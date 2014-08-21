@@ -1,4 +1,4 @@
 ceno
 ====
 
-Innovative censorpship evading technology based on p2p distributed caching network
+Innovative censorship circumvention technology based on a p2p distributed caching network
