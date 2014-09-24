@@ -1,0 +1,20 @@
+2014-09-16T22:14:43.778Z - info: GET / - Request received
+2014-09-16T22:14:43.786Z - info: GET / - Proxying
+2014-09-16T22:21:42.832Z - info: GET / - Request received
+2014-09-16T22:21:42.839Z - info: GET / - Proxying
+2014-09-16T22:21:43.012Z - info: GET / - New response successfully cached
+2014-09-16T22:22:50.504Z - info: GET / - Request received
+2014-09-16T22:22:50.507Z - info: GET / - Proxying
+2014-09-16T22:22:50.530Z - info: GET / - New response successfully cached
+2014-09-16T22:22:51.278Z - info: GET /icons/blank.gif - Request received
+2014-09-16T22:22:51.279Z - info: GET /icons/blank.gif - Proxying
+2014-09-16T22:22:51.285Z - info: GET /icons/text.gif - Request received
+2014-09-16T22:22:51.294Z - info: GET /icons/text.gif - Proxying
+2014-09-16T22:22:51.308Z - info: GET /icons/folder.gif - Request received
+2014-09-16T22:22:51.308Z - info: GET /icons/folder.gif - Proxying
+2014-09-16T22:22:51.335Z - info: GET /icons/image2.gif - Request received
+2014-09-16T22:22:51.337Z - info: GET /icons/image2.gif - Proxying
+2014-09-16T22:22:51.368Z - info: GET /icons/blank.gif - New response successfully cached
+2014-09-16T22:22:51.380Z - info: GET /icons/text.gif - New response successfully cached
+2014-09-16T22:22:51.388Z - info: GET /icons/folder.gif - New response successfully cached
+2014-09-16T22:22:51.389Z - info: GET /icons/image2.gif - New response successfully cached

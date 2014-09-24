@@ -5,3 +5,6 @@
 /cache
 */cache
 */*/cache
+# /node_modules
+# /cache
+# /test/cache

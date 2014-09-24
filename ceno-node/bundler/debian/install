@@ -1,0 +1,4 @@
+conf/bundler.yaml /etc/
+src/bundler /usr/bin
+#TODO
+#src/debundler.html /usr/share/bundler/

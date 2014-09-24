@@ -1,0 +1,3 @@
+---
+general:
+  proxy: "http://localhost:8099"

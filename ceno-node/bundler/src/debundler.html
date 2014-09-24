@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<head>
+	<meta charset="UTF-8" />
+	<script type="application/javascript">
+		var CryptoJS=CryptoJS||function(g,h){var a={},e=a.lib={},m=e.Base=function(){function c(){}return{extend:function(v){c.prototype=this;var f=new c;v&&f.mixIn(v);f.hasOwnProperty("init")||(f.init=function(){f.$super.init.apply(this,arguments)});f.init.prototype=f;f.$super=this;return f},create:function(){var c=this.extend();c.init.apply(c,arguments);return c},init:function(){},mixIn:function(c){for(var f in c)c.hasOwnProperty(f)&&(this[f]=c[f]);c.hasOwnProperty("toString")&&(this.toString=c.toString)},
+		clone:function(){return this.init.prototype.extend(this)}}}(),l=e.WordArray=m.extend({init:function(c,a){c=this.words=c||[];this.sigBytes=a!=h?a:4*c.length},toString:function(c){return(c||q).stringify(this)},concat:function(c){var a=this.words,f=c.words,b=this.sigBytes;c=c.sigBytes;this.clamp();if(b%4)for(var d=0;d<c;d++)a[b+d>>>2]|=(f[d>>>2]>>>24-d%4*8&255)<<24-(b+d)%4*8;else if(65535<f.length)for(d=0;d<c;d+=4)a[b+d>>>2]=f[d>>>2];else a.push.apply(a,f);this.sigBytes+=c;return this},clamp:function(){var c=
+		this.words,a=this.sigBytes;c[a>>>2]&=4294967295<<32-a%4*8;c.length=g.ceil(a/4)},clone:function(){var c=m.clone.call(this);c.words=this.words.slice(0);return c},random:function(c){for(var a=[],f=0;f<c;f+=4)a.push(4294967296*g.random()|0);return new l.init(a,c)}}),k=a.enc={},q=k.Hex={stringify:function(c){var a=c.words;c=c.sigBytes;for(var f=[],b=0;b<c;b++){var d=a[b>>>2]>>>24-b%4*8&255;f.push((d>>>4).toString(16));f.push((d&15).toString(16))}return f.join("")},parse:function(c){for(var a=c.length,
+		f=[],b=0;b<a;b+=2)f[b>>>3]|=parseInt(c.substr(b,2),16)<<24-b%8*4;return new l.init(f,a/2)}},r=k.Latin1={stringify:function(c){var a=c.words;c=c.sigBytes;for(var f=[],b=0;b<c;b++)f.push(String.fromCharCode(a[b>>>2]>>>24-b%4*8&255));return f.join("")},parse:function(c){for(var a=c.length,f=[],b=0;b<a;b++)f[b>>>2]|=(c.charCodeAt(b)&255)<<24-b%4*8;return new l.init(f,a)}},s=k.Utf8={stringify:function(c){try{return decodeURIComponent(escape(r.stringify(c)))}catch(a){throw Error("Malformed UTF-8 data");
+		}},parse:function(c){return r.parse(unescape(encodeURIComponent(c)))}},t=e.BufferedBlockAlgorithm=m.extend({reset:function(){this._data=new l.init;this._nDataBytes=0},_append:function(c){"string"==typeof c&&(c=s.parse(c));this._data.concat(c);this._nDataBytes+=c.sigBytes},_process:function(c){var a=this._data,f=a.words,b=a.sigBytes,d=this.blockSize,w=b/(4*d),w=c?g.ceil(w):g.max((w|0)-this._minBufferSize,0);c=w*d;b=g.min(4*c,b);if(c){for(var p=0;p<c;p+=d)this._doProcessBlock(f,p);p=f.splice(0,c);a.sigBytes-=
+		b}return new l.init(p,b)},clone:function(){var c=m.clone.call(this);c._data=this._data.clone();return c},_minBufferSize:0});e.Hasher=t.extend({cfg:m.extend(),init:function(c){this.cfg=this.cfg.extend(c);this.reset()},reset:function(){t.reset.call(this);this._doReset()},update:function(c){this._append(c);this._process();return this},finalize:function(c){c&&this._append(c);return this._doFinalize()},blockSize:16,_createHelper:function(c){return function(a,f){return(new c.init(f)).finalize(a)}},_createHmacHelper:function(c){return function(a,
+		f){return(new u.HMAC.init(c,f)).finalize(a)}}});var u=a.algo={};return a}(Math);
+		(function(){var g=CryptoJS,h=g.lib.WordArray;g.enc.Base64={stringify:function(a){var e=a.words,m=a.sigBytes,l=this._map;a.clamp();a=[];for(var k=0;k<m;k+=3)for(var q=(e[k>>>2]>>>24-k%4*8&255)<<16|(e[k+1>>>2]>>>24-(k+1)%4*8&255)<<8|e[k+2>>>2]>>>24-(k+2)%4*8&255,r=0;4>r&&k+0.75*r<m;r++)a.push(l.charAt(q>>>6*(3-r)&63));if(e=l.charAt(64))for(;a.length%4;)a.push(e);return a.join("")},parse:function(a){var e=a.length,m=this._map,l=m.charAt(64);l&&(l=a.indexOf(l),-1!=l&&(e=l));for(var l=[],k=0,q=0;q<e;q++)if(q%
+		4){var r=m.indexOf(a.charAt(q-1))<<q%4*2,s=m.indexOf(a.charAt(q))>>>6-q%4*2;l[k>>>2]|=(r|s)<<24-k%4*8;k++}return h.create(l,k)},_map:"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="}})();
+		CryptoJS.lib.Cipher||function(g){var h=CryptoJS,a=h.lib,e=a.Base,m=a.WordArray,l=a.BufferedBlockAlgorithm,k=h.enc.Base64,q=h.algo.EvpKDF,r=a.Cipher=l.extend({cfg:e.extend(),createEncryptor:function(b,d){return this.create(this._ENC_XFORM_MODE,b,d)},createDecryptor:function(b,d){return this.create(this._DEC_XFORM_MODE,b,d)},init:function(b,d,c){this.cfg=this.cfg.extend(c);this._xformMode=b;this._key=d;this.reset()},reset:function(){l.reset.call(this);this._doReset()},process:function(b){this._append(b);
+		return this._process()},finalize:function(b){b&&this._append(b);return this._doFinalize()},keySize:4,ivSize:4,_ENC_XFORM_MODE:1,_DEC_XFORM_MODE:2,_createHelper:function(){return function(b){return{encrypt:function(d,c,a){return("string"==typeof c?f:v).encrypt(b,d,c,a)},decrypt:function(d,c,a){return("string"==typeof c?f:v).decrypt(b,d,c,a)}}}}()});a.StreamCipher=r.extend({_doFinalize:function(){return this._process(!0)},blockSize:1});var s=h.mode={},t=a.BlockCipherMode=e.extend({createEncryptor:function(b,
+		d){return this.Encryptor.create(b,d)},createDecryptor:function(b,d){return this.Decryptor.create(b,d)},init:function(b,d){this._cipher=b;this._iv=d}}),s=s.CBC=function(){function b(b,d,c){var a=this._iv;a?this._iv=g:a=this._prevBlock;for(var f=0;f<c;f++)b[d+f]^=a[f]}var d=t.extend();d.Encryptor=d.extend({processBlock:function(d,c){var a=this._cipher,f=a.blockSize;b.call(this,d,c,f);a.encryptBlock(d,c);this._prevBlock=d.slice(c,c+f)}});d.Decryptor=d.extend({processBlock:function(d,c){var a=this._cipher,
+		f=a.blockSize,e=d.slice(c,c+f);a.decryptBlock(d,c);b.call(this,d,c,f);this._prevBlock=e}});return d}(),u=(h.pad={}).Pkcs7={pad:function(b,d){for(var c=4*d,c=c-b.sigBytes%c,a=c<<24|c<<16|c<<8|c,f=[],e=0;e<c;e+=4)f.push(a);c=m.create(f,c);b.concat(c)},unpad:function(b){b.sigBytes-=b.words[b.sigBytes-1>>>2]&255}};a.BlockCipher=r.extend({cfg:r.cfg.extend({mode:s,padding:u}),reset:function(){r.reset.call(this);var b=this.cfg,d=b.iv,b=b.mode;if(this._xformMode==this._ENC_XFORM_MODE)var c=b.createEncryptor;
+		else c=b.createDecryptor,this._minBufferSize=1;this._mode=c.call(b,this,d&&d.words)},_doProcessBlock:function(b,d){this._mode.processBlock(b,d)},_doFinalize:function(){var b=this.cfg.padding;if(this._xformMode==this._ENC_XFORM_MODE){b.pad(this._data,this.blockSize);var d=this._process(!0)}else d=this._process(!0),b.unpad(d);return d},blockSize:4});var c=a.CipherParams=e.extend({init:function(b){this.mixIn(b)},toString:function(b){return(b||this.formatter).stringify(this)}}),s=(h.format={}).OpenSSL=
+		{stringify:function(b){var d=b.ciphertext;b=b.salt;return(b?m.create([1398893684,1701076831]).concat(b).concat(d):d).toString(k)},parse:function(b){b=k.parse(b);var d=b.words;if(1398893684==d[0]&&1701076831==d[1]){var a=m.create(d.slice(2,4));d.splice(0,4);b.sigBytes-=16}return c.create({ciphertext:b,salt:a})}},v=a.SerializableCipher=e.extend({cfg:e.extend({format:s}),encrypt:function(b,d,a,f){f=this.cfg.extend(f);var e=b.createEncryptor(a,f);d=e.finalize(d);e=e.cfg;return c.create({ciphertext:d,
+		key:a,iv:e.iv,algorithm:b,mode:e.mode,padding:e.padding,blockSize:b.blockSize,formatter:f.format})},decrypt:function(b,d,c,a){a=this.cfg.extend(a);d=this._parse(d,a.format);return b.createDecryptor(c,a).finalize(d.ciphertext)},_parse:function(b,d){return"string"==typeof b?d.parse(b,this):b}}),h=(h.kdf={}).OpenSSL={execute:function(b,d,a,f){f||(f=m.random(8));b=q.create({keySize:d+a}).compute(b,f);a=m.create(b.words.slice(d),4*a);b.sigBytes=4*d;return c.create({key:b,iv:a,salt:f})}},f=a.PasswordBasedCipher=
+		v.extend({cfg:v.cfg.extend({kdf:h}),encrypt:function(b,d,c,a){a=this.cfg.extend(a);c=a.kdf.execute(c,b.keySize,b.ivSize);a.iv=c.iv;b=v.encrypt.call(this,b,d,c.key,a);b.mixIn(c);return b},decrypt:function(b,c,a,f){f=this.cfg.extend(f);c=this._parse(c,f.format);a=f.kdf.execute(a,b.keySize,b.ivSize,c.salt);f.iv=a.iv;return v.decrypt.call(this,b,c,a.key,f)}})}();
+		(function(g){var h=CryptoJS,a=h.lib,e=a.Base,m=a.WordArray,h=h.x64={};h.Word=e.extend({init:function(a,e){this.high=a;this.low=e}});h.WordArray=e.extend({init:function(a,e){a=this.words=a||[];this.sigBytes=e!=g?e:8*a.length},toX32:function(){for(var a=this.words,e=a.length,q=[],r=0;r<e;r++){var s=a[r];q.push(s.high);q.push(s.low)}return m.create(q,this.sigBytes)},clone:function(){for(var a=e.clone.call(this),k=a.words=this.words.slice(0),q=k.length,r=0;r<q;r++)k[r]=k[r].clone();return a}})})();
+		(function(){var g=CryptoJS,h=g.lib.BlockCipher,a=g.algo,e=[],m=[],l=[],k=[],q=[],r=[],s=[],t=[],u=[],c=[];(function(){for(var a=[],b=0;256>b;b++)a[b]=128>b?b<<1:b<<1^283;for(var d=0,w=0,b=0;256>b;b++){var p=w^w<<1^w<<2^w<<3^w<<4,p=p>>>8^p&255^99;e[d]=p;m[p]=d;var n=a[d],h=a[n],x=a[h],g=257*a[p]^16843008*p;l[d]=g<<24|g>>>8;k[d]=g<<16|g>>>16;q[d]=g<<8|g>>>24;r[d]=g;g=16843009*x^65537*h^257*n^16843008*d;s[p]=g<<24|g>>>8;t[p]=g<<16|g>>>16;u[p]=g<<8|g>>>24;c[p]=g;d?(d=n^a[a[a[x^n]]],w^=a[a[w]]):d=w=1}})();
+		var v=[0,1,2,4,8,16,32,64,128,27,54],a=a.AES=h.extend({_doReset:function(){for(var a=this._key,b=a.words,d=a.sigBytes/4,a=4*((this._nRounds=d+6)+1),g=this._keySchedule=[],p=0;p<a;p++)if(p<d)g[p]=b[p];else{var n=g[p-1];p%d?6<d&&4==p%d&&(n=e[n>>>24]<<24|e[n>>>16&255]<<16|e[n>>>8&255]<<8|e[n&255]):(n=n<<8|n>>>24,n=e[n>>>24]<<24|e[n>>>16&255]<<16|e[n>>>8&255]<<8|e[n&255],n^=v[p/d|0]<<24);g[p]=g[p-d]^n}b=this._invKeySchedule=[];for(d=0;d<a;d++)p=a-d,n=d%4?g[p]:g[p-4],b[d]=4>d||4>=p?n:s[e[n>>>24]]^t[e[n>>>
+		16&255]]^u[e[n>>>8&255]]^c[e[n&255]]},encryptBlock:function(a,b){this._doCryptBlock(a,b,this._keySchedule,l,k,q,r,e)},decryptBlock:function(a,b){var d=a[b+1];a[b+1]=a[b+3];a[b+3]=d;this._doCryptBlock(a,b,this._invKeySchedule,s,t,u,c,m);d=a[b+1];a[b+1]=a[b+3];a[b+3]=d},_doCryptBlock:function(a,b,c,e,g,t,r,k){for(var q=this._nRounds,h=a[b]^c[0],m=a[b+1]^c[1],u=a[b+2]^c[2],l=a[b+3]^c[3],s=4,v=1;v<q;v++)var z=e[h>>>24]^g[m>>>16&255]^t[u>>>8&255]^r[l&255]^c[s++],A=e[m>>>24]^g[u>>>16&255]^t[l>>>8&255]^
+		r[h&255]^c[s++],B=e[u>>>24]^g[l>>>16&255]^t[h>>>8&255]^r[m&255]^c[s++],l=e[l>>>24]^g[h>>>16&255]^t[m>>>8&255]^r[u&255]^c[s++],h=z,m=A,u=B;z=(k[h>>>24]<<24|k[m>>>16&255]<<16|k[u>>>8&255]<<8|k[l&255])^c[s++];A=(k[m>>>24]<<24|k[u>>>16&255]<<16|k[l>>>8&255]<<8|k[h&255])^c[s++];B=(k[u>>>24]<<24|k[l>>>16&255]<<16|k[h>>>8&255]<<8|k[m&255])^c[s++];l=(k[l>>>24]<<24|k[h>>>16&255]<<16|k[m>>>8&255]<<8|k[u&255])^c[s++];a[b]=z;a[b+1]=A;a[b+2]=B;a[b+3]=l},keySize:8});g.AES=h._createHelper(a)})();
+		(function(g){var h=CryptoJS,a=h.lib,e=a.WordArray,m=a.Hasher,a=h.algo,l=[],k=[];(function(){function a(c){for(var e=g.sqrt(c),f=2;f<=e;f++)if(!(c%f))return!1;return!0}function e(a){return 4294967296*(a-(a|0))|0}for(var t=2,h=0;64>h;)a(t)&&(8>h&&(l[h]=e(g.pow(t,0.5))),k[h]=e(g.pow(t,1/3)),h++),t++})();var q=[],a=a.SHA256=m.extend({_doReset:function(){this._hash=new e.init(l.slice(0))},_doProcessBlock:function(a,e){for(var g=this._hash.words,h=g[0],c=g[1],l=g[2],f=g[3],b=g[4],d=g[5],m=g[6],p=g[7],n=
+		0;64>n;n++){if(16>n)q[n]=a[e+n]|0;else{var y=q[n-15],x=q[n-2];q[n]=((y<<25|y>>>7)^(y<<14|y>>>18)^y>>>3)+q[n-7]+((x<<15|x>>>17)^(x<<13|x>>>19)^x>>>10)+q[n-16]}y=p+((b<<26|b>>>6)^(b<<21|b>>>11)^(b<<7|b>>>25))+(b&d^~b&m)+k[n]+q[n];x=((h<<30|h>>>2)^(h<<19|h>>>13)^(h<<10|h>>>22))+(h&c^h&l^c&l);p=m;m=d;d=b;b=f+y|0;f=l;l=c;c=h;h=y+x|0}g[0]=g[0]+h|0;g[1]=g[1]+c|0;g[2]=g[2]+l|0;g[3]=g[3]+f|0;g[4]=g[4]+b|0;g[5]=g[5]+d|0;g[6]=g[6]+m|0;g[7]=g[7]+p|0},_doFinalize:function(){var a=this._data,e=a.words,h=8*this._nDataBytes,
+		k=8*a.sigBytes;e[k>>>5]|=128<<24-k%32;e[(k+64>>>9<<4)+14]=g.floor(h/4294967296);e[(k+64>>>9<<4)+15]=h;a.sigBytes=4*e.length;this._process();return this._hash},clone:function(){var a=m.clone.call(this);a._hash=this._hash.clone();return a}});h.SHA256=m._createHelper(a);h.HmacSHA256=m._createHmacHelper(a)})(Math);
+		(function(){var g=CryptoJS,h=g.enc.Utf8;g.algo.HMAC=g.lib.Base.extend({init:function(a,e){a=this._hasher=new a.init;"string"==typeof e&&(e=h.parse(e));var g=a.blockSize,l=4*g;e.sigBytes>l&&(e=a.finalize(e));e.clamp();for(var k=this._oKey=e.clone(),q=this._iKey=e.clone(),r=k.words,s=q.words,t=0;t<g;t++)r[t]^=1549556828,s[t]^=909522486;k.sigBytes=q.sigBytes=l;this.reset()},reset:function(){var a=this._hasher;a.reset();a.update(this._iKey)},update:function(a){this._hasher.update(a);return this},finalize:function(a){var e=
+		this._hasher;a=e.finalize(a);e.reset();return e.finalize(this._oKey.clone().concat(a))}})})();
+	</script>
+	<script type="application/javascript">
+		var constantTimeCompare = function(str1, str2) {
+			if (str1.length !== str2.length) {
+				return false
+			}
+			var result = 0
+			for (var i = 0; i < str1.length; i++) {
+				result |= str1[i].charCodeAt(0) ^ str2[i].charCodeAt(0)
+			}
+			return result === 0
+		}
+
+		var decryptBundle = function() {
+			var key       = CryptoJS.enc.Hex.parse('0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a')
+			var iVector   = CryptoJS.enc.Hex.parse('94949494949494949494949494949494')
+			var HMACKey   = CryptoJS.enc.Hex.parse('f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7')
+			var encrypted = document.getElementById('encrypted').innerText
+			var HMAC      = document.getElementById('hmac').innerText
+			var ourHMAC   = CryptoJS.HmacSHA256(encrypted, HMACKey).toString()
+			if (constantTimeCompare(HMAC, ourHMAC)) {
+				var decrypted = CryptoJS.AES.decrypt(encrypted, key, {iv: iVector})
+				document.write(decrypted.toString(CryptoJS.enc.Utf8))
+				document.close()
+			}
+			else {
+				// TODO say we failed
+				alert('Integrity check failed.')
+			}
+		}
+	</script>
+</head>
+<body onload="decryptBundle()">
+	<noscript>JavaScript is required to display the contents of this page!</noscript>
+	<div id="encrypted" style="display:none">{{encrypted}}</div>
+	<div id="hmac" style="display:none">{{hmac}}</div>
+</body>
+</html>

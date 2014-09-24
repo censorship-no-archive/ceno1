@@ -1,0 +1,73 @@
+#! /bin/sh
+
+### BEGIN INIT INFO
+# Provides:          bundler
+# Required-Start:    
+# Required-Stop:     
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start daemon at boot time
+# Description:       Enable service provided by daemon.
+### END INIT INFO
+
+# example python daemon starter script
+# based on skeleton from Debian GNU/Linux
+# cliechti@gmx.net
+# place the daemon scripts in a folder accessible by root. /usr/local/sbin is a good idea
+
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+DAEMON="/usr/bin/node /usr/bin/bundlerd"
+NAME=bundlerd
+DESC="Bundler daemon"
+
+set -e
+
+case "$1" in
+  start)
+  DAEMON_ARGS="start"
+  echo -n "Starting $DESC: "
+  start-stop-daemon --start --quiet \
+  		    --exec $DAEMON $DAEMON_ARGS
+		    echo "$NAME."
+		    ;;
+  stop)
+  DAEMON_ARGS="stop"
+  echo -n "Stopping $DESC: "
+  start-stop-daemon --stop --quiet \
+  		    --exec $DAEMON $DAEMON_ARGS
+	echo "$NAME."
+  ;; 
+  #reload)
+  #
+  #	If the daemon can reload its config files on the fly
+  #	for example by sending it SIGHUP, do it here.
+  #
+  #	If the daemon responds to changes in its config file
+  #	directly anyway, make this a do-nothing entry.
+  #
+  # echo "Reloading $DESC configuration files."
+  # start-stop-daemon --stop --signal 1 --quiet --pidfile \
+  # /var/run/$NAME.pid --exec $DAEMON
+  #;;
+  restart|force-reload)
+  #
+  #	If the "reload" option is implemented, move the "force-reload"
+  #	option to the "reload" entry above. If not, "force-reload" is
+  #	just the same as "restart".
+  #
+  DAEMON_ARGS="restart"
+  echo -n "Restarting $DESC: "
+  start-stop-daemon --start --quiet \
+  		    --exec $DAEMON $DAEMON_ARGS
+		    echo "$NAME."
+		    ;;
+  *)
+  N=/etc/init.d/$NAME
+  # echo "Usage: $N {start|stop|restart|reload|force-reload}" >&2
+  echo "Usage: $N {start|stop|restart|force-reload}" >&2
+  exit 1
+  ;;
+esac
+
+exit 0
+
