@@ -1,10 +1,11 @@
 *~
 \#*\#
+.\#*
 /node_modules
 */node_modules
 /cache
 */cache
 */*/cache
-# /node_modules
-# /cache
-# /test/cache
+/ceno-node/node_modules
+/ceno-node/cache
+/ceno-node/test/cache

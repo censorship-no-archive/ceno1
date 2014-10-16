@@ -46,11 +46,11 @@
 			var key       = CryptoJS.enc.Hex.parse('0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a')
 			var iVector   = CryptoJS.enc.Hex.parse('94949494949494949494949494949494')
 			var HMACKey   = CryptoJS.enc.Hex.parse('f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7')
-			var encrypted = document.getElementById('encrypted').innerText
-			var HMAC      = document.getElementById('hmac').innerText
+			var encrypted = document.getElementById('encrypted').textContent
+			var HMAC      = document.getElementById('hmac').textContent
 			var ourHMAC   = CryptoJS.HmacSHA256(encrypted, HMACKey).toString()
 			if (constantTimeCompare(HMAC, ourHMAC)) {
-				var decrypted = CryptoJS.AES.decrypt(encrypted, key, {iv: iVector})
+ 				var decrypted = CryptoJS.AES.decrypt(encrypted, key, {iv: iVector})
 				document.write(decrypted.toString(CryptoJS.enc.Utf8))
 				document.close()
 			}
@@ -62,6 +62,7 @@
 	</script>
 </head>
 <body onload="decryptBundle()">
+    <button type="button" onclick="decryptBundle()">this is?</button>
 	<noscript>JavaScript is required to display the contents of this page!</noscript>
 	<div id="encrypted" style="display:none">{{encrypted}}</div>
 	<div id="hmac" style="display:none">{{hmac}}</div>

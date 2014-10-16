@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 // -*- eval: (indent-tabs-mode t) -*-
+/*jshint bitwise:false, unused:vars */
 
 'use strict';
 /*
@@ -11,7 +12,7 @@ var portScanner = require('portscanner'),
 	express     = require('express'),
 	phantom     = require('phantom'),
 	request     = require('request'),
-	//colors      = require('colors'),
+	colors      = require('colors'), //needed for rainbow color of bundler
 	mime        = require('mime'),
 	http        = require('http'),
 	//path        = require('path'),
@@ -53,7 +54,7 @@ var Bundler = express()
 
 var Debundler = '';
 var debundlerState = '';
-fs.readFile('bundle.json', function(err, data) {
+fs.readFile('debundler.html', function(err, data) {
 	if (err) { throw err; }
 	debundlerState = data.toString();
 });
@@ -83,7 +84,6 @@ var crypto_config = {
 
 if ('listen' in configData) {
     if ('host' in configData.listen) {
-        debugger;
         listenip = configData.listen.host;
     }
     if ('port' in configData.listen) {
@@ -98,8 +98,8 @@ if ('crypto' in configData) {
     if ('iv' in configData.crypto) {
         crypto_config.iv = configData.crypto.iv;
     }
-    if ('hmackey' in configData.crypto) {
-        crypto_config.hmac_key = configData.crypto.hmackey;
+    if ('hmac_key' in configData.crypto) {
+        crypto_config.hmac_key = configData.crypto.hmac_key;
     }
 }
 
@@ -157,10 +157,10 @@ Bundler.beginProcess = function(req, res) {
 	// Initialize collection of resources the website is dependent on.
 	// Will fetch resources as part of the bundle.
     debugger;
-	var resources = {};
-	var resourceNumber = 0;
-	var pageLoadedCutoff = false;
-	var resourceDomain;// = undefined;
+	//var resources = {};//probably for later use when resources are included
+	//var resourceNumber = 0;
+	//var pageLoadedCutoff = false;
+	var resourceDomain;
     var url = req.query.url;
 	if (url.indexOf('http') === -1) {
 		// we're being passed a query with no host - let's see if we can get a passed location
@@ -191,8 +191,7 @@ Bundler.beginProcess = function(req, res) {
 			.match(/\w+\.\w+(\.\w+)?(\/|$)/)[0];
 	}
 	if (resourceDomain[resourceDomain.length - 1] !== '/') { resourceDomain += '/'; }
-	Bundler.log('Got a request for ' + url.green + ' ' + '['.inverse + resourceDomain.substring(0, resourceDomain.length - 1).inverse + ']'.inverse;
-	);
+	Bundler.log('Got a request for ' + url.green + ' ' + '['.inverse + resourceDomain.substring(0, resourceDomain.length - 1).inverse + ']'.inverse);
 	// Visit the website, determine its HTML and the resources it depends on.
 	portScanner.findAPortNotInUse(40000, 60000, 'localhost', function(err, freePort) {
 		phantom.create(function(ph) {
@@ -210,15 +209,17 @@ Bundler.beginProcess = function(req, res) {
 };
 
 Bundler.mainProcess = function(req, res, proc) {
+    debugger;
 	proc.resources = {};
 	proc.resourceNumber = 0;
 	proc.pageLoadedCutoff = false;
 	Debundler = debundlerState;
 	Bundler.log('Initializing bundling for ' + req.query.url.green);
-	proc.page.set('onResourceRequested', function(request, networkRequest) {
+	proc.page.set('onResourceRequested', function(request /*, networkRequest*/) {
 		if (!proc.pageLoadedCutoff) {
 			if ( request.url.match('^http') &&
 					request.url.match(proc.resourceDomain)) {
+                debugger;
 				proc.resources[proc.resourceNumber] = {
 					url: request.url
 				};
@@ -251,7 +252,7 @@ Bundler.mainProcess = function(req, res, proc) {
                         req.query.iv = crypto_config.iv;
                     }
                     if (!req.query.hasOwnProperty('hmackey')) {
-                        req.query.hmackey = crypto_config.hmackey;
+                        req.query.hmac_key = crypto_config.hmac_key;
                     }
                     debugger;
 					var key     = CryptoJS.enc.Hex.parse(req.query.key);
@@ -261,6 +262,10 @@ Bundler.mainProcess = function(req, res, proc) {
 					var encrypted = CryptoJS.AES.encrypt(
 						proc.resources[0].content, key, {iv: iVector}
 					).toString();
+                    Bundler.log(req.query);
+                    Bundler.log(proc.resources[0].content);
+                    Bundler.log(CryptoJS.AES.decrypt(encrypted, key, {iv: iVector}).toString(CryptoJS.enc.Utf8))
+
 					var HMAC = CryptoJS.HmacSHA256(encrypted, HMACKey).toString();
 					Debundler = Debundler.replace('{{encrypted}}', encrypted);
 					Debundler = Debundler.replace('{{hmac}}', HMAC);
@@ -271,7 +276,9 @@ Bundler.mainProcess = function(req, res, proc) {
 		var fetchedResources = 0;
 		Bundler.log('Begin fetching resources.'.inverse);
 		for (var i in proc.resources) {
-			Bundler.fetchResource(proc.resources[i].url, i, resource_handler);
+            //JS dictionary keys are auto translated to str so we need to retranslate 
+            //it back to int
+			Bundler.fetchResource(proc.resources[i].url, parseInt(i), resource_handler);
 		}
 		proc.ph.exit();
 	});
@@ -294,6 +301,7 @@ Bundler.isSearchableFile = function(url) {
 
 Bundler.fetchResource = function(url, resourceNumber, callback) {
 	var enc = 'Base64';
+    debugger;
 	if (Bundler.isSearchableFile(url) || resourceNumber === 0) { // why?
 		enc = 'utf8';
 	}
@@ -348,7 +356,8 @@ Bundler.replaceResource = function(resources) {
 };
 
 Bundler.convertToDataURI = function(content, extension) {
-	if (extension = extension.match(/\.\w+/)) {
+    extension = extension.match(/\.\w+/);
+	if (extension) {
 		extension = extension[0];
 	}
 	else {
