@@ -6,6 +6,6 @@
 /cache
 */cache
 */*/cache
-/ceno-node/node_modules
-/ceno-node/cache
-/ceno-node/test/cache
+/cache
+*/*/proxy.log
+

@@ -1,3 +1,15 @@
+/*
+ * HTTP Bundler Stale Cache Proxy is a library based ont 
+ * http-stale-cache-proxy with following:
+ * - It bundles all resources in a page before storing the cache.
+ * - The storage is abstracted out so it can be used with different 
+ *   type of storage
+ *
+ * Copyright (c) 2014 eQualit.ie under GNU AGPL v3.0 or later
+ * 
+ * Vmon: Oct 2014 Initial fork
+ */ 
+
 var _ = require('lodash'),
     async = require('async'),
     crypto = require('crypto'),
