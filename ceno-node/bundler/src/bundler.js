@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // -*- eval: (indent-tabs-mode t) -*-
 /*jshint bitwise:false, unused:vars */
+/*breaking it into bundler and bundler server*/
 
 'use strict';
 /*
@@ -9,16 +10,15 @@
 
 var portScanner = require('portscanner'),
 	CryptoJS    = require('crypto-js'),
-	express     = require('express'),
 	phantom     = require('phantom'),
 	request     = require('request'),
-	colors      = require('colors'), //needed for rainbow color of bundler
 	mime        = require('mime'),
 	http        = require('http'),
 	//path        = require('path'),
 	fs          = require('fs'),
 	Syslog      = require('node-syslog'),
-	yaml        = require('js-yaml');
+	yaml        = require('js-yaml'),
+    _ = require('lodash');
 
 /*
  * Disable warnings.
@@ -43,68 +43,11 @@ if (process.argv[2] !== '-v') {
 	Syslog.init('bundler', Syslog.LOG_PID | Syslog.LOG_ODELAY, Syslog.LOG_LOCAL0);
 }
 
-
-/*
- * Initialize Bundler.
- */
-var Bundler = express()
-	.use(require('compression')())
-	.use(require('body-parser')())
-	.use(require('method-override')());
-
-var Debundler = '';
-var debundlerState = '';
-fs.readFile('debundler.html', function(err, data) {
-	if (err) { throw err; }
-	debundlerState = data.toString();
-});
-Debundler = debundlerState;
-
-// lol javascript
-var configData = {};
-var configThing = {};
-try {
-    var yamlfile = fs.readFileSync('config.yaml');
-    configThing = yaml.safeLoad(yamlfile.toString());
-} catch (err) {
-    console.error('Error when loading config file: ' + err);
-}
-configData = configThing;
-
-var listenport = 3000;
-var listenip = '127.0.0.1';
-var crypto_config = {
-    // crypto info is need to encrypt the bundle after
-    // creation. These can be given through config file
-    // or as query key sent along url
-    encryption_key: '',
-    iv: '',
-    hmac_key: ''
-};
-
-if ('listen' in configData) {
-    if ('host' in configData.listen) {
-        listenip = configData.listen.host;
-    }
-    if ('port' in configData.listen) {
-        listenport = configData.listen.port;
-    }
-}
-
-if ('crypto' in configData) {
-    if ('key' in configData.crypto) {
-        crypto_config.encryption_key = configData.crypto.key;
-    }
-    if ('iv' in configData.crypto) {
-        crypto_config.iv = configData.crypto.iv;
-    }
-    if ('hmac_key' in configData.crypto) {
-        crypto_config.hmac_key = configData.crypto.hmac_key;
-    }
-}
-
 // print to commandline if -v
-Bundler.log = function(message) {
+/**
+   The global logger
+*/
+var log =  function(message) {
 	if (process.argv[2] === '-v') {
 		console.log('[BUNDLER] '.red.bold, message);
 	} else {
@@ -112,263 +55,338 @@ Bundler.log = function(message) {
 	}
 };
 
-// phantomjs shits itself if it can't find the actual program for
-// phantomjs in the path. Jerk.
-process.env.PATH = process.env.PATH + ':../node_modules/phantomjs/bin';
+/*
+* Definition of Proc object which handle fetching 
+* all resources of one page, one proc is created
+* per request received to bundler
+*/
+var Proc = function(ph, page, resourceDomain) {
+    this.initialize.apply(this, arguments);
+};
 
-http.createServer(Bundler).listen(listenport, listenip, function() {
-    var banner = [
-	'____  _   _ _   _ ____  _     _____ ____  ',
-	'| __ )| | | | \\ | |  _ \\| |   | ____|  _ \\ ',
-	'|  _ \\| | | |  \\| | | | | |   |  _| | |_) |',
-	'| |_) | |_| | |\\  | |_| | |___| |___|  _ < ',
-	'|____/ \\___/|_| \\_|____/|_____|_____|_| \\_\\'];
-    banner.map(function(line) {console.log(line.rainbow.bold);});
-    console.log('');
-    Bundler.log('Ready!');
+/** Defining utility functions which don't manipulate properties */
+var BundlingUtil = {
+    isSearchableFile: function(url) {
+	    var ext = '';
+	    if (ext === url.match(/\.\w+($|\?)/)) {
+		    ext = ext[0];
+		    if (ext[ext.length - 1] === '?') {
+			    ext = ext.substring(0, ext.length - 1);
+		    }
+		    if (mime.lookup(ext).match(
+			        /(text|css|javascript|plain|json|xml|octet\-stream)/)) {
+			    return true;
+		    }
+	    }
+	    return false;
+    },
 
-    //Drop privileges if running as root
-    if (process.getuid() === 0) {
-	console.log('Dropping privileges');
-	// TODO actually have these values read out of config - config
-	// is usually read AFTER this point
-	if ('group' in configData) {
-	    console.log('Dropping group to ' + configData.group);
-            process.setgid(configData.group);
-	}
-	if ('user' in configData) {
-	    console.log('Dropping user to ' + configData.user);
-            process.setuid(configData.user);
-	}
+    fetchResource : function(url, resourceNumber, callback) {
+	    var enc = 'Base64';
+        debugger;
+	    if (this.isSearchableFile(url) || resourceNumber === 0) { // why?
+		    enc = 'utf8';
+	    }
+	    request(url, {
+		    method: 'GET',
+		    encoding: enc,
+		    timeout: 8000 },
+		        function(error, response, body) {
+			        if (error) {
+				        log('ERROR'.red.bold + ' fetching resource'	+ ' ['.red + url.red + ']'.red);
+			        }
+			        else {
+				        log('Fetched resource ' + resourceNumber.toString().inverse	+ ' ['.green + url.green + ']'.green);
+			        }
+			        callback(body, resourceNumber);
+		        }
+	           );
+    },
+
+    convertToDataURI : function(content, extension) {
+        extension = extension.match(/\.\w+/);
+	    if (extension) {
+		    extension = extension[0];
+	    }
+	    else {
+		    extension = '.html';
+	    }
+	    var dataURI = 'data:' + mime.lookup(extension) + ';base64,';
+	    if (BundlingUtil.isSearchableFile(extension)) {
+		    dataURI += new Buffer(content).toString('base64');
+	    }
+	    else {
+		    dataURI += content;
+	    }
+	    return dataURI;
     }
+};
+
+_.extend(Proc.prototype, {
+    initialize: function(ph, req, res, page, resourceDomain, crypto_config) {
+	    this.ph = ph;
+        this.req = req;
+        this.res = res;
+	    this.page = page;
+	    this.resourceDomain = resourceDomain;
+        this.crypto_config = crypto_config;
+
+        this.serve_it_myself = true;
+
+		this.fetchedResources = 0;
+
+        //function which needs access/manipulate the object's properties
+        this.pageProcessor = this.pageProcessor.bind(this);
+        this.resourceHandler = this.resourceHandler.bind(this);
+        this.replaceResource = this.replaceResource.bind(this);
+
+    },
+
+    pageProcessor: function(status) {
+		this.pageLoadedCutoff = true;
+		if (status !== 'success') {
+            //TODO https://redmine.equalit.ie/redmine/issues/324
+			log('Abort'.red.bold + ': ' + status);
+			return false;
+		}
+
+		log('Begin fetching resources.'.inverse);
+		for (var i in this.resources) {
+            //JS dictionary keys are auto translated to str so we need to retranslate 
+            //it back to int
+			BundlingUtil.fetchResource(this.resources[i].url, parseInt(i), this.resourceHandler);
+		}
+		this.ph.exit();
+	},
+
+	// We've loaded the page and know what its resources are.
+    resourceHandler: function(body, rn) {
+		this.fetchedResources++;
+		this.resources[rn].content = body;
+		if (this.fetchedResources === this.resourceNumber) {
+			log('Done fetching resources.'.inverse);
+			log('Begin scanning resources.'.inverse);
+			this.replaceResource();
+			log('Encrypting bundle: '.bold + this.resources[0].url.green);
+            // If we are not provided with custom key then we'll use 
+            // the default key
+            if (!this.req.query.hasOwnProperty('key')) {
+                this.req.query.key = this.crypto_config.encryption_key;
+            }
+            if (!this.req.query.hasOwnProperty('iv')) {
+                this.req.query.iv = this.crypto_config.iv;
+            }
+            if (!this.req.query.hasOwnProperty('hmackey')) {
+                this.req.query.hmac_key = this.crypto_config.hmac_key;
+            }
+            debugger;
+			var key     = CryptoJS.enc.Hex.parse(this.req.query.key);
+			var iVector = CryptoJS.enc.Hex.parse(this.req.query.iv);
+			var HMACKey = CryptoJS.enc.Hex.parse(this.req.query.hmac_key);
+
+			var encrypted = CryptoJS.AES.encrypt(
+				this.resources[0].content, key, {iv: iVector}
+			).toString();
+            log(this.req.query);
+            log(this.resources[0].content);
+            log(CryptoJS.AES.decrypt(encrypted, key, {iv: iVector}).toString(CryptoJS.enc.Utf8))
+
+			var HMAC = CryptoJS.HmacSHA256(encrypted, HMACKey).toString();
+            
+			this.Debundler = this.Debundler.replace('{{encrypted}}', encrypted);
+			this.Debundler = this.Debundler.replace('{{hmac}}', HMAC);
+			log('Serving bundle: '.bold + this.resources[0].url.green);
+            if (this.serve_it_myself)
+			    this.res.end(this.Debundler);
+		}
+	},
+
+    // why is it necessary to iterate via decrement?
+    replaceResource: function() {
+	    var catchURI = /(^https?:\/\/|\.{0,2}\/?)((?:\w|-|@|\.|\?|\=|\&)+)/g;
+	    for (var i = Object.keys(this.resources).length - 1; i >= 0; i--) {
+		    if (!this.resources[i].content) { continue; }
+		    if (this.resources[i].content.length > 262144) { continue; }
+		    if (this.resources[i].url !== this.resources[0].url) {
+			    if (!BundlingUtil.isSearchableFile(this.resources[i].url)) {
+				    continue;
+			    }
+		    }
+		    log('Scanning resource '.bold + i.toString().inverse + ' ' + '['.cyan + this.resources[i].url.toString().cyan + ']'.cyan);
+		    for (var o = Object.keys(this.resources).length - 1; o >= 0; o--) {
+			    if (this.resources[o].url === this.resources[0].url) { continue; }
+			    var filename = this.resources[o].url.match(catchURI);
+			    filename = filename[filename.length - 1];
+			    if (!filename.match(/\/(\w|-|@)+(\w|\?|\=|\.)+$/)) { continue; }
+			    filename = filename.substring(1);
+			    log('Bundling ' + '['.blue + this.resources[o].url.toString().blue + ']'.blue);
+			    var dataURI = BundlingUtil.convertToDataURI(	this.resources[o].content, filename);
+			    var URI = [new RegExp("(\'|')(\\w|:|\\/|-|@|\\.*)*" + filename.replace(/\?/g, '\\?') + '(\'|\')', 'g'),	new RegExp('\\((\\w|:|\\/|-|@|\\.*)*' + filename.replace(/\?/g, '\\?') + '\\)', 'g'),	];
+			    for (var p in URI) {
+				    if (p === 0) {
+					    this.resources[i].content = this.resources[i].content.replace(URI[p], "'" + dataURI + "'");
+				    }
+				    if (p === 1) {
+					    this.resources[i].content = this.resources[i].content.replace(URI[p], '(' + dataURI + ')');
+				    }
+			    }
+		    }
+	    }
+    },
+
 });
 
 /*
- * Generate and deliver bundles on the reception of an HTTP GET request.
- * GET parameters:
- * url: The URL of the webpage to bundle.
- */
-
-Bundler.route('/').get(function(req, res) {
-	Bundler.beginProcess(req, res);
-});
-
-Bundler.beginProcess = function(req, res) {
-	// Initialize collection of resources the website is dependent on.
-	// Will fetch resources as part of the bundle.
-    debugger;
-	//var resources = {};//probably for later use when resources are included
-	//var resourceNumber = 0;
-	//var pageLoadedCutoff = false;
-	var resourceDomain;
-    var url = req.query.url;
-	if (url.indexOf('http') === -1) {
-		// we're being passed a query with no host - let's see if we can get a passed location
-		Bundler.log('No valid url present in query [' + url + '] - attempting to get host');
-		if (typeof(req.headers.host) !== 'undefined') {
-			resourceDomain = req.headers.host + '/';
-			Bundler.log('Got a valid host of ' + req.headers.host);
-			// There are two obscenely dumb things happening here.
-			// * Under no circumstances should I be forcing http - this will
-			// need to be something that we set per-origin
-			// * Redefining url is obviously awful. I did this
-			// because I'm no good at this javascripting and didn't want to mess with mainProcess.
-			url = 'http://' + resourceDomain + url;
-		}
-		else {
-			Bundler.log('Failed to get a valid host - request invalid');
-			res.end('');
-			return;
-		}
-	}
-	else {
-		if (!url) {
-			res.end('');
-			return;
-		}
-		resourceDomain = url
-			.match(/^https?:\/\/(\w|\.)+(\/|$)/)[0]
-			.match(/\w+\.\w+(\.\w+)?(\/|$)/)[0];
-	}
-	if (resourceDomain[resourceDomain.length - 1] !== '/') { resourceDomain += '/'; }
-	Bundler.log('Got a request for ' + url.green + ' ' + '['.inverse + resourceDomain.substring(0, resourceDomain.length - 1).inverse + ']'.inverse);
-	// Visit the website, determine its HTML and the resources it depends on.
-	portScanner.findAPortNotInUse(40000, 60000, 'localhost', function(err, freePort) {
-		phantom.create(function(ph) {
-			ph.createPage(function(page) {
-				Bundler.mainProcess(
-					req, res, {
-						ph: ph,
-						page: page,
-						resourceDomain: resourceDomain
-					});
-			});
-		}, {port: freePort}
-		);
-	});
+ * Define the Bundler object
+*/
+var Bundler = function() {
+    this.initialize.apply(this, arguments);
 };
 
-Bundler.mainProcess = function(req, res, proc) {
-    debugger;
-	proc.resources = {};
-	proc.resourceNumber = 0;
-	proc.pageLoadedCutoff = false;
-	Debundler = debundlerState;
-	Bundler.log('Initializing bundling for ' + req.query.url.green);
-	proc.page.set('onResourceRequested', function(request /*, networkRequest*/) {
-		if (!proc.pageLoadedCutoff) {
+_.extend(Bundler.prototype, {
+    initialize: function() { //nothing for now
+        if (process.argv[2] !== '-v') {
+	        Syslog.init('bundler', Syslog.LOG_PID | Syslog.LOG_ODELAY, Syslog.LOG_LOCAL0);
+        }
+
+        this.debundlerState = fs.readFileSync('debundler.html').toString();
+
+        // lol javascript
+        var configData = {};
+        var configThing = {};
+        try {
+            var yamlfile = fs.readFileSync('config.yaml');
+            configThing = yaml.safeLoad(yamlfile.toString());
+        } catch (err) {
+            console.error('Error when loading config file: ' + err);
+        }
+        configData = configThing;
+
+        this.crypto_config = {
+            // crypto info is need to encrypt the bundle after
+            // creation. These can be given through config file
+            // or as query key sent along url
+            encryption_key: '',
+            iv: '',
+            hmac_key: ''
+        };
+
+        if ('crypto' in configData) {
+            if ('key' in configData.crypto) {
+                this.crypto_config.encryption_key = configData.crypto.key;
+            }
+            if ('iv' in configData.crypto) {
+                this.crypto_config.iv = configData.crypto.iv;
+            }
+            if ('hmac_key' in configData.crypto) {
+                this.crypto_config.hmac_key = configData.crypto.hmac_key;
+            }
+        }
+        
+        //enforce OOP sanity: this should be always the owner
+        this.initiateRequest = this.initiateRequest.bind(this);
+        this.beginProcess = this.beginProcess.bind(this);
+        this.mainProcess = this.mainProcess.bind(this);
+    },
+    
+    beginProcess: function(req, res, url_is_parametric) {
+	    // Initialize collection of resources the website is dependent on.
+	    // Will fetch resources as part of the bundle.
+	    //var resources = {};//probably for later use when resources are included
+	    //var resourceNumber = 0;
+	    //var pageLoadedCutoff = false;
+        //If you don't specifies if the url is sent by paramerter or not I'm
+        //going to try it anyway
+        url_is_parametric = (typeof url_is_parametric !== 'undefined' ? url_is_parametric : true) && req.query.hasOwnProperty('url');
+        if (url_is_parametric) {
+            var url = req.query.url;
+        } else {
+            var url = req.url;
+        }
+        
+	    var resourceDomain;
+	    if (url.indexOf('http') === -1) {
+		    // we're being passed a query with no host - let's see if we can get a passed location
+		    log('No valid url present in query [' + url + '] - attempting to get host');
+		    if (typeof(req.headers.host) !== 'undefined') {
+			    resourceDomain = req.headers.host + '/';
+			    log('Got a valid host of ' + req.headers.host);
+			    // There are two obscenely dumb things happening here.
+			    // * Under no circumstances should I be forcing http - this will
+			    // need to be something that we set per-origin
+			    // * Redefining url is obviously awful. I did this
+			    // because I'm no good at this javascripting and didn't want to mess with mainProcess.
+			    url = 'http://' + resourceDomain + url;
+		    }
+		    else {
+			    log('Failed to get a valid host - request invalid');
+			    res.end('');
+			    return;
+		    }
+	    }
+	    else {
+		    if (!url) {
+			    res.end('');
+			    return;
+		    }
+		    resourceDomain = url
+			    .match(/^https?:\/\/(\w|\.)+(\/|$)/)[0]
+			    .match(/\w+\.\w+(\.\w+)?(\/|$)/)[0];
+	    }
+	    if (resourceDomain[resourceDomain.length - 1] !== '/') { resourceDomain += '/'; }
+	    log('Got a request for ' + url.green + ' ' + '['.inverse + resourceDomain.substring(0, resourceDomain.length - 1).inverse + ']'.inverse);
+	    // Visit the website, determine its HTML and the resources it depends on.
+        this.initiateRequest(req,res, resourceDomain);
+
+    },
+
+    initiateRequest: function(req,res, resourceDomain) {
+        var current_bundler = this;
+	    portScanner.findAPortNotInUse(40000, 60000, 'localhost', function(err, freePort) {
+		    phantom.create(function(ph) {
+			    ph.createPage(function(page) {
+				    current_bundler.mainProcess(
+					    req, res, 
+                        new Proc(ph, req, res, page, resourceDomain, current_bundler.crypto_config)
+			        );
+		        }, {port: freePort}
+		                     );
+	        });
+        });
+    },
+
+    mainProcess: function(req, res, proc) {
+        debugger;
+	    proc.resources = {};
+	    proc.resourceNumber = 0;
+	    proc.pageLoadedCutoff = false;
+	    proc.Debundler = this.debundlerState;
+	    log('Initializing bundling for ' + req.query.url.green);
+	    proc.page.set('onResourceRequested', function(request /*, networkRequest*/) {
+		    if (!proc.pageLoadedCutoff) {
 			if ( request.url.match('^http') &&
-					request.url.match(proc.resourceDomain)) {
+				 request.url.match(proc.resourceDomain)) {
                 debugger;
 				proc.resources[proc.resourceNumber] = {
 					url: request.url
 				};
 				proc.resourceNumber++;
 			}
-		}
-	});
-	proc.page.open(req.query.url, function(status) {
-		proc.pageLoadedCutoff = true;
-		if (status !== 'success') {
-                    //TODO https://redmine.equalit.ie/redmine/issues/324
-			Bundler.log('Abort'.red.bold + ': ' + status);
-			return false;
-		}
-		// We've loaded the page and know what its resources are.
-        var resource_handler = function(body, rn) {
-				fetchedResources++;
-				proc.resources[rn].content = body;
-				if (fetchedResources === proc.resourceNumber) {
-					Bundler.log('Done fetching resources.'.inverse);
-					Bundler.log('Begin scanning resources.'.inverse);
-					proc.resources = Bundler.replaceResource(proc.resources);
-					Bundler.log('Encrypting bundle: '.bold + proc.resources[0].url.green);
-                    // If we are not provided with custom key then we'll use 
-                    // the default key
-                    if (!req.query.hasOwnProperty('key')) {
-                        req.query.key = crypto_config.encryption_key;
-                    }
-                    if (!req.query.hasOwnProperty('iv')) {
-                        req.query.iv = crypto_config.iv;
-                    }
-                    if (!req.query.hasOwnProperty('hmackey')) {
-                        req.query.hmac_key = crypto_config.hmac_key;
-                    }
-                    debugger;
-					var key     = CryptoJS.enc.Hex.parse(req.query.key);
-					var iVector = CryptoJS.enc.Hex.parse(req.query.iv);
-					var HMACKey = CryptoJS.enc.Hex.parse(req.query.hmac_key);
+		    }
+	    });
+	    proc.page.open(req.query.url, proc.pageProcessor);
+    },
+    
+});
 
-					var encrypted = CryptoJS.AES.encrypt(
-						proc.resources[0].content, key, {iv: iVector}
-					).toString();
-                    Bundler.log(req.query);
-                    Bundler.log(proc.resources[0].content);
-                    Bundler.log(CryptoJS.AES.decrypt(encrypted, key, {iv: iVector}).toString(CryptoJS.enc.Utf8))
+// phantomjs shits itself if it can't find the actual program for
+// phantomjs in the path. Jerk.
+process.env.PATH = process.env.PATH + ':../node_modules/phantomjs/bin';
 
-					var HMAC = CryptoJS.HmacSHA256(encrypted, HMACKey).toString();
-					Debundler = Debundler.replace('{{encrypted}}', encrypted);
-					Debundler = Debundler.replace('{{hmac}}', HMAC);
-					Bundler.log('Serving bundle: '.bold + proc.resources[0].url.green);
-					res.end(Debundler);
-				}
-		};
-		var fetchedResources = 0;
-		Bundler.log('Begin fetching resources.'.inverse);
-		for (var i in proc.resources) {
-            //JS dictionary keys are auto translated to str so we need to retranslate 
-            //it back to int
-			Bundler.fetchResource(proc.resources[i].url, parseInt(i), resource_handler);
-		}
-		proc.ph.exit();
-	});
-};
-
-Bundler.isSearchableFile = function(url) {
-	var ext = '';
-	if (ext === url.match(/\.\w+($|\?)/)) {
-		ext = ext[0];
-		if (ext[ext.length - 1] === '?') {
-			ext = ext.substring(0, ext.length - 1);
-		}
-		if (mime.lookup(ext).match(
-			/(text|css|javascript|plain|json|xml|octet\-stream)/)) {
-			return true;
-		}
-	}
-	return false;
-};
-
-Bundler.fetchResource = function(url, resourceNumber, callback) {
-	var enc = 'Base64';
+exports.createBundler = function() {
     debugger;
-	if (Bundler.isSearchableFile(url) || resourceNumber === 0) { // why?
-		enc = 'utf8';
-	}
-	request(url, {
-			method: 'GET',
-			encoding: enc,
-			timeout: 8000 },
-		function(error, response, body) {
-			if (error) {
-				Bundler.log('ERROR'.red.bold + ' fetching resource'	+ ' ['.red + url.red + ']'.red);
-			}
-			else {
-				Bundler.log('Fetched resource ' + resourceNumber.toString().inverse	+ ' ['.green + url.green + ']'.green);
-			}
-			callback(body, resourceNumber);
-		}
-	);
-};
+    var bundler = new Bundler();
+    debugger;
 
-// why is it necessary to iterate via decrement?
-Bundler.replaceResource = function(resources) {
-	var catchURI = /(^https?:\/\/|\.{0,2}\/?)((?:\w|-|@|\.|\?|\=|\&)+)/g;
-	for (var i = Object.keys(resources).length - 1; i >= 0; i--) {
-		if (!resources[i].content) { continue; }
-		if (resources[i].content.length > 262144) { continue; }
-		if (resources[i].url !== resources[0].url) {
-			if (!Bundler.isSearchableFile(resources[i].url)) {
-				continue;
-			}
-		}
-		Bundler.log('Scanning resource '.bold + i.toString().inverse + ' ' + '['.cyan + resources[i].url.toString().cyan + ']'.cyan);
-		for (var o = Object.keys(resources).length - 1; o >= 0; o--) {
-			if (resources[o].url === resources[0].url) { continue; }
-			var filename = resources[o].url.match(catchURI);
-			filename = filename[filename.length - 1];
-			if (!filename.match(/\/(\w|-|@)+(\w|\?|\=|\.)+$/)) { continue; }
-			filename = filename.substring(1);
-			Bundler.log('Bundling ' + '['.blue + resources[o].url.toString().blue + ']'.blue);
-			var dataURI = Bundler.convertToDataURI(	resources[o].content, filename);
-			var URI = [new RegExp("(\'|')(\\w|:|\\/|-|@|\\.*)*" + filename.replace(/\?/g, '\\?') + '(\'|\')', 'g'),	new RegExp('\\((\\w|:|\\/|-|@|\\.*)*' + filename.replace(/\?/g, '\\?') + '\\)', 'g'),	];
-			for (var p in URI) {
-				if (p === 0) {
-					resources[i].content = resources[i].content.replace(URI[p], "'" + dataURI + "'");
-				}
-				if (p === 1) {
-					resources[i].content = resources[i].content.replace(URI[p], '(' + dataURI + ')');
-				}
-			}
-		}
-	}
-	return resources;
-};
-
-Bundler.convertToDataURI = function(content, extension) {
-    extension = extension.match(/\.\w+/);
-	if (extension) {
-		extension = extension[0];
-	}
-	else {
-		extension = '.html';
-	}
-	var dataURI = 'data:' + mime.lookup(extension) + ';base64,';
-	if (Bundler.isSearchableFile(extension)) {
-		dataURI += new Buffer(content).toString('base64');
-	}
-	else {
-		dataURI += content;
-	}
-	return dataURI;
+    return bundler;
 };
