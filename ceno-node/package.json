@@ -17,7 +17,7 @@
     "node-mocks-http": "~1.0.1",
     "temp": "~0.6.0",
     "winston": "~0.7.2",
-
+    
     "method-override": "latest",
     "body-parser": "latest",
     "compression": "latest",
@@ -31,11 +31,12 @@
     "mime": "latest",
     "node-syslog": "latest",
     "js-yaml": "latest",
-    "daemonize2": "latest"
+    "daemonize2": "latest",
+    "resumer": "latest"
+
   },
   "devDependencies": {
     "chai": "~1.8.0",
-    "express": "~3.4.0",
     "grunt": "~0.4.5",
     "grunt-cli": "~0.1.9",
     "grunt-contrib-jshint": "~0.7.2",

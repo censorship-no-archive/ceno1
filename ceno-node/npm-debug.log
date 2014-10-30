@@ -1,0 +1,29 @@
+0 info it worked if it ends with ok
+1 verbose cli [ '/usr/bin/node', '/usr/bin/npm', 'install' ]
+2 info using npm@2.0.0
+3 info using node@v0.10.32
+4 error install Couldn't read dependencies
+5 verbose stack Error: Failed to parse json
+5 verbose stack Unexpected token /
+5 verbose stack     at parseError (/usr/lib/node_modules/npm/node_modules/read-package-json/read-json.js:378:25)
+5 verbose stack     at parseJson (/usr/lib/node_modules/npm/node_modules/read-package-json/read-json.js:85:51)
+5 verbose stack     at /usr/lib/node_modules/npm/node_modules/read-package-json/read-json.js:59:33
+5 verbose stack     at evalmachine.<anonymous>:271:14
+5 verbose stack     at /usr/lib/node_modules/npm/node_modules/graceful-fs/graceful-fs.js:102:5
+5 verbose stack     at Object.oncomplete (evalmachine.<anonymous>:107:15)
+6 verbose cwd /home/vmon/Dropbox/doc/code/ceno/ceno/ceno-node
+7 error Linux 3.15.8-1-ARCH
+8 error argv "/usr/bin/node" "/usr/bin/npm" "install"
+9 error node v0.10.32
+10 error npm  v2.0.0
+11 error file /home/vmon/Dropbox/doc/code/ceno/ceno/ceno-node/package.json
+12 error code EJSONPARSE
+13 error Failed to parse json
+13 error Unexpected token /
+14 error File: /home/vmon/Dropbox/doc/code/ceno/ceno/ceno-node/package.json
+15 error Failed to parse package.json data.
+15 error package.json must be actual JSON, not just JavaScript.
+15 error
+15 error This is not a bug in npm.
+15 error Tell the package author to fix their package.json file. JSON.parse
+16 verbose exit [ 1, true ]

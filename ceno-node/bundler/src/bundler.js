@@ -18,6 +18,7 @@ var portScanner = require('portscanner'),
 	fs          = require('fs'),
 	Syslog      = require('node-syslog'),
 	yaml        = require('js-yaml'),
+    url_util     = require('url'), 
     _ = require('lodash');
 
 /*
@@ -48,20 +49,11 @@ if (process.argv[2] !== '-v') {
    The global logger
 */
 var log =  function(message) {
-	if (process.argv[2] === '-v') {
+	if (true === true || process.argv[2] === '-v') {
 		console.log('[BUNDLER] '.red.bold, message);
 	} else {
 		Syslog.log(Syslog.LOG_INFO, '[BUNDLER] '+message.stripColors);
 	}
-};
-
-/*
-* Definition of Proc object which handle fetching 
-* all resources of one page, one proc is created
-* per request received to bundler
-*/
-var Proc = function(ph, page, resourceDomain) {
-    this.initialize.apply(this, arguments);
 };
 
 /** Defining utility functions which don't manipulate properties */
@@ -122,14 +114,24 @@ var BundlingUtil = {
     }
 };
 
+/*
+* Definition of Proc object which handle fetching 
+* all resources of one page, one proc is created
+* per request received to bundler
+*/
+var Proc = function(ph, page, resourceDomain) {
+    this.initialize.apply(this, arguments);
+};
+
 _.extend(Proc.prototype, {
-    initialize: function(ph, req, res, page, resourceDomain, crypto_config) {
+    initialize: function(ph, req, res, page, resourceDomain, crypto_config, onResponseCallback) {
 	    this.ph = ph;
         this.req = req;
         this.res = res;
 	    this.page = page;
 	    this.resourceDomain = resourceDomain;
         this.crypto_config = crypto_config;
+        this.onResponseCallback = onResponseCallback;
 
         this.serve_it_myself = true;
 
@@ -187,18 +189,24 @@ _.extend(Proc.prototype, {
 			var encrypted = CryptoJS.AES.encrypt(
 				this.resources[0].content, key, {iv: iVector}
 			).toString();
-            log(this.req.query);
-            log(this.resources[0].content);
-            log(CryptoJS.AES.decrypt(encrypted, key, {iv: iVector}).toString(CryptoJS.enc.Utf8))
+            //log(this.req.query);
+            //log(this.resources[0].content);
+            //log(CryptoJS.AES.decrypt(encrypted, key, {iv: iVector}).toString(CryptoJS.enc.Utf8));
 
 			var HMAC = CryptoJS.HmacSHA256(encrypted, HMACKey).toString();
             
 			this.Debundler = this.Debundler.replace('{{encrypted}}', encrypted);
 			this.Debundler = this.Debundler.replace('{{hmac}}', HMAC);
 			log('Serving bundle: '.bold + this.resources[0].url.green);
-            if (this.serve_it_myself)
-			    this.res.end(this.Debundler);
-		}
+            //log(this.res);
+            if (this.serve_it_myself) {
+			    this.res.write(this.Debundler);
+                if (typeof this.onResponseCallback !== 'undefined') {
+                    this.onResponseCallback(this.res, this.Debundler);
+                }
+			    this.res.end();
+		    }
+        }
 	},
 
     // why is it necessary to iterate via decrement?
@@ -289,7 +297,7 @@ _.extend(Bundler.prototype, {
         this.mainProcess = this.mainProcess.bind(this);
     },
     
-    beginProcess: function(req, res, url_is_parametric) {
+    beginProcess: function(req, res, url_is_parametric, onResponseCallback) {
 	    // Initialize collection of resources the website is dependent on.
 	    // Will fetch resources as part of the bundle.
 	    //var resources = {};//probably for later use when resources are included
@@ -297,17 +305,28 @@ _.extend(Bundler.prototype, {
 	    //var pageLoadedCutoff = false;
         //If you don't specifies if the url is sent by paramerter or not I'm
         //going to try it anyway
+        debugger;
+        log(onResponseCallback);
+        res.on('data', function (chunk) {
+            console.log('BODY: ' + chunk);
+        });
+     
+        /**
+           if request has no query, we need to parse the query
+         */
+        if (!req.hasOwnProperty('query')) {
+            req.query = url_util.parse(req.url, true).query; //parse the query string
+       }
+            
         url_is_parametric = (typeof url_is_parametric !== 'undefined' ? url_is_parametric : true) && req.query.hasOwnProperty('url');
-        if (url_is_parametric) {
-            var url = req.query.url;
-        } else {
-            var url = req.url;
+        if (!url_is_parametric) {
+            req.query.url = req.url;
         }
         
 	    var resourceDomain;
-	    if (url.indexOf('http') === -1) {
+	    if (req.query.url.indexOf('http') === -1) {
 		    // we're being passed a query with no host - let's see if we can get a passed location
-		    log('No valid url present in query [' + url + '] - attempting to get host');
+		    log('No valid url present in query [' + req.query.url + '] - attempting to get host');
 		    if (typeof(req.headers.host) !== 'undefined') {
 			    resourceDomain = req.headers.host + '/';
 			    log('Got a valid host of ' + req.headers.host);
@@ -316,7 +335,7 @@ _.extend(Bundler.prototype, {
 			    // need to be something that we set per-origin
 			    // * Redefining url is obviously awful. I did this
 			    // because I'm no good at this javascripting and didn't want to mess with mainProcess.
-			    url = 'http://' + resourceDomain + url;
+			    req.query.url = 'http://' + resourceDomain + req.query.url;
 		    }
 		    else {
 			    log('Failed to get a valid host - request invalid');
@@ -325,29 +344,29 @@ _.extend(Bundler.prototype, {
 		    }
 	    }
 	    else {
-		    if (!url) {
+		    if (!req.query.url) {
 			    res.end('');
 			    return;
 		    }
-		    resourceDomain = url
+		    resourceDomain = req.query.url
 			    .match(/^https?:\/\/(\w|\.)+(\/|$)/)[0]
 			    .match(/\w+\.\w+(\.\w+)?(\/|$)/)[0];
 	    }
 	    if (resourceDomain[resourceDomain.length - 1] !== '/') { resourceDomain += '/'; }
-	    log('Got a request for ' + url.green + ' ' + '['.inverse + resourceDomain.substring(0, resourceDomain.length - 1).inverse + ']'.inverse);
+	    log('Got a request for ' + req.query.url.green + ' ' + '['.inverse + resourceDomain.substring(0, resourceDomain.length - 1).inverse + ']'.inverse);
 	    // Visit the website, determine its HTML and the resources it depends on.
-        this.initiateRequest(req,res, resourceDomain);
+        this.initiateRequest(req,res, resourceDomain, onResponseCallback);
 
     },
 
-    initiateRequest: function(req,res, resourceDomain) {
+    initiateRequest: function(req,res, resourceDomain, onResponseCallback) {
         var current_bundler = this;
 	    portScanner.findAPortNotInUse(40000, 60000, 'localhost', function(err, freePort) {
 		    phantom.create(function(ph) {
 			    ph.createPage(function(page) {
 				    current_bundler.mainProcess(
 					    req, res, 
-                        new Proc(ph, req, res, page, resourceDomain, current_bundler.crypto_config)
+                        new Proc(ph, req, res, page, resourceDomain, current_bundler.crypto_config, onResponseCallback)
 			        );
 		        }, {port: freePort}
 		                     );
@@ -384,9 +403,7 @@ _.extend(Bundler.prototype, {
 process.env.PATH = process.env.PATH + ':../node_modules/phantomjs/bin';
 
 exports.createBundler = function() {
-    debugger;
     var bundler = new Bundler();
-    debugger;
 
     return bundler;
 };

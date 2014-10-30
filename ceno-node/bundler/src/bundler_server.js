@@ -77,7 +77,7 @@ if ('listen' in configData) {
 }
 
 http.createServer(BundlerServer).listen(listenport, listenip, function() {
-    debugger;
+    //debugger;
     BundlerServer.bundler = bundler.createBundler();
     var banner = [
 	'____  _   _ _   _ ____  _     _____ ____  ',
@@ -111,7 +111,6 @@ http.createServer(BundlerServer).listen(listenport, listenip, function() {
  * url: The URL of the webpage to bundle.
  */
 BundlerServer.route('/').get(function(req, res) {
-    
     var beginProcess = BundlerServer.bundler.beginProcess.bind(BundlerServer.bundler);
 	beginProcess(req, res);
 });

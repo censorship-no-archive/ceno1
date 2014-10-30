@@ -1,14 +1,14 @@
 var path = require('path');
 process.env.PROXY_CACHE_DIR = path.resolve(__dirname, './cache');
 
-var httpStaleCacheProxy = require('../lib/http-stale-cache-proxy');
+var httpBundlerStaleCacheProxy = require('../lib/http-bundler-stale-cache-proxy');
 
-httpStaleCacheProxy.createServer({
+httpBundlerStaleCacheProxy.createServer({
   changeOrigin: true,
   target: {
     host: 'localhost',
-    port: 80,
-  },
+    port: 3000
+  }
 }).listen(3090);
 
 require('chai').should();
