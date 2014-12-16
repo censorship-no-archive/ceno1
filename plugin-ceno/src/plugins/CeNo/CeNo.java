@@ -1,40 +1,62 @@
-package pulgins.CeNo
+package plugins.CeNo;
 
-    public class CeNo FredPlugin {
+import freenet.pluginmanager.*;
 
-    private final static Logger Logger LOGGER = Logger.getLogger(CeNo.class.getName());
-    private PulginRespirator pluginRespirator;
+import freenet.support.Logger;
+
+import org.eclipse.jetty.server.Server;
+
+
+public class CeNo implements FredPlugin {
+
+    //private final static Logger LOGGER = Logger.getLogger(CeNo.class.getName());
+    private PluginRespirator pluginRespirator;
+
+    //Need to be read from config
+    private final static Integer ceNoPluginHttpPort = 3091;
+
+    private Server ceNoHttpServer = new Server(ceNoPluginHttpPort);
 
     public static final String pluginUri = "/plugins/plugins.CeNo.CeNo";
 	public static final String pluginName = "CeNo";
 
-    /**
-       setup the web interface in FProxy
-       but we don't really need a web inteface as we don't use FProxy 
-       per sa
-     */
-    private void setupWebInterface()
-    {
-		webInterface = new WebInterface(this, pluginRespirator.getHLSimpleClient(), pluginRespirator.getToadletContainer());
-		webInterface.load();
 
-        /*PluginContex pluginContext = new PluginContext(pluginRespirator);
-        this.webInterface = new WebInterface(plginContext);
+    // /**
+    //    setup the web interface in FProxy
+    //    but we don't really need a web inteface as we don't use FProxy 
+    //    per sa
+    //  */
+    // private void setupWebInterface()
+    // {
+	// 	webInterface = new WebInterface(this, pluginRespirator.getHLSimpleClient(), pluginRespirator.getToadletContainer());
+	// 	webInterface.load();
 
-        pluginRespirator.getPageMaker().addNavigationCategory(basePath + "/", "WebOfTrust.menunName.name", "WebOfTrust.menuName.tooltip", this);
-        ToadletContainer tc = pluginRespirator.getToadletContainer();
+    //     /*PluginContex pluginContext = new PluginContext(pluginRespirator);
+    //     this.webInterface = new WebInterface(plginContext);
 
-        ///pages
-        Overview oc = new Overview(this, pluginRespirator.getHLSimpleClient(), basePath, db);*/
+    //     pluginRespirator.getPageMaker().addNavigationCategory(basePath + "/", "WebOfTrust.menunName.name", "WebOfTrust.menuName.tooltip", this);
+    //     ToadletContainer tc = pluginRespirator.getToadletContainer();
+
+    //     ///pages
+    //     Overview oc = new Overview(this, pluginRespirator.getHLSimpleClient(), basePath, db);*/
                                  
         
-    }
+    // }
 
     public void runPlugin(PluginRespirator pr)
     {
         pluginRespirator = pr;
-        setupWebInterface();
-           
+
+        Server server = new Server(3091);
+        try {
+            server.start();
+            server.join();
+        } catch (Exception e) {
+            e.printStackTrace();
+        
+        }
+
+        
     }
 
     public void terminate()
@@ -42,3 +64,4 @@ package pulgins.CeNo
         Logger.normal(this, pluginName + " terminated.");
     }
 
+}

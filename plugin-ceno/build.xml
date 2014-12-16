@@ -1,0 +1,119 @@
+<?xml version="1.0"?>
+<!-- ant build file for Freenet -->
+
+<project name="ceno-plugin" default="dist" basedir=".">
+	<property name="freenet-cvs-snapshot.location" location="../fred/dist/freenet.jar"/>
+	<property name="freenet-ext.location" location="../fred/lib/freenet-ext.jar"/>
+	<property name="svn.revision" value="@custom@"/>
+	<property name="source-version" value="1.5"/>
+	<property name="build" location="build/"/>
+	<property name="build-test" location="build-test/"/>
+	<property name="dist" location="dist/"/>
+    <property name="junit.location" value="/usr/share/java/junit.jar"/>
+
+    <!-- Jetty stuff -->
+    <property name="jetty.location" value="/usr/share/eclipse/plugins/org.eclipse.jetty."/>
+    <property name="jetty-serverlet.location" value="/usr/share/eclipse/plugins/javax.servlet_3.0.0.v201112011016.jar"/>
+
+    <property name="jetty-all.location" value="/usr/share/eclipse/plugins/org.eclipse.jetty.*.jar"/>
+
+<available file="src/plugins/CeNo/Version.java" property="version.present"/>
+    <available file="${junit.location}" property="junit.present"/>
+
+
+
+	<target name="mkdir">
+		<mkdir dir="${build}"/>
+		<mkdir dir="${build-test}"/>
+		<mkdir dir="${dist}"/>
+		<echo message="Using ${freenet-cvs-snapshot.location} as freenet-cvs-snapshot.jar"/>
+		<echo message="Using ${freenet-ext.location} as freenet-ext.jar"/>
+	</target>
+	
+	<target name="setver" if="version.present">
+		<!-- Update the Version file -->
+		<replace file="src/plugins/CeNo/Version.java">
+			<replacefilter token="@custom@" value="${svn.revision}"/>
+		</replace>
+	</target>
+
+	<!-- ================================================== -->
+	<target name="compile" depends="mkdir,setver" >
+		<!-- Create the time stamp -->
+		<tstamp/>
+		<!-- Create the build directory structure used by compile -->
+
+		<!-- FIXME: remove the debug and replace with optimize -->
+		<javac srcdir="src/" destdir="${build}" debug="on" optimize="on" source="${source-version}">
+			<classpath>
+				<pathelement location="${freenet-ext.location}"/>
+                <pathelement location="${freenet-cvs-snapshot.location}"/>
+                <pathelement location="${jetty-all.location}"/>
+                <pathelement location="${jetty-serverlet.location}"/>
+                <fileset dir="/usr/share/eclipse/plugins/">
+                    <include name="*.jar"/>
+                 </fileset>
+			</classpath>
+			<include name="**/*.java"/>
+			<exclude name="**/*Test.java"/>
+		</javac>
+	</target>
+
+	<!-- ================================================== -->
+
+	<target name="unit-build" depends="compile" if="junit.present" unless="skip_tests">
+		<javac srcdir="src/" destdir="${build-test}" debug="on" optimize="on" source="1.5">
+			<classpath>
+				<pathelement path="${build}"/>
+				<pathelement location="${freenet-ext.location}"/>
+				<pathelement location="${freenet-cvs-snapshot.location}"/>
+				<pathelement location="${junit.location}"/>
+			</classpath>
+			<compilerarg value="-Xlint"/>
+			<include name="**/*Test.java"/>
+		</javac>
+	</target>
+
+	<target name="junit" depends="unit-build" if="junit.present" unless="skip_tests">
+		<junit printsummary="yes" fork="yes" haltonfailure="yes">
+			<classpath>
+				<pathelement path="${build}"/>
+				<pathelement path="${build-test}"/>
+				<pathelement location="${freenet-ext.location}"/>
+				<pathelement location="${freenet-cvs-snapshot.location}"/>
+				<pathelement location="${junit.location}"/>
+			</classpath>
+
+			<formatter type="plain" usefile="false"/>
+
+			<batchtest fork="yes">
+				<fileset dir="${build-test}">
+					<include name="**/*Test.class"/>
+				</fileset>
+			</batchtest>
+			<sysproperty key="benchmark" value="${benchmark}" />
+			<sysproperty key="extensiveTesting" value="${extensiveTesting}" />
+		</junit>
+	</target>
+
+	<!-- ================================================== -->
+	<target name="dist" depends="clean,compile,junit"
+		description="generate the distribution" >
+		<jar jarfile="${dist}/CeNo.jar" duplicate="fail">
+			<manifest>
+				<attribute name="Plugin-Main-Class" value="plugins.CeNo.CeNo"/>
+			</manifest>
+			<fileset dir="src/" casesensitive="no">
+				<include name="*.txt"/>
+			</fileset>
+			<fileset dir="${build}/"/>
+		</jar>
+	</target>
+
+	<!-- ================================================== -->
+	<target name="clean" description="Delete class files and docs dir.">
+		<delete dir="${build}"/>
+		<delete dir="${build-test}"/>
+		<delete dir="${dist}"/>
+	</target>
+</project>
