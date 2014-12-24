@@ -37,7 +37,7 @@
 		</replace>
 	</target>
 
-	<!-- ================================================== -->
+<!-- ================================================== -->
 	<target name="compile" depends="mkdir,setver" >
 		<!-- Create the time stamp -->
 		<tstamp/>
@@ -96,6 +96,16 @@
 		</junit>
 	</target>
 
+<!-- <target name="jar" depends="compile" -->
+<!--     description="Creates a standalone JAR of all class files and dependencies."> -->
+<!--   <jar destfile="${my.ant.task.jar.file}" update="true"> -->
+<!--     <fileset dir="${build.classes.dir}" /> -->
+<!--     <zipfileset src="${lib.dir}/javax.inject.jar" /> -->
+<!--     <zipfileset src="${lib.dir}/guice-3.0.jar" /> -->
+<!--     <zipfileset src="${lib.dir}/guice-multibindings-3.0.jar" /> -->
+<!--     <zipfileset src="${lib.dir}/guice-assistedinject-3.0.jar" /> -->
+<!--   </jar> -->
+<!-- </target> -->
 	<!-- ================================================== -->
 	<target name="dist" depends="clean,compile,junit"
 		description="generate the distribution" >
@@ -106,7 +116,12 @@
 			<fileset dir="src/" casesensitive="no">
 				<include name="*.txt"/>
 			</fileset>
-			<fileset dir="${build}/"/>
+            <fileset dir="${build}/"/>
+           <!--- <zipfileset src="${jetty-all.location}" /> -->
+           <zipfileset src="${jetty-serverlet.location}" />
+           <zipfileset dir="/usr/share/eclipse/plugins/">
+               <include name="org.eclipse.jetty.*.jar"/>
+           </zipfileset>
 		</jar>
 	</target>
 

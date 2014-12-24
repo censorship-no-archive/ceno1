@@ -1,22 +1,17 @@
-Content-Type: text/enriched
-Text-Width: 70
+/*
+ * HTTP Bundler Stale Cache Proxy is a library based ont 
+ * http-stale-cache-proxy with following:
+ * - It bundles all resources in a page before storing the cache.
+ * - The storage is abstracted out so it can be used with different 
+ *   type of storage
+ *
+ * Copyright (c) 2014 eQualit.ie under GNU AGPL v3.0 or later
+ * 
+ * Vmon: Oct 2014 Initial fork
+ */ 
 
-  /home/vmon/Dropbox/doc/code/ceno/ceno/ceno-node/lib:
-  /*
-  * HTTP Bundler Stale Cache Proxy is a library based ont 
-  /home/vmon/Dropbox/doc/code/ceno/ceno/ceno-node/lib/* http-stale-cache-proxy with following:
-  * - It bundles all resources in a page before storing the cache.
-  * - The storage is abstracted out so it can be used with different 
-  *   type of storage
-  *
-  * Copyright (c) 2014 eQualit.ie under GNU AGPL v3.0 or later
-  * 
-  * Vmon: Oct 2014 Initial fork
-  */ 
 
-<x-color><param>DeepPink</param>
-
-  var _ = require('lodash'),</x-color>
+  var _ = require('lodash'),
   async = require('async'),
   crypto = require('crypto'),
   httpMocks = require('node-mocks-http'),
@@ -30,26 +25,22 @@ Text-Width: 70
   temp = require('temp'),
   bundlerProxy = require('../bundler/src/bundler');
 
-<x-color><param>DeepPink</param>
 
-  var cacheDir = process.env.PROXY_CACHE_DIR || path.resolve(process.cwd(), './cache/');</x-color>
+  var cacheDir = process.env.PROXY_CACHE_DIR || path.resolve(process.cwd(), './cache/');
   var cacheTempDir = path.join(cacheDir, 'tmp');
   var rottingAge = 30; //in second
 
-<x-color><param>DeepPink</param>
 
-  fs.mkdirRecursiveSync(cacheDir);</x-color>
+  fs.mkdirRecursiveSync(cacheDir);
   fs.mkdirRecursiveSync(cacheTempDir);
 
-<x-color><param>DeepPink</param>
 
-  var Cacher = function() {</x-color>
+  var Cacher = function() {
   this.initialize.apply(this, arguments);
   };
 
-<x-color><param>DeepPink</param>
 
-  _.extend(Cacher.prototype, {</x-color>
+  _.extend(Cacher.prototype, {
   initialize: function(request, response, proxy, bundler, options) {
   this.request = request;
   this.response = response;
@@ -58,26 +49,22 @@ Text-Width: 70
   this.options = options;
   this.buffer = httpProxy.buffer(request);
 
-<x-color><param>DeepPink</param>
 
-  this.requestLogId = request.method + ' ' + request.url;</x-color>
+  this.requestLogId = request.method + ' ' + request.url;
 
-<x-color><param>DeepPink</param>
 
-  var cacheKey = [</x-color>
+  var cacheKey = [
   request.method,
   request.headers.host,
   request.url,
   request.headers.authorization,
   ].join('');
 
-<x-color><param>DeepPink</param>
 
-  this.cacheBase = crypto.createHash('sha256').update(cacheKey).digest('hex');</x-color>
+  this.cacheBase = crypto.createHash('sha256').update(cacheKey).digest('hex');
 
-<x-color><param>DeepPink</param>
 
-  // TODO: Make this more configurable.</x-color>
+  // TODO: Make this more configurable.
   this.cacheDecider = function(request, cacheAge) {
   logger.info('cacheAge: ' + cacheAge.toString());
   if (cacheAge << rottingAge) {
@@ -86,33 +73,28 @@ Text-Width: 70
   return false;
   };
 
-<x-color><param>DeepPink</param>
 
-  this.metaCachePath = path.join(cacheDir, this.cacheBase + '.meta');</x-color>
+  this.metaCachePath = path.join(cacheDir, this.cacheBase + '.meta');
   this.bodyCachePath = path.join(cacheDir, this.cacheBase + '.body');
   this.lockCachePath = path.join(cacheDir, this.cacheBase + '.lock');
 
-<x-color><param>DeepPink</param>
 
-  logger.info(this.requestLogId + ' - Request received');</x-color>
+  logger.info(this.requestLogId + ' - Request received');
   this.writeTempCache =  this.writeTempCache.bind(this);
   this.checkCache(this.handleCheckCache.bind(this));
   },
 
-<x-color><param>DeepPink</param>
 
-  checkCache: function(callback) {</x-color>
+  checkCache: function(callback) {
   var bodyExists = fs.existsSync(this.bodyCachePath);
   var metaExists = fs.existsSync(this.metaCachePath);
 
-<x-color><param>DeepPink</param>
 
-  if(bodyExists && metaExists) {</x-color>
+  if(bodyExists && metaExists) {
   var stats = fs.statSync(this.metaCachePath);
 
-<x-color><param>DeepPink</param>
 
-  var now = new Date();</x-color>
+  var now = new Date();
   var cacheAge = Math.ceil((now.getTime() - stats.mtime.getTime()) / 1000);
 
 
@@ -288,5 +270,4 @@ Text-Width: 70
 
 
   };
-
 
