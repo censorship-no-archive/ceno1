@@ -6,11 +6,14 @@ import freenet.support.Logger;
 
 import org.eclipse.jetty.server.Server;
 
+import java.util.Date;
+
 
 public class CeNo implements FredPlugin {
 
     //private final static Logger LOGGER = Logger.getLogger(CeNo.class.getName());
     private PluginRespirator pluginRespirator;
+	private volatile boolean goon = true;
 
     //Need to be read from config
     private final static Integer ceNoPluginHttpPort = 3091;
@@ -56,11 +59,20 @@ public class CeNo implements FredPlugin {
         
         }
 
+		while(goon) {
+			System.err.println("Heartbeat from CeNo-plugin: " + (new Date()));
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				// Who cares ?
+			}
+		}
         
     }
 
     public void terminate()
     {
+		goon = false;
         Logger.normal(this, pluginName + " terminated.");
     }
 

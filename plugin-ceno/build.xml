@@ -3,7 +3,7 @@
 
 <project name="ceno-plugin" default="dist" basedir=".">
 	<property name="freenet-cvs-snapshot.location" location="../fred/dist/freenet.jar"/>
-	<property name="freenet-ext.location" location="../fred/lib/freenet-ext.jar"/>
+	<property name="freenet-ext.location" location="../fred/lib/freenet/freenet-ext.jar"/>
 	<property name="svn.revision" value="@custom@"/>
 	<property name="source-version" value="1.5"/>
 	<property name="build" location="build/"/>
@@ -12,15 +12,13 @@
     <property name="junit.location" value="/usr/share/java/junit.jar"/>
 
     <!-- Jetty stuff -->
-    <property name="jetty.location" value="/usr/share/eclipse/plugins/org.eclipse.jetty."/>
-    <property name="jetty-serverlet.location" value="/usr/share/eclipse/plugins/javax.servlet_3.0.0.v201112011016.jar"/>
-
-    <property name="jetty-all.location" value="/usr/share/eclipse/plugins/org.eclipse.jetty.*.jar"/>
-
+    <!-- <property name="jetty.location" value="/usr/share/eclipse/plugins/org.eclipse.jetty."/> -->
+    <property name="jetty-serverlet.location" value="../fred/lib/javax.servlet-api-3.1.0.jar"/>
+    <!-- <property name="jetty-server.location" value="../plugins/org.eclipse.jetty.server_8.1.14.v20131031.jar"/> -->
+    <!-- <property name="jetty-util.location" value="../plugins/org.eclipse.jetty.util_8.1.14.v20131031.jar"/> -->
+<property name="jetty-all.location" value="../fred/lib/jetty-all-9.2.6.v20141205.jar"/>
 <available file="src/plugins/CeNo/Version.java" property="version.present"/>
     <available file="${junit.location}" property="junit.present"/>
-
-
 
 	<target name="mkdir">
 		<mkdir dir="${build}"/>
@@ -50,9 +48,9 @@
                 <pathelement location="${freenet-cvs-snapshot.location}"/>
                 <pathelement location="${jetty-all.location}"/>
                 <pathelement location="${jetty-serverlet.location}"/>
-                <fileset dir="/usr/share/eclipse/plugins/">
-                    <include name="*.jar"/>
-                 </fileset>
+                <!-- <fileset dir="../plugins/"> -->
+                <!--     <include name="org.eclipse.jetty.*.jar"/> -->
+                <!--  </fileset> -->
 			</classpath>
 			<include name="**/*.java"/>
 			<exclude name="**/*Test.java"/>
@@ -117,11 +115,11 @@
 				<include name="*.txt"/>
 			</fileset>
             <fileset dir="${build}/"/>
-           <!--- <zipfileset src="${jetty-all.location}" /> -->
-           <zipfileset src="${jetty-serverlet.location}" />
-           <zipfileset dir="/usr/share/eclipse/plugins/">
-               <include name="org.eclipse.jetty.*.jar"/>
-           </zipfileset>
+            <zipfileset src="${jetty-all.location}" />
+            <zipfileset src="${jetty-serverlet.location}" />
+           <!-- <zipfileset dir="/usr/share/eclipse/plugins/"> -->
+           <!--     <include name="org.eclipse.jetty.*.jar"/> -->
+           <!-- </zipfileset> -->
 		</jar>
 	</target>
 
