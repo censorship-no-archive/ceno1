@@ -59,6 +59,7 @@ var log =  function(message) {
 /** Defining utility functions which don't manipulate properties */
 var BundlingUtil = {
     isSearchableFile: function(url) {
+        /*
 	    var ext = '';
 	    if (ext === url.match(/\.\w+($|\?)/)) {
 		    ext = ext[0];
@@ -71,6 +72,17 @@ var BundlingUtil = {
 		    }
 	    }
 	    return false;
+        /*/
+        var ext = url.match(/\.\w+($|\?)/);
+        if (ext) {
+            ext = ext[0];
+            if (ext[ext.length - 1] === '?') {
+                ext = ext.substring(0, ext.length - 1);
+            }
+            var mimetype = mime.lookup(ext).match(/(text|css|javascript|plain|json|xml|octet\-stream)/);
+            return mimetype !== null;
+        }
+        return false;
     },
 
     fetchResource : function(url, resourceNumber, callback) {
