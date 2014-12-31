@@ -59,26 +59,11 @@ var log =  function(message) {
 /** Defining utility functions which don't manipulate properties */
 var BundlingUtil = {
     isSearchableFile: function(url) {
-        /*
-	    var ext = '';
-	    if (ext === url.match(/\.\w+($|\?)/)) {
-		    ext = ext[0];
-		    if (ext[ext.length - 1] === '?') {
-			    ext = ext.substring(0, ext.length - 1);
-		    }
-		    if (mime.lookup(ext).match(
-			        /(text|css|javascript|plain|json|xml|octet\-stream)/)) {
-			    return true;
-		    }
-	    }
-	    return false;
-        /*/
-        var ext = url.match(/\.\w+($|\?)/);
+        var i = url.lastIndexOf('.');
+        var ext = url.substring(i, url.length);
+        ext = ext.match(/\.\w+/);
         if (ext) {
             ext = ext[0];
-            if (ext[ext.length - 1] === '?') {
-                ext = ext.substring(0, ext.length - 1);
-            }
             var mimetype = mime.lookup(ext).match(/(text|css|javascript|plain|json|xml|octet\-stream)/);
             return mimetype !== null;
         }
@@ -108,6 +93,7 @@ var BundlingUtil = {
     },
 
     convertToDataURI : function(content, extension) {
+        extension = '.' + extension.split('.').pop();
         extension = extension.match(/\.\w+/);
 	    if (extension) {
 		    extension = extension[0];
@@ -374,14 +360,13 @@ _.extend(Bundler.prototype, {
     initiateRequest: function(req,res, resourceDomain, onResponseCallback) {
         var current_bundler = this;
 	    portScanner.findAPortNotInUse(40000, 60000, 'localhost', function(err, freePort) {
-		    phantom.create(function(ph) {
+            phantom.create(function(ph) {
 			    ph.createPage(function(page) {
 				    current_bundler.mainProcess(
 					    req, res, 
                         new Proc(ph, req, res, page, resourceDomain, current_bundler.crypto_config, onResponseCallback)
 			        );
-		        }, {port: freePort}
-		                     );
+		        }, {port: freePort});
 	        });
         });
     },
