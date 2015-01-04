@@ -56,14 +56,24 @@ var log =  function(message) {
 	}
 };
 
+var filetype = function(url) {
+    var i = url.lastIndexOf('.');
+    if (i < 0) {
+        return null;
+    }
+    var ext = '.' + url.substring(i, url.length);
+    ext = ext.match(/\.\w+/);
+    if (ext) {
+        return ext[0];
+    }
+    return null;
+};
+
 /** Defining utility functions which don't manipulate properties */
 var BundlingUtil = {
     isSearchableFile: function(url) {
-        var i = url.lastIndexOf('.');
-        var ext = url.substring(i, url.length);
-        ext = ext.match(/\.\w+/);
+        var ext = filetype(url);
         if (ext) {
-            ext = ext[0];
             var mimetype = mime.lookup(ext).match(/(text|css|javascript|plain|json|xml|octet\-stream)/);
             return mimetype !== null;
         }
@@ -93,16 +103,13 @@ var BundlingUtil = {
     },
 
     convertToDataURI : function(content, extension) {
-        extension = '.' + extension.split('.').pop();
-        extension = extension.match(/\.\w+/);
-	    if (extension) {
-		    extension = extension[0];
-	    }
-	    else {
-		    extension = '.html';
-	    }
-	    var dataURI = 'data:' + mime.lookup(extension) + ';base64,';
-	    if (BundlingUtil.isSearchableFile(extension)) {
+        extension = filetype(extension);
+        if (extension === null) {
+            extension = '.html';
+        }
+        var mimetype = mime.lookup(extension);
+	    var dataURI = 'data:' + mimetype + ';base64,';
+	    if (BundlingUtil.isSearchableFile(extension) || mimetype.match(/image/) !== null) {
 		    dataURI += new Buffer(content).toString('base64');
 	    }
 	    else {
@@ -211,10 +218,11 @@ _.extend(Proc.prototype, {
     replaceResource: function() {
 	    var catchURI = /(^https?:\/\/|\.{0,2}\/?)((?:\w|-|@|\.|\?|\=|\&)+)/g;
 	    for (var i = Object.keys(this.resources).length - 1; i >= 0; i--) {
+            log('URL = '.green.bold + this.resources[i].url.red.bold);
 		    if (!this.resources[i].content) { continue; }
 		    if (this.resources[i].content.length > 262144) { continue; }
 		    if (this.resources[i].url !== this.resources[0].url) {
-			    if (!BundlingUtil.isSearchableFile(this.resources[i].url)) {
+			    if (!BundlingUtil.isSearchableFile(filetype(this.resources[i].url))) {
 				    continue;
 			    }
 		    }
