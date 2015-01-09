@@ -9,3 +9,6 @@ node_modules
 proxy.log
 
 ../fred
+
+# Vim temporary files
+.swp
