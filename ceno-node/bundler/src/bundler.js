@@ -412,3 +412,5 @@ exports.createBundler = function() {
 
     return bundler;
 };
+
+exports.filetype = filetype;

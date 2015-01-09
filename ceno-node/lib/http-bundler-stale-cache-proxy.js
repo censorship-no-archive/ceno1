@@ -133,14 +133,19 @@ _.extend(Cacher.prototype, {
 
   proxyAndCache: function(response) {
     logger.info(this.requestLogId + ' - Proxying');
-    var ft = filetype(this.request.url);
-    logger.info('Got filetype ' + ft + ' for URL ' + this.request.url);
-    //url is not sent by /?url= but is the same url as the get request
-    this.bundler.beginProcess(this.request, response, false, this.writeTempCache);
     /*
+    var contentType = this.request.headers['Content-Type'];
+    util.puts('Got contentType ' + contentType);
+    if (contentType === 'text/html') {
+      //url is not sent by /?url= but is the same url as the get request
+      this.bundler.beginProcess(this.request, response, false, this.writeTempCache);
+    } else {
+      this.request.write(response.content);
+      this.request.end();
+    }
+    */
     this.proxy.proxyRequest(
       this.request, response, _.extend({}, this.options, {buffer: this.buffer}));
-    */
   },
 
 
