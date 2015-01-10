@@ -397,15 +397,14 @@ _.extend(Bundler.prototype, {
     proc.Debundler = this.debundlerState;
     log('Initializing bundling for ' + req.query.url.green);
     proc.page.set('onResourceRequested', function(request /*, networkRequest*/ ) {
-      if (!proc.pageLoadedCutoff) {
-        if (request.url.match('^http') &&
-          request.url.match(proc.resourceDomain)) {
-          debugger;
-          proc.resources[proc.resourceNumber] = {
-            url: request.url
-          };
-          proc.resourceNumber++;
-        }
+      if (!proc.pageLoadedCutoff
+       && request.url.substring(0, 4) === 'http'
+       && request.url.indexOf(proc.resourceDomain) >= 0) {
+        debugger;
+        proc.resources[proc.resourceNumber] = {
+          url: request.url
+        };
+        proc.resourceNumber++;
       }
     });
     proc.page.open(req.query.url, proc.pageProcessor);
