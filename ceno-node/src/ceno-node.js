@@ -5,10 +5,10 @@ var httpBundlerStaleCacheProxy = require('../lib/http-bundler-stale-cache-proxy'
 
 httpBundlerStaleCacheProxy.createServer({
   changeOrigin: true,
-  target: {
-    host: 'localhost',
-    port: 3000
-  }
+  // target: {
+  //   host: 'localhost',
+  //   port: 3000
+    // }
 }).listen(3090);
 
 require('chai').should();

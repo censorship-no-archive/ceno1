@@ -25,7 +25,6 @@
   temp = require('temp'),
   bundlerProxy = require('../bundler/src/bundler');
 
-
   var cacheDir = process.env.PROXY_CACHE_DIR || path.resolve(process.cwd(), './cache/');
   var cacheTempDir = path.join(cacheDir, 'tmp');
   var rottingAge = 30; //in second
@@ -131,10 +130,10 @@
 
   proxyAndCache: function(response) {
   logger.info(this.requestLogId + ' - Proxying');
-  this.bundler.beginProcess(this.request, response, false, this.writeTempCache); //url is not sent by /?url= but is the same url as the get request
-  /*this.proxy.proxyRequest(this.request, response, _.extend({}, this.options, {
+  /*this.bundler.beginProcess(this.request, response, false, this.writeTempCache); //url is not sent by /?url= but is the same url as the get request*/
+  this.proxy.proxyRequest(this.request, response, _.extend({}, this.options, {
   buffer: this.buffer,
-  }));*/
+  }));
 
 
   },
@@ -256,8 +255,14 @@
 
   var proxyServer = httpProxy.createServer(function (request, response, proxy) {
   debugger;
-  util.puts('Receiving forward for: ' + request.url + ' on host ' + request.headers.host);
-  request.cacher = new Cacher(request, response, proxy, bundler, options);               
+      util.puts('Receiving forward for: ' + request.url + ' on host ' + request.headers.host);
+
+      options.host  = request.headers.host;
+      options.port  = 80;
+      options.enable = { xforward: true }
+
+      request.cacher = new Cacher(request, response, proxy, bundler, options);
+
   });
 
 
