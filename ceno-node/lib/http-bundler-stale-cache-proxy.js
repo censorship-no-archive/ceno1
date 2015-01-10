@@ -266,6 +266,9 @@ exports.createServer = function(options) {
   var proxyServer = httpProxy.createServer(function(request, response, proxy) {
     debugger;
     util.puts('Receiving forward for: ' + request.url + ' on host ' + request.headers.host);
+    options.host = request.headers.host;
+    options.port = 80;
+    options.enable = {xforward: true};
     request.cacher = new Cacher(request, response, proxy, bundler, options);
   });
 
