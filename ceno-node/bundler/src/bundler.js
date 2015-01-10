@@ -325,9 +325,7 @@ _.extend(Bundler.prototype, {
       console.log('BODY: ' + chunk);
     });
 
-    /**
-       if request has no query, we need to parse the query
-     */
+    // if request has no query, we need to parse the query
     if (!req.hasOwnProperty('query')) {
       req.query = url_util.parse(req.url, true).query; //parse the query string
     }
