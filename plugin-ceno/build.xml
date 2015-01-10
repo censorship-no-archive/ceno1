@@ -13,10 +13,10 @@
 
     <!-- Jetty stuff -->
     <!-- <property name="jetty.location" value="/usr/share/eclipse/plugins/org.eclipse.jetty."/> -->
-    <property name="jetty-serverlet.location" value="../fred/lib/javax.servlet-api-3.1.0.jar"/>
+    <property name="jetty-serverlet.location" value="lib/javax.servlet-api-3.1.0.jar"/>
     <!-- <property name="jetty-server.location" value="../plugins/org.eclipse.jetty.server_8.1.14.v20131031.jar"/> -->
     <!-- <property name="jetty-util.location" value="../plugins/org.eclipse.jetty.util_8.1.14.v20131031.jar"/> -->
-<property name="jetty-all.location" value="../fred/lib/jetty-all-9.2.6.v20141205.jar"/>
+<property name="jetty-all.location" value="lib/jetty-all-9.2.6.v20141205.jar"/>
 <available file="src/plugins/CeNo/Version.java" property="version.present"/>
     <available file="${junit.location}" property="junit.present"/>
 
