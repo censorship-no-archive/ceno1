@@ -372,20 +372,32 @@ _.extend(Bundler.prototype, {
   },
   */
 
+  /* Push the request through the bundler without making any changes to the contents. */
   producePageContent: function(req, res, phantomInstance, port, callback) {
     var page;
+    if (!_.contains(['text/html', 'application/octet-stream'], mime.lookup(req.url))) {
+      // We don't want to handle both the browser's usual resource requests. Only Phantom's.
+      res.end();
+      return;
+    }
     phantomInstance.createPage(function (_page) {
       page = _page;
+      // Phantom serves resources in their own pages if we don't do something to catch them
+      // before they are actually fetched.
+      page.set('onResourceReceived', function (response) {
+        //log('Intercepted '.green + response.url);
+        //log(response.contentType);
+      });
       log('Opening ' + req.url);
       page.open(req.url, function (stat) {
-        log('Inside page.open callback');
+        //log('Inside page.open callback');
         if (stat === 'success') {
           log('Successfully fetched ' + req.url);
           page.evaluate(function () {
             var content = '<!DOCTYPE html><html>' + document.documentElement.innerHTML + '</html>';
             return content;
           }, function (content) {
-            log(content);
+            //log('Content Received'.green + ' for ' + req.url);
             res.write(content);
             res.end();
             phantomInstance.exit();
