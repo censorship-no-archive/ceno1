@@ -5,8 +5,8 @@ var http = require('http');
 // retrieved cached bundles.
 //var cache = require('../lib/cache').local();
 
-// Likewise we could initialize the cache to use freenet
-var cache = require('../lib/cache').freenet('localhost:9001');
+// Likewise we could initialize the cache to use some HTTP interface 
+var cache = require('../lib/cache').http('localhost:9001');
 
 // Temporarily treat the bundler like it doesn't do anything
 var bundler = {

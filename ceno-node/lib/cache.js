@@ -63,16 +63,16 @@ function localStorer() {
   };
 }
 
-function freenetRetriever(fnAddr) {
+function httpRetriever(addr) {
   return function (url, callback) {
-    console.log('Requesting URL ' + url + ' from freenet at ' + fnAddr);
+    console.log('Requesting URL ' + url + ' from freenet at ' + addr);
     callback(null, 'Woah');
   };
 }
 
-function freenetStorer(fnAddr) {
+function httpStorer(addr) {
   return function (data, callback) {
-    console.log('Writing to freenet at ' + fnAddr);
+    console.log('Writing to freenet at ' + addr);
     console.log(data);
     callback(null, 'Dude');
   };
@@ -83,8 +83,8 @@ module.exports = {
     return new Cache(localRetriever(), localStorer());
   },
 
-  freenet: function (fnAddr) {
-    return new Cache(freenetRetriever(fnAddr), freenetStorer(fnAddr));
+  http: function (addr) {
+    return new Cache(httpRetriever(addr), httpStorer(addr));
   }
   // etc.
 };
