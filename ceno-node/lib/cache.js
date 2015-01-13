@@ -3,6 +3,7 @@
  */
 
 //var request = require('superagent');
+var _ = require('lodash');
 
 var cacheFile = 'cache.dat';
 
@@ -22,15 +23,21 @@ var cacheFile = 'cache.dat';
  * implementations of the reader and writer supplied to the Cache object
  * to determine how to interpret them and provide data to the callbacks.
  */
-function Cache(reader, writer) {
-  this.read = function (from, callback) {
-    reader(from, callback);
-  };
+var Cache = function () {
+  this.initialize.apply(this, arguments);
+};
 
-  this.write = function (data, callback) {
-    writer(data, callback); 
-  };
-}
+_.extend(Cache.prototype, {
+  initialize: function (reader, writer) {
+    this.read = function (from, callback) {
+      reader(from, callback);
+    };
+    
+    this.write = function (data, callback) {
+      writer(data, callback);
+    };
+  }
+});
 
 /* Each retriever and storer function provide closures over any configuration
  * data they may need to retain. This allows us to simply export from this
