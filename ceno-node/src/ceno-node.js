@@ -1,8 +1,23 @@
 var path = require('path');
-process.env.PROXY_CACHE_DIR = path.resolve(__dirname, './cache');
+var http = require('http');
 
-var httpBundlerStaleCacheProxy = require('../lib/http-bundler-stale-cache-proxy');
+// Provides an interface to whatever mechanism is being used to store and
+// retrieved cached bundles.
+//var cache = require('../lib/cache').local();
 
-httpBundlerStaleCacheProxy.createServer({changeOrigin: true}).listen(3090);
+// Likewise we could initialize the cache to use freenet
+var cache = require('../lib/cache').freenet('localhost:9001');
 
-require('chai').should();
+http.createServer(function (req, res) {
+  cache.read('www.google.com', function (err, data) {
+    console.log('Received data from local cache.');
+    console.log(data);
+  });
+  cache.write({
+    url: 'www.google.com',
+    bundle: 'ABCDEFG'
+  }, function (err, result) {
+    console.log('After writing, local cache says ' + result);
+  });
+}).listen(3090, '127.0.0.1');
+
