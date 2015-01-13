@@ -311,7 +311,6 @@ _.extend(Bundler.prototype, {
     this.mainProcess = this.mainProcess.bind(this);
   },
 
-  /*
   beginProcess: function(req, res, url_is_parametric, onResponseCallback) {
     // Initialize collection of resources the website is dependent on.
     // Will fetch resources as part of the bundle.
@@ -326,7 +325,9 @@ _.extend(Bundler.prototype, {
       console.log('BODY: ' + chunk);
     });
 
-    // if request has no query, we need to parse the query
+    /**
+       if request has no query, we need to parse the query
+     */
     if (!req.hasOwnProperty('query')) {
       req.query = url_util.parse(req.url, true).query; //parse the query string
     }
@@ -369,50 +370,7 @@ _.extend(Bundler.prototype, {
     log('Got a request for ' + req.query.url.green + ' ' + '['.inverse + resourceDomain.substring(0, resourceDomain.length - 1).inverse + ']'.inverse);
     // Visit the website, determine its HTML and the resources it depends on.
     this.initiateRequest(req, res, resourceDomain, onResponseCallback);
-  },
-  */
 
-  producePageContent: function(req, res, phantomInstance, port, callback) {
-    var page;
-    phantomInstance.createPage(function (_page) {
-      page = _page;
-      log('Opening ' + req.url);
-      page.open(req.url, function (stat) {
-        log('Inside page.open callback');
-        if (stat === 'success') {
-          log('Successfully fetched ' + req.url);
-          page.evaluate(function () {
-            var content = '<!DOCTYPE html><html>' + document.documentElement.innerHTML + '</html>';
-            return content;
-          }, function (content) {
-            log(content);
-            res.write(content);
-            res.end();
-            phantomInstance.exit();
-            log('Phantom instance exited');
-          });
-        } else {
-          log('Could not fetch page');
-          res.write(
-            '<!DOCTYPE html><html><head><title>Error</title></head><body><p>Could not open ' +
-            req.url +
-            '</p></body></html>');
-          res.end();
-          phantomInstance.exit();
-          log('Phantom instance exited');
-        }
-      });
-    }, {port: port});
-  },
-
-  beginProcess: function(req, res, urlIsParametric, onResponseCallback) {
-    var thisBundler = this;
-    log('Beginning process to fetch ' + req.url);
-    portScanner.findAPortNotInUse(40000, 60000, 'localhost', function (err, port) {
-      phantom.create(function (phantomInstance) {
-        thisBundler.producePageContent(req, res, phantomInstance, port, onResponseCallback);
-      });
-    });
   },
 
   initiateRequest: function(req, res, resourceDomain, onResponseCallback) {
@@ -440,8 +398,8 @@ _.extend(Bundler.prototype, {
     log('Initializing bundling for ' + req.query.url.green);
     proc.page.set('onResourceRequested', function(request /*, networkRequest*/ ) {
       if (!proc.pageLoadedCutoff
-        && request.url.substring(0, 4) === 'http'
-        && request.url.indexOf(proc.resourceDomain) >= 0) {
+       && request.url.substring(0, 4) === 'http'
+       && request.url.indexOf(proc.resourceDomain) >= 0) {
         debugger;
         proc.resources[proc.resourceNumber] = {
           url: request.url
@@ -465,5 +423,4 @@ exports.createBundler = function() {
 };
 
 exports.filetype = filetype;
-
 
