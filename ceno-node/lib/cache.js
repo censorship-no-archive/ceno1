@@ -4,8 +4,12 @@
 
 //var request = require('superagent');
 var _ = require('lodash');
+var path = require('path');
+var fs = require('fs');
 
-var cacheFile = 'cache.dat';
+// To keep things simple (albeit inefficient), we will store locally cached bundles
+// in a JSON file. TODO make this more efficient
+var cacheFile = path.join('cache', 'bundles.json');
 
 /* Cache objects provide a uniform interface to access and store data from and to
  * any of the kinds of media we may want to use to cache bundles.
@@ -45,21 +49,49 @@ _.extend(Cache.prototype, {
  * may be required.
  */
 
-/* We may have the local retriever and storer functions be configured with
- * a directory and file to read and write cached data to and from.
- */
 function localRetriever() {
-  return function (from, callback) {
-    console.log('Reading data from ' + from);
-    callback(null, 'Hello world');
+  return function (url, callback) {
+    console.log('Reading bundle for URL ' + url);
+    fs.readFile(cacheFile, function (err, content) {
+      if (err) {
+        console.log('Failed to read cache file.');
+        callback(err, null);
+      } else {
+        console.log('Successfully read cache file.');
+        var bundle = JSON.parse(content)[url];
+        if (typeof bundle === 'undefined' || !bundle) {
+          // We don't need the ID for anything in the local case, so default to 0.
+          callback(null, {bundleFound: false, bundleID: 0});
+        } else {
+          callback(null, {bundleFound: true, bundle: bundle});
+        }
+      }
+    });
   };
 }
 
 function localStorer() {
   return function (data, callback) {
-    console.log('Writing data');
-    console.log(data);
-    callback(null, 'Goodbye!');
+    console.log('Writing bundle for ' + data.url); 
+    fs.readFile(cacheFile, function (err, content) {
+      if (err) {
+        console.log('Failed to read cache file.');
+        callback(err);
+      } else {
+        console.log('Read cache file.');
+        var cacheData = JSON.parse(content);
+        cacheData[data.url] = data.bundle;
+        fs.writeFile(cacheFile, JSON.stringify(cacheData), function (err, data) {
+          if (err) {
+            console.log('Failed to write new cache data.');
+            callback(err);
+          } else {
+            console.log('Successfuly wrote new cache data.');
+            callback(null);
+          }
+        });
+      }
+    });
   };
 }
 
@@ -80,6 +112,12 @@ function httpStorer(addr) {
 
 module.exports = {
   local: function () {
+    // Initialize the cache file.
+    try {
+      var fd = fs.openSync(cacheFile, 'wx');
+      fs.writeSync(fd, new Buffer('{}'), 0, 2, 0);
+      console.log('Created new cache file.');
+    } catch (err) {}
     return new Cache(localRetriever(), localStorer());
   },
 
