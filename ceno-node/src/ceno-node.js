@@ -6,24 +6,25 @@ var http = require('http');
 //var cache = require('../lib/cache').local();
 
 // Likewise we could initialize the cache to use some HTTP interface 
-var cache = require('../lib/cache').http('localhost:9001');
+var cache = require('../lib/cache').local();
 
 // Temporarily treat the bundler like it doesn't do anything
 var bundler = {
   makeBundle: function (url, callback) {
-    callback(null, url);
+    callback(null, 'HELLOWORLD');
   }
 };
 
 /* When a new bundle is created for a page that hasn't been cached already,
  * we want to cache it in whatever media we are using.
  */
-function cacheNewBundle(cacheObj, bundleID, bundle) {
+function cacheNewBundle(cacheObj, url, bundleID, bundle) {
   cacheObj.write({
+    url: url,
     id: bundleID,
     bundle: bundle
-  }, function (err, response) {
-    console.log('Response from cache write : ' + response);
+  }, function (err) {
+    console.log('Error information from write: ' + err);
   });
 }
 
@@ -40,13 +41,15 @@ function requestHandler(req, res) {
         if (err) {
           // Do something in case the bundler fails
         } else {
+          console.log('New bundle created');
           res.write(bundle);
           res.end();
-          cacheNewBundle(cache, response.bundleID, bundle);
+          cacheNewBundle(cache, req.url, response.bundleID, bundle);
         } 
       });
     } else {
-      res.write(bundle);
+      console.log('Existing bundle found');
+      res.write(response.bundle);
       res.end();
     }
   });
