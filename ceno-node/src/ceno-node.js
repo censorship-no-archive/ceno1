@@ -1,19 +1,10 @@
 var path = require('path');
 var http = require('http');
+var urllib = require('url');
+var querystring = require('querystring');
 
-// Provides an interface to whatever mechanism is being used to store and
-// retrieved cached bundles.
-//var cache = require('../lib/cache').local();
-
-// Likewise we could initialize the cache to use some HTTP interface 
 var cache = require('../lib/cache').local();
-
-// Temporarily treat the bundler like it doesn't do anything
-var bundler = {
-  makeBundle: function (url, callback) {
-    callback(null, 'HELLOWORLD');
-  }
-};
+var bundler = require('../lib/bundler');
 
 /* When a new bundle is created for a page that hasn't been cached already,
  * we want to cache it in whatever media we are using.
@@ -33,18 +24,22 @@ function cacheNewBundle(cacheObj, url, bundleID, bundle) {
  * 2. {bundleFound: false, bundleID: <unique-id>} if not
  */
 function requestHandler(req, res) {
-  cache.read(req.url, function (err, response) {
+  console.log('req.url = ' + req.url);
+  var url = querystring.parse(urllib.parse(req.url).query).url;
+  console.log('Got request for ' + url);
+  cache.read(url, function (err, response) {
     if (err) {
       // Do something special if reading from the cache is broken
     } else if (!response.bundleFound) {
-      bundler.makeBundle(req.url, function (err, bundle) {
+      bundler.makeBundle(url, function (err, result) {
         if (err) {
           // Do something in case the bundler fails
         } else {
+          var bundle = result.text;
           console.log('New bundle created');
           res.write(bundle);
           res.end();
-          cacheNewBundle(cache, req.url, response.bundleID, bundle);
+          cacheNewBundle(cache, url, response.bundleID, bundle);
         } 
       });
     } else {
@@ -54,7 +49,6 @@ function requestHandler(req, res) {
     }
   });
 }
-
 
 http.createServer(requestHandler).listen(3090, '127.0.0.1');
 
