@@ -53,18 +53,5 @@ function requestHandler(req, res) {
 }
 
 
-http.createServer(function (req, res) {
-  // The following two calls demonstrate that, regardless of how we initialize our
-  // cache object, the simple interface it provides can be used uniformly.
-  cache.read('www.google.com', function (err, data) {
-    console.log('Received data from local cache.');
-    console.log(data);
-  });
-  cache.write({
-    url: 'www.google.com',
-    bundle: 'ABCDEFG'
-  }, function (err, result) {
-    console.log('After writing, local cache says ' + result);
-  });
-}).listen(3090, '127.0.0.1');
+http.createServer(requestHandler).listen(3090, '127.0.0.1');
 
