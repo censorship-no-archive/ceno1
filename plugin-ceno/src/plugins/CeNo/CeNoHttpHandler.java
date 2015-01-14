@@ -11,6 +11,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
+import plugins.CeNo.BridgeInterface.Bundle;
+import plugins.CeNo.BridgeInterface.BundleRequest;
 import freenet.client.FetchException;
 import freenet.client.FetchException.FetchExceptionMode;
 import freenet.client.FetchResult;
@@ -44,7 +46,7 @@ public class CeNoHttpHandler extends AbstractHandler
         throws IOException, ServletException
     {
     	String requestPath = request.getPathInfo().substring(1);
-    	if (requestPath.startsWith("USK@")){
+    	if (requestPath.startsWith("USK@") || requestPath.startsWith("SSK@")){
 			FetchResult result = null;
 			try {
 				result = HighLevelSimpleClientInterface.fetchURI(new FreenetURI(requestPath));
@@ -63,7 +65,8 @@ public class CeNoHttpHandler extends AbstractHandler
 			if (result != null) {
 				// When fetching is complete, write it to the response OutputStream
 				response.setContentType(result.getMimeType());
-		        response.setStatus(HttpServletResponse.SC_OK);
+				response.setStatus(HttpServletResponse.SC_OK);
+				baseRequest.setHandled(true);
 				OutputStream resOutStream = response.getOutputStream();
 
 				Bucket resultBucket = result.asBucket();
@@ -78,10 +81,17 @@ public class CeNoHttpHandler extends AbstractHandler
 				resultBucket.free();
 			}
     	} else {
+    		//TODO Translate requestPath to USK
+    		// request computed USK
+    		//   if found, write the freesite to response's output stream
+    		//   if not (e.isDNF()), request a bundle from node.js for the given URI
+    		// return the bundle content as a result
+    		// insert the bundle content in freenet with the computed USK
+    		Bundle bundle = BundleRequest.requestURI(requestPath);
     		response.setContentType("text/html;charset=utf-8");
     		response.setStatus(HttpServletResponse.SC_OK);
     		baseRequest.setHandled(true);
-    		response.getWriter().println("Requested: " + request.getPathInfo().substring(1));
+    		response.getWriter().println(bundle.getContent());
     	}
     }
 }
