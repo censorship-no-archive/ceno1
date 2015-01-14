@@ -1,7 +1,6 @@
 package plugins.CeNo;
 
 import freenet.pluginmanager.*;
-
 import freenet.support.Logger;
 
 import org.eclipse.jetty.server.Server;
@@ -18,7 +17,7 @@ public class CeNo implements FredPlugin {
     //Need to be read from config
     private final static Integer ceNoPluginHttpPort = 3091;
 
-    private Server ceNoHttpServer = new Server(ceNoPluginHttpPort);
+    private Server ceNoHttpServer;
 
     public static final String pluginUri = "/plugins/plugins.CeNo.CeNo";
 	public static final String pluginName = "CeNo";
@@ -50,24 +49,30 @@ public class CeNo implements FredPlugin {
     {
         pluginRespirator = pr;
 
-        Server server = new Server(3091);
+        ceNoHttpServer = new Server(ceNoPluginHttpPort);
         
         CeNoHttpHandler handler = new CeNoHttpHandler();
-        server.setHandler(handler);
+        ceNoHttpServer.setHandler(handler);
         
         try {
-            server.start();
-            server.join();
+        	ceNoHttpServer.start();
+        	ceNoHttpServer.join();
         } catch (Exception e) {
             e.printStackTrace();
         
         }
-        
     }
 
     public void terminate()
     {
-		goon = false;
+    	if (ceNoHttpServer != null) {
+			try {
+				ceNoHttpServer.stop();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+    	}
         Logger.normal(this, pluginName + " terminated.");
     }
 
