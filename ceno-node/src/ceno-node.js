@@ -31,11 +31,10 @@ function requestHandler(req, res) {
     if (err) {
       // Do something special if reading from the cache is broken
     } else if (!response.bundleFound) {
-      bundler.makeBundle(url, function (err, result) {
+      bundler.makeBundle(url, function (err, bundle) {
         if (err) {
           // Do something in case the bundler fails
         } else {
-          var bundle = result.text;
           console.log('New bundle created');
           res.write(bundle);
           res.end();
