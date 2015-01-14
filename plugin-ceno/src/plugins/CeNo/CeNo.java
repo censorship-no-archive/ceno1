@@ -51,6 +51,10 @@ public class CeNo implements FredPlugin {
         pluginRespirator = pr;
 
         Server server = new Server(3091);
+        
+        CeNoHttpHandler handler = new CeNoHttpHandler();
+        server.setHandler(handler);
+        
         try {
             server.start();
             server.join();
@@ -58,15 +62,6 @@ public class CeNo implements FredPlugin {
             e.printStackTrace();
         
         }
-
-		while(goon) {
-			System.err.println("Heartbeat from CeNo-plugin: " + (new Date()));
-			try {
-				Thread.sleep(5000);
-			} catch (InterruptedException e) {
-				// Who cares ?
-			}
-		}
         
     }
 
