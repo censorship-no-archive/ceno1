@@ -3,7 +3,6 @@ package plugins.CeNo;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -17,7 +16,6 @@ import freenet.client.FetchException;
 import freenet.client.FetchException.FetchExceptionMode;
 import freenet.client.FetchResult;
 import freenet.keys.FreenetURI;
-import freenet.node.BaseRequestThrottle;
 import freenet.support.api.Bucket;
 import freenet.support.io.BucketTools;
 
@@ -35,6 +33,13 @@ import freenet.support.io.BucketTools;
  */
 public class CeNoHttpHandler extends AbstractHandler
 {
+	private void writeWelcome(Request baseRequest, HttpServletResponse response, String requestPath) throws IOException {
+		response.setContentType("text/html;charset=utf-8");
+		response.setStatus(HttpServletResponse.SC_OK);
+		response.getWriter().println("Welcome to CeNo.");
+		baseRequest.setHandled(true);
+	}
+	
 	private void writeError(Request baseRequest, HttpServletResponse response, String requestPath) throws IOException {
 		response.setContentType("text/html;charset=utf-8");
 		response.setStatus(HttpServletResponse.SC_OK);
@@ -43,14 +48,33 @@ public class CeNoHttpHandler extends AbstractHandler
 	}
 	
 	private FreenetURI computeSSKfromPath(String requestPath) throws MalformedURLException {
-		return new FreenetURI("USK@XJZAi25dd5y7lrxE3cHMmM-xZ-c-hlPpKLYeLC0YG5I,8XTbR1bd9RBXlX6j-OZNednsJ8Cl6EAeBBebC3jtMFU,AQACAAE/" + requestPath + "/-1/");
+		requestPath = requestPath.replaceFirst("http://|https://", "");
+		
+		String domain, extraPath;
+		int slashIndex = requestPath.indexOf('/');
+		if (slashIndex < 1 || slashIndex == requestPath.length()) {
+			domain = requestPath;
+			extraPath = "";
+		} else {
+			domain = requestPath.substring(0, slashIndex);
+			extraPath = requestPath.substring(slashIndex + 1, requestPath.length());
+		}
+		
+		return new FreenetURI("USK@XJZAi25dd5y7lrxE3cHMmM-xZ-c-hlPpKLYeLC0YG5I,8XTbR1bd9RBXlX6j-OZNednsJ8Cl6EAeBBebC3jtMFU,AQACAAE/" + domain + "/-1/" + extraPath);
+		
 	}
 	
 	private void pathDNF(Request baseRequest, HttpServletRequest request, HttpServletResponse response, String requestPath) throws IOException {
 		// Request a bundle from node.js for the given URI
 		// return the bundle content as a result
 		FreenetURI requestKey = new FreenetURI(requestPath);
-		Bundle bundle = BundleRequest.requestURI(requestKey.getDocName());
+		StringBuilder allMetaStrings = new StringBuilder();
+		for (String metaString : requestKey.getAllMetaStrings()) {
+			if (!metaString.isEmpty()) {
+				allMetaStrings.append("/" + metaString);
+			}
+		}
+		Bundle bundle = BundleRequest.requestURI(requestKey.getDocName() + allMetaStrings);
 		response.setContentType("text/html;charset=utf-8");
 		response.setStatus(HttpServletResponse.SC_OK);
 		response.getWriter().println(bundle.getContent());
@@ -63,7 +87,10 @@ public class CeNoHttpHandler extends AbstractHandler
         throws IOException, ServletException
     {
     	String requestPath = request.getPathInfo().substring(1);
-    	if (requestPath.startsWith("USK@") || requestPath.startsWith("SSK@")){
+    	if (requestPath.isEmpty() || requestPath.equals("")) {
+    		writeWelcome(baseRequest, response, requestPath);
+    		return;
+    	} else if (requestPath.startsWith("USK@") || requestPath.startsWith("SSK@")) {
 			FetchResult result = null;
 			try {
 				result = HighLevelSimpleClientInterface.fetchURI(new FreenetURI(requestPath));
