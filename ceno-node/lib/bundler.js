@@ -22,7 +22,7 @@ function replaceResources(url, html, callback) {
   for (var i = 0, len = selectors.length; i < len; ++i) {
     functions.push(function (selector) {
       return function (callback) {
-        console.log(selector);
+        console.log('Looking for items with selector ' + selector);
         bundleable[selector]($, selector, url, callback);
       };
     }(selectors[i]));
@@ -31,6 +31,7 @@ function replaceResources(url, html, callback) {
     if (err) {
       callback(err, null);
     } else {
+      console.log('Finished calling series of handlers');
       callback(null, cheerios[cheerios.length - 1].html());
     }
   });
@@ -67,7 +68,14 @@ function replaceAll($, selector, url, attr, callback) {
     elements.push($_this);
   });
   async.reduce(elements, elements[0], function (memo, item, next) {
-    fetchAndReplace(attr, memo, url, next);
+    console.log('Reducing ' + elements.length + ' elements');
+    if (typeof memo.attr(attr) === 'undefined') {
+      console.log('Skipping element');
+      next(null, item);
+    } else {
+      console.log('Processing new element');
+      fetchAndReplace(attr, memo, url, next);
+    }
   }, callback);
 }
 
