@@ -43,6 +43,9 @@ function dataURI(url, content) {
 
 function fetchAndReplace(attr, elem, url, callback) {
   var resource = elem.attr(attr);
+  if (typeof resource === 'undefined' || !resource) {
+    return;
+  }
   url = urllib.resolve(url, resource);
   request.get(url).end(function (err, result) {
     if (!err) {
@@ -63,7 +66,7 @@ function replaceAll($, selector, url, attr, callback) {
     var $_this = $(this);
     elements.push($_this);
   });
-  async.reduce(elements, $, function (memo, item, next) {
+  async.reduce(elements, elements[0], function (memo, item, next) {
     fetchAndReplace(attr, memo, url, next);
   }, callback);
 }
