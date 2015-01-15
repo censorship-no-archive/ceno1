@@ -2,6 +2,7 @@
  * bundle a web page and its resources into data-URIs.
  */
 
+var mime = require('mime');
 var async = require('async');
 var request = require('superagent');
 var cheerio = require('cheerio');
@@ -18,14 +19,16 @@ function replaceResources(url, html, callback) {
   var $ = cheerio.load(html);
   var selectors = Object.keys(bundleable);
   async.reduce(selectors, $, function ($, selector) {
+    console.log('Replacing resources for ' + selector);
     bundleable[selector]($, selector, url);
   }, function (err, $) {
+    console.log('Finished applying replacement handlers');
     callback(err, $.html());
   });
 }
 
 function dataURI(url, content) {
-  var encoded = (new Buffer(content)).toString('base64');
+  var encoded = content.toString('base64');
   return 'data:' + mime.lookup(url) + ';base64,' + encoded;
 }
 
@@ -33,26 +36,31 @@ function fetchAndReplace(attr, elem, url, resource) {
   url = urllib.resolve(url, resource);
   request.get(url).end(function (err, result) {
     if (!err) {
-      elem.attr(attr, dataURI(url, result.text));
+      var newuri = dataURI(url, result.body);
+      console.log('Computed data uri ' + newuri);
+      elem.attr(attr, newuri);
     }
   });
 }
 
 function replaceImages($, selector, url) {
   $(selector).each(function (index, elem) {
-    fetchAndReplace('src', elem, url, elem.attr('src'));
+    var $_this = $(this);
+    fetchAndReplace('src', $_this, url, $_this.attr('src'));
   });
 }
 
 function replaceCSSFiles($, selector, url) {
   $(selector).each(function (index, elem) {
-    fetchAndReplace('href', elem, url, elem.attr('href'));
+    var $_this = $(this);
+    fetchAndReplace('href', $_this, url, $_this.attr('href'));
   });
 }
 
 function replaceJSFiles($, selector, url) {
   $(selector).each(function (index, elem) {
-    fetchAndReplace('src', elem, url, elem.attr('src'));
+    var $_this = $(this);
+    fetchAndReplace('src', $_this, url, $_this.attr('src'));
   });
 }
 
@@ -62,8 +70,7 @@ module.exports = {
       if (err) {
         callback(err, null);
       } else {
-        var content = replaceResources(url, result.text);
-        callback(null, content);
+        replaceResources(url, result.text, callback);
       }
     });
   }
