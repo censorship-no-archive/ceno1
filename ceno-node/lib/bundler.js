@@ -18,12 +18,21 @@ var bundleable = {
 function replaceResources(url, html, callback) {
   var $ = cheerio.load(html);
   var selectors = Object.keys(bundleable);
-  async.reduce(selectors, $, function ($, selector) {
-    console.log('Replacing resources for ' + selector);
-    bundleable[selector]($, selector, url);
-  }, function (err, $) {
-    console.log('Finished applying replacement handlers');
-    callback(err, $.html());
+  var functions = [];
+  for (var i = 0, len = selectors.length; i < len; ++i) {
+    functions.push(function (selector) {
+      return function (callback) {
+        console.log(selector);
+        bundleable[selector]($, selector, url, callback);
+      };
+    }(selectors[i]));
+  }
+  async.series(functions, function (err, cheerios) {
+    if (err) {
+      callback(err, null);
+    } else {
+      callback(null, cheerios[cheerios.length - 1].html());
+    }
   });
 }
 
@@ -32,36 +41,43 @@ function dataURI(url, content) {
   return 'data:' + mime.lookup(url) + ';base64,' + encoded;
 }
 
-function fetchAndReplace(attr, elem, url, resource) {
+function fetchAndReplace(attr, elem, url, callback) {
+  var resource = elem.attr(attr);
   url = urllib.resolve(url, resource);
   request.get(url).end(function (err, result) {
     if (!err) {
       var newuri = dataURI(url, result.body);
       console.log('Computed data uri ' + newuri);
       elem.attr(attr, newuri);
+      console.log('Replaced URL');
+      callback(null, elem);
+    } else {
+      callback(err, null);
     }
   });
 }
 
-function replaceImages($, selector, url) {
+function replaceAll($, selector, url, attr, callback) {
+  var elements = [];
   $(selector).each(function (index, elem) {
     var $_this = $(this);
-    fetchAndReplace('src', $_this, url, $_this.attr('src'));
+    elements.push($_this);
   });
+  async.reduce(elements, $, function (memo, item, next) {
+    fetchAndReplace(attr, memo, url, next);
+  }, callback);
 }
 
-function replaceCSSFiles($, selector, url) {
-  $(selector).each(function (index, elem) {
-    var $_this = $(this);
-    fetchAndReplace('href', $_this, url, $_this.attr('href'));
-  });
+function replaceImages($, selector, url, callback) {
+  replaceAll($, selector, url, 'src', callback);
 }
 
-function replaceJSFiles($, selector, url) {
-  $(selector).each(function (index, elem) {
-    var $_this = $(this);
-    fetchAndReplace('src', $_this, url, $_this.attr('src'));
-  });
+function replaceCSSFiles($, selector, url, callback) {
+  replaceAll($, selector, url, 'href', callback);
+}
+
+function replaceJSFiles($, selector, url, callback) {
+  replaceAll($, selector, url, 'src', callback);
 }
 
 module.exports = {
