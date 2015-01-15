@@ -38,8 +38,25 @@ public class CeNoHttpHandler extends AbstractHandler
 	private void writeError(Request baseRequest, HttpServletResponse response, String requestPath) throws IOException {
 		response.setContentType("text/html;charset=utf-8");
 		response.setStatus(HttpServletResponse.SC_OK);
-		baseRequest.setHandled(true);
 		response.getWriter().println("Error while fetching: " + requestPath);
+		baseRequest.setHandled(true);
+	}
+	
+	private FreenetURI computeSSKfromPath(String requestPath) throws MalformedURLException {
+		return new FreenetURI("USK@XJZAi25dd5y7lrxE3cHMmM-xZ-c-hlPpKLYeLC0YG5I,8XTbR1bd9RBXlX6j-OZNednsJ8Cl6EAeBBebC3jtMFU,AQACAAE/" + requestPath + "/-1/");
+	}
+	
+	private void pathDNF(Request baseRequest, HttpServletRequest request, HttpServletResponse response, String requestPath) throws IOException {
+		// Request a bundle from node.js for the given URI
+		// return the bundle content as a result
+		FreenetURI requestKey = new FreenetURI(requestPath);
+		Bundle bundle = BundleRequest.requestURI(requestKey.getDocName());
+		response.setContentType("text/html;charset=utf-8");
+		response.setStatus(HttpServletResponse.SC_OK);
+		response.getWriter().println(bundle.getContent());
+		baseRequest.setHandled(true);
+		
+		//TODO non-blocking insert the bundle content in freenet with the computed USK
 	}
 	
     public void handle(String target,Request baseRequest,HttpServletRequest request,HttpServletResponse response) 
@@ -52,21 +69,25 @@ public class CeNoHttpHandler extends AbstractHandler
 				result = HighLevelSimpleClientInterface.fetchURI(new FreenetURI(requestPath));
 			} catch (MalformedURLException e) {
 				writeError(baseRequest, response, requestPath);
+				return;
 			} catch (FetchException e) {
 				// USK key has been updated, redirect to the new URI
 				if (e.getMode() == FetchExceptionMode.PERMANENT_REDIRECT) {
 					String newURI = "/".concat(e.newURI.toString());
 					response.sendRedirect(newURI);
-				} else {
+				} else if (e.isDNF()) {
+					pathDNF(baseRequest, request, response, requestPath);
+					return;
+				} else{
 					e.printStackTrace();
 					writeError(baseRequest, response, requestPath);
+					return;
 				}
 			}
 			if (result != null) {
 				// When fetching is complete, write it to the response OutputStream
 				response.setContentType(result.getMimeType());
 				response.setStatus(HttpServletResponse.SC_OK);
-				baseRequest.setHandled(true);
 				OutputStream resOutStream = response.getOutputStream();
 
 				Bucket resultBucket = result.asBucket();
@@ -79,19 +100,23 @@ public class CeNoHttpHandler extends AbstractHandler
 					e.printStackTrace();
 				}
 				resultBucket.free();
+				baseRequest.setHandled(true);
+			} else {
+				writeError(baseRequest, response, requestPath);
 			}
     	} else {
-    		//TODO Translate requestPath to USK
-    		// request computed USK
-    		//   if found, write the freesite to response's output stream
-    		//   if not (e.isDNF()), request a bundle from node.js for the given URI
-    		// return the bundle content as a result
-    		// insert the bundle content in freenet with the computed USK
-    		Bundle bundle = BundleRequest.requestURI(requestPath);
-    		response.setContentType("text/html;charset=utf-8");
-    		response.setStatus(HttpServletResponse.SC_OK);
+    		// Translate requestPath to USK
+    		// Redirect request to the calculated USK
+    		FreenetURI calculatedUSK = null;
+    		try {
+    			calculatedUSK = computeSSKfromPath(requestPath);
+    		} catch (Exception e) {
+    			writeError(baseRequest, response, requestPath);
+    			return;
+    		}
+    		
+    		response.sendRedirect("/" + calculatedUSK.toString());
     		baseRequest.setHandled(true);
-    		response.getWriter().println(bundle.getContent());
     	}
     }
 }

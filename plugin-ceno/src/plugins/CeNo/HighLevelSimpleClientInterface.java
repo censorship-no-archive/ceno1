@@ -3,6 +3,11 @@ package plugins.CeNo;
 import freenet.client.FetchException;
 import freenet.client.FetchResult;
 import freenet.client.HighLevelSimpleClient;
+import freenet.client.InsertBlock;
+import freenet.client.InsertContext;
+import freenet.client.InsertException;
+import freenet.client.async.ClientPutCallback;
+import freenet.client.async.ClientPutter;
 import freenet.keys.FreenetURI;
 import freenet.node.Node;
 import freenet.node.NodeClientCore;
@@ -47,6 +52,31 @@ public class HighLevelSimpleClientInterface {
 	public static FetchResult fetchURI(FreenetURI uri) throws FetchException {
 		FetchResult result = HLSCInterface.client.fetch(uri);
 		return result;
+	}
+	
+	/**
+	 * Generates a new key pair, consisting of the insert URI at index 0 and the
+	 * request URI at index 1.
+	 *
+	 * @param docName
+	 *            The document name
+	 * @return An array containing the insert and request URI
+	 */
+	public static FreenetURI[] generateKeyPair(String docName) {
+		FreenetURI[] keyPair = HLSCInterface.generateKeyPair(docName);
+		return keyPair;
+	}
+	
+	/**
+	 * Non-blocking insert.
+	 * @param isMetadata If true, insert metadata.
+	 * @param cb Will be called when the insert completes. If the request is persistent
+	 * this will be called on the database thread with a container parameter.
+	 * @param ctx Insert context so you can customise the insertion process.
+	 */
+	public static ClientPutter insert(InsertBlock insert, String filenameHint, boolean isMetadata, InsertContext ctx, ClientPutCallback cb) throws InsertException {
+		ClientPutter clientPutter = HLSCInterface.insert(insert, filenameHint, isMetadata, ctx, cb);
+		return clientPutter;
 	}
 
 }
