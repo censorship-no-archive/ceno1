@@ -2,6 +2,7 @@
  * bundle a web page and its resources into data-URIs.
  */
 
+var _ = require('lodash');
 var mime = require('mime');
 var async = require('async');
 var request = require('superagent');
@@ -30,15 +31,16 @@ function replaceResources(url, html, callback) {
       };
     }(selectors[i]));
   }
-  async.series(functions, function (err, cheerios) {
+  async.series(functions, function (err, diffs) {
     if (err) {
       callback(err, null);
     } else {
       console.log('Finished calling series of handlers');
-      // The call to series will produce an array of Cheerio objects.
-      // We probably need a way to merge the changes but, for now,
-      // we'll just produce the last one.
-      callback(null, cheerios[cheerios.length - 1].html());
+      // The call to `async.series` will produce an array of objects mapping
+      // resource URLs to their data URIs, so we merge them together here.
+      var allDiffs = _.reduce(diffs, _.extend);
+      html = applyDiffs(html, allDiffs);
+      callback(null, html);
     }
   });
 }
@@ -48,46 +50,68 @@ function dataURI(url, content) {
   return 'data:' + mime.lookup(url) + ';base64,' + encoded;
 }
 
-function fetchAndReplace(attr, elem, url, callback) {
+function strReplaceAll(string, str1, str2) {
+  var index = string.indexOf(str1);
+  while (index >= 0) {
+    string = string.replace(str1, str2);
+    index = string.indexOf(str1, index);
+  }
+  return string;
+}
+
+function applyDiffs(string, diffs) {
+  var keys = Object.keys(diffs);
+  for (var i = 0, len = keys.length; i < len; ++i) {
+    string = strReplaceAll(string, keys[i], diffs[keys[i]]);
+  }
+  return string;
+}
+
+function fetchAndReplace(attr, elem, diff, url, callback) {
+  console.log(elem);
   var resource = elem.attr(attr);
   // For some reason top-level pages might make it here
   // and we want to break the function before trying to fetch them.
   if (typeof resource === 'undefined' || !resource) {
     return;
   }
-  url = urllib.resolve(url, resource);
-  request.get(url).end(function (err, result) {
+  var resurl = urllib.resolve(url, resource);
+  request.get(resurl).end(function (err, result) {
     if (!err) {
-      var newuri = dataURI(url, result.body);
+      var newuri = dataURI(resurl, result.body);
       console.log('Computed data uri ' + newuri);
-      elem.attr(attr, newuri);
-      console.log('Replaced URL');
-      callback(null, elem);
+      // If we made an object literal like {resource: newuri}, we would
+      // Just keep overwriting the 'resource' field instead of creating
+      // new (key, value) pairs for resource locators and data URIs.
+      var newDiff = {};
+      newDiff[resource] = newuri;
+      callback(null, _.extend(diff, newDiff));
     } else {
       // Here, the callback is actually the function that continues
       // iterating in async.reduce, so it is imperitive that we call it.
-      callback(err, null);
+      callback(err, diff);
     }
   });
 }
 
 function replaceAll($, selector, url, attr, callback) {
   var elements = [];
+  console.log($);
   $(selector).each(function (index, elem) {
     var $_this = $(this);
+    console.log($_this);
     elements.push($_this);
   });
-  async.reduce(elements, elements[0], function (memo, item, next) {
+  async.reduce(elements, {}, function (memo, item, next) {
     console.log('Reducing ' + elements.length + ' elements');
-    if (typeof memo.attr(attr) === 'undefined') {
+    if (typeof item.attr(attr) === 'undefined') {
       console.log('Skipping element');
       // In the case that we get something like a <script> tag with no
       // source or href to fetch, just skip it.
-      // This might not be quite right, but we'll come back to it.
-      next(null, item);
+      next(null, memo);
     } else {
       console.log('Processing new element');
-      fetchAndReplace(attr, memo, url, next);
+      fetchAndReplace(attr, item, memo, url, next);
     }
   }, callback);
 }
@@ -112,7 +136,7 @@ module.exports = {
   makeBundle: function (url, callback) {
     request.get(url).end(function (err, result) {
       if (err) {
-        callback(err, null);
+        callback(err, result);
       } else {
         replaceResources(url, result.text, callback);
       }
