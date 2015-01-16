@@ -20,6 +20,9 @@ function replaceResources(url, html, callback) {
   var selectors = Object.keys(bundleable);
   var functions = [];
   for (var i = 0, len = selectors.length; i < len; ++i) {
+    // A closure over `selector` is created here so that the function
+    // created for async.series has a reference to the selector at the
+    // appropriate part of the loop, not just the last one.
     functions.push(function (selector) {
       return function (callback) {
         console.log('Looking for items with selector ' + selector);
@@ -32,6 +35,9 @@ function replaceResources(url, html, callback) {
       callback(err, null);
     } else {
       console.log('Finished calling series of handlers');
+      // The call to series will produce an array of Cheerio objects.
+      // We probably need a way to merge the changes but, for now,
+      // we'll just produce the last one.
       callback(null, cheerios[cheerios.length - 1].html());
     }
   });
@@ -44,6 +50,8 @@ function dataURI(url, content) {
 
 function fetchAndReplace(attr, elem, url, callback) {
   var resource = elem.attr(attr);
+  // For some reason top-level pages might make it here
+  // and we want to break the function before trying to fetch them.
   if (typeof resource === 'undefined' || !resource) {
     return;
   }
@@ -56,6 +64,8 @@ function fetchAndReplace(attr, elem, url, callback) {
       console.log('Replaced URL');
       callback(null, elem);
     } else {
+      // Here, the callback is actually the function that continues
+      // iterating in async.reduce, so it is imperitive that we call it.
       callback(err, null);
     }
   });
@@ -71,6 +81,9 @@ function replaceAll($, selector, url, attr, callback) {
     console.log('Reducing ' + elements.length + ' elements');
     if (typeof memo.attr(attr) === 'undefined') {
       console.log('Skipping element');
+      // In the case that we get something like a <script> tag with no
+      // source or href to fetch, just skip it.
+      // This might not be quite right, but we'll come back to it.
       next(null, item);
     } else {
       console.log('Processing new element');
@@ -78,6 +91,10 @@ function replaceAll($, selector, url, attr, callback) {
     }
   }, callback);
 }
+
+/***********************
+ ** Handler Functions **
+ ***********************/
 
 function replaceImages($, selector, url, callback) {
   replaceAll($, selector, url, 'src', callback);
