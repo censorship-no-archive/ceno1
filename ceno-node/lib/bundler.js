@@ -6,6 +6,7 @@ var _ = require('lodash');
 var mime = require('mime');
 var async = require('async');
 var request = require('superagent');
+var request2 = require('request');
 var cheerio = require('cheerio');
 var urllib = require('url');
 
@@ -45,9 +46,23 @@ function replaceResources(url, html, callback) {
   });
 }
 
+var mimetype = function(url) {
+  var i = url.lastIndexOf('.');
+  var defaultMT = 'text/plain';
+  if (i < 0) {
+    return defaultMT;
+  }
+  var ext = '.' + url.substring(i, url.length);
+  ext = ext.match(/\.\w+/);
+  if (ext) {
+    return mime.lookup(ext[0]);
+  }
+  return defaultMT;
+};
+
 function dataURI(url, content) {
   var encoded = content.toString('base64');
-  return 'data:' + mime.lookup(url) + ';base64,' + encoded;
+  return 'data:' + mimetype(url) + ';base64,' + encoded;
 }
 
 function strReplaceAll(string, str1, str2) {
@@ -68,7 +83,6 @@ function applyDiffs(string, diffs) {
 }
 
 function fetchAndReplace(attr, elem, diff, url, callback) {
-  console.log(elem);
   var resource = elem.attr(attr);
   // For some reason top-level pages might make it here
   // and we want to break the function before trying to fetch them.
@@ -76,10 +90,18 @@ function fetchAndReplace(attr, elem, diff, url, callback) {
     return;
   }
   var resurl = urllib.resolve(url, resource);
+  //request2(resurl, function (err, response, body) {
   request.get(resurl).end(function (err, result) {
     if (!err) {
+      var source;
+      console.log(resurl);
+      if (typeof result.text !== 'undefined' || !Buffer.isBuffer(result.body)) {
+        source = new Buffer(result.text);
+      } else {
+        source = result.body;
+      }
       var newuri = dataURI(resurl, result.body);
-      console.log('Computed data uri ' + newuri);
+      //var newuri = dataURI(resurl, new Buffer(body));
       // If we made an object literal like {resource: newuri}, we would
       // Just keep overwriting the 'resource' field instead of creating
       // new (key, value) pairs for resource locators and data URIs.
@@ -96,21 +118,17 @@ function fetchAndReplace(attr, elem, diff, url, callback) {
 
 function replaceAll($, selector, url, attr, callback) {
   var elements = [];
-  console.log($);
   $(selector).each(function (index, elem) {
     var $_this = $(this);
-    console.log($_this);
     elements.push($_this);
   });
   async.reduce(elements, {}, function (memo, item, next) {
-    console.log('Reducing ' + elements.length + ' elements');
     if (typeof item.attr(attr) === 'undefined') {
       console.log('Skipping element');
       // In the case that we get something like a <script> tag with no
       // source or href to fetch, just skip it.
       next(null, memo);
     } else {
-      console.log('Processing new element');
       fetchAndReplace(attr, item, memo, url, next);
     }
   }, callback);
