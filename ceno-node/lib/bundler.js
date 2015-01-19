@@ -32,7 +32,7 @@ function replaceResources(url, html, callback) {
       };
     }(selectors[i]));
   }
-  async.series(functions, function (err, diffs) {
+  async.parallel(functions, function (err, diffs) {
     if (err) {
       callback(err, null);
     } else {
@@ -82,6 +82,13 @@ function applyDiffs(string, diffs) {
   return string;
 }
 
+function writeDiff(resource, resurl, source, diff, callback) {
+  var newuri = dataURI(resurl, source);
+  var newDiff = {};
+  newDiff[resource] = newuri;
+  callback(null, _.extend(diff, newDiff));
+}
+
 function fetchAndReplace(attr, elem, diff, url, callback) {
   var resource = elem.attr(attr);
   // For some reason top-level pages might make it here
@@ -95,22 +102,26 @@ function fetchAndReplace(attr, elem, diff, url, callback) {
     if (!err) {
       var source;
       console.log(resurl);
-      if (typeof result.text !== 'undefined' || !Buffer.isBuffer(result.body)) {
-        source = new Buffer(result.text);
-      } else {
+      if (Buffer.isBuffer(result.body)) {
         source = result.body;
+        writeDiff(resource, resurl, source, diff, callback);
+      } else if (typeof result.text !== 'undefined') {
+        source = new Buffer(result.text);
+        writeDiff(resource, resurl, source, diff, callback);
+      } else {
+        // Retry the request in the weird cases where superagent fails.
+        request2(resurl, function (err, response, body) {
+          if (err) {
+            // Here, the callback is actually the function that continues
+            // iterating in async.reduce, so it is imperitive that we call it.
+            callback(err, diff);
+          } else {
+            source = new Buffer(body);
+            writeDiff(resource, resurl, source, diff, callback);
+          }
+        });
       }
-      var newuri = dataURI(resurl, result.body);
-      //var newuri = dataURI(resurl, new Buffer(body));
-      // If we made an object literal like {resource: newuri}, we would
-      // Just keep overwriting the 'resource' field instead of creating
-      // new (key, value) pairs for resource locators and data URIs.
-      var newDiff = {};
-      newDiff[resource] = newuri;
-      callback(null, _.extend(diff, newDiff));
     } else {
-      // Here, the callback is actually the function that continues
-      // iterating in async.reduce, so it is imperitive that we call it.
       callback(err, diff);
     }
   });
