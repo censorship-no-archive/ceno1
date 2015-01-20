@@ -3,28 +3,20 @@ var path = require('path');
 var http = require('http');
 var urllib = require('url');
 var querystring = require('querystring');
+var diskdb = require('diskdb');
 
 var cache = require('../lib/cache').local();
 var bundler = require('../lib/bundler');
 
 var views = 'views';
 var errorPage = path.join(views, '404.html');
+var waitPage = path.join(views, 'wait.html');
 
 var portNumber = 3090;
 var address = '127.0.0.1';
 
-/* When a new bundle is created for a page that hasn't been cached already,
- * we want to cache it in whatever media we are using.
- */
-function cacheNewBundle(cacheObj, url, bundleID, bundle) {
-  cacheObj.write({
-    url: url,
-    id: bundleID,
-    bundle: bundle
-  }, function (err) {
-    console.log('Error information from write: ' + err);
-  });
-}
+var dbDir = 'db';
+var db = diskdb.connect(dbDir, ['processes']);
 
 /* Parse the contents of a POST request.
  */
@@ -39,6 +31,20 @@ function parsePostBody(req, limit, callback) {
   });
   req.on('end', function () {
     callback(false, querystring.parse(body));
+  });
+}
+
+/* Serve a page asking User to wait for their bundle to be retrieved.
+ */
+function servePleaseWait(req, res) {
+  fs.readFile(waitPage, function (err, content) {
+    if (err) {
+      serveError(req, res);
+    } else {
+      res.writeHead(200, {'Content-Type': 'text/html'});
+      res.write(content);
+      res.end();
+    }
   });
 }
 
@@ -60,40 +66,45 @@ function serveError(req, res) {
   });
 }
 
-/* Query the Cache Server for a bundled page.
- */
-function requestBundle(url, res) {
-  console.log('Got request for ' + url);
-  cache.read(url, function (err, response) {
-    if (err) {
-      // Do something special if reading from the cache is broken
-    } else if (!response.bundleFound) {
-      makeNewBundle(cache, url);
-    } else {
-      console.log('Existing bundle found');
-      res.write(response.bundle);
-      res.end();
-    }
-  });
-}
-
 /* Request that the Transport begin making a new bundle.
  */
-function makeNewBundle(cache, url) {
+function makeNewBundle(url) {
   // Writing to Cache server is really sending a request to Transport
   // to make a new bundle, so we need only provide the URL to bundle.
   cache.write(url, function (err, processID) {
-    // Store the process ID for later.
+    if (err) {
+      console.log('Could not request new bundle be made by Bundler.');
+      console.log(err);
+    } else {
+      db.processes.save({
+        url: url,
+        pid: processID
+      });
+    }
   });
 }
 
 /* Handle requests from the user to have a bundled page fetched.
  */
 function handleBundleRequest(req, res) {
-  // Check to see if a process ID for the requested page has already been served
-  // If one hasn't, make a request to Transport
-  // Then send "please wait" to User
   var url = querystring.parse(urllib.parse(req.url).query).url;
+  var process = db.processes.findOne({url: url});
+  if (!process || !process.hasOwnProperty('pid')) {
+    // There is a no process running by Bundler to create a new bundle.
+    cache.read(url, function (err, response) {
+      if (!response.bundleFound) {
+        // Cache server does not have the requested bundle.
+        makeNewBundle(url);
+        servePleaseWait(req, res);
+      } else {
+        res.write(response.bundle);
+        res.end();
+      }
+    });
+  } else {
+    // There is already a process running to create a new bundle.
+    servePleaseWait(req, res);
+  }
 }
 
 /* Handle requests from the Transport server informing us that
@@ -104,7 +115,7 @@ function handleProcessCompletion(req, res) {
     console.log('handleProcess got data');
     console.log(data);
     var processID = data['pid'];
-    // Remove the process ID from the list of processes being waited on.
+    db.processes.remove({pid: processID}, false);
   });
 }
 
