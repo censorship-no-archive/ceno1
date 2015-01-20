@@ -2,10 +2,11 @@
  * want to use to cache and retrieve bundles.
  */
 
-//var request = require('superagent');
+var request = require('superagent');
 var _ = require('lodash');
 var path = require('path');
 var fs = require('fs');
+var urllib = require('url');
 
 // To keep things simple (albeit inefficient), we will store locally cached bundles
 // in a JSON file. TODO make this more efficient
@@ -51,13 +52,10 @@ _.extend(Cache.prototype, {
 
 function localRetriever() {
   return function (url, callback) {
-    console.log('Reading bundle for URL ' + url);
     fs.readFile(cacheFile, function (err, content) {
       if (err) {
-        console.log('Failed to read cache file.');
         callback(err, null);
       } else {
-        console.log('Successfully read cache file.');
         var bundle = JSON.parse(content)[url];
         if (typeof bundle === 'undefined' || !bundle) {
           // We don't need the ID for anything in the local case, so default to 0.
@@ -72,21 +70,16 @@ function localRetriever() {
 
 function localStorer() {
   return function (data, callback) {
-    console.log('Writing bundle for ' + data.url); 
     fs.readFile(cacheFile, function (err, content) {
       if (err) {
-        console.log('Failed to read cache file.');
         callback(err);
       } else {
-        console.log('Read cache file.');
         var cacheData = JSON.parse(content);
         cacheData[data.url] = data.bundle;
         fs.writeFile(cacheFile, JSON.stringify(cacheData), function (err, data) {
           if (err) {
-            console.log('Failed to write new cache data.');
             callback(err);
           } else {
-            console.log('Successfuly wrote new cache data.');
             callback(null);
           }
         });
@@ -95,18 +88,35 @@ function localStorer() {
   };
 }
 
-function httpRetriever(addr) {
+function httpRetriever(cacheAddr) {
   return function (url, callback) {
-    console.log('Requesting URL ' + url + ' from freenet at ' + addr);
-    callback(null, 'Woah');
+    var requrl = urllib.resolve(cacheAddr, '/?url=' + url);
+    request.get(requrl).end(function (err, response) {
+      if (err) {
+        callback(err, {bundleFound: false});
+      } else {
+        callback(null, JSON.parse(response.text));
+      }
+    });
   };
 }
 
-function httpStorer(addr) {
-  return function (data, callback) {
-    console.log('Writing to freenet at ' + addr);
-    console.log(data);
-    callback(null, 'Dude');
+function httpStorer(bundlerAddr) {
+  return function (url, callback) {
+    var requrl = urllib.resolve(bundlerAddr, '/?url=' + url);
+    request.get(requrl).end(function (err, response) {
+      if (err) {
+        callback(err, null);
+      } else {
+        var json = JSON.parse(response.text);
+        if (!json.hasOwnProperty('processID')) {
+          callback(new Error('Transport response contains no processID.'), null);
+        } else {
+          var pid = json['processID'];
+          callback(null, pid);
+        }
+      }
+    });
   };
 }
 
@@ -116,13 +126,12 @@ module.exports = {
     try {
       var fd = fs.openSync(cacheFile, 'wx');
       fs.writeSync(fd, new Buffer('{}'), 0, 2, 0);
-      console.log('Created new cache file.');
     } catch (err) {}
     return new Cache(localRetriever(), localStorer());
   },
 
-  http: function (addr) {
-    return new Cache(httpRetriever(addr), httpStorer(addr));
+  http: function (cacheAddr, bundlerAddr) {
+    return new Cache(httpRetriever(cacheAddr), httpStorer(bundlerAddr));
   }
   // etc.
 };
