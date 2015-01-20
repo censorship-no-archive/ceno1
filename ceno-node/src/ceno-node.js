@@ -1,3 +1,4 @@
+var fs = require('fs');
 var path = require('path');
 var http = require('http');
 var urllib = require('url');
@@ -6,9 +7,11 @@ var querystring = require('querystring');
 var cache = require('../lib/cache').local();
 var bundler = require('../lib/bundler');
 
+var views = 'views';
+var errorPage = path.join(views, '404.html');
+
 var portNumber = 3090;
 var address = '127.0.0.1';
-var processes = {};
 
 /* When a new bundle is created for a page that hasn't been cached already,
  * we want to cache it in whatever media we are using.
@@ -36,6 +39,24 @@ function parsePostBody(req, limit, callback) {
   });
   req.on('end', function () {
     callback(false, querystring.parse(body));
+  });
+}
+
+/* Serve an error page as HTML since it it most likely users who
+ * would try to access an invalid route.
+ */
+function serveError(req, res) {
+  fs.readFile(errorPage, function (err, content) {
+    if (err) {
+      // This is the most desperate case where we cannot even get our 404 page.
+      res.writeHead(404, {'Content-Type': 'application/json'});
+      res.write('{"error": "Route for ' + req.url + ' not found."}');
+      res.end();
+    } else {
+      res.writeHead(404, {'Content-Type': 'text/html'});
+      res.write(content);
+      res.end();
+    }
   });
 }
 
@@ -91,8 +112,11 @@ function handleProcessCompletion(req, res) {
  */
 function requestHandler(req, res) {
   console.log('req.url = ' + req.url);
-  // For now, let's just route requests as before.
-  requestBundle(req, res);
+  switch (req.url) {
+  case '/': handleBundleRequest(req, res);
+  case '/done': handleProcessCompletion(req, res);
+  default: serveError(req, res);
+  }
 }
 
 http.createServer(requestHandler).listen(portNumber, address);
