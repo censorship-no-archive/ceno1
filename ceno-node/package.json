@@ -8,6 +8,7 @@
   "scripts": {
   },
   "dependencies": {
+    "diskdb": "latest",
     "async": "latest",
     "lodash": "~2.0.0",
     "body-parser": "latest",
