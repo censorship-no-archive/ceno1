@@ -110,7 +110,7 @@ function httpStorer(bundlerAddr) {
       } else {
         var json = JSON.parse(response.text);
         if (!json.hasOwnProperty('processID')) {
-          callback(new Error('Transport response contains no processID.'), null);
+          callback(json.error, null);
         } else {
           var pid = json['processID'];
           callback(null, pid);
