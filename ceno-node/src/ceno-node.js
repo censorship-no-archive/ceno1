@@ -5,7 +5,10 @@ var urllib = require('url');
 var querystring = require('querystring');
 var diskdb = require('diskdb');
 
-var cache = require('../lib/cache').local();
+var cacheReaderServer = 'localhost:3091';
+var cacheWriterServer = 'localhost:3092';
+
+var cache = require('../lib/cache').http(cacheReaderServer, cacheWriterServer);
 var bundler = require('../lib/bundler');
 
 var views = 'views';
