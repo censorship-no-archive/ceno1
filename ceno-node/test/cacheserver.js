@@ -15,7 +15,7 @@ var db = disk.connect('db', ['bundles']);
 
 /* Parse the contents of a POST request.
  */
-function parseBody(req, limit, callback) {
+function parsePostBody(req, limit, callback) {
   var body = '';
   req.on('data', function (data) {
     body += data;
@@ -63,6 +63,7 @@ function cacheWriter(req, res) {
         error: null,
         status: 'success'
       }));
+      res.end();
     });
   } else {
     res.writeHead(404, {'Content-Type': 'application/json'});
@@ -70,8 +71,8 @@ function cacheWriter(req, res) {
       error: new Error('Server does not handle non-POST requests.'),
       status: 'failure'
     }));
+    res.end();
   }
-  res.end();
 }
 
 http.createServer(cacheReader).listen(readerPortNumber);
