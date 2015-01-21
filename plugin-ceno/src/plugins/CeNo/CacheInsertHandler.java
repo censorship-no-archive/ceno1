@@ -13,13 +13,13 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
 /* ------------------------------------------------------------ */
 /** CeNo Plugin handler for requests to cache bundles
  * 	
- * CeNoCacheHanlder listens to :{@link CeNo#ceNoPluginCachePort} port
+ * CacheInsertHandler listens to :{@link CeNo#cacheInsertPort} port
  * and under the "/store" route for POST requests.
  * Those POST requests include the bundled page as well as the original url.
  * The handler caches the given bundle under its signed subspace.
  * Upon successful insertion, the handler replies with "stored".
  */
-public class CeNoCacheHanlder extends AbstractHandler {
+public class CacheInsertHandler extends AbstractHandler {
 
 	public void handle(String target,Request baseRequest,HttpServletRequest request,HttpServletResponse response)
 			throws IOException, ServletException

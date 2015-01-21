@@ -12,53 +12,35 @@ import plugins.CeNo.FreenetInterface.NodeInterface;
 
 public class CeNo implements FredPlugin {
 
-    //private final static Logger LOGGER = Logger.getLogger(CeNo.class.getName());
     private PluginRespirator pluginRespirator;
 
     //Need to be read from config
-    private final static Integer ceNoPluginHttpPort = 3091;
-    private final static Integer ceNoPluginCachePort = 3092;
+    public final static Integer cacheLookupPort = 3091;
+    public final static Integer cacheInsertPort = 3092;
 
     private Server ceNoHttpServer;
     
+    // Interface objects with fred
     private HighLevelSimpleClientInterface client;
     public NodeInterface nodeInterface;
 
+    // Plugin-specific configuration
     public static final String pluginUri = "/plugins/plugins.CeNo.CeNo";
 	public static final String pluginName = "CeNo";
 
 
     public void runPlugin(PluginRespirator pr)
-    {
+    {        
+        // Initialize interfaces with fred
         pluginRespirator = pr;
-        client = new HighLevelSimpleClientInterface(pr.getHLSimpleClient());
-        nodeInterface = new NodeInterface(pr.getNode());
+        client = new HighLevelSimpleClientInterface(pluginRespirator.getHLSimpleClient());
+        nodeInterface = new NodeInterface(pluginRespirator.getNode());
 
-        ceNoHttpServer = new Server(ceNoPluginHttpPort);
-        
-        ServerConnector httpConnector = new ServerConnector(ceNoHttpServer);
-        httpConnector.setName("http");
-        httpConnector.setPort(ceNoPluginHttpPort);
-        ServerConnector cacheConnector = new ServerConnector(ceNoHttpServer);
-        cacheConnector.setName("cache");
-        cacheConnector.setPort(ceNoPluginCachePort);
-        
-        ceNoHttpServer.setConnectors(new ServerConnector[]{httpConnector, cacheConnector});
+        // Configure the CeNo's jetty embedded server
+        ceNoHttpServer = new Server();
+        configHttpServer(ceNoHttpServer);
 
-        ContextHandlerCollection handlers = new ContextHandlerCollection();
-        ceNoHttpServer.setHandler(handlers);
-        
-        ContextHandler httpCtxHandler = new ContextHandler();
-        httpCtxHandler.setHandler(new CeNoHttpHandler());
-        httpCtxHandler.setVirtualHosts(new String[]{"@http"});
-        ContextHandler cacheCtxHandler = new ContextHandler();
-        cacheCtxHandler.setHandler(new CeNoCacheHanlder());
-        cacheCtxHandler.setVirtualHosts(new String[]{"@cache"});
-        
-        
-        handlers.addHandler(httpCtxHandler);
-        handlers.addHandler(cacheCtxHandler);
-
+        // Start server and wait until it gets interrupted
         try {
         	ceNoHttpServer.start();
         	ceNoHttpServer.join();
@@ -66,14 +48,53 @@ public class CeNo implements FredPlugin {
             e.printStackTrace();
         }
     }
+    
+    /**
+     * Configure CeNo's embedded server
+     * 
+     * @param ceNoHttpServer the jetty server to be configured
+     */
+    private void configHttpServer(Server ceNoHttpServer) {     
+    	// Add a ServerConnector for each port
+        ServerConnector httpConnector = new ServerConnector(ceNoHttpServer);
+        httpConnector.setName("cacheLookup");
+        httpConnector.setPort(cacheLookupPort);
+        ServerConnector cacheConnector = new ServerConnector(ceNoHttpServer);
+        cacheConnector.setName("cacheInsert");
+        cacheConnector.setPort(cacheInsertPort);
+        
+        // Set server's connectors the ones configured above
+        ceNoHttpServer.setConnectors(new ServerConnector[]{httpConnector, cacheConnector});
 
+        // Create a collection of ContextHandlers for the server
+        ContextHandlerCollection handlers = new ContextHandlerCollection();
+        ceNoHttpServer.setHandler(handlers);
+        
+        // Configure ContextHandlers to listen to a specific port
+        // and upon request call the appropriate AbstractHandler subclass
+        ContextHandler cacheLookupCtxHandler = new ContextHandler();
+        cacheLookupCtxHandler.setHandler(new CacheLookupHandler());
+        cacheLookupCtxHandler.setVirtualHosts(new String[]{"@cacheLookup"});
+        ContextHandler cacheInsertCtxHandler = new ContextHandler();
+        cacheInsertCtxHandler.setHandler(new CacheInsertHandler());
+        cacheInsertCtxHandler.setVirtualHosts(new String[]{"@cacheInsert"});
+        
+        // Add the configured ContextHandlers to the server
+        handlers.addHandler(cacheLookupCtxHandler);
+        handlers.addHandler(cacheInsertCtxHandler);
+    }
+
+    /**
+     * Method called before termination of the CeNo plugin
+     * Terminates ceNoHttpServer and releases resources
+     */
     public void terminate()
     {
+    	// Stop ceNoHttpServer and unbind ports
     	if (ceNoHttpServer != null) {
 			try {
 				ceNoHttpServer.stop();
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
     	}

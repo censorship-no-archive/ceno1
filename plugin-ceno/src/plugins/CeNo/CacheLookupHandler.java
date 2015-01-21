@@ -31,7 +31,7 @@ import freenet.support.io.BucketTools;
  * - The Bridge then will serve the bundle to the plugin
  *   to insert into Freenet
  */
-public class CeNoHttpHandler extends AbstractHandler
+public class CacheLookupHandler extends AbstractHandler
 {
 	private void writeWelcome(Request baseRequest, HttpServletResponse response, String requestPath) throws IOException {
 		response.setContentType("text/html;charset=utf-8");
