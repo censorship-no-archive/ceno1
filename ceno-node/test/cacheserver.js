@@ -51,18 +51,19 @@ function cacheReader(req, res) {
  */
 function cacheWriter(req, res) {
   if (req.method.toUpperCase() === 'POST') {
-    var url = querystring.parse(urllib.parse(req.url).query).url;
     // Let's not prevent the cache server from rewriting a bundle
     // because we may want to do that in the future to update content.
-    res.writeHead(200, {'Content-Type': 'application/json'});
-    db.bundles.save({
-      url: url,
-      bundle: bundleData
+    parsePostBody(req, 2e6, function (body) {
+      res.writeHead(200, {'Content-Type': 'application/json'});
+      db.bundles.save({
+        url: body.url,
+        bundle: body.bundle
+      });
+      res.write(JSON.stringify({
+        error: null,
+        status: 'success'
+      }));
     });
-    res.write(JSON.stringify({
-      error: null,
-      status: 'success'
-    }));
   } else {
     res.writeHead(404, {'Content-Type': 'application/json'});
     res.write(JSON.stringify({
@@ -77,3 +78,10 @@ http.createServer(cacheReader).listen(readerPortNumber);
 http.createServer(cacheWriter).listen(writerPortNumber);
 console.log('Cache reader listening on port ' + readerPortNumber);
 console.log('Cache writer listening on port ' + writerPortNumber);
+
+module.exports = {
+  readerPort: readerPortNumber,
+  writerPort: writerPortNumber,
+  reader: cacheReader,
+  writer: cacheWriter
+};
