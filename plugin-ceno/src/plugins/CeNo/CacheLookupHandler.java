@@ -31,25 +31,24 @@ import freenet.support.io.BucketTools;
  * - The Bridge then will serve the bundle to the plugin
  *   to insert into Freenet
  */
-public class CacheLookupHandler extends AbstractHandler
-{
+public class CacheLookupHandler extends AbstractHandler {
 	private void writeWelcome(Request baseRequest, HttpServletResponse response, String requestPath) throws IOException {
 		response.setContentType("text/html;charset=utf-8");
 		response.setStatus(HttpServletResponse.SC_OK);
 		response.getWriter().println("Welcome to CeNo.");
 		baseRequest.setHandled(true);
 	}
-	
+
 	private void writeError(Request baseRequest, HttpServletResponse response, String requestPath) throws IOException {
 		response.setContentType("text/html;charset=utf-8");
 		response.setStatus(HttpServletResponse.SC_OK);
 		response.getWriter().println("Error while fetching: " + requestPath);
 		baseRequest.setHandled(true);
 	}
-	
+
 	private FreenetURI computeSSKfromPath(String requestPath) throws MalformedURLException {
 		requestPath = requestPath.replaceFirst("http://|https://", "");
-		
+
 		String domain, extraPath;
 		int slashIndex = requestPath.indexOf('/');
 		if (slashIndex < 1 || slashIndex == requestPath.length()) {
@@ -59,11 +58,10 @@ public class CacheLookupHandler extends AbstractHandler
 			domain = requestPath.substring(0, slashIndex);
 			extraPath = requestPath.substring(slashIndex + 1, requestPath.length());
 		}
-		
+
 		return new FreenetURI("USK@XJZAi25dd5y7lrxE3cHMmM-xZ-c-hlPpKLYeLC0YG5I,8XTbR1bd9RBXlX6j-OZNednsJ8Cl6EAeBBebC3jtMFU,AQACAAE/" + domain + "/-1/" + extraPath);
-		
 	}
-	
+
 	private void pathDNF(Request baseRequest, HttpServletRequest request, HttpServletResponse response, String requestPath) throws IOException {
 		// Request a bundle from node.js for the given URI
 		// return the bundle content as a result
@@ -79,18 +77,17 @@ public class CacheLookupHandler extends AbstractHandler
 		response.setStatus(HttpServletResponse.SC_OK);
 		response.getWriter().println(bundle.getContent());
 		baseRequest.setHandled(true);
-		
+
 		//TODO non-blocking insert the bundle content in freenet with the computed USK
 	}
-	
-    public void handle(String target,Request baseRequest,HttpServletRequest request,HttpServletResponse response) 
-        throws IOException, ServletException
-    {
-    	String requestPath = request.getPathInfo().substring(1);
-    	if (requestPath.isEmpty() || requestPath.equals("")) {
-    		writeWelcome(baseRequest, response, requestPath);
-    		return;
-    	} else if (requestPath.startsWith("USK@") || requestPath.startsWith("SSK@")) {
+
+	public void handle(String target,Request baseRequest,HttpServletRequest request,HttpServletResponse response) 
+			throws IOException, ServletException {
+		String requestPath = request.getPathInfo().substring(1);
+		if (requestPath.isEmpty() || requestPath.equals("")) {
+			writeWelcome(baseRequest, response, requestPath);
+			return;
+		} else if (requestPath.startsWith("USK@") || requestPath.startsWith("SSK@")) {
 			FetchResult result = null;
 			try {
 				result = HighLevelSimpleClientInterface.fetchURI(new FreenetURI(requestPath));
@@ -131,19 +128,19 @@ public class CacheLookupHandler extends AbstractHandler
 			} else {
 				writeError(baseRequest, response, requestPath);
 			}
-    	} else {
-    		// Translate requestPath to USK
-    		// Redirect request to the calculated USK
-    		FreenetURI calculatedUSK = null;
-    		try {
-    			calculatedUSK = computeSSKfromPath(requestPath);
-    		} catch (Exception e) {
-    			writeError(baseRequest, response, requestPath);
-    			return;
-    		}
-    		
-    		response.sendRedirect("/" + calculatedUSK.toString());
-    		baseRequest.setHandled(true);
-    	}
-    }
+		} else {
+			// Translate requestPath to USK
+			// Redirect request to the calculated USK
+			FreenetURI calculatedUSK = null;
+			try {
+				calculatedUSK = computeSSKfromPath(requestPath);
+			} catch (Exception e) {
+				writeError(baseRequest, response, requestPath);
+				return;
+			}
+
+			response.sendRedirect("/" + calculatedUSK.toString());
+			baseRequest.setHandled(true);
+		}
+	}
 }
