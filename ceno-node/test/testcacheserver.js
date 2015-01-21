@@ -1,11 +1,8 @@
 var http = require('http');
 var assert = require('assert');
 var request = require('superagent');
-//var cache = require('./cacheserver');
+var cache = require('./cacheserver');
 var testServer = require('./testserver');
-
-//var reader = http.createServer(cache.reader);
-//var writer = http.createServer(cache.writer);
 
 var readerAddress = 'localhost:3091';
 var writerAddress = 'localhost:3092';
@@ -13,11 +10,8 @@ var writerAddress = 'localhost:3092';
 var testURL = 'http://nowhere.place/just/testing/';
 var testBundleData = 'HELLOWORLD';
 
-//reader.listen(cache.readerPort);
-//writer.listen(cache.writerPort);
-
-//testServer(reader, [testCacheRead]);
-//testServer(writer, [testCacheWrite]);
+testServer(cache.reader, [testCacheRead]);
+testServer(cache.writer, [testCacheWrite]);
 
 function testCacheRead(done) {
   request
@@ -59,7 +53,3 @@ function testCacheWrite(done) {
   });
   done();
 }
-
-var nop = function() {};
-testCacheRead(nop);
-testCacheWrite(nop);
