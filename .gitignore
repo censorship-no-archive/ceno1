@@ -12,3 +12,6 @@ proxy.log
 
 # Vim temporary files
 .swp
+
+# Database files in the future
+src/db/*
