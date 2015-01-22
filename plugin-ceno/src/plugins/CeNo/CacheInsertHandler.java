@@ -1,7 +1,6 @@
 package plugins.CeNo;
 
 import java.io.IOException;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -9,7 +8,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.eclipse.jetty.server.Request;
 
 import plugins.CeNo.BridgeInterface.Bundle;
-import plugins.CeNo.BridgeInterface.BundleRequest;
 import freenet.keys.FreenetURI;
 
 /* ------------------------------------------------------------ */
@@ -25,23 +23,30 @@ public class CacheInsertHandler extends CeNoHandler {
 
 	public void handle(String target,Request baseRequest,HttpServletRequest request,HttpServletResponse response)
 			throws IOException, ServletException {
-		// Request a bundle from bundler/transporter for the given URI
-		// return the bundle content as a result
-		String requestPath = request.getPathInfo().substring(1);
-		FreenetURI requestKey = new FreenetURI(requestPath);
-		StringBuilder allMetaStrings = new StringBuilder();
-		for (String metaString : requestKey.getAllMetaStrings()) {
-			if (!metaString.isEmpty()) {
-				allMetaStrings.append("/" + metaString);
-			}
+		// Only POST requests at /store route will be handled
+		if (!request.getMethod().equals("POST") || !request.getPathInfo().equals("/store")) {
+			writeError(baseRequest, response, "Not a POST request");
+			return;
 		}
-		Bundle bundle = BundleRequest.requestURI(requestKey.getDocName() + allMetaStrings);
 
-		//TODO non-blocking insert the bundle content in freenet with the computed USK
+		// Get the data from the POST request
+		//TODO Add support for multi-part POST requests
+		String urlParam = request.getParameter("url");
+		Bundle bundle = new Bundle(urlParam);
+		bundle.setContent(request.getParameter("bundle"));
 
-		response.setContentType("text/html;charset=utf-8");
-		response.setStatus(HttpServletResponse.SC_OK);
-		response.getWriter().println("stored");
-		baseRequest.setHandled(true);
+		if ((urlParam != null) && !urlParam.isEmpty() && !bundle.getContent().isEmpty()) {
+
+			//TODO non-blocking insert the bundle content in freenet with the computed USK
+			FreenetURI insertKey = computeUSKfromURL(urlParam);
+			// HighLevelSimpleClientInterface.insert(insert, filenameHint, isMetadata, ctx, cb);
+
+			response.setContentType("text/html;charset=utf-8");
+			response.setStatus(HttpServletResponse.SC_OK);
+			response.getWriter().println("stored");
+			baseRequest.setHandled(true);
+		} else {
+			writeError(baseRequest, response, urlParam);
+		}
 	}
 }

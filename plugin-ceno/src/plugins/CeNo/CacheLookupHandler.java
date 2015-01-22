@@ -54,6 +54,8 @@ public class CacheLookupHandler extends CeNoHandler {
 					String newURI = "/".concat(e.newURI.toString());
 					response.sendRedirect(newURI);
 				} else if (e.isDNF()) {
+					// The requested URL has not been found in the cache
+					// Return JSON {"bundleFound": "false"}
 					JSONObject jsonResponse = new JSONObject();
 					response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 					jsonResponse.put("bundleFound", "false");
@@ -68,7 +70,7 @@ public class CacheLookupHandler extends CeNoHandler {
 				}
 			}
 			if (result != null) {
-				// When fetching is complete, write it to the response OutputStream		
+				// Bundler for the requested URL has been successfully retrieved
 				Bundle bundle = new Bundle(urlParam);
 				bundle.setContent(result.asByteArray());
 				
@@ -81,14 +83,15 @@ public class CacheLookupHandler extends CeNoHandler {
 				
 				response.getOutputStream().println(jsonResponse.toJSONString());
 			} else {
+				// Error while retrieving the bundle from the cache
 				writeError(baseRequest, response, requestPath);
 			}
 		} else {
-			// Translate requestPath to USK
-			// Redirect request to the calculated USK
+			// Request path is in form of URL
+			// Calculate its USK and redirect the request
 			FreenetURI calculatedUSK = null;
 			try {
-				calculatedUSK = computeSSKfromPath(urlParam);
+				calculatedUSK = computeUSKfromURL(urlParam);
 			} catch (Exception e) {
 				writeError(baseRequest, response, requestPath);
 				return;

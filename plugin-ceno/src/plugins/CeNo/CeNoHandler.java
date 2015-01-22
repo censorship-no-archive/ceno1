@@ -24,6 +24,8 @@ public abstract class CeNoHandler extends AbstractHandler {
 		baseRequest.setHandled(true);
 	}
 
+	//TODO: Define error codes that CeNo plugins will be using
+	// Give a descriptive message for each of them (like Malformed URL)
 	protected void writeError(Request baseRequest, HttpServletResponse response, String requestPath) throws IOException {
 		response.setContentType("text/html;charset=utf-8");
 		response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -31,11 +33,29 @@ public abstract class CeNoHandler extends AbstractHandler {
 		baseRequest.setHandled(true);
 	}
 	
-	protected FreenetURI computeSSKfromPath(String requestPath) throws MalformedURLException {
+	/**
+	 * Computes the USK for a given URL so that:
+	 * <ul>
+	 *   <li> CeNo can lookup if this URL has been cached before</li>
+	 *   <li> CeNo knows the insert USK to use when caching a bundle</li>
+	 * </ul>
+	 * 
+	 * @param requestPath the URL requested by the user/bundler
+	 * @return the calculated FreenetURI that corresponds to that resource
+	 * @throws MalformedURLException
+	 */
+	protected FreenetURI computeUSKfromURL(String requestPath) throws MalformedURLException {
+		// Remove protocol from URL
 		requestPath = requestPath.replaceFirst("http://|https://", "");
 
+		// Extract domain and extra path
 		String domain, extraPath;
 		int slashIndex = requestPath.indexOf('/');
+		// Support for URLs with queries that follow right after <host> without a slash /
+		int queryIndex = requestPath.indexOf('?');
+		if (queryIndex < slashIndex) {
+			slashIndex = queryIndex;
+		}
 		if (slashIndex < 1 || slashIndex == requestPath.length()) {
 			domain = requestPath;
 			extraPath = "";
@@ -43,8 +63,22 @@ public abstract class CeNoHandler extends AbstractHandler {
 			domain = requestPath.substring(0, slashIndex);
 			extraPath = requestPath.substring(slashIndex + 1, requestPath.length());
 		}
-
-		return new FreenetURI("USK@XJZAi25dd5y7lrxE3cHMmM-xZ-c-hlPpKLYeLC0YG5I,8XTbR1bd9RBXlX6j-OZNednsJ8Cl6EAeBBebC3jtMFU,AQACAAE/" + domain + "/-1/" + extraPath);
+		
+		//TODO Get public key from configuration, use generated decrypt key and encryption settings
+		String publicKeyHash = "USK@XJZAi25dd5y7lrxE3cHMmM-xZ-c-hlPpKLYeLC0YG5I";
+		String documentDecryptKey = "8XTbR1bd9RBXlX6j-OZNednsJ8Cl6EAeBBebC3jtMFU";
+		String encryptionSettings = "AQACAAE";
+		
+		String computedKey = publicKeyHash + "," + documentDecryptKey + "," + encryptionSettings + "/" + domain + "/-1/" + extraPath;
+		return new FreenetURI(computedKey);
 	}
+	
+	/* Extract meta strings from FreenetURI
+	StringBuilder allMetaStrings = new StringBuilder();
+	for (String metaString : requestKey.getAllMetaStrings()) {
+		if (!metaString.isEmpty()) {
+			allMetaStrings.append("/" + metaString);
+		}
+	}*/	
 
 }
