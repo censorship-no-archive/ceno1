@@ -23,6 +23,14 @@ public class Bundle {
 	public String getContent() {
 		return content;
 	}
+	
+	public void setContent(String content) {
+		this.content = content;
+	}
+	
+	public void setContent(byte[] content) {
+		this.content = new String(content);
+	}
 
 	public void requestFromBundler() {
 		try {

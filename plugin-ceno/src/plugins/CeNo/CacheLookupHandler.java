@@ -3,15 +3,16 @@ package plugins.CeNo;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import net.minidev.json.JSONObject;
+
 import org.eclipse.jetty.server.Request;
-import org.eclipse.jetty.server.handler.AbstractHandler;
 
 import plugins.CeNo.BridgeInterface.Bundle;
-import plugins.CeNo.BridgeInterface.BundleRequest;
 import freenet.client.FetchException;
 import freenet.client.FetchException.FetchExceptionMode;
 import freenet.client.FetchResult;
@@ -31,60 +32,13 @@ import freenet.support.io.BucketTools;
  * - The Bridge then will serve the bundle to the plugin
  *   to insert into Freenet
  */
-public class CacheLookupHandler extends AbstractHandler {
-	private void writeWelcome(Request baseRequest, HttpServletResponse response, String requestPath) throws IOException {
-		response.setContentType("text/html;charset=utf-8");
-		response.setStatus(HttpServletResponse.SC_OK);
-		response.getWriter().println("Welcome to CeNo.");
-		baseRequest.setHandled(true);
-	}
-
-	private void writeError(Request baseRequest, HttpServletResponse response, String requestPath) throws IOException {
-		response.setContentType("text/html;charset=utf-8");
-		response.setStatus(HttpServletResponse.SC_OK);
-		response.getWriter().println("Error while fetching: " + requestPath);
-		baseRequest.setHandled(true);
-	}
-
-	private FreenetURI computeSSKfromPath(String requestPath) throws MalformedURLException {
-		requestPath = requestPath.replaceFirst("http://|https://", "");
-
-		String domain, extraPath;
-		int slashIndex = requestPath.indexOf('/');
-		if (slashIndex < 1 || slashIndex == requestPath.length()) {
-			domain = requestPath;
-			extraPath = "";
-		} else {
-			domain = requestPath.substring(0, slashIndex);
-			extraPath = requestPath.substring(slashIndex + 1, requestPath.length());
-		}
-
-		return new FreenetURI("USK@XJZAi25dd5y7lrxE3cHMmM-xZ-c-hlPpKLYeLC0YG5I,8XTbR1bd9RBXlX6j-OZNednsJ8Cl6EAeBBebC3jtMFU,AQACAAE/" + domain + "/-1/" + extraPath);
-	}
-
-	private void pathDNF(Request baseRequest, HttpServletRequest request, HttpServletResponse response, String requestPath) throws IOException {
-		// Request a bundle from node.js for the given URI
-		// return the bundle content as a result
-		FreenetURI requestKey = new FreenetURI(requestPath);
-		StringBuilder allMetaStrings = new StringBuilder();
-		for (String metaString : requestKey.getAllMetaStrings()) {
-			if (!metaString.isEmpty()) {
-				allMetaStrings.append("/" + metaString);
-			}
-		}
-		Bundle bundle = BundleRequest.requestURI(requestKey.getDocName() + allMetaStrings);
-		response.setContentType("text/html;charset=utf-8");
-		response.setStatus(HttpServletResponse.SC_OK);
-		response.getWriter().println(bundle.getContent());
-		baseRequest.setHandled(true);
-
-		//TODO non-blocking insert the bundle content in freenet with the computed USK
-	}
+public class CacheLookupHandler extends CeNoHandler {
 
 	public void handle(String target,Request baseRequest,HttpServletRequest request,HttpServletResponse response) 
 			throws IOException, ServletException {
 		String requestPath = request.getPathInfo().substring(1);
-		if (requestPath.isEmpty() || requestPath.equals("")) {
+		String urlParam = (request.getParameter("url") != null) ? request.getParameter("url") : requestPath;
+		if (urlParam.isEmpty() && requestPath.isEmpty()) {
 			writeWelcome(baseRequest, response, requestPath);
 			return;
 		} else if (requestPath.startsWith("USK@") || requestPath.startsWith("SSK@")) {
@@ -100,7 +54,12 @@ public class CacheLookupHandler extends AbstractHandler {
 					String newURI = "/".concat(e.newURI.toString());
 					response.sendRedirect(newURI);
 				} else if (e.isDNF()) {
-					pathDNF(baseRequest, request, response, requestPath);
+					JSONObject jsonResponse = new JSONObject();
+					response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+					jsonResponse.put("bundleFound", "false");
+					response.setContentType("application/javascript");
+					response.getOutputStream().println(jsonResponse.toJSONString());
+					baseRequest.setHandled(true);
 					return;
 				} else{
 					e.printStackTrace();
@@ -109,22 +68,18 @@ public class CacheLookupHandler extends AbstractHandler {
 				}
 			}
 			if (result != null) {
-				// When fetching is complete, write it to the response OutputStream
+				// When fetching is complete, write it to the response OutputStream		
+				Bundle bundle = new Bundle(urlParam);
+				bundle.setContent(result.asByteArray());
+				
 				response.setContentType(result.getMimeType());
 				response.setStatus(HttpServletResponse.SC_OK);
-				OutputStream resOutStream = response.getOutputStream();
-
-				Bucket resultBucket = result.asBucket();
-				try {
-					BucketTools.copyTo(resultBucket, resOutStream, Long.MAX_VALUE);
-					resOutStream.flush();
-					resOutStream.close();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				resultBucket.free();
-				baseRequest.setHandled(true);
+				response.setContentType("application/javascript");
+				JSONObject jsonResponse = new JSONObject();
+				jsonResponse.put("bundleFound", "true");
+				jsonResponse.put("bundle", bundle.getContent());
+				
+				response.getOutputStream().println(jsonResponse.toJSONString());
 			} else {
 				writeError(baseRequest, response, requestPath);
 			}
@@ -133,7 +88,7 @@ public class CacheLookupHandler extends AbstractHandler {
 			// Redirect request to the calculated USK
 			FreenetURI calculatedUSK = null;
 			try {
-				calculatedUSK = computeSSKfromPath(requestPath);
+				calculatedUSK = computeSSKfromPath(urlParam);
 			} catch (Exception e) {
 				writeError(baseRequest, response, requestPath);
 				return;

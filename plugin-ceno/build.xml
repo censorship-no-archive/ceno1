@@ -10,6 +10,8 @@
 	<property name="build-test" location="build-test/"/>
 	<property name="dist" location="dist/"/>
 	<property name="junit.location" value="/usr/share/java/junit.jar"/>
+	<property name="json-smart.location" location="lib/json-smart-1.2.jar"/>
+
 
 	<!-- Jetty stuff -->
 	<!-- <property name="jetty.location" value="/usr/share/eclipse/plugins/org.eclipse.jetty."/> -->
@@ -48,6 +50,7 @@
                 <pathelement location="${freenet-cvs-snapshot.location}"/>
                 <pathelement location="${jetty-all.location}"/>
                 <pathelement location="${jetty-serverlet.location}"/>
+                <pathelement location="${json-smart.location}"/>
                 <!-- <fileset dir="../plugins/"> -->
                 <!--     <include name="org.eclipse.jetty.*.jar"/> -->
                 <!--  </fileset> -->
@@ -117,6 +120,7 @@
             <fileset dir="${build}/"/>
             <zipfileset src="${jetty-all.location}" />
             <zipfileset src="${jetty-serverlet.location}" />
+            <zipfileset src="${json-smart.location}" />
            <!-- <zipfileset dir="/usr/share/eclipse/plugins/"> -->
            <!--     <include name="org.eclipse.jetty.*.jar"/> -->
            <!-- </zipfileset> -->
