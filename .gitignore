@@ -14,4 +14,6 @@ proxy.log
 .swp
 
 # Database files in the future
-src/db/*
+ceno-node/src/db/*
+
+ceno-node/test/db/*
