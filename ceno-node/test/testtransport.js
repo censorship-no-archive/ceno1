@@ -8,14 +8,10 @@ var transport = require('../src/transport-node');
 var transportAddress = 'localhost:3093';
 
 var validURL = transportAddress + '/?url=https://google.com/';
-var invalidURL = transportAddress + '/?url=https://nowhere.place';
 
-testServer(transport, [
-  testSuccessfulBundle
-  //testFailingBundle
-]);
+testServer(transport, [testSuccessfulBundle]);
 
-function simulateCeNo(done) {
+function simulateCeNo() {
   // Simulate CeNo client
   var server = http.createServer(function (req, res) {
     assert.strictEqual(req.method, 'POST', 'Request to notify of successful bundling not POST.');
@@ -28,14 +24,13 @@ function simulateCeNo(done) {
       assert.ok(data.hasOwnProperty('pid'), 'Request data contains no pid field.');
       res.end();
       server.close();
-      done();
     });
   });
   server.listen(3090);
   return server;
 }
 
-function simulateCacheServer(done) {
+function simulateCacheServer() {
   var server = http.createServer(function (req, res) {
     assert.strictEqual(req.method, 'POST', 'Request to have bundle stored notPOST');
     var data = '';
@@ -48,7 +43,6 @@ function simulateCacheServer(done) {
       assert.ok(data.hasOwnProperty('bundle'), 'Request data contains no bundle field.');
       res.end();
       server.close();
-      done();
     });
   });
   server.listen(3092);
@@ -62,17 +56,12 @@ function testSuccessfulBundle(done) {
     if (err) {
       console.log('Test resulted in error.');
       console.log(err);
+      done();
     } else {
       console.log('Test resulted in success.');
       var json = response.body;
       assert.ok(json.hasOwnProperty('processID'), 'Response to make bundle contains no processID field.');
+      done();
     }
-  });
-}
-
-function testFailingBundle(done) {
-  simulateCeNo(done);
-  request.get(invalidURL).end(function (err, response) {
-
   });
 }
