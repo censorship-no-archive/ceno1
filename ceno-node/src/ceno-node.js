@@ -5,6 +5,11 @@ var urllib = require('url');
 var querystring = require('querystring');
 var diskdb = require('diskdb');
 
+// TODO
+// The transport (bridge) and cache servers are imported here
+// so that we can run CeNo node locally for testing purposes just
+// by running `node ceno-node.js` instead of managing all three
+// servers independently.
 var transport = require('./transport-node');
 var cacheserv = require('../test/cacheserver');
 
@@ -47,6 +52,9 @@ function servePleaseWait(req, res) {
     if (err) {
       serveError(req, res);
     } else {
+      var url = querystring.parse(urllib.parse(req.url).query).url;
+      var redirect = '/?url=' + url;
+      content = content.toString().replace('{{REDIRECT}}', redirect);
       res.writeHead(200, {'Content-Type': 'text/html'});
       res.write(content);
       res.end();
