@@ -11,7 +11,7 @@ var disk = require('diskdb');
 var readerPortNumber = 3091;
 var writerPortNumber = 3092;
 
-var db = disk.connect('db', ['bundles']);
+var db = disk.connect('./db', ['bundles']);
 
 /* Parse the contents of a POST request.
  */
@@ -24,7 +24,7 @@ function parsePostBody(req, limit, callback) {
     }
   });
   req.on('end', function () {
-    callback(false, querystring.parse(body));
+    callback(false, body);
   });
 }
 
@@ -53,8 +53,9 @@ function cacheWriter(req, res) {
   if (req.method.toUpperCase() === 'POST') {
     // Let's not prevent the cache server from rewriting a bundle
     // because we may want to do that in the future to update content.
-    parsePostBody(req, 2e6, function (body) {
+    parsePostBody(req, 2e6, function (err, body) {
       res.writeHead(200, {'Content-Type': 'application/json'});
+      body = JSON.parse(body);
       db.bundles.save({
         url: body.url,
         bundle: body.bundle

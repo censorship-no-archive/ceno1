@@ -13,6 +13,7 @@ var cenoClient = 'localhost:3090';
 /* Have the cache server store a bundle for a given url.
  */
 function cacheBundle(url, bundle, callback) {
+  console.log('Sent post request to ' + cacheServer);
   request
   .post(cacheServer)
   .send({url: url, bundle: bundle})
@@ -23,8 +24,9 @@ function cacheBundle(url, bundle, callback) {
  * finished being processed.
  */
 function reportDone(pid) {
+  console.log('Sending post request to ' + cenoClient + '/done');
   request
-  .post(cenoClient)
+  .post(cenoClient + '/done')
   .send({pid: pid})
   .end(function (err, response) {
     if (err) {
@@ -56,7 +58,7 @@ function bundle(url, pid) {
 }
 
 function handleRequests(req, res) {
-  var url = querystring.parse(url.parse(req.url).query).url;
+  var url = querystring.parse(urllib.parse(req.url).query).url;
   res.writeHead(200, {'Content-Type': 'application/json'});
   res.write('{"processID": ' + currentProcessID + '}');
   res.end();
@@ -64,5 +66,8 @@ function handleRequests(req, res) {
   currentProcessID++;
 }
 
-http.createServer(handleRequests).listen(portNumber);
+var server = http.createServer(handleRequests).listen(portNumber);
 console.log('Transport server listening on localhost:' + portNumber);
+
+// Export server for testing purposes.
+module.exports = server;

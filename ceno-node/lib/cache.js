@@ -90,12 +90,16 @@ function localStorer() {
 
 function httpRetriever(cacheAddr) {
   return function (url, callback) {
-    var requrl = urllib.resolve(cacheAddr, '/?url=' + url);
+    var requrl = cacheAddr + '/?url=' + url;
     request.get(requrl).end(function (err, response) {
       if (err) {
+        console.log('Requesting ' + requrl + ' resulted in error.');
+        console.log(err);
         callback(err, {bundleFound: false});
       } else {
-        callback(null, JSON.parse(response.text));
+        console.log('Requesting ' + requrl + ' succeeded.');
+        var data = JSON.parse(response.text);
+        callback(null, data);
       }
     });
   };
@@ -103,16 +107,21 @@ function httpRetriever(cacheAddr) {
 
 function httpStorer(bundlerAddr) {
   return function (url, callback) {
-    var requrl = urllib.resolve(bundlerAddr, '/?url=' + url);
+    var requrl = bundlerAddr + '/?url=' + url;
     request.get(requrl).end(function (err, response) {
       if (err) {
+        console.log('Requesting ' + requrl + ' resulted in error.');
+        console.log(err);
         callback(err, null);
       } else {
         var json = JSON.parse(response.text);
+        console.log('Requesting ' + requrl + ' succeeded.');
+        console.log(json);
         if (!json.hasOwnProperty('processID')) {
           callback(json.error, null);
         } else {
           var pid = json['processID'];
+          console.log('New process ID = ' + pid);
           callback(null, pid);
         }
       }
@@ -131,6 +140,9 @@ module.exports = {
   },
 
   http: function (cacheAddr, bundlerAddr) {
+    console.log('Initializing HTTP cache access with');
+    console.log('cacheAddr = ' + cacheAddr);
+    console.log('bundlerAddr = ' + bundlerAddr);
     return new Cache(httpRetriever(cacheAddr), httpStorer(bundlerAddr));
   }
   // etc.

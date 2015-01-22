@@ -27,7 +27,6 @@ function replaceResources(url, html, callback) {
     // appropriate part of the loop, not just the last one.
     functions.push(function (selector) {
       return function (callback) {
-        console.log('Looking for items with selector ' + selector);
         bundleable[selector]($, selector, url, callback);
       };
     }(selectors[i]));
@@ -36,7 +35,6 @@ function replaceResources(url, html, callback) {
     if (err) {
       callback(err, null);
     } else {
-      console.log('Finished calling series of handlers');
       // The call to `async.series` will produce an array of objects mapping
       // resource URLs to their data URIs, so we merge them together here.
       var allDiffs = _.reduce(diffs, _.extend);
@@ -101,7 +99,6 @@ function fetchAndReplace(attr, elem, diff, url, callback) {
   request.get(resurl).end(function (err, result) {
     if (!err) {
       var source;
-      console.log(resurl);
       if (Buffer.isBuffer(result.body)) {
         source = result.body;
         writeDiff(resource, resurl, source, diff, callback);
@@ -135,7 +132,6 @@ function replaceAll($, selector, url, attr, callback) {
   });
   async.reduce(elements, {}, function (memo, item, next) {
     if (typeof item.attr(attr) === 'undefined') {
-      console.log('Skipping element');
       // In the case that we get something like a <script> tag with no
       // source or href to fetch, just skip it.
       next(null, memo);
