@@ -1,55 +1,29 @@
 {
-  "name": "http-stale-cache-proxy",
-  "description": "A non-compliant HTTP caching proxy that excels at serving stale cached content, while keeping its cache updated asynchronously.",
-  "version": "0.2.0",
-  "engines": ">= 0.8.0",
-  "author": "Nick Muerdter <stuff@nickm.org>",
-  "main": "./lib/http-stale-cache-proxy",
+  "name": "ceno-node",
+  "description": "",
+  "version": "0.1.0",
+  "engines": ">= 0.10.0",
+  "author": "Zack Mullaly <redwire@riseup.net>",
+  "main": "./src/ceno-node.js",
   "scripts": {
-    "test": "grunt"
   },
   "dependencies": {
-    "async": "~0.2.9",
-    "fs.extra": "~1.2.1",
-    "http-proxy": "~0.10.3",
-    "lockfile": "~0.4.2",
+    "diskdb": "latest",
+    "async": "latest",
     "lodash": "~2.0.0",
-    "node-mocks-http": "~1.0.1",
-    "temp": "~0.6.0",
-    "winston": "~0.7.2",
-    
-    "method-override": "latest",
     "body-parser": "latest",
-    "compression": "latest",
-    "portscanner": "latest",
-    "phantomjs": "latest",
     "crypto-js": "latest",
-    "express": "latest",
-    "request": "latest",
-    "phantom": "latest",
+    "superagent": "latest",
     "colors": "latest",
     "mime": "latest",
-    "node-syslog": "latest",
     "js-yaml": "latest",
-    "daemonize2": "latest",
-    "resumer": "latest"
-
+    "cheerio": "latest"
   },
   "devDependencies": {
-    "chai": "~1.8.0",
-    "grunt": "~0.4.5",
-    "grunt-cli": "~0.1.9",
-    "grunt-contrib-jshint": "~0.7.2",
-    "grunt-contrib-watch": "~0.5.3",
-    "grunt-mocha-test": "~0.7.0",
-    "grunt-debian-package": "~0.1.9",
-    "mocha": "~1.13.0",
-    "request": "~2.27.0",
-    "rimraf": "~2.2.2"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/GUI/http-stale-cache-proxy.git"
+    "url": "https://github.com/equalitie/ceno.git"
   },
-  "license": "MIT"
+  "license": "GPL v3"
 }
