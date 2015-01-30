@@ -9,16 +9,18 @@
 	<property name="build" location="build/"/>
 	<property name="build-test" location="build-test/"/>
 	<property name="dist" location="dist/"/>
-    <property name="junit.location" value="/usr/share/java/junit.jar"/>
+	<property name="junit.location" value="/usr/share/java/junit.jar"/>
+	<property name="json-smart.location" location="lib/json-smart-1.2.jar"/>
 
-    <!-- Jetty stuff -->
-    <!-- <property name="jetty.location" value="/usr/share/eclipse/plugins/org.eclipse.jetty."/> -->
-    <property name="jetty-serverlet.location" value="../fred/lib/javax.servlet-api-3.1.0.jar"/>
-    <!-- <property name="jetty-server.location" value="../plugins/org.eclipse.jetty.server_8.1.14.v20131031.jar"/> -->
-    <!-- <property name="jetty-util.location" value="../plugins/org.eclipse.jetty.util_8.1.14.v20131031.jar"/> -->
-<property name="jetty-all.location" value="../fred/lib/jetty-all-9.2.6.v20141205.jar"/>
-<available file="src/plugins/CeNo/Version.java" property="version.present"/>
-    <available file="${junit.location}" property="junit.present"/>
+
+	<!-- Jetty stuff -->
+	<!-- <property name="jetty.location" value="/usr/share/eclipse/plugins/org.eclipse.jetty."/> -->
+    	<property name="jetty-serverlet.location" value="lib/javax.servlet-api-3.1.0.jar"/>
+	<!-- <property name="jetty-server.location" value="../plugins/org.eclipse.jetty.server_8.1.14.v20131031.jar"/> -->
+	<!-- <property name="jetty-util.location" value="../plugins/org.eclipse.jetty.util_8.1.14.v20131031.jar"/> -->
+    	<property name="jetty-all.location" value="lib/jetty-all-9.2.6.v20141205.jar"/>
+    	<available file="src/plugins/CeNo/Version.java" property="version.present"/>
+    	<available file="${junit.location}" property="junit.present"/>
 
 	<target name="mkdir">
 		<mkdir dir="${build}"/>
@@ -35,7 +37,7 @@
 		</replace>
 	</target>
 
-<!-- ================================================== -->
+        <!-- ================================================== -->
 	<target name="compile" depends="mkdir,setver" >
 		<!-- Create the time stamp -->
 		<tstamp/>
@@ -48,6 +50,7 @@
                 <pathelement location="${freenet-cvs-snapshot.location}"/>
                 <pathelement location="${jetty-all.location}"/>
                 <pathelement location="${jetty-serverlet.location}"/>
+                <pathelement location="${json-smart.location}"/>
                 <!-- <fileset dir="../plugins/"> -->
                 <!--     <include name="org.eclipse.jetty.*.jar"/> -->
                 <!--  </fileset> -->
@@ -94,16 +97,16 @@
 		</junit>
 	</target>
 
-<!-- <target name="jar" depends="compile" -->
-<!--     description="Creates a standalone JAR of all class files and dependencies."> -->
-<!--   <jar destfile="${my.ant.task.jar.file}" update="true"> -->
-<!--     <fileset dir="${build.classes.dir}" /> -->
-<!--     <zipfileset src="${lib.dir}/javax.inject.jar" /> -->
-<!--     <zipfileset src="${lib.dir}/guice-3.0.jar" /> -->
-<!--     <zipfileset src="${lib.dir}/guice-multibindings-3.0.jar" /> -->
-<!--     <zipfileset src="${lib.dir}/guice-assistedinject-3.0.jar" /> -->
-<!--   </jar> -->
-<!-- </target> -->
+	<!-- <target name="jar" depends="compile" -->
+	<!--     description="Creates a standalone JAR of all class files and dependencies."> -->
+	<!--   <jar destfile="${my.ant.task.jar.file}" update="true"> -->
+	<!--     <fileset dir="${build.classes.dir}" /> -->
+	<!--     <zipfileset src="${lib.dir}/javax.inject.jar" /> -->
+	<!--     <zipfileset src="${lib.dir}/guice-3.0.jar" /> -->
+	<!--     <zipfileset src="${lib.dir}/guice-multibindings-3.0.jar" /> -->
+	<!--     <zipfileset src="${lib.dir}/guice-assistedinject-3.0.jar" /> -->
+	<!--   </jar> -->
+	<!-- </target> -->
 	<!-- ================================================== -->
 	<target name="dist" depends="clean,compile,junit"
 		description="generate the distribution" >
@@ -117,6 +120,7 @@
             <fileset dir="${build}/"/>
             <zipfileset src="${jetty-all.location}" />
             <zipfileset src="${jetty-serverlet.location}" />
+            <zipfileset src="${json-smart.location}" />
            <!-- <zipfileset dir="/usr/share/eclipse/plugins/"> -->
            <!--     <include name="org.eclipse.jetty.*.jar"/> -->
            <!-- </zipfileset> -->
