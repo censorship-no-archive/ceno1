@@ -20,6 +20,8 @@
     "cheerio": "latest"
   },
   "devDependencies": {
+    "grunt-contrib-jshint": "latest",
+    "grunt-mocha-test": "latest"
   },
   "repository": {
     "type": "git",

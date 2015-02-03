@@ -1,79 +1,105 @@
 package plugins.CeNo;
 
 import freenet.pluginmanager.*;
-
 import freenet.support.Logger;
 
 import org.eclipse.jetty.server.Server;
-
-import java.util.Date;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.handler.ContextHandler;
+import org.eclipse.jetty.server.handler.ContextHandlerCollection;
+import plugins.CeNo.FreenetInterface.NodeInterface;
 
 
 public class CeNo implements FredPlugin {
 
-    //private final static Logger LOGGER = Logger.getLogger(CeNo.class.getName());
-    private PluginRespirator pluginRespirator;
-	private volatile boolean goon = true;
+	private PluginRespirator pluginRespirator;
 
-    //Need to be read from config
-    private final static Integer ceNoPluginHttpPort = 3091;
+	//Need to be read from config
+	public final static Integer cacheLookupPort = 3091;
+	public final static Integer cacheInsertPort = 3092;
+	public final static Integer bundlerPort = 3093;
 
-    private Server ceNoHttpServer = new Server(ceNoPluginHttpPort);
+	private Server ceNoHttpServer;
 
-    public static final String pluginUri = "/plugins/plugins.CeNo.CeNo";
+	// Interface objects with fred
+	private HighLevelSimpleClientInterface client;
+	public NodeInterface nodeInterface;
+
+	// Plugin-specific configuration
+	public static final String pluginUri = "/plugins/plugins.CeNo.CeNo";
 	public static final String pluginName = "CeNo";
 
 
-    // /**
-    //    setup the web interface in FProxy
-    //    but we don't really need a web inteface as we don't use FProxy 
-    //    per sa
-    //  */
-    // private void setupWebInterface()
-    // {
-	// 	webInterface = new WebInterface(this, pluginRespirator.getHLSimpleClient(), pluginRespirator.getToadletContainer());
-	// 	webInterface.load();
+	public void runPlugin(PluginRespirator pr)
+	{        
+		// Initialize interfaces with fred
+		pluginRespirator = pr;
+		client = new HighLevelSimpleClientInterface(pluginRespirator.getHLSimpleClient());
+		nodeInterface = new NodeInterface(pluginRespirator.getNode());
 
-    //     /*PluginContex pluginContext = new PluginContext(pluginRespirator);
-    //     this.webInterface = new WebInterface(plginContext);
+		// Configure the CeNo's jetty embedded server
+		ceNoHttpServer = new Server();
+		configHttpServer(ceNoHttpServer);
 
-    //     pluginRespirator.getPageMaker().addNavigationCategory(basePath + "/", "WebOfTrust.menunName.name", "WebOfTrust.menuName.tooltip", this);
-    //     ToadletContainer tc = pluginRespirator.getToadletContainer();
+		// Start server and wait until it gets interrupted
+		try {
+			ceNoHttpServer.start();
+			ceNoHttpServer.join();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
-    //     ///pages
-    //     Overview oc = new Overview(this, pluginRespirator.getHLSimpleClient(), basePath, db);*/
-                                 
-        
-    // }
+	/**
+	 * Configure CeNo's embedded server
+	 * 
+	 * @param ceNoHttpServer the jetty server to be configured
+	 */
+	private void configHttpServer(Server ceNoHttpServer) {     
+		// Add a ServerConnector for each port
+		ServerConnector httpConnector = new ServerConnector(ceNoHttpServer);
+		httpConnector.setName("cacheLookup");
+		httpConnector.setPort(cacheLookupPort);
+		ServerConnector cacheConnector = new ServerConnector(ceNoHttpServer);
+		cacheConnector.setName("cacheInsert");
+		cacheConnector.setPort(cacheInsertPort);
 
-    public void runPlugin(PluginRespirator pr)
-    {
-        pluginRespirator = pr;
+		// Set server's connectors the ones configured above
+		ceNoHttpServer.setConnectors(new ServerConnector[]{httpConnector, cacheConnector});
 
-        Server server = new Server(3091);
-        try {
-            server.start();
-            server.join();
-        } catch (Exception e) {
-            e.printStackTrace();
-        
-        }
+		// Create a collection of ContextHandlers for the server
+		ContextHandlerCollection handlers = new ContextHandlerCollection();
+		ceNoHttpServer.setHandler(handlers);
 
-		while(goon) {
-			System.err.println("Heartbeat from CeNo-plugin: " + (new Date()));
+		// Configure ContextHandlers to listen to a specific port
+		// and upon request call the appropriate AbstractHandler subclass	
+		ContextHandler cacheLookupCtxHandler = new ContextHandler();
+		cacheLookupCtxHandler.setHandler(new CacheLookupHandler());
+		cacheLookupCtxHandler.setVirtualHosts(new String[]{"@cacheLookup"});
+		ContextHandler cacheInsertCtxHandler = new ContextHandler();
+		cacheInsertCtxHandler.setHandler(new CacheInsertHandler());
+		cacheInsertCtxHandler.setVirtualHosts(new String[]{"@cacheInsert"});
+
+		// Add the configured ContextHandlers to the server
+		handlers.addHandler(cacheLookupCtxHandler);
+		handlers.addHandler(cacheInsertCtxHandler);
+	}
+
+	/**
+	 * Method called before termination of the CeNo plugin
+	 * Terminates ceNoHttpServer and releases resources
+	 */
+	public void terminate()
+	{
+		// Stop ceNoHttpServer and unbind ports
+		if (ceNoHttpServer != null) {
 			try {
-				Thread.sleep(5000);
-			} catch (InterruptedException e) {
-				// Who cares ?
+				ceNoHttpServer.stop();
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		}
-        
-    }
-
-    public void terminate()
-    {
-		goon = false;
-        Logger.normal(this, pluginName + " terminated.");
-    }
+		Logger.normal(this, pluginName + " terminated.");
+	}
 
 }
