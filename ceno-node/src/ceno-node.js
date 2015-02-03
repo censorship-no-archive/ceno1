@@ -5,14 +5,6 @@ var urllib = require('url');
 var querystring = require('querystring');
 var diskdb = require('diskdb');
 
-// TODO
-// The transport (bridge) and cache servers are imported here
-// so that we can run CeNo node locally for testing purposes just
-// by running `node ceno-node.js` instead of managing all three
-// servers independently.
-var transport = require('./transport-node');
-var cacheserv = require('../test/cacheserver');
-
 var readServ = 'localhost:3091';
 var writeServ = 'localhost:3093';
 
@@ -165,4 +157,9 @@ function requestHandler(req, res) {
   }
 }
 
-http.createServer(requestHandler).listen(portNumber, address);
+module.exports = {
+  start: function () {
+    http.createServer(requestHandler).listen(portNumber, address);
+    console.log('Client server listening on localhost:' + portNumber);
+  }
+};

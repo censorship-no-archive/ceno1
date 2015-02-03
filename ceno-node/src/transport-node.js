@@ -66,8 +66,11 @@ function handleRequests(req, res) {
   currentProcessID++;
 }
 
-var server = http.createServer(handleRequests).listen(portNumber);
-console.log('Transport server listening on localhost:' + portNumber);
-
 // Export server for testing purposes.
-module.exports = server;
+module.exports = {
+  start: function () {
+    console.log('Transport port number: ' + portNumber);
+    var server = http.createServer(handleRequests).listen(portNumber);
+    console.log('Transport server listening on localhost:' + portNumber);
+  }
+};

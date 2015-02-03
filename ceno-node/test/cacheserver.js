@@ -76,14 +76,13 @@ function cacheWriter(req, res) {
   }
 }
 
-var reader = http.createServer(cacheReader);
-reader.listen(readerPortNumber);
-var writer = http.createServer(cacheWriter);
-writer.listen(writerPortNumber);
-console.log('Cache reader listening on port ' + readerPortNumber);
-console.log('Cache writer listening on port ' + writerPortNumber);
-
 module.exports = {
-  reader: reader,
-  writer: writer
+  start: function () {
+    var reader = http.createServer(cacheReader);
+    reader.listen(readerPortNumber);
+    var writer = http.createServer(cacheWriter);
+    writer.listen(writerPortNumber);
+    console.log('Cache reader listening on port ' + readerPortNumber);
+    console.log('Cache writer listening on port ' + writerPortNumber);
+  }
 };
