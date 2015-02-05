@@ -7,6 +7,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
+
 import plugins.CeNo.FreenetInterface.NodeInterface;
 
 
@@ -15,9 +16,9 @@ public class CeNo implements FredPlugin {
 	private PluginRespirator pluginRespirator;
 
 	//Need to be read from config
-	public final static Integer cacheLookupPort = 3091;
-	public final static Integer cacheInsertPort = 3092;
-	public final static Integer bundlerPort = 3093;
+	public static final Integer cacheLookupPort = 3091;
+	public static final Integer cacheInsertPort = 3092;
+	public static final Integer bundlerPort = 3093;
 
 	private Server ceNoHttpServer;
 
@@ -28,6 +29,7 @@ public class CeNo implements FredPlugin {
 	// Plugin-specific configuration
 	public static final String pluginUri = "/plugins/plugins.CeNo.CeNo";
 	public static final String pluginName = "CeNo";
+	public static Configuration initConfig;
 
 
 	public void runPlugin(PluginRespirator pr)
@@ -36,6 +38,9 @@ public class CeNo implements FredPlugin {
 		pluginRespirator = pr;
 		client = new HighLevelSimpleClientInterface(pluginRespirator.getHLSimpleClient());
 		nodeInterface = new NodeInterface(pluginRespirator.getNode());
+		// Read properties of the configuration file
+		initConfig = new Configuration();
+		initConfig.readProperties();
 
 		// Configure the CeNo's jetty embedded server
 		ceNoHttpServer = new Server();

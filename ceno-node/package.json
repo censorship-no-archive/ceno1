@@ -17,7 +17,8 @@
     "colors": "latest",
     "mime": "latest",
     "js-yaml": "latest",
-    "cheerio": "latest"
+    "cheerio": "latest",
+    "require": "latest"
   },
   "devDependencies": {
     "grunt-contrib-jshint": "latest",
