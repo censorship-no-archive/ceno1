@@ -1,5 +1,6 @@
 package plugins.CeNo;
 
+import freenet.keys.FreenetURI;
 import freenet.pluginmanager.*;
 import freenet.support.Logger;
 
@@ -38,9 +39,18 @@ public class CeNo implements FredPlugin {
 		pluginRespirator = pr;
 		client = new HighLevelSimpleClientInterface(pluginRespirator.getHLSimpleClient());
 		nodeInterface = new NodeInterface(pluginRespirator.getNode());
+		
 		// Read properties of the configuration file
 		initConfig = new Configuration();
 		initConfig.readProperties();
+		// If CeNo has no private key for inserting freesites,
+		// generate a new key pair and store it in the configuration file
+		if (initConfig.getProperty("insertURI") == null) {
+			FreenetURI[] keyPair = nodeInterface.generateKeyPair();
+			initConfig.setProperty("insertURI", keyPair[0].toString());
+			initConfig.setProperty("requestURI", keyPair[1].toString());
+			initConfig.storeProperties();
+		}
 
 		// Configure the CeNo's jetty embedded server
 		ceNoHttpServer = new Server();

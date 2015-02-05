@@ -111,6 +111,28 @@ public class Configuration {
 	public void setProperty(String key, String value) {
 		properties.setProperty(key, value);
 	}
+	
+	/**
+	 * Getter for the property with a given key
+	 * 
+	 * @param key the key of the property
+	 * @return a String value for that key, or null if that property does not exist
+	 */
+	public String getProperty(String key) {
+		return getProperty(key, null);
+	}
+	
+	/**
+	 * Safe getter for the property with a given key
+	 * 
+	 * @param key the key of the property
+	 * @param defaultValue the value to be returned in case that key does not exist in the properties
+	 * @return the property value for the given key, or the defaultValue if the key does not exist
+	 * in the properties
+	 */
+	public String getProperty(String key, String defaultValue) {
+		return properties.getProperty(key, defaultValue);
+	}
 
 	/**
 	 * Stores the values of {@link #properties} in the configuration file. If a property with
