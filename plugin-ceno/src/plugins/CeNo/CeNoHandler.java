@@ -20,7 +20,7 @@ public abstract class CeNoHandler extends AbstractHandler {
 	protected void writeWelcome(Request baseRequest, HttpServletResponse response, String requestPath) throws IOException {
 		response.setContentType("text/html;charset=utf-8");
 		response.setStatus(HttpServletResponse.SC_OK);
-		response.getWriter().println("Welcome to CeNo.");
+		response.getWriter().print("Welcome to CeNo.");
 		baseRequest.setHandled(true);
 	}
 
@@ -29,7 +29,14 @@ public abstract class CeNoHandler extends AbstractHandler {
 	protected void writeError(Request baseRequest, HttpServletResponse response, String requestPath) throws IOException {
 		response.setContentType("text/html;charset=utf-8");
 		response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-		response.getWriter().println("Error while fetching: " + requestPath);
+		response.getWriter().print("Error while fetching: " + requestPath);
+		baseRequest.setHandled(true);
+	}
+	
+	protected void writeNotFound(Request baseRequest, HttpServletResponse response, String requestPath) throws IOException {
+		response.setContentType("text/html;charset=utf-8");
+		response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+		response.getWriter().print("Resource not found: " + requestPath);
 		baseRequest.setHandled(true);
 	}
 
