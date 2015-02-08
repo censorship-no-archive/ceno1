@@ -57,4 +57,11 @@ public class Bundle {
 		return;
 	}
 
+	public int getContentLength() {
+		if (content != null) {
+			return content.length();
+		}
+		return 0;
+	}
+
 }

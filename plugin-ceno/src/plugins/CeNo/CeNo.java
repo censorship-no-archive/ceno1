@@ -25,7 +25,7 @@ public class CeNo implements FredPlugin {
 
 	// Interface objects with fred
 	private HighLevelSimpleClientInterface client;
-	public NodeInterface nodeInterface;
+	public static NodeInterface nodeInterface;
 
 	// Plugin-specific configuration
 	public static final String pluginUri = "/plugins/plugins.CeNo.CeNo";

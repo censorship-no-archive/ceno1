@@ -1,6 +1,7 @@
 package plugins.CeNo;
 
 import java.io.IOException;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -9,6 +10,7 @@ import org.eclipse.jetty.server.Request;
 
 import plugins.CeNo.BridgeInterface.Bundle;
 import freenet.keys.FreenetURI;
+import freenet.support.api.Bucket;
 
 /* ------------------------------------------------------------ */
 /** CeNo Plugin handler for requests to cache bundles
@@ -32,15 +34,18 @@ public class CacheInsertHandler extends CeNoHandler {
 		// Get the data from the POST request
 		//TODO Add support for multi-part POST requests
 		String urlParam = request.getParameter("url");
+		if((urlParam == null) || urlParam.isEmpty()) {
+			return;
+		}
+		
 		Bundle bundle = new Bundle(urlParam);
-		bundle.setContent(request.getParameter("bundle"));
+		bundle.requestFromBundler();
 
-		if ((urlParam != null) && !urlParam.isEmpty() && !bundle.getContent().isEmpty()) {
-
+		if (!bundle.getContent().isEmpty()) {
 			//TODO non-blocking insert the bundle content in freenet with the computed USK
-			FreenetURI insertKey = computeUSKfromURL(urlParam);
-			// HighLevelSimpleClientInterface.insert(insert, filenameHint, isMetadata, ctx, cb);
-
+			FreenetURI insertKey = computeInsertURI(urlParam);
+			CeNo.nodeInterface.insertFreesite(insertKey, bundle.getContent());
+			
 			response.setContentType("text/html;charset=utf-8");
 			response.setStatus(HttpServletResponse.SC_OK);
 			response.getWriter().println("stored");
