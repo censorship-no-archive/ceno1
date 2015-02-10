@@ -15,7 +15,7 @@ var cenoClient = 'localhost:3090';
 function cacheBundle(url, bundle, callback) {
   console.log('Sent post request to ' + cacheServer);
   request
-  .post(cacheServer)
+  .post(cacheServer + '/store')
   .send({url: url, bundle: bundle})
   .end(callback);
 }

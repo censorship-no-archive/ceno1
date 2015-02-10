@@ -1,14 +1,18 @@
 package plugins.CeNo;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import net.minidev.json.JSONObject;
+import net.minidev.json.JSONValue;
+import net.minidev.json.parser.ParseException;
 
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
@@ -67,6 +71,11 @@ public abstract class CeNoHandler extends AbstractHandler {
 		splitMap.put("domain", domain);
 		splitMap.put("extraPath", extraPath);
 		return splitMap;
+	}
+	
+	protected JSONObject readJSONbody(BufferedReader r) throws IOException, ParseException {
+		JSONObject readJSON = (JSONObject) JSONValue.parseWithException(r);
+		return readJSON;
 	}
 
 	/**

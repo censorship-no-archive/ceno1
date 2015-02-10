@@ -18,7 +18,6 @@ import freenet.support.api.RandomAccessBucket;
 public class NodeInterface implements FreenetInterface {
 
 	private Node node;
-	private HighLevelSimpleClientInterface hl;
 
 	public NodeInterface(Node node) {
 		this.node = node;
@@ -50,8 +49,8 @@ public class NodeInterface implements FreenetInterface {
 		bucket.setReadOnly();
 		
 		InsertBlock ib = new InsertBlock(bucket, null, insertURI);
-		InsertContext ictx = hl.getInsertContext(true);
-		ClientPutter pu = hl.insert(ib, false, null, false, ictx, RequestStarter.IMMEDIATE_SPLITFILE_PRIORITY_CLASS);
+		InsertContext ictx = HighLevelSimpleClientInterface.getInsertContext(true);
+		HighLevelSimpleClientInterface.insert(ib, false, null, false, ictx, RequestStarter.IMMEDIATE_SPLITFILE_PRIORITY_CLASS);
 		return false;
 	}
 

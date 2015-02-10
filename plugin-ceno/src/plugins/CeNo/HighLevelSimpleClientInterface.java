@@ -79,11 +79,11 @@ public class HighLevelSimpleClientInterface {
 		return clientPutter;
 	}
 
-	public InsertContext getInsertContext(boolean b) {
+	public static InsertContext getInsertContext(boolean b) {
 		return HLSCInterface.getInsertContext(b);
 	}
 
-	public ClientPutter insert(InsertBlock ib, boolean b, Object object,
+	public static ClientPutter insert(InsertBlock ib, boolean b, Object object,
 			boolean c, InsertContext ictx, short immediateSplitfilePriorityClass) {
 		return HLSCInterface.insert(ib, b, object, c, ictx, immediateSplitfilePriorityClass);
 	}
