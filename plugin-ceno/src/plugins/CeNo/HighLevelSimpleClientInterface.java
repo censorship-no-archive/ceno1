@@ -53,7 +53,7 @@ public class HighLevelSimpleClientInterface {
 		FetchResult result = HLSCInterface.client.fetch(uri);
 		return result;
 	}
-	
+
 	/**
 	 * Generates a new key pair, consisting of the insert URI at index 0 and the
 	 * request URI at index 1.
@@ -63,10 +63,14 @@ public class HighLevelSimpleClientInterface {
 	 * @return An array containing the insert and request URI
 	 */
 	public static FreenetURI[] generateKeyPair(String docName) {
-		FreenetURI[] keyPair = HLSCInterface.generateKeyPair(docName);
+		FreenetURI[] keyPair = HLSCInterface.client.generateKeyPair(docName);
 		return keyPair;
 	}
-	
+
+	public static InsertContext getInsertContext(boolean b) {
+		return HLSCInterface.client.getInsertContext(b);
+	}
+
 	/**
 	 * Non-blocking insert.
 	 * @param isMetadata If true, insert metadata.
@@ -75,17 +79,19 @@ public class HighLevelSimpleClientInterface {
 	 * @param ctx Insert context so you can customise the insertion process.
 	 */
 	public static ClientPutter insert(InsertBlock insert, String filenameHint, boolean isMetadata, InsertContext ctx, ClientPutCallback cb) throws InsertException {
-		ClientPutter clientPutter = HLSCInterface.insert(insert, filenameHint, isMetadata, ctx, cb);
+		ClientPutter clientPutter = HLSCInterface.client.insert(insert, filenameHint, isMetadata, ctx, cb);
 		return clientPutter;
 	}
 
-	public static InsertContext getInsertContext(boolean b) {
-		return HLSCInterface.getInsertContext(b);
-	}
-
-	public static ClientPutter insert(InsertBlock ib, boolean b, Object object,
-			boolean c, InsertContext ictx, short immediateSplitfilePriorityClass) {
-		return HLSCInterface.insert(ib, b, object, c, ictx, immediateSplitfilePriorityClass);
+	/**
+	 * Non-blocking insert.
+	 * @param isMetadata If true, insert metadata.
+	 * @param cb Will be called when the insert completes. If the request is persistent
+	 * this will be called on the database thread with a container parameter.
+	 * @param ctx Insert context so you can customise the insertion process.
+	 */
+	public static ClientPutter insert(InsertBlock insert, String filenameHint, boolean isMetadata, InsertContext ctx, ClientPutCallback cb, short priority) throws InsertException {
+		return HLSCInterface.client.insert(insert, filenameHint, isMetadata, ctx, cb, priority);
 	}
 
 }

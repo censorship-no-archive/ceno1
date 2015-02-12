@@ -12,7 +12,14 @@ import net.minidev.json.parser.ParseException;
 import org.eclipse.jetty.server.Request;
 
 import plugins.CeNo.BridgeInterface.Bundle;
+import freenet.client.InsertException;
+import freenet.client.async.BaseClientPutter;
+import freenet.client.async.ClientContext;
+import freenet.client.async.ClientPutCallback;
 import freenet.keys.FreenetURI;
+import freenet.node.RequestClient;
+import freenet.support.api.Bucket;
+import freenet.support.io.ResumeFailedException;
 
 /* ------------------------------------------------------------ */
 /** CeNo Plugin handler for requests to cache bundles
@@ -24,6 +31,46 @@ import freenet.keys.FreenetURI;
  * Upon successful insertion, the handler replies with "stored".
  */
 public class CacheInsertHandler extends CeNoHandler {
+	
+	public class InsertCallback implements ClientPutCallback {
+
+		public void onResume(ClientContext context)
+				throws ResumeFailedException {
+			// TODO Auto-generated method stub
+			
+		}
+
+		public RequestClient getRequestClient() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		public void onGeneratedURI(FreenetURI uri, BaseClientPutter state) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		public void onGeneratedMetadata(Bucket metadata, BaseClientPutter state) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		public void onFetchable(BaseClientPutter state) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		public void onSuccess(BaseClientPutter state) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		public void onFailure(InsertException e, BaseClientPutter state) {
+			// TODO Auto-generated method stub
+			
+		}
+		
+	}
 
 	public void handle(String target,Request baseRequest,HttpServletRequest request,HttpServletResponse response)
 			throws IOException, ServletException {
@@ -46,6 +93,11 @@ public class CacheInsertHandler extends CeNoHandler {
 			writeError(baseRequest, response, "No url attribute in request body");
 			return;
 		}
+		if(!requestJSON.containsKey("bundle")) {
+			writeError(baseRequest, response, "No bundle attribute in request body");
+			return;
+		}
+		
 		String urlParam = requestJSON.get("url").toString();
 		if((urlParam == null) || urlParam.isEmpty()) {
 			writeError(baseRequest, response, "Invalid url attribute");
@@ -53,12 +105,22 @@ public class CacheInsertHandler extends CeNoHandler {
 		}
 		
 		Bundle bundle = new Bundle(urlParam);
-		bundle.setContent(requestJSON.get("bundle").toString());
+		if ((requestJSON.get("bundle") != null)) {
+			bundle.setContent(requestJSON.get("bundle").toString());
+		} else {
+			writeError(baseRequest, response, "Bundle attribute was null");
+			return;
+		}
 
 		if (!bundle.getContent().isEmpty()) {
 			//TODO non-blocking insert the bundle content in freenet with the computed USK
 			FreenetURI insertKey = computeInsertURI(urlParam);
-			CeNo.nodeInterface.insertFreesite(insertKey, bundle.getContent());
+			try {
+				CeNo.nodeInterface.insertFreesite(insertKey, bundle.getContent(), new InsertCallback());
+			} catch (InsertException e) {
+				writeError(baseRequest, response, "Error during insertion");
+				return;
+			}
 			
 			response.setContentType("text/html;charset=utf-8");
 			response.setStatus(HttpServletResponse.SC_OK);
