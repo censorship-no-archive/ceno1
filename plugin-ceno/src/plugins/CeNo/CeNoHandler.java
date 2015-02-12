@@ -74,7 +74,12 @@ public abstract class CeNoHandler extends AbstractHandler {
 	}
 	
 	protected JSONObject readJSONbody(BufferedReader r) throws IOException, ParseException {
-		JSONObject readJSON = (JSONObject) JSONValue.parseWithException(r);
+		JSONObject readJSON;
+		try {
+			readJSON = (JSONObject) JSONValue.parseWithException(r);
+		} catch (ClassCastException e) {
+			return new JSONObject();
+		}
 		return readJSON;
 	}
 

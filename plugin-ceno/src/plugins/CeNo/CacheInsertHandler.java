@@ -10,6 +10,7 @@ import net.minidev.json.JSONObject;
 import net.minidev.json.parser.ParseException;
 
 import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.util.log.Log;
 
 import plugins.CeNo.BridgeInterface.Bundle;
 import freenet.client.InsertException;
@@ -18,6 +19,7 @@ import freenet.client.async.ClientContext;
 import freenet.client.async.ClientPutCallback;
 import freenet.keys.FreenetURI;
 import freenet.node.RequestClient;
+import freenet.support.Logger;
 import freenet.support.api.Bucket;
 import freenet.support.io.ResumeFailedException;
 
@@ -41,8 +43,7 @@ public class CacheInsertHandler extends CeNoHandler {
 		}
 
 		public RequestClient getRequestClient() {
-			// TODO Auto-generated method stub
-			return null;
+			return CeNo.nodeInterface.getClient();
 		}
 
 		public void onGeneratedURI(FreenetURI uri, BaseClientPutter state) {
@@ -61,8 +62,7 @@ public class CacheInsertHandler extends CeNoHandler {
 		}
 
 		public void onSuccess(BaseClientPutter state) {
-			// TODO Auto-generated method stub
-			
+			Logger.normal(this, "Caching successful");	
 		}
 
 		public void onFailure(InsertException e, BaseClientPutter state) {
@@ -75,8 +75,8 @@ public class CacheInsertHandler extends CeNoHandler {
 	public void handle(String target,Request baseRequest,HttpServletRequest request,HttpServletResponse response)
 			throws IOException, ServletException {
 		// Only POST requests at /store route will be handled
-		if (!request.getMethod().equals("POST") || !request.getPathInfo().equals("/store")) {
-			writeError(baseRequest, response, "Not a POST request");
+		if (!request.getMethod().equals("POST")) {
+			writeError(baseRequest, response, "Not a POST request at /store route");
 			return;
 		}
 
