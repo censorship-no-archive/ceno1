@@ -13,7 +13,7 @@
     "lodash": "~2.0.0",
     "body-parser": "latest",
     "crypto-js": "latest",
-    "superagent": "latest",
+    "request": "latest",
     "colors": "latest",
     "mime": "latest",
     "js-yaml": "latest",
