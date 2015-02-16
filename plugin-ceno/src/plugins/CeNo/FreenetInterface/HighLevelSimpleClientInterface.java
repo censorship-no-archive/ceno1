@@ -1,4 +1,6 @@
-package plugins.CeNo;
+package plugins.CeNo.FreenetInterface;
+
+import java.util.HashMap;
 
 import freenet.client.FetchException;
 import freenet.client.FetchResult;
@@ -93,5 +95,10 @@ public class HighLevelSimpleClientInterface {
 	public static ClientPutter insert(InsertBlock insert, String filenameHint, boolean isMetadata, InsertContext ctx, ClientPutCallback cb, short priority) throws InsertException {
 		return HLSCInterface.client.insert(insert, filenameHint, isMetadata, ctx, cb, priority);
 	}
+	
+	public static FreenetURI insertManifest(FreenetURI insertURI, HashMap<String, Object> bucketsByName, String defaultName, short priorityClass) throws InsertException {
+		return HLSCInterface.client.insertManifest(insertURI, bucketsByName, defaultName, priorityClass);
+	}
+
 
 }

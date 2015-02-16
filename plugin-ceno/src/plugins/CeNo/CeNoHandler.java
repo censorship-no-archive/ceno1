@@ -105,7 +105,7 @@ public abstract class CeNoHandler extends AbstractHandler {
 	protected FreenetURI computeInsertURI(String requestPath) throws MalformedURLException {
 		Map<String, String> splitMap = splitURL(requestPath);
 		String insertURI = CeNo.initConfig.getProperty("insertURI");
-		String computedKey = insertURI.replaceFirst("SSK", "USK") + splitMap.get("domain") + "/-1/" + splitMap.get("extraPath");
+		String computedKey = insertURI.replaceFirst("SSK", "USK") + splitMap.get("domain") + "/0/" + splitMap.get("extraPath");
 
 		return new FreenetURI(computedKey);
 	}

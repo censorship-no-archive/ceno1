@@ -66,8 +66,7 @@ public class CacheInsertHandler extends CeNoHandler {
 		}
 
 		public void onFailure(InsertException e, BaseClientPutter state) {
-			// TODO Auto-generated method stub
-			
+			Logger.error(this, "Failed to insert freesite " + e);
 		}
 		
 	}
@@ -116,7 +115,7 @@ public class CacheInsertHandler extends CeNoHandler {
 			//TODO non-blocking insert the bundle content in freenet with the computed USK
 			FreenetURI insertKey = computeInsertURI(urlParam);
 			try {
-				CeNo.nodeInterface.insertFreesite(insertKey, bundle.getContent(), new InsertCallback());
+				CeNo.nodeInterface.insertFreesite(insertKey, urlParam, bundle.getContent(), new InsertCallback());
 			} catch (InsertException e) {
 				writeError(baseRequest, response, "Error during insertion");
 				return;
