@@ -7,4 +7,6 @@ import freenet.keys.FreenetURI;
 public interface FreenetInterface {
 	
 	FetchResult fetchURI(FreenetURI uri) throws FetchException;
+	FreenetURI[] generateKeyPair();
+	
 }

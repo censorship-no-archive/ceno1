@@ -16,11 +16,11 @@ public abstract class CeNoHandler extends AbstractHandler {
 
 	public abstract void handle(String arg0, Request arg1, HttpServletRequest arg2,
 			HttpServletResponse arg3) throws IOException, ServletException;
-	
+
 	protected void writeWelcome(Request baseRequest, HttpServletResponse response, String requestPath) throws IOException {
 		response.setContentType("text/html;charset=utf-8");
 		response.setStatus(HttpServletResponse.SC_OK);
-		response.getWriter().println("Welcome to CeNo.");
+		response.getWriter().print("Welcome to CeNo.");
 		baseRequest.setHandled(true);
 	}
 
@@ -29,10 +29,17 @@ public abstract class CeNoHandler extends AbstractHandler {
 	protected void writeError(Request baseRequest, HttpServletResponse response, String requestPath) throws IOException {
 		response.setContentType("text/html;charset=utf-8");
 		response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-		response.getWriter().println("Error while fetching: " + requestPath);
+		response.getWriter().print("Error while fetching: " + requestPath);
 		baseRequest.setHandled(true);
 	}
 	
+	protected void writeNotFound(Request baseRequest, HttpServletResponse response, String requestPath) throws IOException {
+		response.setContentType("text/html;charset=utf-8");
+		response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+		response.getWriter().print("Resource not found: " + requestPath);
+		baseRequest.setHandled(true);
+	}
+
 	/**
 	 * Computes the USK for a given URL so that:
 	 * <ul>
@@ -53,7 +60,7 @@ public abstract class CeNoHandler extends AbstractHandler {
 		int slashIndex = requestPath.indexOf('/');
 		// Support for URLs with queries that follow right after <host> without a slash /
 		int queryIndex = requestPath.indexOf('?');
-		if (queryIndex < slashIndex) {
+		if (queryIndex > -1 && queryIndex < slashIndex) {
 			slashIndex = queryIndex;
 		}
 		if (slashIndex < 1 || slashIndex == requestPath.length()) {
@@ -63,16 +70,13 @@ public abstract class CeNoHandler extends AbstractHandler {
 			domain = requestPath.substring(0, slashIndex);
 			extraPath = requestPath.substring(slashIndex + 1, requestPath.length());
 		}
-		
-		//TODO Get public key from configuration, use generated decrypt key and encryption settings
-		String publicKeyHash = "USK@XJZAi25dd5y7lrxE3cHMmM-xZ-c-hlPpKLYeLC0YG5I";
-		String documentDecryptKey = "8XTbR1bd9RBXlX6j-OZNednsJ8Cl6EAeBBebC3jtMFU";
-		String encryptionSettings = "AQACAAE";
-		
-		String computedKey = publicKeyHash + "," + documentDecryptKey + "," + encryptionSettings + "/" + domain + "/-1/" + extraPath;
+
+		String requestURI = CeNo.initConfig.getProperty("requestURI");
+		String computedKey = requestURI.replaceFirst("SSK", "USK") + domain + "/-1/" + extraPath;
+
 		return new FreenetURI(computedKey);
 	}
-	
+
 	/* Extract meta strings from FreenetURI
 	StringBuilder allMetaStrings = new StringBuilder();
 	for (String metaString : requestKey.getAllMetaStrings()) {
