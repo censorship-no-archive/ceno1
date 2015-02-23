@@ -12,6 +12,7 @@ import net.minidev.json.JSONObject;
 import org.eclipse.jetty.server.Request;
 
 import plugins.CeNo.BridgeInterface.Bundle;
+import plugins.CeNo.FreenetInterface.HighLevelSimpleClientInterface;
 import freenet.client.FetchException;
 import freenet.client.FetchException.FetchExceptionMode;
 import freenet.client.FetchResult;

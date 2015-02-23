@@ -17,6 +17,7 @@ import net.minidev.json.parser.ParseException;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
+import freenet.client.InsertException;
 import freenet.keys.FreenetURI;
 
 public abstract class CeNoHandler extends AbstractHandler {
@@ -105,9 +106,16 @@ public abstract class CeNoHandler extends AbstractHandler {
 	protected FreenetURI computeInsertURI(String requestPath) throws MalformedURLException {
 		Map<String, String> splitMap = splitURL(requestPath);
 		String insertURI = CeNo.initConfig.getProperty("insertURI");
-		String computedKey = insertURI.replaceFirst("SSK", "USK") + splitMap.get("domain") + "/0/" + splitMap.get("extraPath");
-
-		return new FreenetURI(computedKey);
+		FreenetURI insertURIconfig = new FreenetURI(insertURI);
+		//String computedKey = insertURI.replaceFirst("SSK", "USK") + "-1/";
+		FreenetURI result = new FreenetURI("USK", requestPath, insertURIconfig.getRoutingKey(), insertURIconfig.getCryptoKey(), insertURIconfig.getExtra());
+		
+		try {
+			result.checkInsertURI();
+		} catch (InsertException e) {
+			throw new MalformedURLException("The computed URI failed checkInsertURI()");
+		}
+		return result;
 	}
 
 	/* Extract meta strings from FreenetURI

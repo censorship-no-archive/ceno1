@@ -9,6 +9,7 @@ import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 
+import plugins.CeNo.FreenetInterface.HighLevelSimpleClientInterface;
 import plugins.CeNo.FreenetInterface.NodeInterface;
 
 
