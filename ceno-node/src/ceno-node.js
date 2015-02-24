@@ -5,8 +5,8 @@ var urllib = require('url');
 var querystring = require('querystring');
 var diskdb = require('diskdb');
 
-var readServ = 'localhost:3091';
-var writeServ = 'localhost:3093';
+var readServ = 'http://localhost:3091';
+var writeServ = 'http://localhost:3093';
 
 var cache = require('../lib/cache').http(readServ, writeServ);
 var bundler = require('../lib/bundler');
@@ -82,7 +82,6 @@ function makeNewBundle(url) {
       console.log('Could not request new bundle be made by Bundler.');
       console.log(err);
     } else {
-      console.log('Got processID = ' + processID);
       db.processes.save({
         url: url,
         pid: processID
@@ -97,7 +96,6 @@ function handleBundleRequest(req, res) {
   var url = querystring.parse(urllib.parse(req.url).query).url;
   var process = db.processes.findOne({url: url});
   if (!process || !process.hasOwnProperty('pid')) {
-    console.log('No existing process to bundle ' + url);
     // There is a no process running by Bundler to create a new bundle.
     cache.read(url, function (err, response) {
       if (!response.bundleFound) {
@@ -114,7 +112,6 @@ function handleBundleRequest(req, res) {
     });
   } else {
     // There is already a process running to create a new bundle.
-    console.log('Sending please wait.');
     servePleaseWait(req, res);
   }
 }
@@ -123,22 +120,14 @@ function handleBundleRequest(req, res) {
  * a bundling process has been completed.
  */
 function handleProcessCompletion(req, res) {
-  console.log('In handleProcessCompletion');
-  console.log('req.method = ' + req.method);
   if (req.method.toUpperCase() !== 'POST') {
     serveError(req, res);
     return;
   }
   parsePostBody(req, 2e6, function (err, data) {
-    console.log('Raw data = ');
-    console.log(data);
     data = JSON.parse(data);
-    console.log('Parsed data = ');
-    console.log(data);
     var processID = data['pid'];
-    console.log('processID = ' + processID);
     db.processes.remove({pid: processID}, false);
-    console.log('Removed process.');
     res.writeHead(200, {'Content-Type': 'text/plain'});
     res.write('Thank you!\r\n');
     res.end();
@@ -149,7 +138,6 @@ function handleProcessCompletion(req, res) {
  */
 function requestHandler(req, res) {
   var route = urllib.parse(req.url).pathname;
-  console.log('Got request on route ' + route);
   switch (route) {
   case '/': handleBundleRequest(req, res); break;
   case '/done': handleProcessCompletion(req, res); break;
