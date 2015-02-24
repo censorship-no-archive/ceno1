@@ -3,7 +3,7 @@
 
 <project name="ceno-plugin" default="dist" basedir=".">
 	<property name="freenet-cvs-snapshot.location" location="../fred/dist/freenet.jar"/>
-	<property name="freenet-ext.location" location="../fred/lib/freenet/freenet-ext.jar"/>
+	<!-- <property name="freenet-ext.location" location="../fred/lib/freenet/freenet-ext.jar"/> -->
 	<property name="svn.revision" value="@custom@"/>
 	<property name="source-version" value="1.5"/>
 	<property name="build" location="build/"/>
@@ -27,7 +27,7 @@
 		<mkdir dir="${build-test}"/>
 		<mkdir dir="${dist}"/>
 		<echo message="Using ${freenet-cvs-snapshot.location} as freenet-cvs-snapshot.jar"/>
-		<echo message="Using ${freenet-ext.location} as freenet-ext.jar"/>
+		<!-- <echo message="Using ${freenet-ext.location} as freenet-ext.jar"/> -->
 	</target>
 	
 	<target name="setver" if="version.present">
@@ -46,7 +46,7 @@
 		<!-- FIXME: remove the debug and replace with optimize -->
 		<javac srcdir="src/" destdir="${build}" debug="on" optimize="on" source="${source-version}">
 			<classpath>
-				<pathelement location="${freenet-ext.location}"/>
+				<!-- <pathelement location="${freenet-ext.location}"/> -->
                 <pathelement location="${freenet-cvs-snapshot.location}"/>
                 <pathelement location="${jetty-all.location}"/>
                 <pathelement location="${jetty-serverlet.location}"/>
@@ -66,7 +66,7 @@
 		<javac srcdir="src/" destdir="${build-test}" debug="on" optimize="on" source="1.5">
 			<classpath>
 				<pathelement path="${build}"/>
-				<pathelement location="${freenet-ext.location}"/>
+				<!-- <pathelement location="${freenet-ext.location}"/> -->
 				<pathelement location="${freenet-cvs-snapshot.location}"/>
 				<pathelement location="${junit.location}"/>
 			</classpath>
@@ -80,7 +80,7 @@
 			<classpath>
 				<pathelement path="${build}"/>
 				<pathelement path="${build-test}"/>
-				<pathelement location="${freenet-ext.location}"/>
+				<!-- <pathelement location="${freenet-ext.location}"/> -->
 				<pathelement location="${freenet-cvs-snapshot.location}"/>
 				<pathelement location="${junit.location}"/>
 			</classpath>
