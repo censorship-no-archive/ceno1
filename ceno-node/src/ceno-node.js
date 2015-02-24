@@ -21,6 +21,11 @@ var address = '127.0.0.1';
 var dbDir = './db';
 var db = diskdb.connect(dbDir, ['processes']);
 
+// Wipe all the existing processes so we don't infinitely wait for a
+// bundle that isn't actually being produced
+db.processes.remove();
+db.loadCollections(['processes']);
+
 /* Parse the contents of a POST request.
  */
 function parsePostBody(req, limit, callback) {
