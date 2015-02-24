@@ -1,15 +1,23 @@
 package plugins.CeNo;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import net.minidev.json.JSONObject;
+import net.minidev.json.JSONValue;
+import net.minidev.json.parser.ParseException;
+
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
+import freenet.client.InsertException;
 import freenet.keys.FreenetURI;
 
 public abstract class CeNoHandler extends AbstractHandler {
@@ -40,18 +48,7 @@ public abstract class CeNoHandler extends AbstractHandler {
 		baseRequest.setHandled(true);
 	}
 
-	/**
-	 * Computes the USK for a given URL so that:
-	 * <ul>
-	 *   <li> CeNo can lookup if this URL has been cached before</li>
-	 *   <li> CeNo knows the insert USK to use when caching a bundle</li>
-	 * </ul>
-	 * 
-	 * @param requestPath the URL requested by the user/bundler
-	 * @return the calculated FreenetURI that corresponds to that resource
-	 * @throws MalformedURLException
-	 */
-	protected FreenetURI computeUSKfromURL(String requestPath) throws MalformedURLException {
+	protected Map<String, String> splitURL(String requestPath) throws MalformedURLException {
 		// Remove protocol from URL
 		requestPath = requestPath.replaceFirst("http://|https://", "");
 
@@ -71,10 +68,53 @@ public abstract class CeNoHandler extends AbstractHandler {
 			extraPath = requestPath.substring(slashIndex + 1, requestPath.length());
 		}
 
+		Map<String, String> splitMap = new HashMap<String, String>();
+		splitMap.put("domain", domain);
+		splitMap.put("extraPath", extraPath);
+		return splitMap;
+	}
+	
+	protected JSONObject readJSONbody(BufferedReader r) throws IOException, ParseException {
+		JSONObject readJSON;
+		try {
+			readJSON = (JSONObject) JSONValue.parseWithException(r);
+		} catch (ClassCastException e) {
+			return new JSONObject();
+		}
+		return readJSON;
+	}
+
+	/**
+	 * Computes the USK for a given URL so that:
+	 * <ul>
+	 *   <li> CeNo can lookup if this URL has been cached before</li>
+	 *   <li> CeNo knows the insert USK to use when caching a bundle</li>
+	 * </ul>
+	 * 
+	 * @param requestPath the URL requested by the user/bundler
+	 * @return the calculated FreenetURI that corresponds to that resource
+	 * @throws MalformedURLException
+	 */
+	protected FreenetURI computeUSKfromURL(String requestPath) throws MalformedURLException {
+		Map<String, String> splitMap = splitURL(requestPath);
 		String requestURI = CeNo.initConfig.getProperty("requestURI");
-		String computedKey = requestURI.replaceFirst("SSK", "USK") + domain + "/-1/" + extraPath;
+		String computedKey = requestURI.replaceFirst("SSK", "USK") + splitMap.get("domain") + "/-1/" + splitMap.get("extraPath");
 
 		return new FreenetURI(computedKey);
+	}
+	
+	protected FreenetURI computeInsertURI(String domain) throws MalformedURLException {
+		String insertURI = CeNo.initConfig.getProperty("insertURI");
+		FreenetURI insertURIconfig = new FreenetURI(insertURI);
+		//String computedKey = insertURI.replaceFirst("SSK", "USK") + "-1/";
+		FreenetURI result = new FreenetURI("USK", domain, insertURIconfig.getRoutingKey(), insertURIconfig.getCryptoKey(), insertURIconfig.getExtra());
+		
+		try {
+			result.checkInsertURI();
+		} catch (InsertException e) {
+			throw new MalformedURLException("The computed URI failed checkInsertURI()");
+		}
+		return result;
 	}
 
 	/* Extract meta strings from FreenetURI
