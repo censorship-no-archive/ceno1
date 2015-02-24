@@ -18,7 +18,8 @@
     "mime": "latest",
     "js-yaml": "latest",
     "cheerio": "latest",
-    "require": "latest"
+    "require": "latest",
+    "equalitie-bundler": "~1.0.0"
   },
   "devDependencies": {
     "grunt-contrib-jshint": "latest",
