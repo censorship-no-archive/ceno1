@@ -1,7 +1,6 @@
 package plugins.CeNo;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.MalformedURLException;
 
 import javax.servlet.ServletException;
@@ -13,12 +12,11 @@ import net.minidev.json.JSONObject;
 import org.eclipse.jetty.server.Request;
 
 import plugins.CeNo.BridgeInterface.Bundle;
+import plugins.CeNo.FreenetInterface.HighLevelSimpleClientInterface;
 import freenet.client.FetchException;
 import freenet.client.FetchException.FetchExceptionMode;
 import freenet.client.FetchResult;
 import freenet.keys.FreenetURI;
-import freenet.support.api.Bucket;
-import freenet.support.io.BucketTools;
 
 /* ------------------------------------------------------------ */
 /** CeNo Plugin Http Communication and Serving server.
@@ -40,7 +38,6 @@ public class CacheLookupHandler extends CeNoHandler {
 		String urlParam = (request.getParameter("url") != null) ? request.getParameter("url") : requestPath;
 		if (urlParam.isEmpty() && requestPath.isEmpty()) {
 			writeWelcome(baseRequest, response, requestPath);
-			return;
 		} else if (requestPath.startsWith("USK@") || requestPath.startsWith("SSK@")) {
 			FetchResult result = null;
 			try {
@@ -57,10 +54,11 @@ public class CacheLookupHandler extends CeNoHandler {
 					// The requested URL has not been found in the cache
 					// Return JSON {"bundleFound": "false"}
 					JSONObject jsonResponse = new JSONObject();
+					jsonResponse.put("bundleFound", false);
 					response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-					jsonResponse.put("bundleFound", "false");
-					response.setContentType("application/javascript");
-					response.getOutputStream().println(jsonResponse.toJSONString());
+					response.setContentType("application/json;charset=utf-8");
+
+					response.getWriter().print(jsonResponse.toJSONString());
 					baseRequest.setHandled(true);
 					return;
 				} else{
@@ -73,19 +71,25 @@ public class CacheLookupHandler extends CeNoHandler {
 				// Bundler for the requested URL has been successfully retrieved
 				Bundle bundle = new Bundle(urlParam);
 				bundle.setContent(result.asByteArray());
-				
+
 				response.setContentType(result.getMimeType());
 				response.setStatus(HttpServletResponse.SC_OK);
-				response.setContentType("application/javascript");
+				response.setContentType("application/json;charset=utf-8");
 				JSONObject jsonResponse = new JSONObject();
-				jsonResponse.put("bundleFound", "true");
+				jsonResponse.put("bundleFound", true);
 				jsonResponse.put("bundle", bundle.getContent());
-				
-				response.getOutputStream().println(jsonResponse.toJSONString());
+
+				response.getWriter().print(jsonResponse.toJSONString());
+				baseRequest.setHandled(true);
+				return;
 			} else {
 				// Error while retrieving the bundle from the cache
 				writeError(baseRequest, response, requestPath);
 			}
+		// Stop background requests normally made by browsers for website resources,
+		// that could start a time-consuming lookup in freenet
+		} else if (requestPath.equals("favicon.ico")) {
+			writeNotFound(baseRequest, response, requestPath);
 		} else {
 			// Request path is in form of URL
 			// Calculate its USK and redirect the request

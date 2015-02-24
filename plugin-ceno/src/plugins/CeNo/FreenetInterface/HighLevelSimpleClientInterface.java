@@ -1,4 +1,6 @@
-package plugins.CeNo;
+package plugins.CeNo.FreenetInterface;
+
+import java.util.HashMap;
 
 import freenet.client.FetchException;
 import freenet.client.FetchResult;
@@ -53,7 +55,7 @@ public class HighLevelSimpleClientInterface {
 		FetchResult result = HLSCInterface.client.fetch(uri);
 		return result;
 	}
-	
+
 	/**
 	 * Generates a new key pair, consisting of the insert URI at index 0 and the
 	 * request URI at index 1.
@@ -63,10 +65,14 @@ public class HighLevelSimpleClientInterface {
 	 * @return An array containing the insert and request URI
 	 */
 	public static FreenetURI[] generateKeyPair(String docName) {
-		FreenetURI[] keyPair = HLSCInterface.generateKeyPair(docName);
+		FreenetURI[] keyPair = HLSCInterface.client.generateKeyPair(docName);
 		return keyPair;
 	}
-	
+
+	public static InsertContext getInsertContext(boolean b) {
+		return HLSCInterface.client.getInsertContext(b);
+	}
+
 	/**
 	 * Non-blocking insert.
 	 * @param isMetadata If true, insert metadata.
@@ -75,8 +81,24 @@ public class HighLevelSimpleClientInterface {
 	 * @param ctx Insert context so you can customise the insertion process.
 	 */
 	public static ClientPutter insert(InsertBlock insert, String filenameHint, boolean isMetadata, InsertContext ctx, ClientPutCallback cb) throws InsertException {
-		ClientPutter clientPutter = HLSCInterface.insert(insert, filenameHint, isMetadata, ctx, cb);
+		ClientPutter clientPutter = HLSCInterface.client.insert(insert, filenameHint, isMetadata, ctx, cb);
 		return clientPutter;
 	}
+
+	/**
+	 * Non-blocking insert.
+	 * @param isMetadata If true, insert metadata.
+	 * @param cb Will be called when the insert completes. If the request is persistent
+	 * this will be called on the database thread with a container parameter.
+	 * @param ctx Insert context so you can customise the insertion process.
+	 */
+	public static ClientPutter insert(InsertBlock insert, String filenameHint, boolean isMetadata, InsertContext ctx, ClientPutCallback cb, short priority) throws InsertException {
+		return HLSCInterface.client.insert(insert, filenameHint, isMetadata, ctx, cb, priority);
+	}
+	
+	public static FreenetURI insertManifest(FreenetURI insertURI, HashMap<String, Object> bucketsByName, String defaultName, short priorityClass) throws InsertException {
+		return HLSCInterface.client.insertManifest(insertURI, bucketsByName, defaultName, priorityClass);
+	}
+
 
 }

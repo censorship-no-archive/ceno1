@@ -9,3 +9,11 @@ node_modules
 proxy.log
 
 ../fred
+
+# Vim temporary files
+.swp
+
+# Database files in the future
+ceno-node/src/db/*
+
+ceno-node/test/db/*
