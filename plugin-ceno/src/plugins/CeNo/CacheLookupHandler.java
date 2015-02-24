@@ -12,6 +12,7 @@ import net.minidev.json.JSONObject;
 import org.eclipse.jetty.server.Request;
 
 import plugins.CeNo.BridgeInterface.Bundle;
+import plugins.CeNo.FreenetInterface.HighLevelSimpleClientInterface;
 import freenet.client.FetchException;
 import freenet.client.FetchException.FetchExceptionMode;
 import freenet.client.FetchResult;
@@ -53,7 +54,7 @@ public class CacheLookupHandler extends CeNoHandler {
 					// The requested URL has not been found in the cache
 					// Return JSON {"bundleFound": "false"}
 					JSONObject jsonResponse = new JSONObject();
-					jsonResponse.put("bundleFound", "false");
+					jsonResponse.put("bundleFound", false);
 					response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 					response.setContentType("application/json;charset=utf-8");
 
@@ -75,7 +76,7 @@ public class CacheLookupHandler extends CeNoHandler {
 				response.setStatus(HttpServletResponse.SC_OK);
 				response.setContentType("application/json;charset=utf-8");
 				JSONObject jsonResponse = new JSONObject();
-				jsonResponse.put("bundleFound", "true");
+				jsonResponse.put("bundleFound", true);
 				jsonResponse.put("bundle", bundle.getContent());
 
 				response.getWriter().print(jsonResponse.toJSONString());
