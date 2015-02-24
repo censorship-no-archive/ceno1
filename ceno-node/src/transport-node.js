@@ -2,7 +2,7 @@ var http = require('http');
 var urllib = require('url');
 var querystring = require('querystring');
 var request = require('superagent');
-var bundler = require('../lib/bundler');
+var bundling = require('equalitie-bundler');
 
 var portNumber = 3093;
 var currentProcessID = 0;
@@ -43,7 +43,15 @@ function reportDone(pid) {
  * as informing CeNo client of the process' completion.
  */
 function bundle(url, pid) {
-  bundler.makeBundle(url, function (err, bundle) {
+  console.log('Making bundler for ' + url);
+  var bundler = new bundling.Bundler(url);
+  bundler.on('originalReceived', bundling.replaceImages);
+  bundler.on('originalReceived', bundling.replaceCSSFiles);
+  bundler.on('originalReceived', bundling.replaceJSFiles);
+  bundler.on('originalReceived', bundling.replaceURLCalls);
+  bundler.on('resourceReceived', bundling.bundleCSSRecursively);
+
+  bundler.bundle(function (err, bundle) {
     if (err) {
       // In the case that we fail to compile a bundle, we report to CeNo client that
       // the process is finished without caching anything so that the process
@@ -59,6 +67,7 @@ function bundle(url, pid) {
 
 function handleRequests(req, res) {
   var url = querystring.parse(urllib.parse(req.url).query).url;
+  console.log('Got request to bundle ' + url);
   res.writeHead(200, {'Content-Type': 'application/json'});
   res.write('{"processID": ' + currentProcessID + '}');
   res.end();
