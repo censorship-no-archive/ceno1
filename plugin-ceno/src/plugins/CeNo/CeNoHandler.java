@@ -48,7 +48,7 @@ public abstract class CeNoHandler extends AbstractHandler {
 		baseRequest.setHandled(true);
 	}
 
-	private Map<String, String> splitURL(String requestPath) throws MalformedURLException {
+	protected Map<String, String> splitURL(String requestPath) throws MalformedURLException {
 		// Remove protocol from URL
 		requestPath = requestPath.replaceFirst("http://|https://", "");
 
@@ -103,12 +103,11 @@ public abstract class CeNoHandler extends AbstractHandler {
 		return new FreenetURI(computedKey);
 	}
 	
-	protected FreenetURI computeInsertURI(String requestPath) throws MalformedURLException {
-		Map<String, String> splitMap = splitURL(requestPath);
+	protected FreenetURI computeInsertURI(String domain) throws MalformedURLException {
 		String insertURI = CeNo.initConfig.getProperty("insertURI");
 		FreenetURI insertURIconfig = new FreenetURI(insertURI);
 		//String computedKey = insertURI.replaceFirst("SSK", "USK") + "-1/";
-		FreenetURI result = new FreenetURI("USK", requestPath, insertURIconfig.getRoutingKey(), insertURIconfig.getCryptoKey(), insertURIconfig.getExtra());
+		FreenetURI result = new FreenetURI("USK", domain, insertURIconfig.getRoutingKey(), insertURIconfig.getCryptoKey(), insertURIconfig.getExtra());
 		
 		try {
 			result.checkInsertURI();

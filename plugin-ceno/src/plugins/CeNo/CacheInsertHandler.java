@@ -1,6 +1,7 @@
 package plugins.CeNo;
 
 import java.io.IOException;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -113,9 +114,10 @@ public class CacheInsertHandler extends CeNoHandler {
 
 		if (!bundle.getContent().isEmpty()) {
 			//TODO non-blocking insert the bundle content in freenet with the computed USK
-			FreenetURI insertKey = computeInsertURI(urlParam);
+			Map<String, String> splitMap = splitURL(urlParam);
+			FreenetURI insertKey = computeInsertURI(splitMap.get("domain"));
 			try {
-				CeNo.nodeInterface.insertFreesite(insertKey, urlParam, bundle.getContent(), new InsertCallback());
+				CeNo.nodeInterface.insertFreesite(insertKey, splitMap.get("extraPath"), bundle.getContent(), new InsertCallback());
 			} catch (InsertException e) {
 				writeError(baseRequest, response, "Error during insertion");
 				return;
