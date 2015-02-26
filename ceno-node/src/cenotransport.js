@@ -10,8 +10,8 @@
 
 var client = require('./ceno-node');
 var transport = require('./transport-node');
-var cacheServer = require('../test/cacheserver');
+//var cacheServer = require('../test/cacheserver');
 
-cacheServer.start();
+//cacheServer.start();
 client.start();
 transport.start();
