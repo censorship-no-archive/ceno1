@@ -15,7 +15,7 @@
     "crypto-js": "latest",
     "request": "latest",
     "colors": "latest",
-    "mime": "latest",
+    "mime": "~1.2.11",
     "js-yaml": "latest",
     "cheerio": "latest",
     "require": "latest",
