@@ -61,6 +61,17 @@ public class CacheLookupHandler extends CeNoHandler {
 					response.getWriter().print(jsonResponse.toJSONString());
 					baseRequest.setHandled(true);
 					return;
+				} else if (e.isFatal()) {
+					// Fatal error while fetching the freesite
+					JSONObject jsonResponse = new JSONObject();
+					jsonResponse.put("bundleFound", true);
+					jsonResponse.put("bundle", "<html><body>There was a fatal error while fetching the bundle from freenet. Retrying will not fix this issue.</body></html>");
+					response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+					response.setContentType("application/json;charset=utf-8");
+
+					response.getWriter().print(jsonResponse.toJSONString());
+					baseRequest.setHandled(true);
+					return;
 				} else{
 					e.printStackTrace();
 					writeError(baseRequest, response, requestPath);
