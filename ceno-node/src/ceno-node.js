@@ -16,7 +16,7 @@ var errorPage = path.join(views, '404.html');
 var waitPage = path.join(views, 'wait.html');
 
 var portNumber = 3090;
-var address = '127.0.0.1';
+var address = '0.0.0.0';
 
 var dbDir = './db';
 var db = diskdb.connect(dbDir, ['processes']);

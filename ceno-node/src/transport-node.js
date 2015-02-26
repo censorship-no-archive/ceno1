@@ -7,8 +7,8 @@ var bundling = require('equalitie-bundler');
 var portNumber = 3093;
 var currentProcessID = 0;
 
-var cacheServer = 'localhost:3092';
-var cenoClient = 'localhost:3090';
+var cacheServer = 'http://127.0.0.1:3092';
+var cenoClient = 'http://127.0.0.1:3090';
 
 /* Have the cache server store a bundle for a given url.
  */
