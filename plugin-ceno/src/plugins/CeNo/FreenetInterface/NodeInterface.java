@@ -2,7 +2,6 @@ package plugins.CeNo.FreenetInterface;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
@@ -20,9 +19,7 @@ import freenet.node.Node;
 import freenet.node.RequestClient;
 import freenet.node.RequestStarter;
 import freenet.support.api.Bucket;
-import freenet.support.api.RandomAccessBucket;
 import freenet.support.io.BucketTools;
-import freenet.support.io.FileBucket;
 
 public class NodeInterface implements FreenetInterface {
 
@@ -72,7 +69,7 @@ public class NodeInterface implements FreenetInterface {
 			mimeType = "text/html";
 		}
 		
-		RandomAccessBucket bucket = node.clientCore.persistentTempBucketFactory.makeBucket(content.length());
+		Bucket bucket = node.clientCore.tempBucketFactory.makeBucket(content.length());
 		BucketTools.copyFrom(bucket, new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8), 0, content.length()), content.length());
 
 		InsertBlock ib = new InsertBlock(bucket, new ClientMetadata("text/html"), insertURI);

@@ -14,7 +14,6 @@ import org.eclipse.jetty.server.Request;
 import plugins.CeNo.BridgeInterface.Bundle;
 import plugins.CeNo.FreenetInterface.HighLevelSimpleClientInterface;
 import freenet.client.FetchException;
-import freenet.client.FetchException.FetchExceptionMode;
 import freenet.client.FetchResult;
 import freenet.keys.FreenetURI;
 
@@ -47,7 +46,7 @@ public class CacheLookupHandler extends CeNoHandler {
 				return;
 			} catch (FetchException e) {
 				// USK key has been updated, redirect to the new URI
-				if (e.getMode() == FetchExceptionMode.PERMANENT_REDIRECT) {
+				if (e.getMode() == FetchException.PERMANENT_REDIRECT) {
 					String newURI = "/".concat(e.newURI.toString());
 					response.sendRedirect(newURI);
 				} else if (e.isDNF()) {
@@ -62,14 +61,14 @@ public class CacheLookupHandler extends CeNoHandler {
 					// Fatal error while fetching the freesite
 					JSONObject jsonResponse = new JSONObject();
 					jsonResponse.put("bundleFound", true);
-					jsonResponse.put("bundle", "<html><body>There was a fatal error (" + e.getMode().code + ") while fetching the bundle from freenet. Retrying will not fix this issue.</body></html>");
+					jsonResponse.put("bundle", "<html><body>There was a fatal error (" + e.getMode() + ") while fetching the bundle from freenet. Retrying will not fix this issue.</body></html>");
 					writeJSON(baseRequest, response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, jsonResponse);
 					return;
 				} else{
 					e.printStackTrace();
 					JSONObject jsonResponse = new JSONObject();
 					jsonResponse.put("bundleFound", true);
-					jsonResponse.put("bundle", "<html><body>There was an error (" + e.getMode().code + ") while fetching the bundle from freenet. Please try again.</body></html>");
+					jsonResponse.put("bundle", "<html><body>There was an error (" + e.getMode() + ") while fetching the bundle from freenet. Please try again.</body></html>");
 					writeJSON(baseRequest, response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, jsonResponse);
 					return;
 				}
