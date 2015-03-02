@@ -73,17 +73,18 @@ public class HighLevelSimpleClientInterface {
 		return HLSCInterface.client.getInsertContext(b);
 	}
 
-	/**
-	 * Non-blocking insert.
-	 * @param isMetadata If true, insert metadata.
-	 * @param cb Will be called when the insert completes. If the request is persistent
-	 * this will be called on the database thread with a container parameter.
-	 * @param ctx Insert context so you can customise the insertion process.
-	 */
-	public static ClientPutter insert(InsertBlock insert, String filenameHint, boolean isMetadata, InsertContext ctx, ClientPutCallback cb) throws InsertException {
-		ClientPutter clientPutter = HLSCInterface.client.insert(insert, filenameHint, isMetadata, ctx, cb);
-		return clientPutter;
-	}
+	
+//	/**
+//	 * Non-blocking insert.
+//	 * @param isMetadata If true, insert metadata.
+//	 * @param cb Will be called when the insert completes. If the request is persistent
+//	 * this will be called on the database thread with a container parameter.
+//	 * @param ctx Insert context so you can customise the insertion process.
+//	 */
+//	public static ClientPutter insert(InsertBlock insert, String filenameHint, boolean isMetadata, InsertContext ctx, ClientPutCallback cb) throws InsertException {
+//		ClientPutter clientPutter = HLSCInterface.client.insert(insert, filenameHint, isMetadata, ctx, cb);
+//		return clientPutter;
+//	}
 
 	/**
 	 * Non-blocking insert.
@@ -93,7 +94,7 @@ public class HighLevelSimpleClientInterface {
 	 * @param ctx Insert context so you can customise the insertion process.
 	 */
 	public static ClientPutter insert(InsertBlock insert, String filenameHint, boolean isMetadata, InsertContext ctx, ClientPutCallback cb, short priority) throws InsertException {
-		return HLSCInterface.client.insert(insert, filenameHint, isMetadata, ctx, cb, priority);
+		return HLSCInterface.client.insert(insert, false, filenameHint, isMetadata, ctx, cb, priority);
 	}
 	
 	public static FreenetURI insertManifest(FreenetURI insertURI, HashMap<String, Object> bucketsByName, String defaultName, short priorityClass) throws InsertException {

@@ -13,16 +13,18 @@ import net.minidev.json.parser.ParseException;
 import org.eclipse.jetty.continuation.Continuation;
 import org.eclipse.jetty.continuation.ContinuationSupport;
 import org.eclipse.jetty.server.Request;
+
 import plugins.CeNo.BridgeInterface.Bundle;
+
+import com.db4o.ObjectContainer;
+
 import freenet.client.InsertException;
 import freenet.client.async.BaseClientPutter;
-import freenet.client.async.ClientContext;
 import freenet.client.async.ClientPutCallback;
 import freenet.keys.FreenetURI;
 import freenet.node.RequestClient;
 import freenet.support.Logger;
 import freenet.support.api.Bucket;
-import freenet.support.io.ResumeFailedException;
 
 /* ------------------------------------------------------------ */
 /** CeNo Plugin handler for requests to cache bundles
@@ -50,31 +52,25 @@ public class CacheInsertHandler extends CeNoHandler {
 			this.response = response;
 		}
 
-		public void onResume(ClientContext context)
-				throws ResumeFailedException {
-			// TODO Auto-generated method stub
-
-		}
-
 		public RequestClient getRequestClient() {
 			return CeNo.nodeInterface.getClient();
 		}
 
-		public void onGeneratedURI(FreenetURI uri, BaseClientPutter state) {
+		public void onGeneratedURI(FreenetURI uri, BaseClientPutter state, ObjectContainer container) {
 			this.cachedURI = uri;
 		}
 
-		public void onGeneratedMetadata(Bucket metadata, BaseClientPutter state) {
+		public void onGeneratedMetadata(Bucket metadata, BaseClientPutter state, ObjectContainer container) {
 			// TODO Auto-generated method stub
 
 		}
 
-		public void onFetchable(BaseClientPutter state) {
+		public void onFetchable(BaseClientPutter state, ObjectContainer container) {
 			// TODO Auto-generated method stub
 
 		}
 
-		public void onSuccess(BaseClientPutter state) {
+		public void onSuccess(BaseClientPutter state, ObjectContainer container) {
 			Logger.normal(this, "Caching successful");
 
 			response.setContentType("text/html;charset=utf-8");
@@ -89,7 +85,7 @@ public class CacheInsertHandler extends CeNoHandler {
 			continuation.complete();
 		}
 
-		public void onFailure(InsertException e, BaseClientPutter state) {
+		public void onFailure(InsertException e, BaseClientPutter state, ObjectContainer container) {
 			Logger.error(this, "Failed to insert freesite " + e);
 			try {
 				writeError(baseRequest, response, "not stored");
@@ -98,6 +94,11 @@ public class CacheInsertHandler extends CeNoHandler {
 				e1.printStackTrace();
 			}
 			continuation.complete();
+		}
+
+		public void onMajorProgress(ObjectContainer container) {
+			// TODO Auto-generated method stub
+			
 		}
 
 	}
@@ -158,6 +159,8 @@ public class CacheInsertHandler extends CeNoHandler {
 			} catch (InsertException e) {
 				writeError(baseRequest, response, "Error during insertion");
 				return;
+			} catch (Exception e1) {
+				writeError(baseRequest, response, "Exception during insertion: " + e1.getMessage());
 			}
 			continuation.suspend();
 		} else {

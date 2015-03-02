@@ -47,6 +47,13 @@ public abstract class CeNoHandler extends AbstractHandler {
 		response.getWriter().print("Resource not found: " + requestPath);
 		baseRequest.setHandled(true);
 	}
+	
+	protected void writeJSON(Request baseRequest, HttpServletResponse response, int responseStatus, JSONObject jsonResponse) throws IOException {
+		response.setStatus(responseStatus);
+		response.setContentType("application/json;charset=utf-8");
+		response.getWriter().print(jsonResponse.toJSONString());
+		baseRequest.setHandled(true);
+	}
 
 	protected Map<String, String> splitURL(String requestPath) throws MalformedURLException {
 		// Remove protocol from URL

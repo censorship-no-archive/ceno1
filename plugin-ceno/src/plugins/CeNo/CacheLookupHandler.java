@@ -14,7 +14,6 @@ import org.eclipse.jetty.server.Request;
 import plugins.CeNo.BridgeInterface.Bundle;
 import plugins.CeNo.FreenetInterface.HighLevelSimpleClientInterface;
 import freenet.client.FetchException;
-import freenet.client.FetchException.FetchExceptionMode;
 import freenet.client.FetchResult;
 import freenet.keys.FreenetURI;
 
@@ -47,7 +46,7 @@ public class CacheLookupHandler extends CeNoHandler {
 				return;
 			} catch (FetchException e) {
 				// USK key has been updated, redirect to the new URI
-				if (e.getMode() == FetchExceptionMode.PERMANENT_REDIRECT) {
+				if (e.getMode() == FetchException.PERMANENT_REDIRECT) {
 					String newURI = "/".concat(e.newURI.toString());
 					response.sendRedirect(newURI);
 				} else if (e.isDNF()) {
@@ -55,15 +54,22 @@ public class CacheLookupHandler extends CeNoHandler {
 					// Return JSON {"bundleFound": "false"}
 					JSONObject jsonResponse = new JSONObject();
 					jsonResponse.put("bundleFound", false);
-					response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-					response.setContentType("application/json;charset=utf-8");
-
-					response.getWriter().print(jsonResponse.toJSONString());
-					baseRequest.setHandled(true);
+					writeJSON(baseRequest, response, HttpServletResponse.SC_NOT_FOUND, jsonResponse);
+					return;
+				} else if (e.isFatal()) {
+					e.printStackTrace();
+					// Fatal error while fetching the freesite
+					JSONObject jsonResponse = new JSONObject();
+					jsonResponse.put("bundleFound", true);
+					jsonResponse.put("bundle", "<html><body>There was a fatal error (" + e.getMode() + ") while fetching the bundle from freenet. Retrying will not fix this issue.</body></html>");
+					writeJSON(baseRequest, response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, jsonResponse);
 					return;
 				} else{
 					e.printStackTrace();
-					writeError(baseRequest, response, requestPath);
+					JSONObject jsonResponse = new JSONObject();
+					jsonResponse.put("bundleFound", true);
+					jsonResponse.put("bundle", "<html><body>There was an error (" + e.getMode() + ") while fetching the bundle from freenet. Please try again.</body></html>");
+					writeJSON(baseRequest, response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, jsonResponse);
 					return;
 				}
 			}
@@ -72,15 +78,10 @@ public class CacheLookupHandler extends CeNoHandler {
 				Bundle bundle = new Bundle(urlParam);
 				bundle.setContent(result.asByteArray());
 
-				response.setContentType(result.getMimeType());
-				response.setStatus(HttpServletResponse.SC_OK);
-				response.setContentType("application/json;charset=utf-8");
 				JSONObject jsonResponse = new JSONObject();
 				jsonResponse.put("bundleFound", true);
 				jsonResponse.put("bundle", bundle.getContent());
-
-				response.getWriter().print(jsonResponse.toJSONString());
-				baseRequest.setHandled(true);
+				writeJSON(baseRequest, response, HttpServletResponse.SC_OK, jsonResponse);
 				return;
 			} else {
 				// Error while retrieving the bundle from the cache
