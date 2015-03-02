@@ -1,5 +1,0 @@
-bundler (0.0.1) unstable; urgency=low
-
-  * First version of bundle generation system for Distributed Deflect.
-
- -- Distributed Deflect Packaging <sysops@equalit.ie>  Tue, 11 Jul 2014 15:37:00 +0000
