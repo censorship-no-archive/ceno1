@@ -58,3 +58,17 @@ HTTP methods (GET, POST, PUT, ...) or `write` in the case of a response.  `value
 14. Once User requests <url> again, [GET <url>]
 15.     CC removes <bundle> from temporary memory and writes bundled document. [write <bundle>]
 ```
+
+## Discussion
+
+It is worth noting that the modifications here do not break from the current trend of implementing CeNo Client as its
+own HTTP server.  This will mean that requests will still be subject to timeouts, but this modification should prevent
+them from occurring.
+
+This is accomplished by having the Cache Server respond to lookup requests immediately with a lookup process ID.  Previously,
+requests to have a bundle retrieved from Freenet were timing out, and no "please wait" page was being served because the
+lookup could take a long time.
+
+The biggest benefit to this approach is that CeNo clients can be set up anywhere and used by any number of individuals.
+
+The drawback, of course, is that a CeNo client needs to be accessible from the outside world.
