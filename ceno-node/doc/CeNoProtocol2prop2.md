@@ -6,7 +6,7 @@ a new bundle to serve to a user.
 
 ## Agents
 
-There are four agents in this scenario.
+There are three agents in this scenario.
 
 **CeNo Client** is the client-side HTTP proxy server that the User proxies their requests through. Abbreivated as **CC**.
 
@@ -17,10 +17,6 @@ The **Transport Server** is the server responsible for creating new bundles. Abb
 ## Syntax
 
 `<url>` will always refer to the URL to be fetched, bundled, and cached.
-
-`<lid>` will always refer to the process ID (lookup ID) the Cache Server is running to find a bundle.
-
-`<bid>` will always refer to the process ID (bundle ID) the Tranport Server is running to create  a new bundle.
 
 `<bundle>` will always refer to the bundlded document corresponding to `<url>`.
 
