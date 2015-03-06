@@ -13,7 +13,11 @@ import plugins.CeNo.FreenetInterface.HighLevelSimpleClientInterface;
 import plugins.CeNo.FreenetInterface.NodeInterface;
 
 
-public class CeNo implements FredPlugin {
+public class CeNo implements FredPlugin, FredPluginVersioned, FredPluginRealVersioned {
+
+	// Versions of the plugin, in human-readable and "real" format
+	public static final String VERSION = "0.1.0";
+	public static final int REAL_VERSION = 1;
 
 	private PluginRespirator pluginRespirator;
 
@@ -40,7 +44,7 @@ public class CeNo implements FredPlugin {
 		pluginRespirator = pr;
 		client = new HighLevelSimpleClientInterface(pluginRespirator.getHLSimpleClient());
 		nodeInterface = new NodeInterface(pluginRespirator.getNode());
-		
+
 		// Read properties of the configuration file
 		initConfig = new Configuration();
 		initConfig.readProperties();
@@ -99,6 +103,14 @@ public class CeNo implements FredPlugin {
 		// Add the configured ContextHandlers to the server
 		handlers.addHandler(cacheLookupCtxHandler);
 		handlers.addHandler(cacheInsertCtxHandler);
+	}
+
+	public String getVersion() {
+		return VERSION;
+	}
+
+	public long getRealVersion() {
+		return REAL_VERSION;
 	}
 
 	/**
