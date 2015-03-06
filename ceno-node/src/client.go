@@ -14,19 +14,43 @@ const (
 	BRIDGE_SERVER = "localhost:3093"
 )
 
-func writeErrorPage(w http.ResponseWriter) {
+func writeErrorPage(w http.ResponseWriter) bool {
 	fmt.Fprint(w, "ERROR")
-}
-
-func askBridgeForBundle(url string, w http.ResponseWriter) bool {
 	return false
 }
 
-func requestNewBundle(url string, w http.ResponseWriter) {
+func askBridgeForBundle(url string, w http.ResponseWriter) bool {
+	remoteAddr, _ := net.ResolveTCPAddr("tcp", BRIDGE_SERVER)
+	conn, err := net.DialTCP("tcp", nil, remoteAddr)
+	readyMSG := []byte("READY\n")
+	endMSG := []byte("END\n")
+	if err != nil {
+		fmt.Println("Could not establish connection to bridge server at " + BRIDGE_SERVER)
+		return false // Failed to get new bundle
+	}
+	reader := bufio.NewReader(conn)
+	conn.Write([]byte("BUNDLE " + url + "\n"))
+	result, _ := reader.ReadString('\n')
+	if !strings.HasPrefix(result, "COMPLETE") {
+		fmt.Println("Bridge server not adhering to protocol.")
+		fmt.Println("In response to BUNDLE, sent " + result)
+		conn.Write(endMSG)
+		conn.Close()
+		return false
+	}
+	conn.Write(readyMSG)
+	bundle, _ := ioutil.ReadAll(reader)
+	w.Write(bundle)
+	conn.Close()
+	return true
+}
+
+func requestNewBundle(url string, w http.ResponseWriter) bool {
 	success := askBridgeForBundle(url, w)
 	if !success {
-		writeErrorPage(w)
+		return writeErrorPage(w)
 	}
+	return success
 }
 
 // Check if a bundle has already been cached and, if so, write it to the ResponseWriter
@@ -44,7 +68,7 @@ func readFromCache(url string, w http.ResponseWriter) bool {
 	result, _ := reader.ReadString('\n')
 	if !strings.HasPrefix(result, "RESULT") {
 		fmt.Println("Edge server not adhering to protocol.")
-		fmt.Println("In response to LOOKUP, sent " + string(result))
+		fmt.Println("In response to LOOKUP, sent " + result)
 		conn.Write(okayMSG)
 		conn.Close()
 		return false
@@ -72,7 +96,8 @@ func readFromCache(url string, w http.ResponseWriter) bool {
 // be made by a bridge/transport server.
 func proxyHandler(w http.ResponseWriter, r *http.Request) {
 	requestedURL := r.URL.String()
-	succeeded := readFromCache(requestedURL, w)
+	//succeeded := readFromCache(requestedURL, w)
+	succeeded := requestNewBundle(requestedURL, w)
 	if succeeded {
 		fmt.Println("Successfully served bundle")
 	} else {
