@@ -24,7 +24,7 @@ type Process struct {
 
 type Request struct {
 	URL    string
-	Writer http.ResponseWriter
+	Output chan []byte
 	Source string
 }
 
@@ -114,10 +114,15 @@ func readFromCache(url string, reportCompletion chan Process) bool {
 func getBundle(url string, reportCompletion chan Process) {
 	foundInCache := readFromCache(url, reportCompletion)
 	if !foundInCache {
+		fmt.Println("Did not find a bundle for " + url + " in cache")
 		producedBundle := requestNewBundle(url, reportCompletion)
 		if !producedBundle {
 			fmt.Println("Error; Could not produce new bundle")
+		} else {
+			fmt.Println("Created a new bundle for " + url)
 		}
+	} else {
+		fmt.Println("Found bundle for " + url + " in cache")
 	}
 }
 
@@ -131,8 +136,9 @@ func issueBundles(requests chan Request) {
 		case request := <-requests:
 			_, exists := processes[request.URL]
 			if exists { // We have already started processing a lookup or bundling for this URL
+				fmt.Println("Existing process to bundle " + request.URL + " found")
 				if len(processes[request.URL].Bundle) > 0 { //The bundle has been prepared
-					request.Writer.Write(processes[request.URL].Bundle)
+					request.Output <- processes[request.URL].Bundle
 					_, hasRequested := processes[request.URL].Clients[request.Source]
 					if hasRequested {
 						// Remove the source of the request from the set of clients
@@ -141,10 +147,12 @@ func issueBundles(requests chan Request) {
 					}
 					if len(processes[request.URL].Clients) == 0 {
 						// Remove the process from memory since no one is waiting on it
+						fmt.Println("Removing process for " + request.URL)
 						delete(processes, request.URL)
 					}
 				} else {
-					request.Writer.Write(pleaseWait(request.URL))
+					fmt.Println("Serving please wait page to " + request.Source)
+					request.Output <- pleaseWait(request.URL)
 					_, hasRequested := processes[request.URL].Clients[request.Source]
 					if !hasRequested {
 						// Add the new source to the set of clients waiting for the bundle
@@ -153,14 +161,18 @@ func issueBundles(requests chan Request) {
 				}
 			} else {
 				// Start a new process for the requested URL's bundle
+				fmt.Println("Creating a new process to get the bundle for " + request.URL)
 				firstClient := make(map[string]bool)
 				firstClient[request.Source] = true
 				processes[request.URL] = Process { Clients: firstClient, Bundle: []byte(""), URL: request.URL }
 				go getBundle(request.URL, finishedProcesses)
+				request.Output <- pleaseWait(request.URL)
 			}
 		case finished := <-finishedProcesses:
 			// When either a successful cache lookup completes or a new bundle is produced,
 			// store the bundle's contents in an existing process to be fetched by clients
+			fmt.Println("Finished retrieving a bundle for " + finished.URL)
+			fmt.Println("-> It contains " + string(finished.Bundle))
 			_, stillWorking := processes[finished.URL]
 			if stillWorking {
 				// Cannot assign directly to a map's struct value so use this workaround
@@ -176,7 +188,12 @@ func makeProxyHandler(toDealer chan Request) func(http.ResponseWriter, *http.Req
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Leave it to the bundle dealer to serve the bundle or please wait page.
 		// This avoids duplicating bundles in memory through a channel.
-		toDealer <- Request { r.RequestURI, w, r.RemoteAddr }
+		fmt.Println("Requesting bundle for " + r.RequestURI + " on behalf of " + r.RemoteAddr)
+		out := make(chan []byte)
+		toDealer <- Request { r.RequestURI, out, r.RemoteAddr }
+		page := <-out
+		fmt.Println("Got page " + string(page))
+		w.Write(page)
 	}
 }
 
