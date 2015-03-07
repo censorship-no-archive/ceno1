@@ -5,6 +5,7 @@ var bundler = require('equalitie-bundler');
 // Make these values configurable
 var cacheServerAddress = 'localhost';
 var cacheServerPort = 3092;
+var port = 3093;
 
 // Send a bundle for a given URL to the cache server for storage
 function cacheBundle(url, bundle) {
@@ -67,4 +68,8 @@ var server = net.createServer(function (client) {
       client.end();
     }
   });
+});
+
+server.listen(port, function () {
+  console.log('Transport server listening on port ' + port);
 });
