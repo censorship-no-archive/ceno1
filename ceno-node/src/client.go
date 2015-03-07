@@ -33,12 +33,6 @@ func pleaseWait(url string) []byte {
 	return bytes.Replace(content, []byte("{{REDIRECT}}"), []byte(url), 1)
 }
 
-func writeErrorPage(w http.ResponseWriter) bool {
-	fmt.Fprintln(w, "Unfortunately, the page you have requested cannot be fetched at this time.")
-	fmt.Fprintln(w, "Please try again in a moment.")
-	return false
-}
-
 // Have the Transport Server create a new bundle
 func askBridgeForBundle(url string, reportCompletion chan Process) bool {
 	remoteAddr, _ := net.ResolveTCPAddr("tcp", BRIDGE_SERVER)
@@ -141,11 +135,13 @@ func issueBundles(requests chan Request) {
 				fmt.Println("Existing process to bundle " + request.URL + " found")
 				if len(processes[request.URL].Bundle) > 0 { //The bundle has been prepared
 					request.Output <- processes[request.URL].Bundle
-					_, hasRequested := processes[request.URL].Clients[request.Source]
+					p, hasRequested := processes[request.URL].Clients[request.Source]
+					fmt.Println(p)
 					if hasRequested {
 						// Remove the source of the request from the set of clients
 						// so we can get closer to removing the bundle from memory
 						delete(processes[request.URL].Clients, request.Source)
+						fmt.Println("Removed " + request.Source + " as a client")
 					}
 					if len(processes[request.URL].Clients) == 0 {
 						// Remove the process from memory since no one is waiting on it
@@ -193,7 +189,8 @@ func makeProxyHandler(toDealer chan Request) func(http.ResponseWriter, *http.Req
 		// This avoids duplicating bundles in memory through a channel.
 		fmt.Println("Requesting bundle for " + r.RequestURI + " on behalf of " + r.RemoteAddr)
 		out := make(chan []byte)
-		toDealer <- Request { r.RequestURI, out, r.RemoteAddr }
+		host, _, _ := net.SplitHostPort(r.RemoteAddr)
+		toDealer <- Request { r.RequestURI, out, host }
 		page := <-out
 		w.Write(page)
 	}
