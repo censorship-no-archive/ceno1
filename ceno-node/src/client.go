@@ -135,6 +135,8 @@ func issueBundles(requests chan Request) {
 		select {
 		case request := <-requests:
 			_, exists := processes[request.URL]
+			fmt.Println("### Processes ###")
+			fmt.Println(processes)
 			if exists { // We have already started processing a lookup or bundling for this URL
 				fmt.Println("Existing process to bundle " + request.URL + " found")
 				if len(processes[request.URL].Bundle) > 0 { //The bundle has been prepared
@@ -172,13 +174,14 @@ func issueBundles(requests chan Request) {
 			// When either a successful cache lookup completes or a new bundle is produced,
 			// store the bundle's contents in an existing process to be fetched by clients
 			fmt.Println("Finished retrieving a bundle for " + finished.URL)
-			fmt.Println("-> It contains " + string(finished.Bundle))
 			_, stillWorking := processes[finished.URL]
 			if stillWorking {
 				// Cannot assign directly to a map's struct value so use this workaround
 				tempProc := processes[finished.URL]
-				copy(tempProc.Bundle, finished.Bundle)
+				tempProc.Bundle = finished.Bundle
+				fmt.Println(tempProc)
 				processes[finished.URL] = tempProc
+				fmt.Println(processes)
 			}
 		}
 	}
@@ -192,7 +195,6 @@ func makeProxyHandler(toDealer chan Request) func(http.ResponseWriter, *http.Req
 		out := make(chan []byte)
 		toDealer <- Request { r.RequestURI, out, r.RemoteAddr }
 		page := <-out
-		fmt.Println("Got page " + string(page))
 		w.Write(page)
 	}
 }
