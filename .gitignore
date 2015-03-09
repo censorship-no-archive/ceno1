@@ -8,6 +8,14 @@ node_modules
 /cache
 proxy.log
 
+# Test cache server bundle storage
+src/bundles/
+bundles/
+
+# CeNo client build
+src/client
+client
+
 ../fred
 
 # Vim temporary files
