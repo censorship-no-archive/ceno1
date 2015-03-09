@@ -7,7 +7,7 @@ cacheserver.bind(('localhost', 3092))
 cacheserver.listen(1)
 
 client.connect(('localhost', 3093))
-client.send('BUNDLE http://google.com/\n')
+client.send('BUNDLE http://news.ycombinator.com/\n')
 complete = client.recv(2048)
 print('(client) From transport: ' + complete)
 client.send('READY\n')
