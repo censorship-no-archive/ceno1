@@ -1,17 +1,13 @@
 var net = require('net');
+var path = require('path');
 var bundler = require('equalitie-bundler');
-
-// TODO
-// Make these values configurable
-var cacheServerAddress = 'localhost';
-var cacheServerPort = 3092;
-var port = 3093;
+var config = require(path.join('..', 'config', 'transport.js'));
 
 // Send a bundle for a given URL to the cache server for storage
 function cacheBundle(url, bundle) {
   var client = net.connect({
-    host: cacheServerAddress,
-    port: cacheServerPort
+    host: config.cacheServerAddress,
+    port: config.cacheServerPort
   }, function () { // Connection event
     client.write('STORE ' + url + '\n');
   });
@@ -70,6 +66,6 @@ var server = net.createServer(function (client) {
   });
 });
 
-server.listen(port, function () {
-  console.log('Transport server listening on port ' + port);
+server.listen(config.port, function () {
+  console.log('Transport server listening on port ' + config.port);
 });

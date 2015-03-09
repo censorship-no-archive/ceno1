@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"fmt"
 	"net"
 	"net/http"
@@ -8,12 +9,8 @@ import (
 	"io/ioutil"
 	"strings"
 	"bytes"
-)
-
-const (
-	EDGE_SERVER = "localhost:3091"
-	BRIDGE_SERVER = "localhost:3093"
-	ERROR_MSG = "The page you requested could not be fetched at this time.\nPlease try again in a moment.\n"
+	"encoding/json"
+	"path"
 )
 
 type Process struct {
@@ -28,19 +25,28 @@ type Request struct {
 	Source string
 }
 
+// Configuration struct to be replaced by a decoded JSON file's contents.
+var Configuration = struct {
+	PortNumber     string
+	EdgeServer     string
+	BridgeServer   string
+	ErrorMsg       string
+	PleaseWaitPage string
+} {}
+
 func pleaseWait(url string) []byte {
-	content, _ := ioutil.ReadFile("views/wait.html")
+	content, _ := ioutil.ReadFile(Configuration.PleaseWaitPage)
 	return bytes.Replace(content, []byte("{{REDIRECT}}"), []byte(url), 1)
 }
 
 // Have the Transport Server create a new bundle
 func askBridgeForBundle(url string, reportCompletion chan Process) bool {
-	remoteAddr, _ := net.ResolveTCPAddr("tcp", BRIDGE_SERVER)
+	remoteAddr, _ := net.ResolveTCPAddr("tcp", Configuration.BridgeServer)
 	conn, err := net.DialTCP("tcp", nil, remoteAddr)
 	readyMSG := []byte("READY\n")
 	endMSG := []byte("END\n")
 	if err != nil {
-		fmt.Println("Could not establish connection to bridge server at " + BRIDGE_SERVER)
+		fmt.Println("Could not establish connection to bridge server at " + Configuration.BridgeServer)
 		return false // Failed to get new bundle
 	}
 	reader := bufio.NewReader(conn)
@@ -63,19 +69,19 @@ func askBridgeForBundle(url string, reportCompletion chan Process) bool {
 func requestNewBundle(url string, reportCompletion chan Process) bool {
 	success := askBridgeForBundle(url, reportCompletion)
 	if !success {
-		reportCompletion <- Process { Clients: nil, Bundle: []byte(ERROR_MSG), URL: url }
+		reportCompletion <- Process { Clients: nil, Bundle: []byte(Configuration.ErrorMsg), URL: url }
 	}
 	return success
 }
 
 // Check if a bundle has already been cached and, if so, write it to the ResponseWriter
 func readFromCache(url string, reportCompletion chan Process) bool {
-	remoteAddr, _ := net.ResolveTCPAddr("tcp", EDGE_SERVER)
+	remoteAddr, _ := net.ResolveTCPAddr("tcp", Configuration.BridgeServer)
 	conn, err := net.DialTCP("tcp", nil, remoteAddr)
 	okayMSG := []byte("OKAY\n")
 	readyMSG := []byte("READY\n")
 	if err != nil {
-		fmt.Println("Could not establish connection to edge server at " + EDGE_SERVER)
+		fmt.Println("Could not establish connection to edge server at " + Configuration.BridgeServer)
 		return false // Failed to lookup
 	}
 	reader := bufio.NewReader(conn)
@@ -192,10 +198,19 @@ func makeProxyHandler(toDealer chan Request) func(http.ResponseWriter, *http.Req
 
 // Create an HTTP proxy server to listen on port 3090
 func main() {
+	// Read the configuration JSON file into the global Configuration
+	configPath := path.Join("..", "config", "client.json")
+	file, _ := os.Open(configPath)
+	decoder := json.NewDecoder(file)
+	err := decoder.Decode(&Configuration)
+	if err != nil {
+		fmt.Println("Could not read configuration file at " + configPath + "\nExiting.")
+		return
+	}
 	toBundleDealer := make(chan Request)
 	// Read requests for bundles for given URLs from toBundleDealer, serve through frBundleDealer
 	go issueBundles(toBundleDealer)
 	http.HandleFunc("/", makeProxyHandler(toBundleDealer))
-	fmt.Println("CeNo proxy server listening at http://localhost:3090")
-	http.ListenAndServe(":3090", nil)
+	fmt.Println("CeNo proxy server listening at http://localhost" + Configuration.PortNumber)
+	http.ListenAndServe(Configuration.PortNumber, nil)
 }
