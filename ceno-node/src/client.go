@@ -88,7 +88,6 @@ func readFromCache(url string, reportCompletion chan Process) bool {
 		conn.Close()
 		return false
 	}
-	fmt.Println(result)
 	if strings.HasSuffix(result, "not found\n") {
 		fmt.Println("No bundle found in cache")
 		conn.Write(okayMSG)
@@ -129,14 +128,11 @@ func issueBundles(requests chan Request) {
 		select {
 		case request := <-requests:
 			_, exists := processes[request.URL]
-			fmt.Println("### Processes ###")
-			fmt.Println(processes)
 			if exists { // We have already started processing a lookup or bundling for this URL
 				fmt.Println("Existing process to bundle " + request.URL + " found")
 				if len(processes[request.URL].Bundle) > 0 { //The bundle has been prepared
 					request.Output <- processes[request.URL].Bundle
-					p, hasRequested := processes[request.URL].Clients[request.Source]
-					fmt.Println(p)
+					_, hasRequested := processes[request.URL].Clients[request.Source]
 					if hasRequested {
 						// Remove the source of the request from the set of clients
 						// so we can get closer to removing the bundle from memory
@@ -175,9 +171,7 @@ func issueBundles(requests chan Request) {
 				// Cannot assign directly to a map's struct value so use this workaround
 				tempProc := processes[finished.URL]
 				tempProc.Bundle = finished.Bundle
-				fmt.Println(tempProc)
 				processes[finished.URL] = tempProc
-				fmt.Println(processes)
 			}
 		}
 	}
