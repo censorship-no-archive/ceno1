@@ -40,11 +40,11 @@ func pleaseWait(url string) []byte {
 }
 
 // Have the Transport Server create a new bundle
-func askBridgeForBundle(url string, reportCompletion chan Process) bool {
+func requestNewBundle(url string, reportCompletion chan Process) bool {
 	remoteAddr, _ := net.ResolveTCPAddr("tcp", Configuration.BridgeServer)
 	conn, err := net.DialTCP("tcp", nil, remoteAddr)
 	readyMSG := []byte("READY\n")
-	endMSG := []byte("END\n")
+	errorMSG := []byte("ERROR expected message COMPLETE\n")
 	if err != nil {
 		fmt.Println("Could not establish connection to bridge server at " + Configuration.BridgeServer)
 		return false // Failed to get new bundle
@@ -53,9 +53,18 @@ func askBridgeForBundle(url string, reportCompletion chan Process) bool {
 	conn.Write([]byte("BUNDLE " + url + "\n"))
 	result, _ := reader.ReadString('\n')
 	if !strings.HasPrefix(result, "COMPLETE") {
-		fmt.Println("Bridge server not adhering to protocol.")
-		fmt.Println("In response to BUNDLE, sent " + result)
-		conn.Write(endMSG)
+		if strings.HasPrefix(result, "ERROR") {
+			fmt.Println("!!! Got error message " + result[strings.Index(result, " "):])
+			// Report process completion so that requests do not sit around in memory.
+			// Serve the error as the bundle so it reaches the user.
+			reportCompletion <- Process { Clients: nil, Bundle: []byte(result), URL: url }
+		} else {
+			fmt.Println("Bridge server not adhering to protocol.")
+			fmt.Println("In response to BUNDLE, sent " + result)
+			conn.Write(errorMSG)
+			// Report process completion so that requests do not sit around in memory.
+			reportCompletion <- Process { Clients: nil, Bundle: errorMSG, URL: url }
+		}
 		conn.Close()
 		return false
 	}
@@ -66,20 +75,13 @@ func askBridgeForBundle(url string, reportCompletion chan Process) bool {
 	return true
 }
 
-func requestNewBundle(url string, reportCompletion chan Process) bool {
-	success := askBridgeForBundle(url, reportCompletion)
-	if !success {
-		reportCompletion <- Process { Clients: nil, Bundle: []byte(Configuration.ErrorMsg), URL: url }
-	}
-	return success
-}
-
 // Check if a bundle has already been cached and, if so, write it to the ResponseWriter
 func readFromCache(url string, reportCompletion chan Process) bool {
-	remoteAddr, _ := net.ResolveTCPAddr("tcp", Configuration.BridgeServer)
+	remoteAddr, _ := net.ResolveTCPAddr("tcp", Configuration.EdgeServer)
 	conn, err := net.DialTCP("tcp", nil, remoteAddr)
 	okayMSG := []byte("OKAY\n")
 	readyMSG := []byte("READY\n")
+	errorMSG := []byte("ERROR expected message RESULT (not) found\n")
 	if err != nil {
 		fmt.Println("Could not establish connection to edge server at " + Configuration.BridgeServer)
 		return false // Failed to lookup
@@ -88,9 +90,13 @@ func readFromCache(url string, reportCompletion chan Process) bool {
 	conn.Write([]byte("LOOKUP " + url + "\n"))
 	result, _ := reader.ReadString('\n')
 	if !strings.HasPrefix(result, "RESULT") {
-		fmt.Println("Edge server not adhering to protocol.")
-		fmt.Println("In response to LOOKUP, sent " + result)
-		conn.Write(okayMSG)
+		if strings.HasPrefix(result, "ERROR") {
+			fmt.Print("!!! Got error message " + result[strings.Index(result, " ") + 1:])
+		} else {
+			fmt.Println("Edge server not adhering to protocol.")
+			fmt.Println("In response to LOOKUP, sent " + result)
+			conn.Write(errorMSG)
+		}
 		conn.Close()
 		return false
 	}
@@ -102,11 +108,20 @@ func readFromCache(url string, reportCompletion chan Process) bool {
 	} else if strings.HasSuffix(result, "found\n") {
 		conn.Write(readyMSG)
 		bundle, _ := ioutil.ReadAll(reader)
-		reportCompletion <- Process { Clients: nil, Bundle: bundle, URL: url }
-		conn.Close()
-		return true
+		if (bytes.HasPrefix(bundle, []byte("ERROR"))) {
+			error := string(bundle)
+			fmt.Println("!!! Got error instead of bundle: " + error[strings.Index(error, " "):])
+			conn.Close()
+			return false
+		} else {
+			reportCompletion <- Process { Clients: nil, Bundle: bundle, URL: url }
+			conn.Close()
+			return true
+		}
 	}
 	fmt.Println("Unrecognized RESULT status received from edge server")
+	conn.Write(errorMSG)
+	conn.Close()
 	return false
 }
 

@@ -18,9 +18,12 @@ function cacheBundle(url, bundle) {
       client.write(bundle);
       client.end();
       console.log('Wrote bundle for ' + url + ' to cache server');
+    } else if (data.indexOf('ERROR') === 0) {
+      console.log('!!! Got error message ' + data.substring(data.indexOf(' ') + 1));
+      client.end();
     } else {
-      console.log('Cache server to adhering to protocol. Sent ' + data);
-      // Send error message
+      console.log('Cache server is not adhering to protocol. Sent ' + data);
+      client.write('ERROR expected message READY\n');
       client.end();
     }
   });
@@ -46,7 +49,7 @@ var server = net.createServer(function (client) {
       bundleMaker.bundle(function (err, bundleData) {
         if (err) {
           console.log('Error producing bundle for ' + url);
-          // Send error message
+          client.write('ERROR could not produce bundle; Error: ' + err.message + '\n');
         } else {
           bundle = bundleData;
           client.write('COMPLETE\n');
@@ -58,9 +61,12 @@ var server = net.createServer(function (client) {
       client.write(bundle);
       client.end();
       console.log('Sent bundle to client');
+    } else if (data.indexOf('ERROR') === 0) {
+      console.log('!!! Got error message ' + data.substring(data.indexOf(' ') + 1));
+      client.end();
     } else {
       console.log('Client is not adhering to protocol. Sent ' + data);
-      // Send error message
+      client.write('ERROR expected message READY\n');
       client.end();
     }
   });
