@@ -48,6 +48,8 @@ preceeds the closing of the connection" respectively.
 
 **STORE** is used by the Transport Server to inform the Cache Server that it is prepared to send a new bundle.
 
+**ERROR** is used to report operational errors so that users of CeNo Client can be informed when something goes wrong.
+
 **_** is used to indicate that no message name exists for the message. i.e. only bundle contents are in the message.
 
 ## Protocol
@@ -84,6 +86,26 @@ In the case that the cache server has stored a bundle for the requested URL, the
 3. CC acknowledges and prepares to receive bundle data. [READY]
 4. CS sends bundle data to CC. [_ bundle] - close
 ```
+
+### Error Cases
+
+There are a number of cases where errors can occur in the expected operation of each server, and it is helpful for implementations to be able to receive and display, if not act upon, errors received during communication.
+
+#### Protocol Adherence
+
+In the case that the Cache Server does not respond to a client's request for a lookup with either "RESULT found\n" or "RESULT not found\n", an error should be sent to the Cache Server from the client in place of the usual OKAY message.
+
+```
+1. CC requests CS lookup a bundle. [LOOKUP <url>] - open
+2. CS responds with a non-standard message. [<MSG> [<data>]]
+3. CC responds to CS with an error report. [ERROR <message>] - close
+```
+
+This method should be duplicated in situations where one host is not sending messages according to the protocol specification.
+
+#### Bundle Creation
+
+In the case that the Transport Server encounters an error when creating a bundle, an error message should be reported to the client in place of the usual COMPLETE message.
 
 ## Discussion
 
