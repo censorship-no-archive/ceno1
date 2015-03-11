@@ -37,7 +37,11 @@ public class CacheLookupHandler extends CeNoHandler {
 		String urlParam = (request.getParameter("url") != null) ? request.getParameter("url") : requestPath;
 		if (urlParam.isEmpty() && requestPath.isEmpty()) {
 			writeWelcome(baseRequest, response, requestPath);
-		} else if (requestPath.startsWith("USK@") || requestPath.startsWith("SSK@")) {
+		}
+		if (requestPath.startsWith("freenet:")) {
+			requestPath.replaceFirst("freenet:", "");
+		}
+		if (requestPath.startsWith("USK@") || requestPath.startsWith("SSK@")) {
 			FetchResult result = null;
 			try {
 				result = HighLevelSimpleClientInterface.fetchURI(new FreenetURI(requestPath));
