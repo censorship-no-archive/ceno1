@@ -20,7 +20,7 @@ var cacheFile = path.join('cache', 'bundles.json');
  * The write method accepts:
  *   1. A description of the data to write
  *   2. A callback for handling the result of writing data
- * In both cases, callbacks should be passed 
+ * In both cases, callbacks should be passed
  *   1. An error object/description if one occurred
  *   2. Any result data
  * Note that the `from` and `data` arguments to `read` and `write` respectively
@@ -37,7 +37,7 @@ _.extend(Cache.prototype, {
     this.read = function (from, callback) {
       reader(from, callback);
     };
-    
+
     this.write = function (data, callback) {
       writer(data, callback);
     };
