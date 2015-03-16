@@ -22,7 +22,6 @@ import freenet.client.InsertException;
 import freenet.client.async.BaseClientPutter;
 import freenet.client.async.ClientPutCallback;
 import freenet.keys.FreenetURI;
-import freenet.node.RequestClient;
 import freenet.support.Logger;
 import freenet.support.api.Bucket;
 
@@ -50,10 +49,6 @@ public class CacheInsertHandler extends CeNoHandler {
 			this.baseRequest = request;
 			this.continuation = continuation;
 			this.response = response;
-		}
-
-		public RequestClient getRequestClient() {
-			return CeNo.nodeInterface.getClient();
 		}
 
 		public void onGeneratedURI(FreenetURI uri, BaseClientPutter state, ObjectContainer container) {

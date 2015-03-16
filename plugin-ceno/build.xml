@@ -110,7 +110,7 @@
 	<!-- ================================================== -->
 	<target name="dist" depends="clean,compile,junit"
 		description="generate the distribution" >
-		<jar jarfile="${dist}/CeNo.jar" duplicate="fail">
+		<jar jarfile="${dist}/CENO.jar" duplicate="fail">
 			<manifest>
 				<attribute name="Plugin-Main-Class" value="plugins.CeNo.CeNo"/>
 			</manifest>
