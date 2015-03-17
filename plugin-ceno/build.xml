@@ -1,72 +1,75 @@
 <?xml version="1.0"?>
-<!-- ant build file for Freenet -->
+<!-- ant build file for CENO client and bridge plugins -->
 
 <project name="ceno-plugin" default="dist" basedir=".">
-	<property name="freenet-cvs-snapshot.location" location="../fred/dist/freenet.jar"/>
-	<property name="freenet-ext.location" location="../fred/lib/freenet/freenet-ext.jar"/>
 	<property name="svn.revision" value="@custom@"/>
 	<property name="source-version" value="1.5"/>
+
 	<property name="build" location="build/"/>
 	<property name="build-test" location="build-test/"/>
 	<property name="dist" location="dist/"/>
+
+	<property name="freenet-cvs-snapshot.location" location="../fred/dist/freenet.jar"/>
+	<property name="freenet-ext.location" location="../fred/lib/freenet/freenet-ext.jar"/>	
 	<property name="junit.location" value="/usr/share/java/junit.jar"/>
+	<property name="jetty-serverlet.location" value="lib/javax.servlet-api-3.1.0.jar"/>
+	<property name="jetty-all.location" value="lib/jetty-all-9.2.6.v20141205.jar"/>
 	<property name="json-smart.location" location="lib/json-smart-1.2.jar"/>
 
+	<available file="src/plugins/CENO/Version.java" property="version.present"/>
+	<available file="${junit.location}" property="junit.present"/>
 
-	<!-- Jetty stuff -->
-	<!-- <property name="jetty.location" value="/usr/share/eclipse/plugins/org.eclipse.jetty."/> -->
-    	<property name="jetty-serverlet.location" value="lib/javax.servlet-api-3.1.0.jar"/>
-	<!-- <property name="jetty-server.location" value="../plugins/org.eclipse.jetty.server_8.1.14.v20131031.jar"/> -->
-	<!-- <property name="jetty-util.location" value="../plugins/org.eclipse.jetty.util_8.1.14.v20131031.jar"/> -->
-    	<property name="jetty-all.location" value="lib/jetty-all-9.2.6.v20141205.jar"/>
-    	<available file="src/plugins/CeNo/Version.java" property="version.present"/>
-    	<available file="${junit.location}" property="junit.present"/>
 
-	<target name="mkdir">
+	<!-- ================================================== -->
+	<target name="mkdir" description="Create the build directory structure used by compile">
 		<mkdir dir="${build}"/>
 		<mkdir dir="${build-test}"/>
 		<mkdir dir="${dist}"/>
 		<echo message="Using ${freenet-cvs-snapshot.location} as freenet-cvs-snapshot.jar"/>
-		<echo message="Using ${freenet-ext.location} as freenet-ext.jar"/>
 	</target>
 	
-	<target name="setver" if="version.present">
+
+	<!-- ================================================== -->
+	<target name="setver">
 		<!-- Update the Version file -->
-		<replace file="src/plugins/CeNo/Version.java">
-			<replacefilter token="@custom@" value="${svn.revision}"/>
+		<exec executable="git" failifexecutionfails="false" outputproperty="gitlasttag">
+			<arg value="describe"/>
+			<arg value="--abbrev=0"/>
+			<arg value="--tags"/>
+		</exec>
+		<replace file="src/plugins/CENO/Version.java">
+			<replacefilter token="@custom@" value="${gitlasttag}"/>
 		</replace>
+		<echo message="Version set to ${gitlasttag}"/>
 	</target>
 
-        <!-- ================================================== -->
+
+	<!-- ================================================== -->
 	<target name="compile" depends="mkdir,setver" >
 		<!-- Create the time stamp -->
 		<tstamp/>
-		<!-- Create the build directory structure used by compile -->
 
 		<!-- FIXME: remove the debug and replace with optimize -->
 		<javac srcdir="src/" destdir="${build}" debug="on" optimize="on" source="${source-version}">
 			<classpath>
+				<pathelement location="${freenet-cvs-snapshot.location}"/>
 				<pathelement location="${freenet-ext.location}"/>
-                <pathelement location="${freenet-cvs-snapshot.location}"/>
-                <pathelement location="${jetty-all.location}"/>
-                <pathelement location="${jetty-serverlet.location}"/>
-                <pathelement location="${json-smart.location}"/>
-                <!-- <fileset dir="../plugins/"> -->
-                <!--     <include name="org.eclipse.jetty.*.jar"/> -->
-                <!--  </fileset> -->
+				<pathelement location="${jetty-all.location}"/>
+				<pathelement location="${jetty-serverlet.location}"/>
+				<pathelement location="${json-smart.location}"/>
 			</classpath>
 			<include name="**/*.java"/>
 			<exclude name="**/*Test.java"/>
 		</javac>
 	</target>
 
-	<!-- ================================================== -->
 
+	<!-- ================================================== -->
 	<target name="unit-build" depends="compile" if="junit.present" unless="skip_tests">
 		<javac srcdir="src/" destdir="${build-test}" debug="on" optimize="on" source="1.5">
 			<classpath>
 				<pathelement path="${build}"/>
-				<pathelement location="${freenet-ext.location}"/>
+				<!-- <pathelement location="${freenet-ext.location}"/> -->
 				<pathelement location="${freenet-cvs-snapshot.location}"/>
 				<pathelement location="${junit.location}"/>
 			</classpath>
@@ -75,12 +78,14 @@
 		</javac>
 	</target>
 
+
+	<!-- ================================================== -->
 	<target name="junit" depends="unit-build" if="junit.present" unless="skip_tests">
 		<junit printsummary="yes" fork="yes" haltonfailure="yes">
 			<classpath>
 				<pathelement path="${build}"/>
 				<pathelement path="${build-test}"/>
-				<pathelement location="${freenet-ext.location}"/>
+				<!-- <pathelement location="${freenet-ext.location}"/> -->
 				<pathelement location="${freenet-cvs-snapshot.location}"/>
 				<pathelement location="${junit.location}"/>
 			</classpath>
@@ -97,35 +102,47 @@
 		</junit>
 	</target>
 
-	<!-- <target name="jar" depends="compile" -->
-	<!--     description="Creates a standalone JAR of all class files and dependencies."> -->
-	<!--   <jar destfile="${my.ant.task.jar.file}" update="true"> -->
-	<!--     <fileset dir="${build.classes.dir}" /> -->
-	<!--     <zipfileset src="${lib.dir}/javax.inject.jar" /> -->
-	<!--     <zipfileset src="${lib.dir}/guice-3.0.jar" /> -->
-	<!--     <zipfileset src="${lib.dir}/guice-multibindings-3.0.jar" /> -->
-	<!--     <zipfileset src="${lib.dir}/guice-assistedinject-3.0.jar" /> -->
-	<!--   </jar> -->
-	<!-- </target> -->
+
 	<!-- ================================================== -->
 	<target name="dist" depends="clean,compile,junit"
 		description="generate the distribution" >
-		<jar jarfile="${dist}/CENO.jar" duplicate="fail">
+<!-- 		<jar jarfile="${dist}/CENO.jar" duplicate="fail">
 			<manifest>
-				<attribute name="Plugin-Main-Class" value="plugins.CeNo.CeNo"/>
+				<attribute name="Plugin-Main-Class" value="plugins.CENO.CENO"/>
 			</manifest>
 			<fileset dir="src/" casesensitive="no">
 				<include name="*.txt"/>
 			</fileset>
-            <fileset dir="${build}/"/>
-            <zipfileset src="${jetty-all.location}" />
-            <zipfileset src="${jetty-serverlet.location}" />
-            <zipfileset src="${json-smart.location}" />
-           <!-- <zipfileset dir="/usr/share/eclipse/plugins/"> -->
-           <!--     <include name="org.eclipse.jetty.*.jar"/> -->
-           <!-- </zipfileset> -->
+			<fileset dir="${build}/"/>
+		</jar> -->
+		<jar jarfile="${dist}/CENOBridge.jar" duplicate="fail">
+			<manifest>
+				<attribute name="Plugin-Main-Class" value="plugins.CENO.Bridge.CENOBridge"/>
+			</manifest>
+			<fileset dir="src/" casesensitive="no">
+				<include name="*.txt"/>
+				<exclude name="**/plugins.CENO.Client**"/>
+			</fileset>
+			<fileset dir="${build}/"/>
+			<zipfileset src="${jetty-all.location}" />
+			<zipfileset src="${jetty-serverlet.location}" />
+			<zipfileset src="${json-smart.location}" />
 		</jar>
 	</target>
+
+
+	<!-- ================================================== -->
+	<target name="sign" depends="dist" description="Sign the generated jar files.">
+		<property file="antSign.properties"/>
+		<signjar
+			alias="${sign.alias}" keystore="${sign.keystore}"
+			storepass="${sign.storepass}" tsaurl="http://tsa.starfieldtech.com">
+			<path>
+				<fileset dir="dist" includes="**/*.jar" />
+			</path>
+		</signjar>
+	</target>
+
 
 	<!-- ================================================== -->
 	<target name="clean" description="Delete class files and docs dir.">
@@ -133,4 +150,5 @@
 		<delete dir="${build-test}"/>
 		<delete dir="${dist}"/>
 	</target>
+
 </project>

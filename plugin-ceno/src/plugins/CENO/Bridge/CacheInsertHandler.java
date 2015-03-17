@@ -1,4 +1,4 @@
-package plugins.CeNo;
+package plugins.CENO.Bridge;
 
 import java.io.IOException;
 import java.util.Map;
@@ -14,7 +14,8 @@ import org.eclipse.jetty.continuation.Continuation;
 import org.eclipse.jetty.continuation.ContinuationSupport;
 import org.eclipse.jetty.server.Request;
 
-import plugins.CeNo.BridgeInterface.Bundle;
+import plugins.CENO.CENOHandler;
+import plugins.CENO.Bridge.BundlerInterface.Bundle;
 
 import com.db4o.ObjectContainer;
 
@@ -28,13 +29,13 @@ import freenet.support.api.Bucket;
 /* ------------------------------------------------------------ */
 /** CeNo Plugin handler for requests to cache bundles
  * 	
- * CacheInsertHandler listens to {@link CeNo#cacheInsertPort} port
+ * CacheInsertHandler listens to {@link CENOBridge#cacheInsertPort} port
  * and under the "/store" route for POST requests.
  * Those POST requests include the bundled page as well as the original url.
  * The handler caches the given bundle under its signed subspace.
  * Upon successful insertion, the handler replies with "stored".
  */
-public class CacheInsertHandler extends CeNoHandler {
+public class CacheInsertHandler extends CENOHandler {
 
 	// Insertion requests time out after 5 mins
 	static final long insertionRequestTimeout = 5 * 60 * 1000;
@@ -150,7 +151,7 @@ public class CacheInsertHandler extends CeNoHandler {
 			Map<String, String> splitMap = splitURL(urlParam);
 			FreenetURI insertKey = computeInsertURI(splitMap.get("domain"));
 			try {
-				CeNo.nodeInterface.insertFreesite(insertKey, splitMap.get("extraPath"), bundle.getContent(), new InsertCallback(baseRequest, continuation, response));
+				CENOBridge.nodeInterface.insertFreesite(insertKey, splitMap.get("extraPath"), bundle.getContent(), new InsertCallback(baseRequest, continuation, response));
 			} catch (InsertException e) {
 				writeError(baseRequest, response, "Error during insertion");
 				return;

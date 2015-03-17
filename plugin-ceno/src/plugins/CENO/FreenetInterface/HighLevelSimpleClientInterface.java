@@ -1,4 +1,4 @@
-package plugins.CeNo.FreenetInterface;
+package plugins.CENO.FreenetInterface;
 
 import java.util.HashMap;
 

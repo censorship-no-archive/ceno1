@@ -1,4 +1,4 @@
-package plugins.CeNo;
+package plugins.CENO.Bridge;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -11,8 +11,9 @@ import net.minidev.json.JSONObject;
 
 import org.eclipse.jetty.server.Request;
 
-import plugins.CeNo.BridgeInterface.Bundle;
-import plugins.CeNo.FreenetInterface.HighLevelSimpleClientInterface;
+import plugins.CENO.CENOHandler;
+import plugins.CENO.Bridge.BundlerInterface.Bundle;
+import plugins.CENO.FreenetInterface.HighLevelSimpleClientInterface;
 import freenet.client.FetchException;
 import freenet.client.FetchResult;
 import freenet.keys.FreenetURI;
@@ -29,7 +30,7 @@ import freenet.keys.FreenetURI;
  * - The Bridge then will serve the bundle to the plugin
  *   to insert into Freenet
  */
-public class CacheLookupHandler extends CeNoHandler {
+public class CacheLookupHandler extends CENOHandler {
 
 	public void handle(String target,Request baseRequest,HttpServletRequest request,HttpServletResponse response) 
 			throws IOException, ServletException {
