@@ -38,6 +38,7 @@ public class CacheLookupHandler extends CENOHandler {
 		String urlParam = (request.getParameter("url") != null) ? request.getParameter("url") : requestPath;
 		if (urlParam.isEmpty() && requestPath.isEmpty()) {
 			writeWelcome(baseRequest, response, requestPath);
+			return;
 		}
 		if (requestPath.startsWith("freenet:")) {
 			requestPath.replaceFirst("freenet:", "");
@@ -91,11 +92,13 @@ public class CacheLookupHandler extends CENOHandler {
 			} else {
 				// Error while retrieving the bundle from the cache
 				writeError(baseRequest, response, requestPath);
+				return;
 			}
 		// Stop background requests normally made by browsers for website resources,
 		// that could start a time-consuming lookup in freenet
-		} else if (requestPath.equals("favicon.ico")) {
+		} else if (requestPath.endsWith("favicon.ico")) {
 			writeNotFound(baseRequest, response, requestPath);
+			return;
 		} else {
 			// Request path is in form of URL
 			// Calculate its USK and redirect the request
