@@ -106,24 +106,23 @@
 	<!-- ================================================== -->
 	<target name="dist" depends="clean,compile,junit"
 		description="generate the distribution" >
-<!-- 		<jar jarfile="${dist}/CENO.jar" duplicate="fail">
+
+		<jar jarfile="${dist}/CENO.jar" duplicate="fail">
 			<manifest>
-				<attribute name="Plugin-Main-Class" value="plugins.CENO.CENO"/>
+				<attribute name="Plugin-Main-Class" value="plugins.CENO.Client.CENOClient"/>
 			</manifest>
-			<fileset dir="src/" casesensitive="no">
-				<include name="*.txt"/>
+			<fileset dir="${build}/">
+				<exclude name="plugins/CENO/Bridge/**"/>
 			</fileset>
-			<fileset dir="${build}/"/>
-		</jar> -->
+		</jar>
+		
 		<jar jarfile="${dist}/CENOBridge.jar" duplicate="fail">
 			<manifest>
 				<attribute name="Plugin-Main-Class" value="plugins.CENO.Bridge.CENOBridge"/>
 			</manifest>
-			<fileset dir="src/" casesensitive="no">
-				<include name="*.txt"/>
-				<exclude name="**/plugins.CENO.Client**"/>
+			<fileset dir="${build}/">
+				<exclude name="plugins/CENO/Client/**"/>
 			</fileset>
-			<fileset dir="${build}/"/>
 			<zipfileset src="${jetty-all.location}" />
 			<zipfileset src="${jetty-serverlet.location}" />
 			<zipfileset src="${json-smart.location}" />
