@@ -1,4 +1,4 @@
-package plugins.CeNo;
+package plugins.CENO.Bridge;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -11,8 +11,9 @@ import net.minidev.json.JSONObject;
 
 import org.eclipse.jetty.server.Request;
 
-import plugins.CeNo.BridgeInterface.Bundle;
-import plugins.CeNo.FreenetInterface.HighLevelSimpleClientInterface;
+import plugins.CENO.CENOHandler;
+import plugins.CENO.Bridge.BundlerInterface.Bundle;
+import plugins.CENO.FreenetInterface.HighLevelSimpleClientInterface;
 import freenet.client.FetchException;
 import freenet.client.FetchResult;
 import freenet.keys.FreenetURI;
@@ -29,7 +30,7 @@ import freenet.keys.FreenetURI;
  * - The Bridge then will serve the bundle to the plugin
  *   to insert into Freenet
  */
-public class CacheLookupHandler extends CeNoHandler {
+public class CacheLookupHandler extends CENOHandler {
 
 	public void handle(String target,Request baseRequest,HttpServletRequest request,HttpServletResponse response) 
 			throws IOException, ServletException {
@@ -37,7 +38,12 @@ public class CacheLookupHandler extends CeNoHandler {
 		String urlParam = (request.getParameter("url") != null) ? request.getParameter("url") : requestPath;
 		if (urlParam.isEmpty() && requestPath.isEmpty()) {
 			writeWelcome(baseRequest, response, requestPath);
-		} else if (requestPath.startsWith("USK@") || requestPath.startsWith("SSK@")) {
+			return;
+		}
+		if (requestPath.startsWith("freenet:")) {
+			requestPath.replaceFirst("freenet:", "");
+		}
+		if (requestPath.startsWith("USK@") || requestPath.startsWith("SSK@")) {
 			FetchResult result = null;
 			try {
 				result = HighLevelSimpleClientInterface.fetchURI(new FreenetURI(requestPath));
@@ -86,11 +92,13 @@ public class CacheLookupHandler extends CeNoHandler {
 			} else {
 				// Error while retrieving the bundle from the cache
 				writeError(baseRequest, response, requestPath);
+				return;
 			}
 		// Stop background requests normally made by browsers for website resources,
 		// that could start a time-consuming lookup in freenet
-		} else if (requestPath.equals("favicon.ico")) {
+		} else if (requestPath.endsWith("favicon.ico")) {
 			writeNotFound(baseRequest, response, requestPath);
+			return;
 		} else {
 			// Request path is in form of URL
 			// Calculate its USK and redirect the request

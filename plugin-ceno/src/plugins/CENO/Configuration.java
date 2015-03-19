@@ -1,4 +1,4 @@
-package plugins.CeNo;
+package plugins.CENO;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -10,8 +10,8 @@ import java.util.Properties;
 import freenet.support.Logger;
 
 public class Configuration {
-	/** The default location for the configuration file (~/.CeNo/ceno.properties) */
-	private static final String defaultConfigLocation = System.getProperty("user.home") + "/.CeNo/config.properties";
+	/** The default location for the configuration file (~/.CENO/ceno.properties) */
+	private static final String defaultConfigLocation = System.getProperty("user.home") + "/.CENO/config.properties";
 	private String customConfigLocation;
 
 	/**
@@ -80,7 +80,7 @@ public class Configuration {
 			if (createConfigFile(customConfigLocation)) {
 				return true;
 			} else {
-				Logger.warning(this, "CeNo plugin could not create configuration file.");
+				Logger.warning(this, "CENO plugin could not create configuration file.");
 				return false;
 			}
 		}

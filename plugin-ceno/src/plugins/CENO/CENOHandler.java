@@ -1,4 +1,4 @@
-package plugins.CeNo;
+package plugins.CENO;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -17,10 +17,11 @@ import net.minidev.json.parser.ParseException;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
+import plugins.CENO.Bridge.CENOBridge;
 import freenet.client.InsertException;
 import freenet.keys.FreenetURI;
 
-public abstract class CeNoHandler extends AbstractHandler {
+public abstract class CENOHandler extends AbstractHandler {
 
 	public abstract void handle(String arg0, Request arg1, HttpServletRequest arg2,
 			HttpServletResponse arg3) throws IOException, ServletException;
@@ -104,14 +105,14 @@ public abstract class CeNoHandler extends AbstractHandler {
 	 */
 	protected FreenetURI computeUSKfromURL(String requestPath) throws MalformedURLException {
 		Map<String, String> splitMap = splitURL(requestPath);
-		String requestURI = CeNo.initConfig.getProperty("requestURI");
+		String requestURI = CENOBridge.initConfig.getProperty("requestURI");
 		String computedKey = requestURI.replaceFirst("SSK", "USK") + splitMap.get("domain") + "/-1/" + splitMap.get("extraPath");
 
 		return new FreenetURI(computedKey);
 	}
 	
 	protected FreenetURI computeInsertURI(String domain) throws MalformedURLException {
-		String insertURI = CeNo.initConfig.getProperty("insertURI");
+		String insertURI = CENOBridge.initConfig.getProperty("insertURI");
 		FreenetURI insertURIconfig = new FreenetURI(insertURI);
 		//String computedKey = insertURI.replaceFirst("SSK", "USK") + "-1/";
 		FreenetURI result = new FreenetURI("USK", domain, insertURIconfig.getRoutingKey(), insertURIconfig.getCryptoKey(), insertURIconfig.getExtra());

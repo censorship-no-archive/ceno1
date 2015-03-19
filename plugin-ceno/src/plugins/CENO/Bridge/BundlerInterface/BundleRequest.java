@@ -1,4 +1,4 @@
-package plugins.CeNo.BridgeInterface;
+package plugins.CENO.Bridge.BundlerInterface;
 
 public class BundleRequest {
 

@@ -1,4 +1,4 @@
-package plugins.CeNo;
+package plugins.CENO.Bridge;
 
 import freenet.keys.FreenetURI;
 import freenet.pluginmanager.*;
@@ -9,19 +9,17 @@ import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 
-import plugins.CeNo.FreenetInterface.HighLevelSimpleClientInterface;
-import plugins.CeNo.FreenetInterface.NodeInterface;
+import plugins.CENO.Configuration;
+import plugins.CENO.Version;
+import plugins.CENO.FreenetInterface.HighLevelSimpleClientInterface;
+import plugins.CENO.FreenetInterface.NodeInterface;
 
 
-public class CeNo implements FredPlugin, FredPluginVersioned, FredPluginRealVersioned {
-
-	// Versions of the plugin, in human-readable and "real" format
-	public static final String VERSION = "0.1.0";
-	public static final int REAL_VERSION = 1;
+public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRealVersioned {
 
 	private PluginRespirator pluginRespirator;
 
-	//Need to be read from config
+	// Need to be read from config
 	public static final Integer cacheLookupPort = 3091;
 	public static final Integer cacheInsertPort = 3092;
 	public static final Integer bundlerPort = 3093;
@@ -33,20 +31,24 @@ public class CeNo implements FredPlugin, FredPluginVersioned, FredPluginRealVers
 	public static NodeInterface nodeInterface;
 
 	// Plugin-specific configuration
-	public static final String pluginUri = "/plugins/plugins.CeNo.CeNo";
-	public static final String pluginName = "CeNo";
+	public static final String pluginUri = "/plugins/plugins.CENO.CENO";
+	public static final String pluginName = "CENO";
 	public static Configuration initConfig;
+	private  Version version;
+	private static final String configPath = System.getProperty("user.home") + "/.CENO/bridge.properties";
 
 
 	public void runPlugin(PluginRespirator pr)
-	{        
+	{
+		version = new Version(Version.PluginType.BRIDGE);
+
 		// Initialize interfaces with fred
 		pluginRespirator = pr;
 		client = new HighLevelSimpleClientInterface(pluginRespirator.getHLSimpleClient());
 		nodeInterface = new NodeInterface(pluginRespirator.getNode());
 
 		// Read properties of the configuration file
-		initConfig = new Configuration();
+		initConfig = new Configuration(configPath);
 		initConfig.readProperties();
 		// If CeNo has no private key for inserting freesites,
 		// generate a new key pair and store it in the configuration file
@@ -106,11 +108,19 @@ public class CeNo implements FredPlugin, FredPluginVersioned, FredPluginRealVers
 	}
 
 	public String getVersion() {
-		return VERSION;
+		if (version != null) {
+			return version.getVersion();
+		} else {
+			return "loading";
+		}
 	}
 
 	public long getRealVersion() {
-		return REAL_VERSION;
+		if (version != null) {
+			return version.getRealVersion();
+		} else {
+			return -1;
+		}
 	}
 
 	/**
