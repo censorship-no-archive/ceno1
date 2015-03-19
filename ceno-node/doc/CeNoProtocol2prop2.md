@@ -12,7 +12,7 @@ There are three agents in this scenario.
 
 The **Cache Server** is the server that caches and retrieves bundles from Freenet or another storage medium. Abbreviated as **CS**.
 
-The **Transport Server** is the server responsible for creating new bundles. Abbreviated as **TS**.
+The **Transport Server** is the server responsible for creating new bundles. Abbreviated as **BS**.
 
 ## Syntax
 
@@ -22,7 +22,7 @@ The **Transport Server** is the server responsible for creating new bundles. Abb
 
 `<CS>` will always refer to the address of the Cache Server.
 
-`<TS>` will always refer to the address of the Transport Server.
+`<BS>` will always refer to the address of the Bundling Server.
 
 `[<MSG> <arg1,arg2,...,argN>]` is the notation that will be used to describe a message from one agent to another. Here,
 `MSG` is an identifier for the type of message being sent, followed by a space, and then the comma-separated list
@@ -40,13 +40,13 @@ preceeds the closing of the connection" respectively.
 
 **OKAY** is used to by CeNo Client to acknowledge that it is not waiting for any more data from the Cache Server.
 
-**BUNDLE** is used to initiate the bundling process on the Transport Server.
+**BUNDLE** is used to initiate the bundling process on the Bundling Server.
 
-**COMPLETE** is used by the Transport Server to notify CeNo Client that it is prepared to send a bundle.
+**COMPLETE** is used by the Bundling Server to notify CeNo Client that it is prepared to send a bundle.
 
 **READY** is used to inform the recipient that it is prepared to receive bundle data.
 
-**STORE** is used by the Transport Server to inform the Cache Server that it is prepared to send a new bundle.
+**STORE** is used by the Bundling Server to inform the Cache Server that it is prepared to send a new bundle.
 
 **ERROR** is used to report operational errors so that users of CeNo Client can be informed when something goes wrong.
 
@@ -67,13 +67,13 @@ followed.
  1. CC requests CS lookup a bundle. [LOOKUP <url>] - open
  2. CS informs CC that no bundle exists for <url>. [RESULT not found]
  3. CC acknowledges, and closes the connection. [OKAY] - close
- 4. CC requests TS create a new bundle. [BUNDLE <url>] - open
- 5. TS informs CC when the bundle is complete. [COMPLETE]
+ 4. CC requests BS create a new bundle. [BUNDLE <url>] - open
+ 5. BS informs CC when the bundle is complete. [COMPLETE]
  6. CC acknowledges and prepares to receive bundle data. [READY]
- 7. TS sends bundle data to CC. [_ bundle] - close
- 8. TS asks CS to store the new bundle. [STORE url] - open
+ 7. BS sends bundle data to CC. [_ bundle] - close
+ 8. BS asks CS to store the new bundle. [STORE url] - open
  9. CS acknowledges and prepares to receive bundle data. [READY]
-10. TS sends bundle data to CS. [_ bundle] - close
+10. BS sends bundle data to CS. [_ bundle] - close
 ```
 
 ### Lookup Success
@@ -105,7 +105,7 @@ This method should be duplicated in situations where one host is not sending mes
 
 #### Bundle Creation
 
-In the case that the Transport Server encounters an error when creating a bundle, an error message should be reported to the client in place of the usual COMPLETE message.
+In the case that the Bundling Server encounters an error when creating a bundle, an error message should be reported to the client in place of the usual COMPLETE message.
 
 ## Discussion
 
