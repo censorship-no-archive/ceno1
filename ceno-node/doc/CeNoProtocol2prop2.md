@@ -12,7 +12,7 @@ There are three agents in this scenario.
 
 The **Cache Server** is the server that caches and retrieves bundles from Freenet or another storage medium. Abbreviated as **CS**.
 
-The **Transport Server** is the server responsible for creating new bundles. Abbreviated as **BS**.
+The **Bundling Server** is the server responsible for creating new bundles. Abbreviated as **BS**.
 
 ## Syntax
 
