@@ -31,17 +31,15 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 	public static NodeInterface nodeInterface;
 
 	// Plugin-specific configuration
-	public static final String pluginUri = "/plugins/plugins.CENO.CENO";
-	public static final String pluginName = "CENO";
+	public static final String pluginUri = "/plugins/plugins.CENO.CENOBridge";
+	public static final String pluginName = "CENOBridge";
 	public static Configuration initConfig;
-	private  Version version;
+	private Version version = new Version(Version.PluginType.BRIDGE);
 	private static final String configPath = System.getProperty("user.home") + "/.CENO/bridge.properties";
 
 
 	public void runPlugin(PluginRespirator pr)
 	{
-		version = new Version(Version.PluginType.BRIDGE);
-
 		// Initialize interfaces with fred
 		pluginRespirator = pr;
 		client = new HighLevelSimpleClientInterface(pluginRespirator.getHLSimpleClient());
@@ -108,19 +106,11 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 	}
 
 	public String getVersion() {
-		if (version != null) {
-			return version.getVersion();
-		} else {
-			return "loading";
-		}
+		return version.getVersion();
 	}
 
 	public long getRealVersion() {
-		if (version != null) {
-			return version.getRealVersion();
-		} else {
-			return -1;
-		}
+		return version.getRealVersion();
 	}
 
 	/**

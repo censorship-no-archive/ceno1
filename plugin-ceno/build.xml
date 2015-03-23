@@ -27,6 +27,14 @@
 		<mkdir dir="${dist}"/>
 		<echo message="Using ${freenet-cvs-snapshot.location} as freenet-cvs-snapshot.jar"/>
 	</target>
+
+
+	<!-- ================================================== -->
+	<target name="copyresources" description="Copies the resources to build directory">
+		<copy todir="${build}">
+			<fileset dir="src" includes="**/Resources/**" />
+		</copy>
+	</target>
 	
 
 	<!-- ================================================== -->
@@ -104,7 +112,7 @@
 
 
 	<!-- ================================================== -->
-	<target name="dist" depends="clean,compile,junit"
+	<target name="dist" depends="clean,compile,copyresources,junit"
 		description="generate the distribution" >
 
 		<jar jarfile="${dist}/CENO.jar" duplicate="fail">

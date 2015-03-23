@@ -25,12 +25,10 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 	// Plugin-specific configuration
 	public static final String pluginUri = "/plugins/plugins.CENO.CENO";
 	public static final String pluginName = "CENO";
-	private  Version version;
+	private Version version = new Version(Version.PluginType.CLIENT);
 
 	public void runPlugin(PluginRespirator pr)
 	{
-		version = new Version(Version.PluginType.CLIENT);
-
 		// Initialize interfaces with fred
 		pluginRespirator = pr;
 		client = new HighLevelSimpleClientInterface(pluginRespirator.getHLSimpleClient());
@@ -38,19 +36,11 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 	}
 
 	public String getVersion() {
-		if (version != null) {
-			return version.getVersion();
-		} else {
-			return "loading";
-		}
+		return version.getVersion();
 	}
 
 	public long getRealVersion() {
-		if (version != null) {
-			return version.getRealVersion();
-		} else {
-			return 1;
-		}
+		return version.getRealVersion();
 	}
 
 	/**
@@ -63,11 +53,11 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 	}
 
 	public String handleHTTPGet(HTTPRequest request) throws PluginHTTPException {
-		return "<http><body>Welcome to CENO.</body></http>";
+		return ClientHandler.handleHTTPGet(request);
 	}
 
 	public String handleHTTPPost(HTTPRequest request) throws PluginHTTPException {
-		return "<http><body>Welcome to CENO.</body></http>";
+		return ClientHandler.handleHTTPPost(request);
 	}
 
 }
