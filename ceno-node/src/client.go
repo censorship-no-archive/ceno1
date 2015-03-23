@@ -3,20 +3,15 @@ package main
 import (
 	"os"
 	"fmt"
-	"net"
 	"net/http"
 	"net/url"
-	"bufio"
+	"io"
 	"io/ioutil"
 	"strings"
 	"bytes"
 	"encoding/json"
 	"path"
-	"time"
 )
-
-// A process is just a url that is being waited on.
-type Process string
 
 // Result of a bundle lookup from cache server.
 type Result struct {
@@ -42,7 +37,7 @@ func pleaseWait(url string) []byte {
 func checkOnLookup(lookupURL string) Result {
 	// The cache server will keep track of running lookups so we will just
 	// ask for a URL the usual way until it responds saying a lookup is complete.
-	response, err := http.Get(config.EdgeServer + "?url=" + url.QueryEscape(lookupURL))
+	response, err := http.Get(Configuration.EdgeServer + "?url=" + url.QueryEscape(lookupURL))
 	defer response.Body.Close()
 	if err != nil || response.StatusCode != 200 {
 		return Result { false, false, nil }
@@ -55,20 +50,23 @@ func checkOnLookup(lookupURL string) Result {
 	return result
 }
 
-func makeNewBundle(url string) {
+func makeNewBundle(lookupURL string) {
 	// POST to the bridge server to have it start making a new bundle.
 	// We can ignore the content of the response since it is not used.
-	response, err := http.Post(config.BridgeServer, "text/plain", strings.Reader(url))
+	response, err := http.Post(
+		Configuration.BridgeServer + "?url=" + url.QueryEscape(lookupURL),
+		"text/plain",
+		strings.NewReader(lookupURL))
 	defer response.Body.Close()
 	if err != nil || response.StatusCode != 200 {
-		fmt.Println("Got error POSTing to bridge server")
+		fmt.Println("Got error POSTing to bridge server or request did not return status 200")
 		fmt.Println(err)
 	}
 }
 
 func makeProxyHandler() func (http.ResponseWriter, *http.Request) {
-	// Maintain a map of "processes" (URLs being looked up by cache) for fast access
-	var lookups map[Process]bool = make(map[Process]bool)
+	// Maintain a map of URLs being looked up by cache for fast access
+	var lookups map[string]bool = make(map[string]bool)
 	return func (w http.ResponseWriter, r *http.Request) {
 		url := r.URL.String()
 		_, processExists := lookups[url]
@@ -79,13 +77,12 @@ func makeProxyHandler() func (http.ResponseWriter, *http.Request) {
 			result := checkOnLookup(url)
 			if result.Ready {
 				if result.Found {
-					delete lookups[url]
 					w.Write(result.Bundle)
 				} else {
 					go makeNewBundle(url)
 					w.Write(pleaseWait(url))
 				}
-				delete lookups[url]
+				delete(lookups, url)
 			}
 		} else {
 			lookups[url] = true
