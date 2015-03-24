@@ -27,21 +27,28 @@ import freenet.support.io.BucketTools;
 public class NodeInterface implements FreenetInterface {
 
 	private Node node;
-	private FetchContext ULPRFC;
+	private FetchContext ULPRFC, localFC;
 
 	public NodeInterface(Node node) {
 		this.node = node;
-		
+
 		// Set up a FetchContext instance for Ultra-lightweight passive requests
 		this.ULPRFC = HighLevelSimpleClientInterface.getFetchContext();
 		this.ULPRFC.maxNonSplitfileRetries = -1;
 		this.ULPRFC.followRedirects = true;
+
+		this.localFC = HighLevelSimpleClientInterface.getFetchContext();
+		this.ULPRFC.localRequestOnly = true;
 	}
 
 	public FetchResult fetchURI(FreenetURI uri) throws FetchException {
 		return HighLevelSimpleClientInterface.fetchURI(uri);
 	}
-	
+
+	public ClientGetter localFetchURI(FreenetURI uri, RequestClient context, ClientGetCallback callback) throws FetchException {
+		return HighLevelSimpleClientInterface.fetchURI(uri, Long.MAX_VALUE, context, callback, localFC);
+	}
+
 	public ClientGetter fetchULR(FreenetURI uri, RequestClient context, ClientGetCallback callback) throws FetchException {
 		return HighLevelSimpleClientInterface.fetchURI(uri, Long.MAX_VALUE, context, callback, ULPRFC);
 	}
@@ -62,7 +69,7 @@ public class NodeInterface implements FreenetInterface {
 		return node.clientCore.persistentTempBucketFactory.makeBucket(length);
 	}
 
-/*
+	/*
 	public boolean insertFreesite(FreenetURI insertURI, String docName, String content, InsertCallback insertCallback) throws IOException, InsertException {
 		RandomAccessBucket bucket = node.clientCore.persistentTempBucketFactory.makeBucket(content.length());
 		bucket.getOutputStream().write(content.getBytes());
@@ -74,14 +81,14 @@ public class NodeInterface implements FreenetInterface {
 		insertManifest(insertURI, bucketsByName, "default.html", RequestStarter.IMMEDIATE_SPLITFILE_PRIORITY_CLASS);
 		return true;
 	}
-*/
+	 */
 
 	public boolean insertFreesite(FreenetURI insertURI, String docName, String content, ClientPutCallback insertCallback) throws IOException, InsertException {
 		String mimeType = DefaultMIMETypes.guessMIMEType(docName, false);
 		if(mimeType == null) {
 			mimeType = "text/html";
 		}
-		
+
 		Bucket bucket = node.clientCore.tempBucketFactory.makeBucket(content.length());
 		BucketTools.copyFrom(bucket, new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8), 0, content.length()), content.length());
 

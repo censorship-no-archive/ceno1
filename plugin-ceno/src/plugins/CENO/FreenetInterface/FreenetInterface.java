@@ -6,13 +6,18 @@ import java.util.HashMap;
 import freenet.client.FetchException;
 import freenet.client.FetchResult;
 import freenet.client.InsertException;
+import freenet.client.async.ClientGetCallback;
+import freenet.client.async.ClientGetter;
 import freenet.client.async.ClientPutCallback;
 import freenet.keys.FreenetURI;
+import freenet.node.RequestClient;
 import freenet.support.api.Bucket;
 
 public interface FreenetInterface {
 
 	FetchResult fetchURI(FreenetURI uri) throws FetchException;
+	ClientGetter localFetchURI(FreenetURI uri, RequestClient context, ClientGetCallback callback) throws FetchException;
+	ClientGetter fetchULR(FreenetURI uri, RequestClient context, ClientGetCallback callback) throws FetchException;
 	FreenetURI[] generateKeyPair();
 	boolean insertFreesite(FreenetURI insertURI, String docName, String content, ClientPutCallback cb) throws IOException, InsertException;
 	Bucket makeBucket(int length) throws IOException;
