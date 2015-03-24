@@ -37,7 +37,7 @@ public class NodeInterface implements FreenetInterface {
 		this.ULPRFC.followRedirects = true;
 
 		this.localFC = HighLevelSimpleClientInterface.getFetchContext();
-		this.ULPRFC.localRequestOnly = true;
+		this.localFC.localRequestOnly = true;
 	}
 
 	public FetchResult fetchURI(FreenetURI uri) throws FetchException {

@@ -13,6 +13,7 @@ import freenet.pluginmanager.PluginHTTPException;
 import freenet.support.api.HTTPRequest;
 
 public class LookupHandler implements ClientHandlerInterface {
+
 	public class LocalLookupCallback implements ClientGetCallback {
 
 		public void onMajorProgress(ObjectContainer container) {
@@ -35,7 +36,7 @@ public class LookupHandler implements ClientHandlerInterface {
 
 	public String handleHTTPGet(HTTPRequest request) throws PluginHTTPException {
 		try {
-			CENOClient.nodeInterface.localFetchURI(new FreenetURI("USK@XJZAi25dd5y7lrxE3cHMmM-xZ-c-hlPpKLYeLC0YG5I,8XTbR1bd9RBXlX6j-OZNednsJ8Cl6EAeBBebC3jtMFU,AQACAAE/index/486/"), new LocalLookupCallback());
+			CENOClient.nodeInterface.localFetchURI(new FreenetURI("USK@OKVCCIFp~eVDo8R1x3czZavtHl1r2~8lCWqeBT6JNgk,ztmJxsWpmOHzyHsjtZJ913oX0ATabON8zWfpbCQhMAo,AQACAAE/garrett00/12/"), new LocalLookupCallback());
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
