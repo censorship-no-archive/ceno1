@@ -21,6 +21,7 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 	// Interface objects with fred
 	private HighLevelSimpleClientInterface client;
 	public static NodeInterface nodeInterface;
+	private static final ClientHandler clientHandler = new ClientHandler();
 
 	// Plugin-specific configuration
 	public static final String pluginUri = "/plugins/plugins.CENO.CENO";
@@ -53,11 +54,11 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 	}
 
 	public String handleHTTPGet(HTTPRequest request) throws PluginHTTPException {
-		return ClientHandler.handleHTTPGet(request);
+		return clientHandler.handleHTTPGet(request);
 	}
 
 	public String handleHTTPPost(HTTPRequest request) throws PluginHTTPException {
-		return ClientHandler.handleHTTPPost(request);
+		return clientHandler.handleHTTPPost(request);
 	}
 
 }

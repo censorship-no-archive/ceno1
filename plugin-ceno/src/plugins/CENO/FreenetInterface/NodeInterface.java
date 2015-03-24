@@ -19,7 +19,6 @@ import freenet.client.async.ClientPutCallback;
 import freenet.keys.FreenetURI;
 import freenet.keys.InsertableClientSSK;
 import freenet.node.Node;
-import freenet.node.RequestClient;
 import freenet.node.RequestStarter;
 import freenet.support.api.Bucket;
 import freenet.support.io.BucketTools;
@@ -45,12 +44,12 @@ public class NodeInterface implements FreenetInterface {
 		return HighLevelSimpleClientInterface.fetchURI(uri);
 	}
 
-	public ClientGetter localFetchURI(FreenetURI uri, RequestClient context, ClientGetCallback callback) throws FetchException {
-		return HighLevelSimpleClientInterface.fetchURI(uri, Long.MAX_VALUE, context, callback, localFC);
+	public ClientGetter localFetchURI(FreenetURI uri, ClientGetCallback callback) throws FetchException {
+		return HighLevelSimpleClientInterface.fetchURI(uri, Long.MAX_VALUE, callback, localFC);
 	}
 
-	public ClientGetter fetchULR(FreenetURI uri, RequestClient context, ClientGetCallback callback) throws FetchException {
-		return HighLevelSimpleClientInterface.fetchURI(uri, Long.MAX_VALUE, context, callback, ULPRFC);
+	public ClientGetter fetchULR(FreenetURI uri, ClientGetCallback callback) throws FetchException {
+		return HighLevelSimpleClientInterface.fetchURI(uri, Long.MAX_VALUE, callback, ULPRFC);
 	}
 
 	/**

@@ -8,17 +8,26 @@ import java.io.InputStreamReader;
 import freenet.pluginmanager.PluginHTTPException;
 import freenet.support.api.HTTPRequest;
 
-public class ClientHandler {
+public class ClientHandler implements ClientHandlerInterface {
+	
+	private static final String pluginPath = "/plugins/" + CENOClient.class.getName();
+	private static final LookupHandler lookupHandler = new LookupHandler();
 
-	public static String handleHTTPGet(HTTPRequest request) throws PluginHTTPException {
-		return printStaticHTML("Resources/index.html");
+	public String handleHTTPGet(HTTPRequest request) throws PluginHTTPException {
+		String path = request.getPath();
+		if (path == null || path.isEmpty()) {
+			return printStaticHTML("Resources/index.html");
+		} else if (path.startsWith(pluginPath + "/lookup")) {
+			return lookupHandler.handleHTTPGet(request);
+		}
+		return printStaticHTML("404: Requested path is invalid.");
 	}
 
-	public static String handleHTTPPost(HTTPRequest request) throws PluginHTTPException {
+	public String handleHTTPPost(HTTPRequest request) throws PluginHTTPException {
 		return "<http><body>POST request received</body></http>";
 	}
 
-	private static String printStaticHTML(String filename) {
+	private String printStaticHTML(String filename) {
 		InputStream is = ClientHandler.class.getResourceAsStream(filename);
 		if (is == null) {
 			return "<http><body>HTML static file not found.</body></http>";
