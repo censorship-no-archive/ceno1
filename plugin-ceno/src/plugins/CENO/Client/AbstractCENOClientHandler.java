@@ -14,7 +14,7 @@ public abstract class AbstractCENOClientHandler {
 	public abstract String handleHTTPPost(HTTPRequest request) throws PluginHTTPException;
 	
 	protected String printStaticHTML(String filename) {
-		InputStream is = ClientHandler.class.getResourceAsStream(filename);
+		InputStream is = AbstractCENOClientHandler.class.getResourceAsStream(filename);
 		if (is == null) {
 			return "<http><body>HTML static file not found.</body></http>";
 		}

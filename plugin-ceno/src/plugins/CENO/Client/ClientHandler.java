@@ -9,13 +9,13 @@ public class ClientHandler extends AbstractCENOClientHandler {
 	private static final LookupHandler lookupHandler = new LookupHandler();
 
 	public String handleHTTPGet(HTTPRequest request) throws PluginHTTPException {
-		String path = request.getPath();
-		if (path == null || path.isEmpty()) {
+		String path = request.getPath().replaceFirst(pluginPath, "");
+		if (path.isEmpty()) {
 			return printStaticHTML("Resources/index.html");
-		} else if (path.startsWith(pluginPath + "/lookup")) {
+		} else if (path.startsWith("/lookup")) {
 			return lookupHandler.handleHTTPGet(request);
 		}
-		return printStaticHTML("404: Requested path is invalid.");
+		return "404: Requested path is invalid.";
 	}
 
 	public String handleHTTPPost(HTTPRequest request) throws PluginHTTPException {

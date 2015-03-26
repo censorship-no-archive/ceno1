@@ -32,7 +32,11 @@ public class LookupHandler extends AbstractCENOClientHandler {
 			e.printStackTrace();
 		}
 		localFetchResult = getSyncCallback.getResult(5L, TimeUnit.SECONDS);
-		return (localFetchResult == null) ? "Not Found" : localFetchResult; 
+		if (localFetchResult == null) {
+			ULPRManager.ulprLookup(urlParam);
+			return "Started Passive Request";
+		}
+		return localFetchResult; 
 	}
 
 	public String handleHTTPPost(HTTPRequest request)
