@@ -14,7 +14,8 @@ import org.eclipse.jetty.continuation.Continuation;
 import org.eclipse.jetty.continuation.ContinuationSupport;
 import org.eclipse.jetty.server.Request;
 
-import plugins.CENO.CENOHandler;
+import plugins.CENO.CENOJettyHandler;
+import plugins.CENO.URLtoUSKTools;
 import plugins.CENO.Bridge.BundlerInterface.Bundle;
 
 import com.db4o.ObjectContainer;
@@ -35,7 +36,7 @@ import freenet.support.api.Bucket;
  * The handler caches the given bundle under its signed subspace.
  * Upon successful insertion, the handler replies with "stored".
  */
-public class CacheInsertHandler extends CENOHandler {
+public class CacheInsertHandler extends CENOJettyHandler {
 
 	// Insertion requests time out after 5 mins
 	static final long insertionRequestTimeout = 5 * 60 * 1000;
@@ -57,13 +58,9 @@ public class CacheInsertHandler extends CENOHandler {
 		}
 
 		public void onGeneratedMetadata(Bucket metadata, BaseClientPutter state, ObjectContainer container) {
-			// TODO Auto-generated method stub
-
 		}
 
 		public void onFetchable(BaseClientPutter state, ObjectContainer container) {
-			// TODO Auto-generated method stub
-
 		}
 
 		public void onSuccess(BaseClientPutter state, ObjectContainer container) {
@@ -93,8 +90,6 @@ public class CacheInsertHandler extends CENOHandler {
 		}
 
 		public void onMajorProgress(ObjectContainer container) {
-			// TODO Auto-generated method stub
-			
 		}
 
 	}
@@ -148,8 +143,8 @@ public class CacheInsertHandler extends CENOHandler {
 				return;
 			}
 			//TODO non-blocking insert the bundle content in freenet with the computed USK
-			Map<String, String> splitMap = splitURL(urlParam);
-			FreenetURI insertKey = computeInsertURI(splitMap.get("domain"));
+			Map<String, String> splitMap = URLtoUSKTools.splitURL(urlParam);
+			FreenetURI insertKey = URLtoUSKTools.computeInsertURI(splitMap.get("domain"));
 			try {
 				CENOBridge.nodeInterface.insertFreesite(insertKey, splitMap.get("extraPath"), bundle.getContent(), new InsertCallback(baseRequest, continuation, response));
 			} catch (InsertException e) {

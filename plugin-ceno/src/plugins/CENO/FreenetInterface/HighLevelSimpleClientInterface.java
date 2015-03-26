@@ -113,7 +113,7 @@ public class HighLevelSimpleClientInterface {
 	 */
 	public static ClientGetter fetchURI(FreenetURI uri, long maxSize, 
 			ClientGetCallback callback, FetchContext fctx) throws FetchException {
-		return HLSCInterface.client.fetch(uri, maxSize, requestClient, callback, fctx);
+		return HLSCInterface.client.fetch(uri, maxSize, HLSCInterface.requestClient, callback, fctx);
 	}
 
 	//	/**

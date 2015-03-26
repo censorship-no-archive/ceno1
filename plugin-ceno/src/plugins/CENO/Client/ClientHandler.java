@@ -9,7 +9,7 @@ import freenet.pluginmanager.PluginHTTPException;
 import freenet.support.api.HTTPRequest;
 
 public class ClientHandler implements ClientHandlerInterface {
-	
+
 	private static final String pluginPath = "/plugins/" + CENOClient.class.getName();
 	private static final LookupHandler lookupHandler = new LookupHandler();
 
@@ -27,7 +27,7 @@ public class ClientHandler implements ClientHandlerInterface {
 		return "<http><body>POST request received</body></http>";
 	}
 
-	private String printStaticHTML(String filename) {
+	protected String printStaticHTML(String filename) {
 		InputStream is = ClientHandler.class.getResourceAsStream(filename);
 		if (is == null) {
 			return "<http><body>HTML static file not found.</body></http>";
