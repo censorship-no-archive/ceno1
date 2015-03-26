@@ -105,7 +105,7 @@ public class CacheLookupHandler extends CENOJettyHandler {
 			// Calculate its USK and redirect the request
 			FreenetURI calculatedUSK = null;
 			try {
-				calculatedUSK = URLtoUSKTools.computeUSKfromURL(urlParam);
+				calculatedUSK = URLtoUSKTools.computeUSKfromURL(urlParam, CENOBridge.initConfig.getProperty("requestURI"));
 			} catch (Exception e) {
 				writeError(baseRequest, response, requestPath);
 				return;

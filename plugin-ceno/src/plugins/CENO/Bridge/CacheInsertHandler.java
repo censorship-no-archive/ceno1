@@ -144,7 +144,7 @@ public class CacheInsertHandler extends CENOJettyHandler {
 			}
 			//TODO non-blocking insert the bundle content in freenet with the computed USK
 			Map<String, String> splitMap = URLtoUSKTools.splitURL(urlParam);
-			FreenetURI insertKey = URLtoUSKTools.computeInsertURI(splitMap.get("domain"));
+			FreenetURI insertKey = URLtoUSKTools.computeInsertURI(splitMap.get("domain"), CENOBridge.initConfig.getProperty("requestURI"));
 			try {
 				CENOBridge.nodeInterface.insertFreesite(insertKey, splitMap.get("extraPath"), bundle.getContent(), new InsertCallback(baseRequest, continuation, response));
 			} catch (InsertException e) {

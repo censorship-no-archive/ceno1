@@ -9,7 +9,7 @@ import freenet.client.InsertException;
 import freenet.keys.FreenetURI;
 
 public class URLtoUSKTools {
-	
+
 	public static Map<String, String> splitURL(String requestPath) throws MalformedURLException {
 		// Remove protocol from URL
 		requestPath = requestPath.replaceFirst("http://|https://", "");
@@ -35,7 +35,7 @@ public class URLtoUSKTools {
 		splitMap.put("extraPath", extraPath);
 		return splitMap;
 	}
-	
+
 	/**
 	 * Computes the USK for a given URL so that:
 	 * <ul>
@@ -47,16 +47,14 @@ public class URLtoUSKTools {
 	 * @return the calculated FreenetURI that corresponds to that resource
 	 * @throws MalformedURLException
 	 */
-	public static FreenetURI computeUSKfromURL(String requestPath) throws MalformedURLException {
+	public static FreenetURI computeUSKfromURL(String requestPath, String requestURI) throws MalformedURLException {
 		Map<String, String> splitMap = splitURL(requestPath);
-		String requestURI = CENOBridge.initConfig.getProperty("requestURI");
 		String computedKey = requestURI.replaceFirst("SSK", "USK") + splitMap.get("domain") + "/-1/" + splitMap.get("extraPath");
 
 		return new FreenetURI(computedKey);
 	}
 
-	public static FreenetURI computeInsertURI(String domain) throws MalformedURLException {
-		String insertURI = CENOBridge.initConfig.getProperty("insertURI");
+	public static FreenetURI computeInsertURI(String domain, String insertURI) throws MalformedURLException {
 		FreenetURI insertURIconfig = new FreenetURI(insertURI);
 		//String computedKey = insertURI.replaceFirst("SSK", "USK") + "-1/";
 		FreenetURI result = new FreenetURI("USK", domain, insertURIconfig.getRoutingKey(), insertURIconfig.getCryptoKey(), insertURIconfig.getExtra());
@@ -68,7 +66,7 @@ public class URLtoUSKTools {
 		}
 		return result;
 	}
-	
+
 	/* Extract meta strings from FreenetURI
 	StringBuilder allMetaStrings = new StringBuilder();
 	for (String metaString : requestKey.getAllMetaStrings()) {

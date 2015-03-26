@@ -27,6 +27,8 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 	public static final String pluginUri = "/plugins/plugins.CENO.CENO";
 	public static final String pluginName = "CENO";
 	private Version version = new Version(Version.PluginType.CLIENT);
+	
+	public static final String bridgeKey = "SSK@Rx6x6Ik1y93wGk8OtTvZaMQ~Ni6uqxFMclGP8BHrk5g,aBMErm8fkZ7xuFnSzSLnBKgHmjk6PR1Ng4V8ITxXzk8,AQACAAE/";
 
 	public void runPlugin(PluginRespirator pr)
 	{
