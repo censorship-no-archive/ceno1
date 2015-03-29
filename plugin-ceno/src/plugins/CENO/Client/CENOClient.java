@@ -35,8 +35,8 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 		// Initialize interfaces with fred
 		pluginRespirator = pr;
 		client = new HighLevelSimpleClientInterface(pluginRespirator.getHLSimpleClient());
-		nodeInterface = new NodeInterface(pluginRespirator.getNode());
 		ULPRManager.init();
+		nodeInterface = new NodeInterface(pluginRespirator.getNode());
 	}
 
 	public String getVersion() {

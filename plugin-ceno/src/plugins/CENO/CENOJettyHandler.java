@@ -2,9 +2,6 @@ package plugins.CENO;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -16,10 +13,6 @@ import net.minidev.json.parser.ParseException;
 
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
-
-import plugins.CENO.Bridge.CENOBridge;
-import freenet.client.InsertException;
-import freenet.keys.FreenetURI;
 
 public abstract class CENOJettyHandler extends AbstractHandler {
 
