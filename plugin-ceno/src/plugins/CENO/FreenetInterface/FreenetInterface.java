@@ -20,5 +20,7 @@ public interface FreenetInterface {
 	FreenetURI[] generateKeyPair();
 	boolean insertFreesite(FreenetURI insertURI, String docName, String content, ClientPutCallback cb) throws IOException, InsertException;
 	Bucket makeBucket(int length) throws IOException;
-	public FreenetURI insertManifest(FreenetURI insertURI, HashMap<String, Object> bucketsByName, String defaultName, short priorityClass) throws InsertException;
+	FreenetURI insertManifest(FreenetURI insertURI, HashMap<String, Object> bucketsByName, String defaultName, short priorityClass) throws InsertException;
+	boolean sendFreemail(String freemailFrom, String freemailTo, String content);
+
 }

@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
+import plugins.CENO.Client.CENOClient;
+import plugins.CENO.FreenetInterface.Freemail.FreemailAPI;
 import freenet.client.ClientMetadata;
 import freenet.client.DefaultMIMETypes;
 import freenet.client.FetchContext;
@@ -99,6 +101,10 @@ public class NodeInterface implements FreenetInterface {
 
 	public FreenetURI insertManifest(FreenetURI insertURI, HashMap<String, Object> bucketsByName, String defaultName, short priorityClass) throws InsertException {
 		return HighLevelSimpleClientInterface.insertManifest(insertURI, bucketsByName, defaultName, priorityClass);
+	}
+
+	public boolean sendFreemail(String freemailFrom, String freemailTo, String content) {
+		return FreemailAPI.sendFreemail(freemailFrom, freemailTo, content);
 	}
 
 }

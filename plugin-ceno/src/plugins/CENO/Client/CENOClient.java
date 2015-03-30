@@ -28,7 +28,10 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 	public static final String pluginName = "CENO";
 	private static final Version version = new Version(Version.PluginType.CLIENT);
 
+	// Freemail-specific constants
 	public static final String bridgeKey = "SSK@Rx6x6Ik1y93wGk8OtTvZaMQ~Ni6uqxFMclGP8BHrk5g,aBMErm8fkZ7xuFnSzSLnBKgHmjk6PR1Ng4V8ITxXzk8,AQACAAE/";
+	public static final String bridgeFreemail = "deflectbridge@3s74bxq5cuap2sbco47w2yqpwmoavk4goi7brihcmebo6l5xiija.freemail";
+	public static final String clientFreemail = "ceno@yay4m6a3z5hwu3fq2j7nyyhmyn6hu5s3uzqyuacdqxoak4jwggta.freemail";
 
 	public void runPlugin(PluginRespirator pr)
 	{

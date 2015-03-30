@@ -15,6 +15,7 @@
 	<property name="jetty-serverlet.location" value="lib/javax.servlet-api-3.1.0.jar"/>
 	<property name="jetty-all.location" value="lib/jetty-all-9.2.6.v20141205.jar"/>
 	<property name="json-smart.location" location="lib/json-smart-1.2.jar"/>
+	<property name="sun-mail.location" location="lib/mail.jar"/>
 
 	<available file="src/plugins/CENO/Version.java" property="version.present"/>
 	<available file="${junit.location}" property="junit.present"/>
@@ -122,6 +123,7 @@
 			<fileset dir="${build}/">
 				<exclude name="plugins/CENO/Bridge/**"/>
 			</fileset>
+			<zipfileset src="${sun-mail.location}" />
 		</jar>
 		
 		<jar jarfile="${dist}/CENOBridge.jar" duplicate="fail">
