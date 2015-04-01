@@ -102,8 +102,8 @@ public class NodeInterface implements FreenetInterface {
 		return HighLevelSimpleClientInterface.insertManifest(insertURI, bucketsByName, defaultName, priorityClass);
 	}
 
-	public boolean sendFreemail(String freemailFrom, String freemailTo, String subject, String content) {
-		return FreemailAPI.sendFreemail(freemailFrom, freemailTo, subject, content);
+	public boolean sendFreemail(String freemailFrom, String freemailTo[], String subject, String content, String password) {
+		return FreemailAPI.sendFreemail(freemailFrom, freemailTo, subject, content, password);
 	}
 
 }

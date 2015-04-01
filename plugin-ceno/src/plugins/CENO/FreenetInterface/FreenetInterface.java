@@ -21,6 +21,6 @@ public interface FreenetInterface {
 	boolean insertFreesite(FreenetURI insertURI, String docName, String content, ClientPutCallback cb) throws IOException, InsertException;
 	Bucket makeBucket(int length) throws IOException;
 	FreenetURI insertManifest(FreenetURI insertURI, HashMap<String, Object> bucketsByName, String defaultName, short priorityClass) throws InsertException;
-	boolean sendFreemail(String freemailFrom, String freemailTo, String subject, String content);
+	boolean sendFreemail(String freemailFrom, String freemailTo[], String subject, String content, String password);
 
 }
