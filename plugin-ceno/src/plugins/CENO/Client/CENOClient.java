@@ -1,5 +1,8 @@
 package plugins.CENO.Client;
 
+import javax.mail.Message;
+import javax.mail.MessagingException;
+
 import plugins.CENO.Version;
 import plugins.CENO.FreenetInterface.HighLevelSimpleClientInterface;
 import plugins.CENO.FreenetInterface.NodeInterface;
@@ -40,7 +43,6 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 		client = new HighLevelSimpleClientInterface(pluginRespirator.getHLSimpleClient());
 		ULPRManager.init();
 		nodeInterface = new NodeInterface(pluginRespirator.getNode());
-		nodeInterface.startIMAPMonitor(clientFreemail, "CENO", "INBOX");
 	}
 
 	public String getVersion() {

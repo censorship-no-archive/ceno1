@@ -108,5 +108,9 @@ public class NodeInterface implements FreenetInterface {
 	public boolean startIMAPMonitor(String freemail, String password, String idleFolder) {
 		return FreemailAPI.startIMAPMonitor(freemail, password, idleFolder);
 	}
+	
+	public String[] getUnreadMailsSubject(String freemail, String password, String inboxFolder, boolean shouldDelete) {
+		return FreemailAPI.getUnreadMailsSubject(freemail, password, inboxFolder, shouldDelete);
+	}
 
 }

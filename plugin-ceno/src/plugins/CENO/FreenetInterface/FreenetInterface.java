@@ -3,6 +3,8 @@ package plugins.CENO.FreenetInterface;
 import java.io.IOException;
 import java.util.HashMap;
 
+import javax.mail.Message;
+
 import freenet.client.FetchException;
 import freenet.client.FetchResult;
 import freenet.client.InsertException;
@@ -23,4 +25,5 @@ public interface FreenetInterface {
 	FreenetURI insertManifest(FreenetURI insertURI, HashMap<String, Object> bucketsByName, String defaultName, short priorityClass) throws InsertException;
 	boolean sendFreemail(String freemailFrom, String freemailTo[], String subject, String content, String password);
 	boolean startIMAPMonitor(String freemail, String password, String idleFolder);
+	public String[] getUnreadMailsSubject(String freemail, String password, String inboxFolder, boolean shouldDelete);
 }

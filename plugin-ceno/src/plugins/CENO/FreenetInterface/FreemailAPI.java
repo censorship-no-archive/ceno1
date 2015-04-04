@@ -1,9 +1,10 @@
 package plugins.CENO.FreenetInterface;
 
-import java.io.IOException;
 import java.util.Properties;
 
 import javax.mail.Authenticator;
+import javax.mail.Flags;
+import javax.mail.Flags.Flag;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -16,6 +17,7 @@ import javax.mail.event.MessageCountAdapter;
 import javax.mail.event.MessageCountEvent;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.mail.search.FlagTerm;
 
 import plugins.CENO.Client.CENOClient;
 
@@ -102,7 +104,7 @@ public class FreemailAPI {
 
 		return Session.getInstance(props, new SMTPAuthenticator(smtpUser, smtpPassword));
 	}
-	
+
 	private static Session prepareIMAPSession(String imapUser, String imapPassword) {
 		Properties props = System.getProperties();
 		props.put("mail.imap.host", localHost);
@@ -144,6 +146,83 @@ public class FreemailAPI {
 		return smtpTransport;
 	}
 
+	/**
+	 * Get an array of the unread freemails of a folder, via IMAP
+	 * 
+	 * @param freemail the freemail user
+	 * @param password freemail user's password
+	 * @param inboxFolder the folder to search for undread freemails
+	 * @param shouldDelete if true, delete unread messages after retrieval
+	 * @return a Message array of the unread freemails, an empty array if there are no unread 
+	 * freemails and null if there was an error
+	 */
+	public static String[] getUnreadMailsSubject(String freemail, String password, String inboxFolder, boolean shouldDelete) {
+		Message[] unreadMessages = getMessages(freemail, password, inboxFolder, shouldDelete, Flags.Flag.SEEN, false);
+		if (unreadMessages == null) {
+			return new String[]{""};
+		}
+		String[] mailsSubject = new String[unreadMessages.length];
+		for (int i=0; i<unreadMessages.length; i++) {
+			try {
+				mailsSubject[i] = unreadMessages[i].getSubject();
+			} catch (MessagingException e) {
+				mailsSubject[i] = "Invalid";
+			}
+		}
+		return mailsSubject;
+	}
+
+	private static Message[] getMessages(String freemail, String password, String inboxFolder, boolean shouldDelete, Flag flag, boolean flagBool) {
+		Store store = null;
+		Folder folder = null;
+		try {
+			Session session = prepareIMAPSession(freemail, password);
+			store = session.getStore("imap");
+			store.connect(localHost, freemail, password);
+
+			folder = store.getFolder(inboxFolder);
+			if (folder == null || !folder.exists()) {
+				return null;
+			}
+
+			folder.open(Folder.READ_WRITE);
+			Message[] unreadMessages = folder.search(new FlagTerm(new Flags(flag), flagBool));
+
+			if (shouldDelete) {
+				for (Message message : unreadMessages) {
+					message.setFlag(Flag.DELETED, true);
+				}
+			}
+
+			// Once the folder is closed, messages cannot be read. Therefore we need to
+			// return a copy of them in a new array.
+			Message[] unreadMessagesCopy = new Message[unreadMessages.length];
+			for (int i=0; i<unreadMessages.length; i++) {
+				unreadMessagesCopy[i] = new MimeMessage((MimeMessage) unreadMessages[i]);
+			}
+
+			// Close the folder and expunge (remove) all mails
+			folder.close(true);
+			store.close();
+
+			return unreadMessagesCopy;
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			try {
+				if (store != null) {
+					store.close();
+				}
+				if (folder != null) {
+					// Close the folder without expunging the mails
+					folder.close(false);
+				}
+			} catch (MessagingException e) {
+				e.printStackTrace();
+			}
+			return null;
+		}
+	}
+
 	public static boolean startIMAPMonitor(String freemail, String password, String idleFolder) {
 		try {
 			Session session = prepareIMAPSession(freemail, password);
@@ -154,7 +233,7 @@ public class FreemailAPI {
 			if (folder == null || !folder.exists()) {
 				return false;
 			}
-			folder.open(Folder.READ_WRITE);
+			folder.open(Folder.READ_ONLY);
 
 			folder.addMessageCountListener(new MessageCountAdapter() {
 				public void messagesAdded(MessageCountEvent ev) {
@@ -173,7 +252,6 @@ public class FreemailAPI {
 					}
 				}
 			});
-
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			return false;
