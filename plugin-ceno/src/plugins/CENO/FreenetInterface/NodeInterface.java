@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
-import plugins.CENO.FreenetInterface.Freemail.FreemailAPI;
 import freenet.client.ClientMetadata;
 import freenet.client.DefaultMIMETypes;
 import freenet.client.FetchContext;
@@ -104,6 +103,10 @@ public class NodeInterface implements FreenetInterface {
 
 	public boolean sendFreemail(String freemailFrom, String freemailTo[], String subject, String content, String password) {
 		return FreemailAPI.sendFreemail(freemailFrom, freemailTo, subject, content, password);
+	}
+
+	public boolean startIMAPMonitor(String freemail, String password, String idleFolder) {
+		return FreemailAPI.startIMAPMonitor(freemail, password, idleFolder);
 	}
 
 }

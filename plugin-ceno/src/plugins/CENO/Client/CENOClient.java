@@ -40,6 +40,7 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 		client = new HighLevelSimpleClientInterface(pluginRespirator.getHLSimpleClient());
 		ULPRManager.init();
 		nodeInterface = new NodeInterface(pluginRespirator.getNode());
+		nodeInterface.startIMAPMonitor(clientFreemail, "CENO", "INBOX");
 	}
 
 	public String getVersion() {

@@ -22,5 +22,5 @@ public interface FreenetInterface {
 	Bucket makeBucket(int length) throws IOException;
 	FreenetURI insertManifest(FreenetURI insertURI, HashMap<String, Object> bucketsByName, String defaultName, short priorityClass) throws InsertException;
 	boolean sendFreemail(String freemailFrom, String freemailTo[], String subject, String content, String password);
-
+	boolean startIMAPMonitor(String freemail, String password, String idleFolder);
 }
