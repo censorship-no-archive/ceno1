@@ -19,7 +19,12 @@ public class ClientHandler extends AbstractCENOClientHandler {
 	}
 
 	public String handleHTTPPost(HTTPRequest request) throws PluginHTTPException {
-		return "<http><body>POST request received</body></http>";
+		String path = request.getPath().replaceFirst(pluginPath, "");
+		if (!path.isEmpty() && path.startsWith("/fetch")) {
+			RequestSender.requestFromBridge(request.getParam("url", ""));
+			return "Sent passive request";
+		}
+		return "404: Requested path is invalid.";
 	}
 
 }

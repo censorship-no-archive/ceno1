@@ -43,6 +43,7 @@ public class ULPRManager {
 		public void onFailure(FetchException e, ClientGetter state,
 				ObjectContainer container) {
 			updateULPRStatus(url, ulprStatus.failed);
+			RequestSender.requestFromBridge(url);
 		}
 
 	}

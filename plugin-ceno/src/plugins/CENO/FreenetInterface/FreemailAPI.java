@@ -147,14 +147,14 @@ public class FreemailAPI {
 	}
 
 	/**
-	 * Get an array of the unread freemails of a folder, via IMAP
+	 * Get an array of the unread freemails of a folder via IMAP
 	 * 
 	 * @param freemail the freemail user
 	 * @param password freemail user's password
 	 * @param inboxFolder the folder to search for undread freemails
-	 * @param shouldDelete if true, delete unread messages after retrieval
+	 * @param shouldDelete if {@code true}, delete unread messages after retrieval
 	 * @return a Message array of the unread freemails, an empty array if there are no unread 
-	 * freemails and null if there was an error
+	 * freemails and {@code null} if there was an error
 	 */
 	public static String[] getUnreadMailsSubject(String freemail, String password, String inboxFolder, boolean shouldDelete) {
 		Message[] unreadMessages = getMessages(freemail, password, inboxFolder, shouldDelete, Flags.Flag.SEEN, false);
@@ -184,10 +184,15 @@ public class FreemailAPI {
 			if (folder == null || !folder.exists()) {
 				return null;
 			}
-
 			folder.open(Folder.READ_WRITE);
-			Message[] unreadMessages = folder.search(new FlagTerm(new Flags(flag), flagBool));
-
+			
+			Message[] unreadMessages;
+			if (flag != null) {
+				unreadMessages = folder.search(new FlagTerm(new Flags(flag), flagBool));
+			} else {
+				unreadMessages = folder.getMessages();
+			}
+			
 			if (shouldDelete) {
 				for (Message message : unreadMessages) {
 					message.setFlag(Flag.DELETED, true);
@@ -201,7 +206,7 @@ public class FreemailAPI {
 				unreadMessagesCopy[i] = new MimeMessage((MimeMessage) unreadMessages[i]);
 			}
 
-			// Close the folder and expunge (remove) all mails
+			// Close the folder and expunge (remove) all mails with the DELETED flag
 			folder.close(true);
 			store.close();
 
@@ -242,7 +247,7 @@ public class FreemailAPI {
 					for (Message message : msgs) {
 						try {
 							if (message.getFrom().equals(CENOClient.bridgeFreemail)) {
-								System.out.println("Bundle requests for URL: " + message.getSubject());
+								System.out.println("Bundle requested for URL: " + message.getSubject());
 							}
 						} catch (MessagingException mex) {
 							mex.printStackTrace();
