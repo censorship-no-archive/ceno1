@@ -1,5 +1,14 @@
 package plugins.CENO.FreenetInterface;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Properties;
 
 import javax.mail.Authenticator;
@@ -19,9 +28,13 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.mail.search.FlagTerm;
 
+import org.apache.commons.compress.utils.IOUtils;
+
 import plugins.CENO.Client.CENOClient;
 
 import com.sun.mail.smtp.SMTPTransport;
+
+import freenet.node.NodeStarter;
 
 public class FreemailAPI {
 	private static final String localHost = "127.0.0.1";
@@ -185,14 +198,14 @@ public class FreemailAPI {
 				return null;
 			}
 			folder.open(Folder.READ_WRITE);
-			
+
 			Message[] unreadMessages;
 			if (flag != null) {
 				unreadMessages = folder.search(new FlagTerm(new Flags(flag), flagBool));
 			} else {
 				unreadMessages = folder.getMessages();
 			}
-			
+
 			if (shouldDelete) {
 				for (Message message : unreadMessages) {
 					message.setFlag(Flag.DELETED, true);
@@ -261,6 +274,51 @@ public class FreemailAPI {
 			ex.printStackTrace();
 			return false;
 		}
+		return true;
+	}
+
+	public static boolean copyAccprops(String freemailAccount) {
+		// Check if an account for the CENO client identity already exists
+		// If it doesn't exist, create the corresponding directory
+		String shortFreemailAddress = freemailAccount.split("@|\\.")[1];
+		String runningJarPath = NodeStarter.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+		Path accpropsPath = null;
+		try {
+			accpropsPath = Paths.get(URLDecoder.decode(runningJarPath, "UTF-8"), "freemail-wot/data", shortFreemailAddress + "/");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			return false;
+		}
+		if (Files.isDirectory(accpropsPath)) {
+			return true;
+		}
+		try {
+			Files.createDirectories(accpropsPath);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
+
+		// Copy the accprops to the directory created
+		InputStream accpropsIn = FreemailAPI.class.getResourceAsStream("Freemail/Resources/accprops");
+		if (accpropsIn == null) {
+			return false;
+		}
+		FileOutputStream accpropsOut = null;
+		try {
+			accpropsOut = new FileOutputStream(accpropsPath + "/accprops");
+		} catch (FileNotFoundException e) {
+			return false;
+		}
+		try {
+			IOUtils.copy(accpropsIn, accpropsOut);
+			accpropsIn.close();
+			accpropsOut.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
+
 		return true;
 	}
 

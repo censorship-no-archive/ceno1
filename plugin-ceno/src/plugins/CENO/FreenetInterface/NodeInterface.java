@@ -112,5 +112,9 @@ public class NodeInterface implements FreenetInterface {
 	public String[] getUnreadMailsSubject(String freemail, String password, String inboxFolder, boolean shouldDelete) {
 		return FreemailAPI.getUnreadMailsSubject(freemail, password, inboxFolder, shouldDelete);
 	}
+	
+	public boolean copyAccprops(String freemailAccount) {
+		return FreemailAPI.copyAccprops(freemailAccount);
+	}
 
 }
