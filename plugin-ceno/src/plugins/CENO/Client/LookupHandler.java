@@ -34,7 +34,7 @@ public class LookupHandler extends AbstractCENOClientHandler {
 		localFetchResult = getSyncCallback.getResult(5L, TimeUnit.SECONDS);
 		if (localFetchResult == null) {
 			ULPRManager.lookupULPR(urlParam);
-			return "Sent Passive Request";
+			return printStaticHTML("Resources/sentULPR.html");
 		}
 		return localFetchResult; 
 	}

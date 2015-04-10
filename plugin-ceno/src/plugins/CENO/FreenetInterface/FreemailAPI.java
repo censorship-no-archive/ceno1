@@ -30,10 +30,9 @@ import javax.mail.search.FlagTerm;
 
 import org.apache.commons.compress.utils.IOUtils;
 
-import plugins.CENO.Client.CENOClient;
-
 import com.sun.mail.smtp.SMTPTransport;
 
+import plugins.CENO.Client.CENOClient;
 import freenet.node.NodeStarter;
 
 public class FreemailAPI {
@@ -86,8 +85,11 @@ public class FreemailAPI {
 	 * @param password the password to use for authentication with freemail's SMTP handler
 	 * @return true, if the freemail was sent successfully
 	 */
-	public static boolean sendFreemail(String freemailFrom, String freemailTo[], String subject, String content, String password) {
+	public static synchronized boolean sendFreemail(String freemailFrom, String freemailTo[], String subject, String content, String password) {
 		Session smtpSession = prepareSMTPSession(freemailFrom, password);
+		if (smtpSession == null) {
+			return false;
+		}
 		SMTPTransport smtpTransport = doConnectSMTP(smtpSession, freemailFrom, password);
 		if (smtpTransport != null) {
 			Message msg = prepareMessage(smtpSession, freemailFrom, freemailTo, subject, content);
@@ -98,6 +100,7 @@ public class FreemailAPI {
 				} catch (MessagingException e) {
 					//TODO Handle 550 bridge freemail not found because bridge's WOT has no trust value
 					// by sending fcp message > add trust value 75 to the WOT identity of the freemail
+					e.printStackTrace();
 					return false;
 				}
 				return true;
@@ -113,18 +116,30 @@ public class FreemailAPI {
 		props.put("mail.smtp.port", smtpPort);
 		props.put("mail.smtp.auth", "true");
 		props.put("mail.smtp.user", smtpUser);
-		props.put("mail.smtp.timeout", "5000");
+		props.put("mail.smtp.connectiontimeout", "5000");
 
-		return Session.getInstance(props, new SMTPAuthenticator(smtpUser, smtpPassword));
+		Session session = null;
+		try {
+			session = Session.getInstance(props, new SMTPAuthenticator(smtpUser, smtpPassword));
+		} catch (IllegalStateException e) {
+			e.printStackTrace();
+		}
+		return session;
 	}
 
 	private static Session prepareIMAPSession(String imapUser, String imapPassword) {
 		Properties props = System.getProperties();
 		props.put("mail.imap.host", localHost);
 		props.put("mail.imap.port", imapPort);
-		//props.put("mail.imap.timeout", "5000");
+		props.put("mail.imap.connectiontimeout", "5000");
 
-		return Session.getInstance(props, null);
+		Session session = null;
+		try {
+			session = Session.getInstance(props);
+		} catch (IllegalStateException e) {
+			e.printStackTrace();
+		}
+		return session;
 	}
 
 	private static Message prepareMessage(Session smtpSession, String freemailFrom, String freemailTo[], String subect, String content) {
@@ -169,10 +184,10 @@ public class FreemailAPI {
 	 * @return a Message array of the unread freemails, an empty array if there are no unread 
 	 * freemails and {@code null} if there was an error
 	 */
-	public static String[] getUnreadMailsSubject(String freemail, String password, String inboxFolder, boolean shouldDelete) {
+	public static synchronized String[] getUnreadMailsSubject(String freemail, String password, String inboxFolder, boolean shouldDelete) {
 		Message[] unreadMessages = getMessages(freemail, password, inboxFolder, shouldDelete, Flags.Flag.SEEN, false);
 		if (unreadMessages == null) {
-			return new String[]{""};
+			return null;
 		}
 		String[] mailsSubject = new String[unreadMessages.length];
 		for (int i=0; i<unreadMessages.length; i++) {
@@ -190,6 +205,9 @@ public class FreemailAPI {
 		Folder folder = null;
 		try {
 			Session session = prepareIMAPSession(freemail, password);
+			if (session == null) {
+				return null;
+			}
 			store = session.getStore("imap");
 			store.connect(localHost, freemail, password);
 
@@ -239,12 +257,14 @@ public class FreemailAPI {
 			}
 			return null;
 		}
+
 	}
 
 	public static boolean startIMAPMonitor(String freemail, String password, String idleFolder) {
+		Store store = null;
 		try {
 			Session session = prepareIMAPSession(freemail, password);
-			Store store = session.getStore("imap");
+			store = session.getStore("imap");
 			store.connect(localHost, freemail, password);
 
 			Folder folder = store.getFolder(idleFolder);
@@ -272,6 +292,13 @@ public class FreemailAPI {
 			});
 		} catch (Exception ex) {
 			ex.printStackTrace();
+			if (store!=null && store.isConnected()) {
+				try {
+					store.close();
+				} catch (MessagingException e) {
+					e.printStackTrace();
+				}
+			}
 			return false;
 		}
 		return true;

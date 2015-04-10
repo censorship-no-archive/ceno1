@@ -66,6 +66,7 @@
 				<pathelement location="${jetty-all.location}"/>
 				<pathelement location="${jetty-serverlet.location}"/>
 				<pathelement location="${json-smart.location}"/>
+				<pathelement location="${sun-mail.location}"/>
 			</classpath>
 			<include name="**/*.java"/>
 			<exclude name="**/*Test.java"/>
@@ -136,6 +137,7 @@
 			<zipfileset src="${jetty-all.location}" />
 			<zipfileset src="${jetty-serverlet.location}" />
 			<zipfileset src="${json-smart.location}" />
+			<zipfileset src="${sun-mail.location}" excludes="META-INF/LICENSE.txt" />
 		</jar>
 	</target>
 

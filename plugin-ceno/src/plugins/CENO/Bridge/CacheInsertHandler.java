@@ -41,13 +41,13 @@ public class CacheInsertHandler extends CENOJettyHandler {
 	// Insertion requests time out after 5 mins
 	static final long insertionRequestTimeout = 5 * 60 * 1000;
 
-	public class InsertCallback implements ClientPutCallback {
+	public class HandlerInsertCallback implements ClientPutCallback {
 		private Request baseRequest;
 		private Continuation continuation;
 		private HttpServletResponse response;
 		private FreenetURI cachedURI;
 
-		public InsertCallback(Request request, Continuation continuation, HttpServletResponse response) {
+		public HandlerInsertCallback(Request request, Continuation continuation, HttpServletResponse response) {
 			this.baseRequest = request;
 			this.continuation = continuation;
 			this.response = response;
@@ -146,7 +146,7 @@ public class CacheInsertHandler extends CENOJettyHandler {
 			Map<String, String> splitMap = URLtoUSKTools.splitURL(urlParam);
 			FreenetURI insertKey = URLtoUSKTools.computeInsertURI(splitMap.get("domain"), CENOBridge.initConfig.getProperty("requestURI"));
 			try {
-				CENOBridge.nodeInterface.insertFreesite(insertKey, splitMap.get("extraPath"), bundle.getContent(), new InsertCallback(baseRequest, continuation, response));
+				CENOBridge.nodeInterface.insertFreesite(insertKey, splitMap.get("extraPath"), bundle.getContent(), new HandlerInsertCallback(baseRequest, continuation, response));
 			} catch (InsertException e) {
 				writeError(baseRequest, response, "Error during insertion");
 				return;
