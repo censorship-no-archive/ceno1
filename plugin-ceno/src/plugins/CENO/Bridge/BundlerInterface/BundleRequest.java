@@ -4,7 +4,7 @@ public class BundleRequest {
 
 	public static Bundle requestURI(String URI) {
 		Bundle bundle = new Bundle(URI);
-		bundle.requestFromBundler();
+		bundle.requestFromBundlerSafe();
 		return bundle;
 	}
 }

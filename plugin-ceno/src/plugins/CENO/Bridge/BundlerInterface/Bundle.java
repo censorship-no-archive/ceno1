@@ -28,8 +28,12 @@ public class Bundle {
 	public void setContent(byte[] content) {
 		this.content = new String(content);
 	}
+	
+	public void requestFromBundler() throws IOException {
+		doRequest();
+	}
 
-	public void requestFromBundler() {
+	public void requestFromBundlerSafe() {
 		try {
 			doRequest();
 		} catch (IOException e) {

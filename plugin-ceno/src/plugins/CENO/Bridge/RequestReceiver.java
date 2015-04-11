@@ -1,7 +1,10 @@
 package plugins.CENO.Bridge;
 
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+
+import freenet.client.InsertException;
 
 public class RequestReceiver {
 
@@ -54,7 +57,13 @@ public class RequestReceiver {
 						urlsRequested = CENOBridge.nodeInterface.getUnreadMailsSubject(freemailBox, "CENO", "INBOX", true);
 						if (urlsRequested != null) {
 							for (String urlRequested : urlsRequested) {
-								BundleInserter.insert(urlRequested);
+								try {
+									BundleInserter.insertBundle(urlRequested);
+								} catch (IOException e) {
+									e.printStackTrace();
+								} catch (InsertException e) {
+									e.printStackTrace();
+								}
 							}
 						}
 					}
