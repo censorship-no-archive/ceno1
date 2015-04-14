@@ -1,77 +1,48 @@
-var net = require('net');
+var http = require('http');
+var qs = require('querystring');
 var path = require('path');
-var bundler = require('equalitie-bundler');
+var url = require('url');
+
+var b = require('equalitie-bundler');
 var config = require(path.join('..', 'config', 'transport'));
 
-// Send a bundle for a given URL to the cache server for storage
-function cacheBundle(url, bundle) {
-  var client = net.connect({
-    host: config.cacheServerAddress,
-    port: config.cacheServerPort
-  }, function () { // Connection event
-    client.write('STORE ' + url + '\n');
-  });
+var server = http.createServer(function (req, res) {
+  var requestedURL = qs.parse(url.parse(req.url).query).url;
+  console.log('Got request to bundle ' + requestedURL);
 
-  client.on('data', function (data) {
-    data = data.toString();
-    if (data.indexOf('READY') === 0) {
-      client.write(bundle);
-      client.end();
-      console.log('Wrote bundle for ' + url + ' to cache server');
-    } else if (data.indexOf('ERROR') === 0) {
-      console.log('!!! Got error message ' + data.substring(data.indexOf(' ') + 1));
-      client.end();
+  // Bundle as many resources in requested pages as possible, without any
+  // request manipulation
+  var bundler = new b.Bundler(requestedURL);
+  bundler.on('originalReceived', b.replaceImages);
+  bundler.on('originalReceived', b.replaceCSSFiles);
+  bundler.on('originalReceived', b.replaceJSFiles);
+  bundler.on('originalReceived', b.replaceURLCalls);
+  bundler.on('resourceReceived', b.bundleCSSRecursively);
+
+  res.writeHead(200, {'Content-Type': 'application/json'});
+
+  bundler.bundle(function (err, bundle) {
+    if (err) {
+      res.statusCode = 500;
+      res.write(JSON.stringify({
+        error: err.message
+      }));
+      console.log('Encountered error creating bundle for ' + requestedURL);
+      console.log('Error: ' + err.message);
     } else {
-      console.log('Cache server is not adhering to protocol. Sent ' + data);
-      client.write('ERROR expected message READY\n');
-      client.end();
+      // Responses are written back with the three key pieces of information
+      // that are needed to relate requested URLs to their bundles and to
+      // present the user with some kind of option to have a cached copy remade.
+      res.write(JSON.stringify({
+        created: new Date(),
+        url: requestedURL,
+        bundle: bundle
+      }));
+      console.log('Successfully created bundle for ' + requestedURL);
     }
-  });
-}
-
-// Listen for requests starting with the BUNDLE command
-var server = net.createServer(function (client) {
-  var bundle = '';
-
-  client.on('data', function (data) {
-    data = data.toString();
-    if (data.indexOf('BUNDLE') === 0) {
-      var url = data.substring('BUNDLE'.length + 1, data.length - 1);
-      console.log('Got request to create bundle for ' + url);
-
-      var bundleMaker = new bundler.Bundler(url);
-      bundleMaker.on('originalReceived', bundler.replaceImages);
-      bundleMaker.on('originalReceived', bundler.replaceCSSFiles);
-      bundleMaker.on('originalReceived', bundler.replaceJSFiles);
-      bundleMaker.on('originalReceived', bundler.replaceURLCalls);
-      bundleMaker.on('resourceReceived', bundler.bundleCSSRecursively);
-
-      bundleMaker.bundle(function (err, bundleData) {
-        if (err) {
-          console.log('Error producing bundle for ' + url);
-          client.write('ERROR could not produce bundle; Error: ' + err.message + '\n');
-        } else {
-          bundle = bundleData;
-          client.write('COMPLETE\n');
-          // Write the newly bundled data to the cache server for later retrieval
-          cacheBundle(url, bundle);
-        }
-      });
-    } else if (data.indexOf('READY') === 0) {
-      client.write(bundle);
-      client.end();
-      console.log('Sent bundle to client');
-    } else if (data.indexOf('ERROR') === 0) {
-      console.log('!!! Got error message ' + data.substring(data.indexOf(' ') + 1));
-      client.end();
-    } else {
-      console.log('Client is not adhering to protocol. Sent ' + data);
-      client.write('ERROR expected message READY\n');
-      client.end();
-    }
+    res.end();
   });
 });
 
-server.listen(config.port, function () {
-  console.log('Transport server listening on port ' + config.port);
-});
+server.listen(config.port);
+console.log('Running bundling server on port ' + config.port);
