@@ -61,13 +61,15 @@ Step | Description                                        | Message
 3    | CC makes a new request for `<url>` after some time | `[GET <LCS>/lookup?url=<url>`
 4    | LCS reports that no bundle exists for `<url>` yet  | `[write {"complete": true, "found": false}]`
 5    | CC requests that a new bundle be created by bridge | `[POST <RS>/create?url=<url>`
-6    | RS signals RR on bridge to create new bundle       | `[POST <RR>/create?url=<url>`
+6    | RS signals RR on bridge to create new bundle       | Send freemail to RR
 
 #### Notes
 
 In step 2, the LCS has only searched the local cache. It must start a process to search the distributed cache in the case that the requested page is not in the local cache.
 
 Steps 3 and 4 can repeat (in order) any number of times until the search is complete.
+
+The format and content of the Freemail sent by RS is not specified.
 
 ### Lookup Success (Local Cache)
 
