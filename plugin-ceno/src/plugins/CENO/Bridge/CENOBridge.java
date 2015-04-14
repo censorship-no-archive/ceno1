@@ -29,19 +29,21 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 	// Interface objects with fred
 	private HighLevelSimpleClientInterface client;
 	public static NodeInterface nodeInterface;
+	private RequestReceiver reqReceiver;
 
 	// Plugin-specific configuration
-	public static final String pluginUri = "/plugins/plugins.CENO.CENO";
-	public static final String pluginName = "CENO";
+	public static final String pluginUri = "/plugins/plugins.CENO.CENOBridge";
+	public static final String pluginName = "CENOBridge";
 	public static Configuration initConfig;
-	private  Version version;
+	private Version version = new Version(Version.PluginType.BRIDGE);
 	private static final String configPath = System.getProperty("user.home") + "/.CENO/bridge.properties";
+
+	public static final String bridgeFreemail = "DEFLECTBridge@3s74bxq5cuap2sbco47w2yqpwmoavk4goi7brihcmebo6l5xiija.freemail";
+	public static final String clientFreemail = "ceno@yay4m6a3z5hwu3fq2j7nyyhmyn6hu5s3uzqyuacdqxoak4jwggta.freemail";
 
 
 	public void runPlugin(PluginRespirator pr)
 	{
-		version = new Version(Version.PluginType.BRIDGE);
-
 		// Initialize interfaces with fred
 		pluginRespirator = pr;
 		client = new HighLevelSimpleClientInterface(pluginRespirator.getHLSimpleClient());
@@ -58,6 +60,9 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 			initConfig.setProperty("requestURI", keyPair[1].toString());
 			initConfig.storeProperties();
 		}
+
+		reqReceiver = new RequestReceiver(new String[]{bridgeFreemail});
+		reqReceiver.loopFreemailBoxes();
 
 		// Configure the CeNo's jetty embedded server
 		ceNoHttpServer = new Server();
@@ -108,19 +113,11 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 	}
 
 	public String getVersion() {
-		if (version != null) {
-			return version.getVersion();
-		} else {
-			return "loading";
-		}
+		return version.getVersion();
 	}
 
 	public long getRealVersion() {
-		if (version != null) {
-			return version.getRealVersion();
-		} else {
-			return -1;
-		}
+		return version.getRealVersion();
 	}
 
 	/**
@@ -129,6 +126,7 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 	 */
 	public void terminate()
 	{
+		reqReceiver.stopLooping();
 		// Stop ceNoHttpServer and unbind ports
 		if (ceNoHttpServer != null) {
 			try {

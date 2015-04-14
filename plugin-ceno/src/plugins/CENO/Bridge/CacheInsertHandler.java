@@ -1,7 +1,6 @@
 package plugins.CENO.Bridge;
 
 import java.io.IOException;
-import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -14,17 +13,14 @@ import org.eclipse.jetty.continuation.Continuation;
 import org.eclipse.jetty.continuation.ContinuationSupport;
 import org.eclipse.jetty.server.Request;
 
-import plugins.CENO.CENOHandler;
+import plugins.CENO.CENOJettyHandler;
+import plugins.CENO.Bridge.BundleInserter.InsertCallback;
 import plugins.CENO.Bridge.BundlerInterface.Bundle;
 
 import com.db4o.ObjectContainer;
 
 import freenet.client.InsertException;
 import freenet.client.async.BaseClientPutter;
-import freenet.client.async.ClientPutCallback;
-import freenet.keys.FreenetURI;
-import freenet.support.Logger;
-import freenet.support.api.Bucket;
 
 /* ------------------------------------------------------------ */
 /** CeNo Plugin handler for requests to cache bundles
@@ -35,40 +31,26 @@ import freenet.support.api.Bucket;
  * The handler caches the given bundle under its signed subspace.
  * Upon successful insertion, the handler replies with "stored".
  */
-public class CacheInsertHandler extends CENOHandler {
+public class CacheInsertHandler extends CENOJettyHandler {
 
 	// Insertion requests time out after 5 mins
 	static final long insertionRequestTimeout = 5 * 60 * 1000;
 
-	public class InsertCallback implements ClientPutCallback {
+	public class HandlerInsertCallback extends InsertCallback {
 		private Request baseRequest;
 		private Continuation continuation;
 		private HttpServletResponse response;
-		private FreenetURI cachedURI;
 
-		public InsertCallback(Request request, Continuation continuation, HttpServletResponse response) {
+		public HandlerInsertCallback(Request request, Continuation continuation, HttpServletResponse response) {
+			super();
 			this.baseRequest = request;
 			this.continuation = continuation;
 			this.response = response;
 		}
 
-		public void onGeneratedURI(FreenetURI uri, BaseClientPutter state, ObjectContainer container) {
-			this.cachedURI = uri;
-		}
-
-		public void onGeneratedMetadata(Bucket metadata, BaseClientPutter state, ObjectContainer container) {
-			// TODO Auto-generated method stub
-
-		}
-
-		public void onFetchable(BaseClientPutter state, ObjectContainer container) {
-			// TODO Auto-generated method stub
-
-		}
-
+		@Override
 		public void onSuccess(BaseClientPutter state, ObjectContainer container) {
-			Logger.normal(this, "Caching successful");
-
+			super.onSuccess(state, container);
 			response.setContentType("text/html;charset=utf-8");
 			response.setStatus(HttpServletResponse.SC_OK);
 			try {
@@ -81,8 +63,9 @@ public class CacheInsertHandler extends CENOHandler {
 			continuation.complete();
 		}
 
+		@Override
 		public void onFailure(InsertException e, BaseClientPutter state, ObjectContainer container) {
-			Logger.error(this, "Failed to insert freesite " + e);
+			super.onFailure(e, state, container);
 			try {
 				writeError(baseRequest, response, "not stored");
 			} catch (IOException e1) {
@@ -90,11 +73,6 @@ public class CacheInsertHandler extends CENOHandler {
 				e1.printStackTrace();
 			}
 			continuation.complete();
-		}
-
-		public void onMajorProgress(ObjectContainer container) {
-			// TODO Auto-generated method stub
-			
 		}
 
 	}
@@ -147,11 +125,8 @@ public class CacheInsertHandler extends CENOHandler {
 				writeError(baseRequest, response, "Request timed out");
 				return;
 			}
-			//TODO non-blocking insert the bundle content in freenet with the computed USK
-			Map<String, String> splitMap = splitURL(urlParam);
-			FreenetURI insertKey = computeInsertURI(splitMap.get("domain"));
 			try {
-				CENOBridge.nodeInterface.insertFreesite(insertKey, splitMap.get("extraPath"), bundle.getContent(), new InsertCallback(baseRequest, continuation, response));
+				BundleInserter.insertBundle(urlParam, bundle, new HandlerInsertCallback(baseRequest, continuation, response));
 			} catch (InsertException e) {
 				writeError(baseRequest, response, "Error during insertion");
 				return;

@@ -21,36 +21,35 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 	// Interface objects with fred
 	private HighLevelSimpleClientInterface client;
 	public static NodeInterface nodeInterface;
+	private static final ClientHandler clientHandler = new ClientHandler();
 
 	// Plugin-specific configuration
 	public static final String pluginUri = "/plugins/plugins.CENO.CENO";
 	public static final String pluginName = "CENO";
-	private  Version version;
+	private static final Version version = new Version(Version.PluginType.CLIENT);
+
+	// Bridge and freemail-specific constants
+	public static final String bridgeKey = "SSK@Rx6x6Ik1y93wGk8OtTvZaMQ~Ni6uqxFMclGP8BHrk5g,aBMErm8fkZ7xuFnSzSLnBKgHmjk6PR1Ng4V8ITxXzk8,AQACAAE/";
+	public static final String bridgeIdentity = "USK@3L-A3h0VAP1IInc-bWIPsxwKq4ZyPhig4mEC7y~3QhI,UseXO9CuWx7h2GDfJ9ceMPa6hVj9sDoAXDJorALAprQ,AQACAAE/WebOfTrust/0";
+	public static final String bridgeFreemail = "DEFLECTBridge@3s74bxq5cuap2sbco47w2yqpwmoavk4goi7brihcmebo6l5xiija.freemail";
+	public static final String clientFreemail = "ceno@yay4m6a3z5hwu3fq2j7nyyhmyn6hu5s3uzqyuacdqxoak4jwggta.freemail";
 
 	public void runPlugin(PluginRespirator pr)
 	{
-		version = new Version(Version.PluginType.CLIENT);
-
 		// Initialize interfaces with fred
 		pluginRespirator = pr;
 		client = new HighLevelSimpleClientInterface(pluginRespirator.getHLSimpleClient());
+		ULPRManager.init();
+		RequestSender.init(new String[]{bridgeFreemail});
 		nodeInterface = new NodeInterface(pluginRespirator.getNode());
 	}
 
 	public String getVersion() {
-		if (version != null) {
-			return version.getVersion();
-		} else {
-			return "loading";
-		}
+		return version.getVersion();
 	}
 
 	public long getRealVersion() {
-		if (version != null) {
-			return version.getRealVersion();
-		} else {
-			return 1;
-		}
+		return version.getRealVersion();
 	}
 
 	/**
@@ -63,11 +62,11 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 	}
 
 	public String handleHTTPGet(HTTPRequest request) throws PluginHTTPException {
-		return "<http><body>Welcome to CENO.</body></http>";
+		return clientHandler.handleHTTPGet(request);
 	}
 
 	public String handleHTTPPost(HTTPRequest request) throws PluginHTTPException {
-		return "<http><body>Welcome to CENO.</body></http>";
+		return clientHandler.handleHTTPPost(request);
 	}
 
 }

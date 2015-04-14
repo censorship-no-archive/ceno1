@@ -1,6 +1,7 @@
 *~
 \#*\#
 .\#*
+.metadata
 node_modules
 /cache
 */cache

@@ -2,6 +2,8 @@ package plugins.CENO.FreenetInterface;
 
 import java.util.HashMap;
 
+import com.db4o.ObjectContainer;
+
 import freenet.client.FetchContext;
 import freenet.client.FetchException;
 import freenet.client.FetchResult;
@@ -21,10 +23,29 @@ import freenet.node.RequestStarter;
 
 public class HighLevelSimpleClientInterface {
 
+	protected static final boolean realTimeFlag = false;
+	
 	private static volatile HighLevelSimpleClientInterface HLSCInterface = null;
+	private static HLSCRequestClient requestClient;
 
 	private HighLevelSimpleClient client;
 	private Node node;
+
+	public class HLSCRequestClient implements RequestClient {
+
+		public boolean persistent() {
+			return false;
+		}
+
+		public void removeFrom(ObjectContainer container) {
+			throw new UnsupportedOperationException();
+		}
+
+		public boolean realTimeFlag() {
+			return realTimeFlag;
+		}
+
+	}
 
 	private HighLevelSimpleClientInterface() {
 	}
@@ -35,6 +56,7 @@ public class HighLevelSimpleClientInterface {
 				HLSCInterface = new HighLevelSimpleClientInterface();
 				HLSCInterface.node = node;
 				HLSCInterface.client = node.clientCore.makeClient(RequestStarter.MAXIMUM_PRIORITY_CLASS, false, false);
+				HLSCInterface.requestClient = new HLSCRequestClient();
 			}
 		}
 	}
@@ -44,6 +66,7 @@ public class HighLevelSimpleClientInterface {
 			if (HLSCInterface == null) {
 				HLSCInterface = new HighLevelSimpleClientInterface();
 				HLSCInterface.client = hlSimpleClient;
+				HLSCInterface.requestClient = new HLSCRequestClient();
 			}
 		}
 	}
@@ -88,9 +111,9 @@ public class HighLevelSimpleClientInterface {
 	 * @return a FetchResult instance upon successful fetch
 	 * @throws FetchException
 	 */
-	public static ClientGetter fetchURI(FreenetURI uri, long maxSize, RequestClient context, 
+	public static ClientGetter fetchURI(FreenetURI uri, long maxSize, 
 			ClientGetCallback callback, FetchContext fctx) throws FetchException {
-		return HLSCInterface.client.fetch(uri, maxSize, context, callback, fctx);
+		return HLSCInterface.client.fetch(uri, maxSize, HLSCInterface.requestClient, callback, fctx);
 	}
 
 	//	/**

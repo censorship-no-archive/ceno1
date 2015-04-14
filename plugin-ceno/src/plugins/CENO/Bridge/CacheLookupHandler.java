@@ -11,7 +11,8 @@ import net.minidev.json.JSONObject;
 
 import org.eclipse.jetty.server.Request;
 
-import plugins.CENO.CENOHandler;
+import plugins.CENO.CENOJettyHandler;
+import plugins.CENO.URLtoUSKTools;
 import plugins.CENO.Bridge.BundlerInterface.Bundle;
 import plugins.CENO.FreenetInterface.HighLevelSimpleClientInterface;
 import freenet.client.FetchException;
@@ -30,7 +31,7 @@ import freenet.keys.FreenetURI;
  * - The Bridge then will serve the bundle to the plugin
  *   to insert into Freenet
  */
-public class CacheLookupHandler extends CENOHandler {
+public class CacheLookupHandler extends CENOJettyHandler {
 
 	public void handle(String target,Request baseRequest,HttpServletRequest request,HttpServletResponse response) 
 			throws IOException, ServletException {
@@ -94,8 +95,8 @@ public class CacheLookupHandler extends CENOHandler {
 				writeError(baseRequest, response, requestPath);
 				return;
 			}
-		// Stop background requests normally made by browsers for website resources,
-		// that could start a time-consuming lookup in freenet
+			// Stop background requests normally made by browsers for website resources,
+			// that could start a time-consuming lookup in freenet
 		} else if (requestPath.endsWith("favicon.ico")) {
 			writeNotFound(baseRequest, response, requestPath);
 			return;
@@ -104,7 +105,7 @@ public class CacheLookupHandler extends CENOHandler {
 			// Calculate its USK and redirect the request
 			FreenetURI calculatedUSK = null;
 			try {
-				calculatedUSK = computeUSKfromURL(urlParam);
+				calculatedUSK = URLtoUSKTools.computeUSKfromURL(urlParam, CENOBridge.initConfig.getProperty("requestURI"));
 			} catch (Exception e) {
 				writeError(baseRequest, response, requestPath);
 				return;
