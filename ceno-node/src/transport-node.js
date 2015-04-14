@@ -1,7 +1,7 @@
 var net = require('net');
 var path = require('path');
 var bundler = require('equalitie-bundler');
-var config = require(path.join('..', 'config', 'transport.js'));
+var config = require(path.join('..', 'config', 'transport'));
 
 // Send a bundle for a given URL to the cache server for storage
 function cacheBundle(url, bundle) {
