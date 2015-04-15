@@ -64,3 +64,20 @@ var server = http.createServer(function (req, res) {
     }
   });
 });
+
+server.listen(config.port);
+log('Running test local cache server on port ' + config.port);
+
+var clientRequestURL = 'http://localhost:' + config.clientPort + '?url=http://www.google.ca';
+// Start a request to the client to get an unbundled file.
+request(clientRequestURL, function (err, response, body) {
+  log('First request complete');
+  log('Request error information: ' + (err ? err.message : 'none'));
+  //log(body.toString()); // Might not want to print due to space consumption.
+  // Start another request to get the cached version
+  request(clientRequestURL, function (err, response, body) {
+    log('Second request complete');
+    log('Request error information: ' + (err ? err.message : 'none'));
+    //log(body.toString()); // Might not want to print due to space consumption.
+  });
+});
