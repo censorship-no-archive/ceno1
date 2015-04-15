@@ -38,7 +38,7 @@ func pleaseWait(url string) []byte {
 // Check with the local cache server to find a bundle for a given URL.
 func lookup(lookupURL string) Result {
 	response, err := http.Get(Configuration.CacheServer + "?url=" + url.QueryEscape(lookupURL))
-	defer response.Body.Close()
+	//defer response.Body.Close()
 
 	if err != nil || response.StatusCode != 200 {
 		return Result{false, false, nil}
