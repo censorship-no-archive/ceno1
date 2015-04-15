@@ -37,17 +37,26 @@ func pleaseWait(url string) []byte {
 
 // Check with the local cache server to find a bundle for a given URL.
 func lookup(lookupURL string) Result {
-	response, err := http.Get(Configuration.CacheServer + "?url=" + url.QueryEscape(lookupURL))
+	response, err := http.Get(Configuration.CacheServer + lookupURL)
 	//defer response.Body.Close()
 
+	fmt.Println("Sent GET request to cache server")
 	if err != nil || response.StatusCode != 200 {
+		fmt.Print("Request did not end successfully. StatusCode = ")
+		fmt.Println(response.StatusCode)
+		fmt.Print("error: ")
+		fmt.Println(err)
 		return Result{false, false, nil}
 	}
 	decoder := json.NewDecoder(response.Body)
 	var result Result
 	if err := decoder.Decode(&result); err == io.EOF {
+		fmt.Println("Error decoding result; Error: ")
+		fmt.Println(err)
 		return Result{false, false, nil}
 	}
+	fmt.Println("Result")
+	fmt.Println(result)
 	return result
 }
 
@@ -58,10 +67,12 @@ func requestNewBundle(lookupURL string) {
 		Configuration.RequestServer + "?url=" + url.QueryEscape(lookupURL),
 		"text/plain",
 		strings.NewReader(lookupURL))
-	defer response.Body.Close()
+	fmt.Println("Sent POST request to Request Server")
 	if err != nil || response.StatusCode != 200 {
 		fmt.Println("Got error POSTing to request server or request did not return status 200")
 		fmt.Println(err)
+	} else {
+		response.Body.Close()
 	}
 }
 
@@ -70,11 +81,15 @@ func requestNewBundle(lookupURL string) {
 // 2. Initiate bundle creation process when no bundle exists anywhere
 func proxyHandler(w http.ResponseWriter, r *http.Request) {
 	url := r.URL.String()
+	fmt.Println("Got request with URL " + url)
 	result := lookup(url)
+	fmt.Println("Got result")
+	fmt.Println(result)
 	if result.Complete {
 		if result.Found {
 			w.Write(result.Bundle)
 		} else {
+			fmt.Println("Requesting new bundle")
 			requestNewBundle(url)
 			w.Write(pleaseWait(url))
 		}
@@ -94,6 +109,7 @@ func main() {
 		fmt.Println("Could not read configuration file at " + configPath + "\nExiting.")
 		return
 	}
+	fmt.Println("Loaded configuration.")
 	http.HandleFunc("/", proxyHandler)
 	fmt.Println("CeNo proxy server listening at http://localhost" + Configuration.PortNumber)
 	http.ListenAndServe(Configuration.PortNumber, nil)

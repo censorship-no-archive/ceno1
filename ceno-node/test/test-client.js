@@ -7,6 +7,8 @@ var request = require('request');
 var config = require('../config/transport');
 
 var cache = 'cache';
+var port = 3091;
+var clientPort = 3090;
 
 function log(msg) {
   console.log('[TEST-CLIENT] ' + msg);
@@ -16,7 +18,7 @@ function log(msg) {
 // Requests on /lookup are the only ones we expect
 var server = http.createServer(function (req, res) {
   var requestedURL = qs.parse(url.parse(req.url).query).url;
-  var fileName = path.join(cache, requestedURL);
+  var fileName = path.join(cache, url.parse(requestedURL).hostname);
 
   log('Got request for ' + requestedURL);
   res.writeHead(200, {'Content-Type': 'application/json'});
@@ -45,10 +47,10 @@ var server = http.createServer(function (req, res) {
         res.end();
       });
     } else {
-      res.write({
+      res.write(JSON.stringify({
         complete: true,
         found: false
-      });
+      }));
       res.end();
       // If no bundle exists, just store the HTML of the page requested for simplicity.
       log('Creating a new bundle for ' + requestedURL);
@@ -65,10 +67,10 @@ var server = http.createServer(function (req, res) {
   });
 });
 
-server.listen(config.port);
-log('Running test local cache server on port ' + config.port);
+server.listen(port);
+log('Running test local cache server on port ' + port);
 
-var clientRequestURL = 'http://localhost:' + config.clientPort + '?url=http://www.google.ca';
+var clientRequestURL = 'http://localhost:' + clientPort + '?url=http://www.google.ca';
 // Start a request to the client to get an unbundled file.
 request(clientRequestURL, function (err, response, body) {
   log('First request complete');
