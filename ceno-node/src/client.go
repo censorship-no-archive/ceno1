@@ -42,8 +42,6 @@ func lookup(lookupURL string) Result {
 
 	fmt.Println("Sent GET request to cache server")
 	if err != nil || response.StatusCode != 200 {
-		fmt.Print("Request did not end successfully. StatusCode = ")
-		fmt.Println(response.StatusCode)
 		fmt.Print("error: ")
 		fmt.Println(err)
 		return Result{false, false, nil}

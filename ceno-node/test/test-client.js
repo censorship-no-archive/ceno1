@@ -17,7 +17,18 @@ function log(msg) {
 // Run a local cache server
 // Requests on /lookup are the only ones we expect
 var server = http.createServer(function (req, res) {
-  var requestedURL = qs.parse(url.parse(req.url).query).url;
+  var query = url.parse(req.url).query;
+  if (!query) {
+    res.write(JSON.stringify({ error: 'No query string provided containing URL' }));
+    res.end();
+    return;
+  }
+  var requestedURL = qs.parse(query).url;
+  if (!requestedURL) {
+    res.write(JSON.stringify({ error: 'No url field in query string' }));
+    res.end();
+    return;
+  }
   var fileName = path.join(cache, url.parse(requestedURL).hostname);
 
   log('Got request for ' + requestedURL);
@@ -55,6 +66,10 @@ var server = http.createServer(function (req, res) {
       // If no bundle exists, just store the HTML of the page requested for simplicity.
       log('Creating a new bundle for ' + requestedURL);
       request(requestedURL, function (err, response, body) {
+        if (err) {
+          log('Error requesting ' + requestedURL +'; Error: ' + err.message);
+          return;
+        }
         fs.writeFile(fileName, body.toString(), function (err) {
           if (err) {
             log('Error creating ' + fileName + '; Error: ' + err.message);
@@ -69,17 +84,3 @@ var server = http.createServer(function (req, res) {
 
 server.listen(port);
 log('Running test local cache server on port ' + port);
-
-var clientRequestURL = 'http://localhost:' + clientPort + '?url=http://www.google.ca';
-// Start a request to the client to get an unbundled file.
-request(clientRequestURL, function (err, response, body) {
-  log('First request complete');
-  log('Request error information: ' + (err ? err.message : 'none'));
-  //log(body.toString()); // Might not want to print due to space consumption.
-  // Start another request to get the cached version
-  request(clientRequestURL, function (err, response, body) {
-    log('Second request complete');
-    log('Request error information: ' + (err ? err.message : 'none'));
-    //log(body.toString()); // Might not want to print due to space consumption.
-  });
-});
