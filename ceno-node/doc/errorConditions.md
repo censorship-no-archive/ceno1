@@ -1,7 +1,7 @@
 # Error Conditions
 
 This document outlines the different error conditions that can be encountered by each agent
-in the CeNo system and defines how they will be handled.  The writing of this document is a 
+in the CeNo system and defines how they will be handled.  The writing of this document is a
 collaborative effort and should serve as a guide for developers involved in CeNo to understand
 possible sources of trouble and how to handle them.  Each agent should operate under the
 assumption that other agents will handle errors in the way described here.
@@ -46,7 +46,7 @@ it sent.  Ideally, the LCS would be able to adjust accordingly.
 
 ### Error from request to LCS
 
-In the case that the LCS encounters an error in its operations, it should send a standard 
+In the case that the LCS encounters an error in its operations, it should send a standard
 operational error response.
 
 ### Cannot connect to RS
@@ -64,60 +64,29 @@ of the view, the information should be formatted and served to the user as plain
 
 ## LCS
 
-### Malformed request URL
+### Cannot read local cache
 
-### Browser-ignited requests for favicons etc.
-
-### Lookup in the local cache throws exception
-
-### Lookup in the distributed cache throws exception
-#### Exception is not fatal (refreshing might work)
-#### Exception is fatal
-
-### Not ready for distributed cache lookups
-#### Node is starting up
-#### Node cannot connect to peers
-#### Node is not connected to enough peers
+### Cannot read from distributed cache
 
 ### Passive request was killed
 
-### Responding to CC throws an error
-#### Preparing JSON response throws exception
+### Connection to CC closed
+
+### Cannot prepare JSON for CC
 
 -----
 
 ## RS
 
-### Malformed request URL
-
 ### Cannot connect to WOT
-#### WOT is not loaded
-#### WOT is not responding
-#### WOT is being downloaded
-#### WOT is starting (might take some times)
 
 ### CENO WOT identity is not available
-#### CENO indentity was not inserted
-#### CENO identity is being downloaded
-#### CENO identity insertion failed
 
 ### Cannot connect to freemail over SMTP
-#### Freemail is not loaded
-#### Freemail is loaded but WOT is missing?
-#### Freemail uses different SMTP port
-#### Connecting with SMTP throws an exception
 
 ### Cannot connect to CENO account
-#### There is no CENO accprops
-#### CENO account has a password other than "CENO"
-#### Connecting over SMTP throws exception
 
 ### Cannot send freemail
-#### Creating the freemail throws exception
-#### Sending the freemail throws exception
-#### Freemail was not sent after long time
-
-### SMTP connection closes before freemail is sent
 
 -----
 
