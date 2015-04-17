@@ -94,3 +94,67 @@ Step | Description                                        | Message
 #### Notes
 
 As in the case of lookup failure, if the search through the distributed cache is not complete by the time step 3 occurs, an implicit step where the LCS responds with `[write {"complete": false}]` occurs, and CC will have to resend lookup requests periodically until the search completes.
+
+## Special Messages
+
+Special messages are those sent by agents to handle error conditions, assert
+certain facts, for example that a given server is running, and to communicate
+new requirements or requests outside of the standard set of interactions
+required for regular use cases.
+
+### Ping to LCS
+
+LCS should respond to ping messages from CC to signal its active status.
+
+Step | Description        | Message
+-----|--------------------|-------------------
+1    | CC pings LCS       | `[GET <LCS>/ping]`
+2    | LCS pongs back     | `[write "pong"]`
+
+### CC reports decode error to LCS
+
+The CC should be able to signal decoding issues to the LCS after a lookup.
+The client should be able to decide the LCS' response into a
+[Result structure](https://github.com/equalitie/ceno/blob/master/ceno-node/src/client.go).
+The report is sent in the case that it cannot.
+
+Step | Description              | Message
+-----|--------------------------|-------------------
+1    | CC reports error to LCS  | `[POST <LCS>/error/decode {"error": <message>}]`
+2    | LCS acknowledges report  | `[write "okay"]`
+
+### Reporting operational errors
+
+Operational errors, such as the LCS being unable to connect to the
+distributed cache, should be reported in HTML responses with a standard
+error field.
+
+**Format:** `{ "error": <message> }`
+
+### BS prompts RR to accept bundle
+
+If the RR closes its connection to the BS before a bundle can be produced,
+the BS should be able to prompt the RR to accept it once it is complete.
+
+Step | Description                   | Message
+-----|-------------------------------|-------------------
+1    | BS prompts RR to store bundle | `[POST <RR>/complete {"bundle": <bundle>, "url": <url>, "created": <date_created>}]`
+2    | RR reports acknowledgement    | `[write "okay"]`
+
+### Ping to BS
+
+BS should respond to ping messages from RR to signal its active status.
+
+Step | Description       | Message
+-----|-------------------|-------------------
+1    | RR pings BS       | `[GET <BS>/ping]`
+2    | BS pongs back     | `[write "pong"]`
+
+### Ping to BI
+
+BI should respond to ping messages from RR to signal its active status.
+
+Step | Description       | Message
+-----|-------------------|-------------------
+1    | RR pings BI       | `[GET <BI>/ping]`
+2    | BI pongs back     | `[write "pong"]`
