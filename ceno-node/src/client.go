@@ -3,33 +3,29 @@ package main
 import (
 	"os"
 	"fmt"
-	"net"
 	"net/http"
 	"net/url"
-	"bufio"
+	"io"
 	"io/ioutil"
 	"strings"
 	"bytes"
 	"encoding/json"
 	"path"
-	"time"
 )
-
-// A process is just a url that is being waited on.
-type Process string
 
 // Result of a bundle lookup from cache server.
 type Result struct {
-	Ready  bool
-	Found  bool
-	Bundle []byte
+	Complete bool
+	Found    bool
+	Bundle   []byte
+	// Should add a Created field for the date created
 }
 
 // Configuration struct to be replaced by a decoded JSON file's contents.
 var Configuration = struct {
 	PortNumber     string
-	EdgeServer     string
-	BridgeServer   string
+	CacheServer    string
+	RequestServer  string
 	ErrorMsg       string
 	PleaseWaitPage string
 } {}
@@ -39,60 +35,64 @@ func pleaseWait(url string) []byte {
 	return bytes.Replace(content, []byte("{{REDIRECT}}"), []byte(url), 1)
 }
 
-func checkOnLookup(lookupURL string) Result {
-	// The cache server will keep track of running lookups so we will just
-	// ask for a URL the usual way until it responds saying a lookup is complete.
-	response, err := http.Get(config.EdgeServer + "?url=" + url.QueryEscape(lookupURL))
-	defer response.Body.Close()
+// Check with the local cache server to find a bundle for a given URL.
+func lookup(lookupURL string) Result {
+	response, err := http.Get(Configuration.CacheServer + lookupURL)
+	//defer response.Body.Close()
+
+	fmt.Println("Sent GET request to cache server")
 	if err != nil || response.StatusCode != 200 {
-		return Result { false, false, nil }
+		fmt.Print("error: ")
+		fmt.Println(err)
+		return Result{false, false, nil}
 	}
 	decoder := json.NewDecoder(response.Body)
 	var result Result
 	if err := decoder.Decode(&result); err == io.EOF {
-		return Result { false, false, nil }
+		fmt.Println("Error decoding result; Error: ")
+		fmt.Println(err)
+		return Result{false, false, nil}
 	}
+	fmt.Println("Result")
+	fmt.Println(result)
 	return result
 }
 
-func makeNewBundle(url string) {
-	// POST to the bridge server to have it start making a new bundle.
+// POST to the request server to have it start making a new bundle.
+func requestNewBundle(lookupURL string) {
 	// We can ignore the content of the response since it is not used.
-	response, err := http.Post(config.BridgeServer, "text/plain", strings.Reader(url))
-	defer response.Body.Close()
+	response, err := http.Post(
+		Configuration.RequestServer + "?url=" + url.QueryEscape(lookupURL),
+		"text/plain",
+		strings.NewReader(lookupURL))
+	fmt.Println("Sent POST request to Request Server")
 	if err != nil || response.StatusCode != 200 {
-		fmt.Println("Got error POSTing to bridge server")
+		fmt.Println("Got error POSTing to request server or request did not return status 200")
 		fmt.Println(err)
+	} else {
+		response.Body.Close()
 	}
 }
 
-func makeProxyHandler() func (http.ResponseWriter, *http.Request) {
-	// Maintain a map of "processes" (URLs being looked up by cache) for fast access
-	var lookups map[Process]bool = make(map[Process]bool)
-	return func (w http.ResponseWriter, r *http.Request) {
-		url := r.URL.String()
-		_, processExists := lookups[url]
-		if processExists {
-			// Rather than maintaining a timer that will periodically check if the bundle
-			// is ready, we will just ask the cache server if it is finished the lookup
-			// when a request comes back in
-			result := checkOnLookup(url)
-			if result.Ready {
-				if result.Found {
-					delete lookups[url]
-					w.Write(result.Bundle)
-				} else {
-					go makeNewBundle(url)
-					w.Write(pleaseWait(url))
-				}
-				delete lookups[url]
-			}
+// Handle incoming requests for bundles.
+// 1. Initiate bundle lookup process
+// 2. Initiate bundle creation process when no bundle exists anywhere
+func proxyHandler(w http.ResponseWriter, r *http.Request) {
+	url := r.URL.String()
+	fmt.Println("Got request with URL " + url)
+	result := lookup(url)
+	fmt.Println("Got result")
+	fmt.Println(result)
+	if result.Complete {
+		if result.Found {
+			w.Write(result.Bundle)
 		} else {
-			lookups[url] = true
-			// Start a lookup process but ignore the result since a bundle can't be ready
-			checkOnLookup(url)
+			fmt.Println("Requesting new bundle")
+			requestNewBundle(url)
 			w.Write(pleaseWait(url))
 		}
+	} else {
+		w.Write(pleaseWait(url))
 	}
 }
 
@@ -107,7 +107,8 @@ func main() {
 		fmt.Println("Could not read configuration file at " + configPath + "\nExiting.")
 		return
 	}
-	http.HandleFunc("/", makeProxyHandler())
+	fmt.Println("Loaded configuration.")
+	http.HandleFunc("/", proxyHandler)
 	fmt.Println("CeNo proxy server listening at http://localhost" + Configuration.PortNumber)
 	http.ListenAndServe(Configuration.PortNumber, nil)
 }

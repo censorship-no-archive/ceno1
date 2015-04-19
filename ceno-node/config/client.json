@@ -1,7 +1,7 @@
 {
   "PortNumber": ":3090",
-  "EdgeServer": "localhost:3091",
-  "BridgeServer": "localhost:3093",
+  "CacheServer": "http://localhost:3091/lookup",
+  "RequestServer": "http://localhost:3093/create",
   "ErrorMsg": "The page you requested could not be fetched at this time.\nPlease try again in a moment.\n",
   "PleaseWaitPage": "views/wait.html"
 }
