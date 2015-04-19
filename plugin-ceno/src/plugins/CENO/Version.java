@@ -9,11 +9,11 @@ public class Version implements FredPluginVersioned, FredPluginRealVersioned {
 	public static final String VERSION = "0.1.0";
 	public static final int REAL_VERSION = 1;
 	
-	public static final String CLIENT_VERSION = "0.1.0";
-	public static final int CLIENT_REAL_VERSION = 1;
+	public static final String CLIENT_VERSION = "0.2.0";
+	public static final int CLIENT_REAL_VERSION = 2;
 	
-	public static final String BRIDGE_VERSION = "0.1.0";
-	public static final int BRIDGE_REAL_VERSION = 1;
+	public static final String BRIDGE_VERSION = "0.2.0";
+	public static final int BRIDGE_REAL_VERSION = 2;
 	
 	/** Revision number of Version.java as read from CVS */
 	public static final String cvsRevision = "@custom@";
