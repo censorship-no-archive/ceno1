@@ -124,6 +124,7 @@
 			<fileset dir="${build}/">
 				<exclude name="plugins/CENO/Bridge/**"/>
 			</fileset>
+			<zipfileset src="${json-smart.location}" />
 			<zipfileset src="${sun-mail.location}" />
 		</jar>
 		
