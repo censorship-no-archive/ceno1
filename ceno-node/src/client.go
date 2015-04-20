@@ -1,7 +1,6 @@
 package main
 
 import (
-	"os"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -13,6 +12,11 @@ import (
 	"path"
 )
 
+const CONFIG_FILE string = "../config/client.json"
+
+// A global configuration instance. Must be instantiated properly in main().
+var Configuration Config
+
 // Result of a bundle lookup from cache server.
 type Result struct {
 	Complete bool
@@ -21,15 +25,6 @@ type Result struct {
 	// Should add a Created field for the date created
 }
 
-// Configuration struct to be replaced by a decoded JSON file's contents.
-var Configuration = struct {
-	PortNumber     string
-	CacheServer    string
-	RequestServer  string
-	ErrorMsg       string
-	PleaseWaitPage string
-} {}
-
 func pleaseWait(url string) []byte {
 	content, _ := ioutil.ReadFile(Configuration.PleaseWaitPage)
 	return bytes.Replace(content, []byte("{{REDIRECT}}"), []byte(url), 1)
@@ -37,7 +32,7 @@ func pleaseWait(url string) []byte {
 
 // Check with the local cache server to find a bundle for a given URL.
 func lookup(lookupURL string) Result {
-	response, err := http.Get(Configuration.CacheServer + lookupURL)
+	response, err := http.Get(Configuration.CacheServer + "?url=" + lookupURL)
 	//defer response.Body.Close()
 
 	fmt.Println("Sent GET request to cache server")
@@ -98,15 +93,7 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 
 // Create an HTTP proxy server to listen on port 3090
 func main() {
-	// Read the configuration JSON file into the global Configuration
-	configPath := path.Join("..", "config", "client.json")
-	file, _ := os.Open(configPath)
-	decoder := json.NewDecoder(file)
-	err := decoder.Decode(&Configuration)
-	if err != nil {
-		fmt.Println("Could not read configuration file at " + configPath + "\nExiting.")
-		return
-	}
+	Configuration = ReadConfigFile(CONFIG_FILE)
 	fmt.Println("Loaded configuration.")
 	http.HandleFunc("/", proxyHandler)
 	fmt.Println("CeNo proxy server listening at http://localhost" + Configuration.PortNumber)
