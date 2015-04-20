@@ -9,6 +9,7 @@ import (
 	"strings"
 	"bytes"
 	"encoding/json"
+	"regexp"
 )
 
 const CONFIG_FILE string = "../config/client2.json"
@@ -16,12 +17,18 @@ const CONFIG_FILE string = "../config/client2.json"
 // A global configuration instance. Must be instantiated properly in main().
 var Configuration Config
 
+const URL_REGEX = "(https?://)?(www\\.)?\\w+\\.\\w+"
+
 // Result of a bundle lookup from cache server.
 type Result struct {
 	Complete bool
 	Found    bool
 	Bundle   []byte
 	// Should add a Created field for the date created
+}
+
+func errorPage(errMsg string) []byte {
+	return []byte("Error: " + errMsg)
 }
 
 func pleaseWait(url string) []byte {
@@ -72,17 +79,23 @@ func requestNewBundle(lookupURL string) {
 // 1. Initiate bundle lookup process
 // 2. Initiate bundle creation process when no bundle exists anywhere
 func proxyHandler(w http.ResponseWriter, r *http.Request) {
-	url := r.URL.String()
-	result := lookup(url)
+	URL := r.URL.String()
+	matched, err := regexp.MatchString(URL_REGEX, URL)
+	if !matched || err != nil {
+		fmt.Println("Invalid URL " + URL)
+		w.Write(errorPage(URL + " is not a valid URL."))
+		return
+	}
+	result := lookup(URL)
 	if result.Complete {
 		if result.Found {
 			w.Write(result.Bundle)
 		} else {
-			requestNewBundle(url)
-			w.Write(pleaseWait(url))
+			requestNewBundle(URL)
+			w.Write(pleaseWait(URL))
 		}
 	} else {
-		w.Write(pleaseWait(url))
+		w.Write(pleaseWait(URL))
 	}
 }
 
