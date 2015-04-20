@@ -43,7 +43,6 @@ public class ULPRManager {
 		public void onFailure(FetchException e, ClientGetter state,
 				ObjectContainer container) {
 			updateULPRStatus(url, ulprStatus.failed);
-			RequestSender.requestFromBridge(url);
 		}
 
 	}
@@ -70,11 +69,11 @@ public class ULPRManager {
 	private static boolean urlExistsInTable(String url) {
 		return ulprManager.ulprTable.containsKey(url);
 	}
-	
+
 	private static ulprStatus getULPRStatus(String url) {
 		return ulprManager.ulprTable.get(url);
 	}
-	
+
 	private static void updateULPRStatus(String url, ulprStatus status) {
 		ulprManager.ulprTable.put(url, status);
 	}

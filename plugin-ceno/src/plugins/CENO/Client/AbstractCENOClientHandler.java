@@ -5,10 +5,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import freenet.pluginmanager.FredPluginHTTP;
 import freenet.pluginmanager.PluginHTTPException;
 import freenet.support.api.HTTPRequest;
 
-public abstract class AbstractCENOClientHandler {
+public abstract class AbstractCENOClientHandler implements FredPluginHTTP {
 
 	public abstract String handleHTTPGet(HTTPRequest request) throws PluginHTTPException;
 	public abstract String handleHTTPPost(HTTPRequest request) throws PluginHTTPException;
@@ -30,6 +31,18 @@ public abstract class AbstractCENOClientHandler {
 			return "<http><body>There was an error. Please refresh.</body></http>";
 		}
 		return htmlContent.toString();
+	}
+	
+	protected String printStaticHTMLReplace(String filename, String target, String replacement) {
+		return printStaticHTML(filename).replace(target, replacement);
+	}
+	
+	protected boolean isClientHtml(HTTPRequest request) {
+		String clientType = request.getParam("client");
+		if (clientType.compareToIgnoreCase("html") == 0) {
+			return true;
+		}
+		return false;
 	}
 
 }
