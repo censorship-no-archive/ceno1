@@ -73,15 +73,11 @@ func requestNewBundle(lookupURL string) {
 // 2. Initiate bundle creation process when no bundle exists anywhere
 func proxyHandler(w http.ResponseWriter, r *http.Request) {
 	url := r.URL.String()
-	fmt.Println("Got request with URL " + url)
 	result := lookup(url)
-	fmt.Println("Got result")
-	fmt.Println(result)
 	if result.Complete {
 		if result.Found {
 			w.Write(result.Bundle)
 		} else {
-			fmt.Println("Requesting new bundle")
 			requestNewBundle(url)
 			w.Write(pleaseWait(url))
 		}
@@ -92,11 +88,13 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 
 // Create an HTTP proxy server to listen on port 3090
 func main() {
-	Configuration, err := ReadConfigFile(CONFIG_FILE)
+	conf, err := ReadConfigFile(CONFIG_FILE)
 	if err != nil {
 		fmt.Print("Could not read configuration file at " + CONFIG_FILE)
 		Configuration = GetConfigFromUser()
-	}=
+	} else {
+		Configuration = conf
+	}
 	http.HandleFunc("/", proxyHandler)
 	fmt.Println("CeNo proxy server listening at http://localhost" + Configuration.PortNumber)
 	http.ListenAndServe(Configuration.PortNumber, nil)

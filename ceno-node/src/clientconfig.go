@@ -59,14 +59,14 @@ func validPortNumber(port string) bool {
 // restricting our use cases, we will broadly say that any URL that
 // parses correctly is valid.
 func validCacheServer(cacheServer string) bool {
-	_, err := url.Parse(cacheServer)
-	return err == nil
+	URL, err := url.Parse(cacheServer)
+	return err == nil && len(URL.Host) > 0
 }
 
 // Likewise for the request server, we only test that the URL can be parsed.
 func validRequestServer(requestServer string) bool {
-	_, err := url.Parse(requestServer)
-	return err == nil
+	URL, err := url.Parse(requestServer)
+	return err == nil && len(URL.Host) > 0
 }
 
 // No expectations are made with regards to the error message provided.
