@@ -9,10 +9,9 @@ import (
 	"strings"
 	"bytes"
 	"encoding/json"
-	"path"
 )
 
-const CONFIG_FILE string = "../config/client.json"
+const CONFIG_FILE string = "../config/client2.json"
 
 // A global configuration instance. Must be instantiated properly in main().
 var Configuration Config
@@ -93,8 +92,11 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 
 // Create an HTTP proxy server to listen on port 3090
 func main() {
-	Configuration = ReadConfigFile(CONFIG_FILE)
-	fmt.Println("Loaded configuration.")
+	Configuration, err := ReadConfigFile(CONFIG_FILE)
+	if err != nil {
+		fmt.Print("Could not read configuration file at " + CONFIG_FILE)
+		Configuration = GetConfigFromUser()
+	}=
 	http.HandleFunc("/", proxyHandler)
 	fmt.Println("CeNo proxy server listening at http://localhost" + Configuration.PortNumber)
 	http.ListenAndServe(Configuration.PortNumber, nil)

@@ -36,7 +36,7 @@ var DefaultConfiguration Config = Config {
 	"http://localhost:3091/lookup",
 	"http://localhost:3093/create",
 	"Page not found",
-	"views/wait.html"
+	"views/wait.html",
 }
 
 // Functions to verify that each configuration field is well formed.
@@ -44,7 +44,10 @@ var DefaultConfiguration Config = Config {
 // Port numbers for the proxy server to run on must be specified in the
 // form ":<number>".
 func validPortNumber(port string) bool {
-	colonPrefixSupplied = port[0] == ':'
+	if len(port) <= 1 {
+		return false
+	}
+	colonPrefixSupplied := port[0] == ':'
 	number, parseErr := strconv.Atoi(port[1:])
 	if parseErr != nil {
 		return false
@@ -74,21 +77,22 @@ func validErrorMessage(errMsg string) bool {
 // We don't want to do too much work verifying that the content of the
 // provided page is valid HTML so we will settle for ensuring the file exists.
 func validPleaseWaitPage(location string) bool {
-	_, err := os.Stat(location)
-	return os.IsExist(err)
+	f, err := os.Open(location)
+	defer f.Close()
+	return err == nil
 }
 
 // Try to read a configuration in from a file.
 func ReadConfigFile(fileName string) (Config, error) {
-	file, fopenErr := os.Open(configPath)
+	file, fopenErr := os.Open(fileName)
 	if fopenErr != nil {
-		return nil, fopenErr
+		return Config {}, fopenErr
 	}
 	var configuration Config
 	decoder := json.NewDecoder(file)
 	err := decoder.Decode(&configuration)
 	if err != nil {
-		return nil, err
+		return Config {}, err
 	}
 	return configuration, nil
 }
@@ -102,37 +106,41 @@ func GetConfigFromUser() Config {
 	fmt.Println("Please provide new settings using the format of the examples provided to configure CeNo.")
 	fmt.Println("You can press enter/return without entering anything else to use the default.")
 	for !done {
-		vPort := validPortNumber(configuration.PortNumber)
+		vPort = validPortNumber(configuration.PortNumber)
 		if !vPort {
 			fmt.Print("Proxy server port number [" + DefaultConfiguration.PortNumber + "]: ")
 			fmt.Scanln(&configuration.PortNumber)
 			if len(configuration.PortNumber) == 0 {
 				configuration.PortNumber = DefaultConfiguration.PortNumber
 			}
+			vPort = validPortNumber(configuration.PortNumber)
 		}
-		vCS := validCacheServer(configuration.CacheServer)
+		vCS = validCacheServer(configuration.CacheServer)
 		if !vCS {
 			fmt.Print("Local cache server lookup URL [" + DefaultConfiguration.CacheServer + "]: ")
 			fmt.Scanln(&configuration.CacheServer)
 			if len(configuration.CacheServer) == 0 {
 				configuration.CacheServer = DefaultConfiguration.CacheServer
 			}
+			vCS = validCacheServer(configuration.CacheServer)
 		}
-		vRS := validRequestServer(configuration.RequestServer)
+		vRS = validRequestServer(configuration.RequestServer)
 		if !vRS {
 			fmt.Print("Bundle creation request server URL [" + DefaultConfiguration.RequestServer + "]: ")
 			fmt.Scanln(&configuration.RequestServer)
 			if len(configuration.RequestServer) == 0 {
 				configuration.RequestServer = DefaultConfiguration.RequestServer
 			}
+			vRS = validRequestServer(configuration.RequestServer)
 		}
-		vPWPage := validPleaseWaitPage(configuration.PleaseWaitPage)
+		vPWPage = validPleaseWaitPage(configuration.PleaseWaitPage)
 		if !vPWPage {
 			fmt.Print("Path to please wait page [" + DefaultConfiguration.PleaseWaitPage + "]: ")
 			fmt.Scanln(&configuration.PleaseWaitPage)
 			if len(configuration.PleaseWaitPage) == 0 {
 				configuration.PleaseWaitPage = DefaultConfiguration.PleaseWaitPage
 			}
+			vPWPage = validPleaseWaitPage(configuration.PleaseWaitPage)
 		}
 		done = vPort && vCS && vRS && vPWPage
 		if !done {
