@@ -17,7 +17,15 @@ const CONFIG_FILE string = "../config/client2.json"
 // A global configuration instance. Must be instantiated properly in main().
 var Configuration Config
 
+// Verifies a URL as valid (enough)
 const URL_REGEX = "(https?://)?(www\\.)?\\w+\\.\\w+"
+
+// In the case that wait.html cannot be served, we will respond with a
+// plain text message to the user.
+const PLEASE_WAIT_PLAINTEXT = /* Multi-line strings, yeah! */ `
+The page you have requested is being prepared.
+Plesae refresh this page in a few seconds to check if it is ready.
+`
 
 // Result of a bundle lookup from cache server.
 type Result struct {
@@ -36,9 +44,14 @@ func errorPage(errMsg string) []byte {
 // Serve a page to inform the user that a bundle for the site they requested is
 // being prepared. It will automatically initiate new requests to retrieve the same
 // URL in an interval.
-func pleaseWait(url string) []byte {
-	content, _ := ioutil.ReadFile(Configuration.PleaseWaitPage)
-	return bytes.Replace(content, []byte("{{REDIRECT}}"), []byte(url), 1)
+// The second bool return value specifies whether the response is HTML or not
+func pleaseWait(url string) ([]byte, bool) {
+	content, err := ioutil.ReadFile(Configuration.PleaseWaitPage)
+	if err != nil {
+		return PLEASE_WAIT_PLAINTEXT, false
+	} else {
+		return bytes.Replace(content, []byte("{{REDIRECT}}"), []byte(url), 1), true
+	}
 }
 
 // Ping the LCS to see if it is available at a given time.
@@ -125,13 +138,26 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 		} else {
 			err = requestNewBundle(URL)
 			if err != nil {
+				w.Header().Set("Content-Type", "text/plain")
 				w.Write(errorPage(err.Error()))
 			} else {
-				w.Write(pleaseWait(URL))
+				body, isHTML := pleaseWait(URL)
+				if isHTML {
+					w.Header().Set("Content-Type", "text/html")
+				} else {
+					w.Header().Set("Content-Type", "text/plain")
+				}
+				w.Write(body)
 			}
 		}
 	} else {
-		w.Write(pleaseWait(URL))
+		body, isHTML := pleaseWait(URL)
+		if isHTML {
+			w.Header().Set("Content-Type", "text/html")
+		} else {
+			w.Header().Set("Content-Type", "text/plain")
+		}
+		w.Write(body)
 	}
 }
 
