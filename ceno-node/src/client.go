@@ -36,34 +36,36 @@ func pleaseWait(url string) []byte {
 	return bytes.Replace(content, []byte("{{REDIRECT}}"), []byte(url), 1)
 }
 
-// Check with the local cache server to find a bundle for a given URL.
-func lookup(lookupURL string) Result {
-	response, err := http.Get(Configuration.CacheServer + "?url=" + lookupURL)
-	//defer response.Body.Close()
+func testLCSAvailability() bool {
+	response, err := http.Get(PingURL(Configuration))
+	return err == nil && response.StatusCode == 200
+}
 
-	fmt.Println("Sent GET request to cache server")
+// Check with the local cache server to find a bundle for a given URL.
+func lookup(lookupURL string) (Result, err) {
+	response, err := http.Get(BundleLookupURL(Configuration, lookupURL))
 	if err != nil || response.StatusCode != 200 {
 		fmt.Print("error: ")
 		fmt.Println(err)
-		return Result{false, false, nil}
+		return Result{false, false, nil}, errors.New("Unsuccessful request to LCS\n" + err.Error())
 	}
 	decoder := json.NewDecoder(response.Body)
 	var result Result
 	if err := decoder.Decode(&result); err == io.EOF {
 		fmt.Println("Error decoding result; Error: ")
 		fmt.Println(err)
-		return Result{false, false, nil}
+		return Result{false, false, nil}, errors.New("Could not decode LCS response\n" + err.Error())
 	}
 	fmt.Println("Result")
 	fmt.Println(result)
-	return result
+	return result, nil
 }
 
 // POST to the request server to have it start making a new bundle.
 func requestNewBundle(lookupURL string) {
 	// We can ignore the content of the response since it is not used.
 	response, err := http.Post(
-		Configuration.RequestServer + "?url=" + url.QueryEscape(lookupURL),
+		CreateBundleURL(Configuration, lookupURL),
 		"text/plain",
 		strings.NewReader(lookupURL))
 	fmt.Println("Sent POST request to Request Server")
@@ -86,8 +88,10 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write(errorPage(URL + " is not a valid URL."))
 		return
 	}
-	result := lookup(URL)
-	if result.Complete {
+	result, err := lookup(URL)
+	if err != nil {
+		w.Write(errorPage(err.Error()))
+	} else if result.Complete {
 		if result.Found {
 			w.Write(result.Bundle)
 		} else {
@@ -107,6 +111,12 @@ func main() {
 		Configuration = GetConfigFromUser()
 	} else {
 		Configuration = conf
+	}
+	available := testLCSAvailability()
+	if !available {
+		fmt.Println("Local cache server is not responding to requests.")
+		fmt.Println(LCS_RUN_INFO)
+		return
 	}
 	http.HandleFunc("/", proxyHandler)
 	fmt.Println("CeNo proxy server listening at http://localhost" + Configuration.PortNumber)

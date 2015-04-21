@@ -29,6 +29,28 @@ const (
 	PLEASE_WAIT_PAGE_ERROR = iota
 )
 
+// Request paths to LCS and RS
+const (
+	LCS_LOOKUP = "/lookup?"
+	LCS_PING = "/ping"
+	RS_CREATE = "/create"
+)
+
+// Information about how to get and run the local cache server
+const LCS_RUN_INFO = "Please restart the local cache server."
+
+func BundleLookupURL(configuration Config, URL string) string {
+	return configuration.CacheServer + LCS_LOOKUP + "?url=" + url.QueryEscape(URL)
+}
+
+func PingURL(configuration Config) string {
+	return configuration.CacheServer + LCS_PING
+}
+
+func CreateBundleURL(configuration Config, URL string) string {
+	return configuration.RequestServer + RS_CREATE + "?url=" + url.QueryEscape(URL)
+}
+
 // The default config values, hardcoded, to be provided as examples to the user
 // should they be asked to provide configuration information.
 var DefaultConfiguration Config = Config {
