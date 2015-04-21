@@ -43,12 +43,6 @@ a Result structure
 then the CC should send a new request to the LCS to inform it that it failed to decode the data
 it sent.  Ideally, the LCS would be able to adjust accordingly.
 
-
-### Error from request to LCS
-
-In the case that the LCS encounters an error in its operations, it should send a standard
-operational error response.
-
 ### Cannot connect to RS
 
 In the case that the client cannot connect to the RS, an error page should be displayed to the
@@ -59,8 +53,6 @@ it should send a ping request to the RS to ensure it is available at that time.
 
 In the case that a view (HTML) file is missing, rather than replacing information into the contnet
 of the view, the information should be formatted and served to the user as plain text.
-
------
 
 ## LCS
 
@@ -74,8 +66,6 @@ of the view, the information should be formatted and served to the user as plain
 
 ### Cannot prepare JSON for CC
 
------
-
 ## RS
 
 ### Cannot connect to WOT
@@ -87,8 +77,6 @@ of the view, the information should be formatted and served to the user as plain
 ### Cannot connect to CENO account
 
 ### Cannot send freemail
-
------
 
 ## RR
 
@@ -109,8 +97,6 @@ If the RR cannot connect to the BI to request bundles be stored, it should ping 
 periodically and ignore requests to create new bundles until it succeeds in establishing
 a connection to the BI.  The RR should also ping the BI at startup.
 
------
-
 ## BS
 
 ### Bundling error
@@ -130,7 +116,5 @@ provided, they should be written to `config/transport.js`.
 In case the RR closes the connection to the bundler before the bundling process completes,
 the BS should temporarily store the bundle after it is prepared and send a request to prompt
 the RR to accept the completed bundle.
-
------
 
 ## BI
