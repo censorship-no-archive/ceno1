@@ -35,23 +35,33 @@ const (
 	LCS_PING = "/ping"
 	LCS_DECODE_ERR = "/error/decode"
 	RS_CREATE = "/create"
+	RS_PING = "/ping"
 )
 
 // Information about how to get and run the local cache server
 const LCS_RUN_INFO = "Please restart the local cache server."
 
+// Produce a URL to request a bundle be looked up by the LCS
 func BundleLookupURL(configuration Config, URL string) string {
 	return configuration.CacheServer + LCS_LOOKUP + "?url=" + url.QueryEscape(URL)
 }
 
-func PingURL(configuration Config) string {
+// Produce a URL to ping the LCS to check on its availability
+func LCSPingURL(configuration Config) string {
 	return configuration.CacheServer + LCS_PING
 }
 
+// Produce a URL to ping the RS to check on its availability
+func RSPingURL(configuration Config) string {
+	return configuration.RequestServer + RS_PING
+}
+
+// Produce a URL to request a new bundle be made by the RS
 func CreateBundleURL(configuration Config, URL string) string {
 	return configuration.RequestServer + RS_CREATE + "?url=" + url.QueryEscape(URL)
 }
 
+// Produce a URL to send to the LCS to report a response decode error
 func DecodeErrReportURL(configuration Config) string {
 	return configuration.CacheServer + LCS_DECODE_ERR
 }

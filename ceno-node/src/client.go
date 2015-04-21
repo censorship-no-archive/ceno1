@@ -43,7 +43,13 @@ func pleaseWait(url string) []byte {
 
 // Ping the LCS to see if it is available at a given time.
 func testLCSAvailability() bool {
-	response, err := http.Get(PingURL(Configuration))
+	response, err := http.Get(LCSPingURL(Configuration))
+	return err == nil && response.StatusCode == 200
+}
+
+// Ping the RS to see if it is available at a given time.
+func testRSAvailability() bool {
+	response, err := http.Get(RSPingURL(Configuration))
 	return err == nil && response.StatusCode == 200
 }
 
@@ -83,7 +89,7 @@ func lookup(lookupURL string) (Result, err) {
 }
 
 // POST to the request server to have it start making a new bundle.
-func requestNewBundle(lookupURL string) {
+func requestNewBundle(lookupURL string) err {
 	// We can ignore the content of the response since it is not used.
 	response, err := http.Post(
 		CreateBundleURL(Configuration, lookupURL),
@@ -96,6 +102,7 @@ func requestNewBundle(lookupURL string) {
 	} else {
 		response.Body.Close()
 	}
+	return err
 }
 
 // Handle incoming requests for bundles.
@@ -116,16 +123,20 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 		if result.Found {
 			w.Write(result.Bundle)
 		} else {
-			requestNewBundle(URL)
-			w.Write(pleaseWait(URL))
+			err = requestNewBundle(URL)
+			if err != nil {
+				w.Write(errorPage(err.Error()))
+			} else {
+				w.Write(pleaseWait(URL))
+			}
 		}
 	} else {
 		w.Write(pleaseWait(URL))
 	}
 }
 
-// Create an HTTP proxy server to listen on port 3090
 func main() {
+	// Read an existing configuration file or have the user supply settings
 	conf, err := ReadConfigFile(CONFIG_FILE)
 	if err != nil {
 		fmt.Print("Could not read configuration file at " + CONFIG_FILE)
@@ -133,12 +144,21 @@ func main() {
 	} else {
 		Configuration = conf
 	}
+	// Ensure the LCS is available at startup time
 	available := testLCSAvailability()
 	if !available {
 		fmt.Println("Local cache server is not responding to requests.")
 		fmt.Println(LCS_RUN_INFO)
 		return
 	}
+	// Ensure the RS is available at startup time
+	available := testRSAvailability()
+	if !available {
+		fmt.Println("Request server is not responding to requests.")
+		fmt.Println(RS_RUN_INFO)
+		return
+	}
+	// Create an HTTP proxy server
 	http.HandleFunc("/", proxyHandler)
 	fmt.Println("CeNo proxy server listening at http://localhost" + Configuration.PortNumber)
 	http.ListenAndServe(Configuration.PortNumber, nil)
