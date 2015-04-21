@@ -27,18 +27,34 @@ type Result struct {
 	// Should add a Created field for the date created
 }
 
+// Present the user with a page informing them that something went wrong with
+// an action.
 func errorPage(errMsg string) []byte {
 	return []byte("Error: " + errMsg)
 }
 
+// Serve a page to inform the user that a bundle for the site they requested is
+// being prepared. It will automatically initiate new requests to retrieve the same
+// URL in an interval.
 func pleaseWait(url string) []byte {
 	content, _ := ioutil.ReadFile(Configuration.PleaseWaitPage)
 	return bytes.Replace(content, []byte("{{REDIRECT}}"), []byte(url), 1)
 }
 
+// Ping the LCS to see if it is available at a given time.
 func testLCSAvailability() bool {
 	response, err := http.Get(PingURL(Configuration))
 	return err == nil && response.StatusCode == 200
+}
+
+// Report that an error occured trying to decode the response from the LCS
+// The LCS is expected to respond to this request with just the string "okay",
+// so we will ignore it for now.
+func reportDecodeError(reportURL, errMSg string) (bool, error) {
+	jsonStr := "{\"error\": \"" + errMsg + "\"}"
+	response, err := http.Post(reportURL, "application/json", strings.NewReader(jsonStr))
+	defer response.Body.Close()
+	return response.StatusCode == 200, err
 }
 
 // Check with the local cache server to find a bundle for a given URL.
@@ -54,7 +70,12 @@ func lookup(lookupURL string) (Result, err) {
 	if err := decoder.Decode(&result); err == io.EOF {
 		fmt.Println("Error decoding result; Error: ")
 		fmt.Println(err)
-		return Result{false, false, nil}, errors.New("Could not decode LCS response\n" + err.Error())
+		reachedLCS, err2 := reportDecodeError(DecodeErrReportURL(Configuration), err.Error())
+		if reachedLCS {
+			return Result{false, false, nil}, errors.New("Could not decode LCS response\n" + err.Error())
+		} else {
+			return Result{false, false, nil}, errors.New("Unsuccessful request to LCS\n" + err2.Error())
+		}
 	}
 	fmt.Println("Result")
 	fmt.Println(result)

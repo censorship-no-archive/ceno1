@@ -31,8 +31,9 @@ const (
 
 // Request paths to LCS and RS
 const (
-	LCS_LOOKUP = "/lookup?"
+	LCS_LOOKUP = "/lookup"
 	LCS_PING = "/ping"
+	LCS_DECODE_ERR = "/error/decode"
 	RS_CREATE = "/create"
 )
 
@@ -49,6 +50,10 @@ func PingURL(configuration Config) string {
 
 func CreateBundleURL(configuration Config, URL string) string {
 	return configuration.RequestServer + RS_CREATE + "?url=" + url.QueryEscape(URL)
+}
+
+func DecodeErrReportURL(configuration Config) string {
+	return configuration.CacheServer + LCS_DECODE_ERR
 }
 
 // The default config values, hardcoded, to be provided as examples to the user
