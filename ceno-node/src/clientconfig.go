@@ -41,6 +41,9 @@ const (
 // Information about how to get and run the local cache server
 const LCS_RUN_INFO = "Please restart the local cache server."
 
+// Information about how to get and run the request server
+const RS_RUN_INFO = "Please restart the request server."
+
 // Produce a URL to request a bundle be looked up by the LCS
 func BundleLookupURL(configuration Config, URL string) string {
 	return configuration.CacheServer + LCS_LOOKUP + "?url=" + url.QueryEscape(URL)

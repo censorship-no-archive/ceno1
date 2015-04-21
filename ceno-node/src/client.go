@@ -3,13 +3,13 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"net/url"
 	"io"
 	"io/ioutil"
 	"strings"
 	"bytes"
 	"encoding/json"
 	"regexp"
+	"errors"
 )
 
 const CONFIG_FILE string = "../config/client2.json"
@@ -48,7 +48,7 @@ func errorPage(errMsg string) []byte {
 func pleaseWait(url string) ([]byte, bool) {
 	content, err := ioutil.ReadFile(Configuration.PleaseWaitPage)
 	if err != nil {
-		return PLEASE_WAIT_PLAINTEXT, false
+		return []byte(PLEASE_WAIT_PLAINTEXT), false
 	} else {
 		return bytes.Replace(content, []byte("{{REDIRECT}}"), []byte(url), 1), true
 	}
@@ -69,7 +69,7 @@ func testRSAvailability() bool {
 // Report that an error occured trying to decode the response from the LCS
 // The LCS is expected to respond to this request with just the string "okay",
 // so we will ignore it for now.
-func reportDecodeError(reportURL, errMSg string) (bool, error) {
+func reportDecodeError(reportURL, errMsg string) (bool, error) {
 	jsonStr := "{\"error\": \"" + errMsg + "\"}"
 	response, err := http.Post(reportURL, "application/json", strings.NewReader(jsonStr))
 	defer response.Body.Close()
@@ -77,7 +77,7 @@ func reportDecodeError(reportURL, errMSg string) (bool, error) {
 }
 
 // Check with the local cache server to find a bundle for a given URL.
-func lookup(lookupURL string) (Result, err) {
+func lookup(lookupURL string) (Result, error) {
 	response, err := http.Get(BundleLookupURL(Configuration, lookupURL))
 	if err != nil || response.StatusCode != 200 {
 		fmt.Print("error: ")
@@ -102,7 +102,7 @@ func lookup(lookupURL string) (Result, err) {
 }
 
 // POST to the request server to have it start making a new bundle.
-func requestNewBundle(lookupURL string) err {
+func requestNewBundle(lookupURL string) error {
 	// We can ignore the content of the response since it is not used.
 	response, err := http.Post(
 		CreateBundleURL(Configuration, lookupURL),
@@ -178,7 +178,7 @@ func main() {
 		return
 	}
 	// Ensure the RS is available at startup time
-	available := testRSAvailability()
+	available = testRSAvailability()
 	if !available {
 		fmt.Println("Request server is not responding to requests.")
 		fmt.Println(RS_RUN_INFO)
