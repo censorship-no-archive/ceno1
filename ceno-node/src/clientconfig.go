@@ -73,8 +73,8 @@ func DecodeErrReportURL(configuration Config) string {
 // should they be asked to provide configuration information.
 var DefaultConfiguration Config = Config {
 	":3090",
-	"http://localhost:3091/lookup",
-	"http://localhost:3093/create",
+	"http://localhost:3091",
+	"http://localhost:3093",
 	"Page not found",
 	"views/wait.html",
 }
@@ -157,7 +157,7 @@ func GetConfigFromUser() Config {
 		}
 		vCS = validCacheServer(configuration.CacheServer)
 		if !vCS {
-			fmt.Print("Local cache server lookup URL [" + DefaultConfiguration.CacheServer + "]: ")
+			fmt.Print("Address of local cache server (LCS) [" + DefaultConfiguration.CacheServer + "]: ")
 			fmt.Scanln(&configuration.CacheServer)
 			if len(configuration.CacheServer) == 0 {
 				configuration.CacheServer = DefaultConfiguration.CacheServer
@@ -166,7 +166,7 @@ func GetConfigFromUser() Config {
 		}
 		vRS = validRequestServer(configuration.RequestServer)
 		if !vRS {
-			fmt.Print("Bundle creation request server URL [" + DefaultConfiguration.RequestServer + "]: ")
+			fmt.Print("Address of request server (RS) [" + DefaultConfiguration.RequestServer + "]: ")
 			fmt.Scanln(&configuration.RequestServer)
 			if len(configuration.RequestServer) == 0 {
 				configuration.RequestServer = DefaultConfiguration.RequestServer

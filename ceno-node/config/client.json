@@ -2,6 +2,6 @@
   "PortNumber": ":3090",
   "CacheServer": "http://localhost:3091",
   "RequestServer": "http://localhost:3093",
-  "ErrorMsg": "The page you requested could not be fetched at this time.\nPlease try again in a moment.\n",
+  "ErrorMsg": "Page not found",
   "PleaseWaitPage": "views/wait.html"
 }

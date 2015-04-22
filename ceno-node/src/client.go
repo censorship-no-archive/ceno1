@@ -3,16 +3,16 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"io"
 	"io/ioutil"
 	"strings"
 	"bytes"
 	"encoding/json"
 	"regexp"
 	"errors"
+	//"github.com/parnurzeal/gorequest"
 )
 
-const CONFIG_FILE string = "../config/client2.json"
+const CONFIG_FILE string = "../config/client.json"
 
 // A global configuration instance. Must be instantiated properly in main().
 var Configuration Config
@@ -70,9 +70,18 @@ func testRSAvailability() bool {
 // The LCS is expected to respond to this request with just the string "okay",
 // so we will ignore it for now.
 func reportDecodeError(reportURL, errMsg string) (bool, error) {
-	jsonStr := "{\"error\": \"" + errMsg + "\"}"
-	response, err := http.Post(reportURL, "application/json", strings.NewReader(jsonStr))
-	defer response.Body.Close()
+	mapping := map[string]interface{} {
+		"error": errMsg,
+	}
+	marshalled, _ := json.Marshal(mapping)
+	reader := bytes.NewReader(marshalled)
+	req, err := http.NewRequest("POST", reportURL, reader)
+	if err != nil {
+		return false, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	client := &http.Client{}
+	response, err := client.Do(req)
 	return response.StatusCode == 200, err
 }
 
@@ -86,8 +95,8 @@ func lookup(lookupURL string) (Result, error) {
 	}
 	decoder := json.NewDecoder(response.Body)
 	var result Result
-	if err := decoder.Decode(&result); err == io.EOF {
-		fmt.Println("Error decoding result; Error: ")
+	if err := decoder.Decode(&result); err != nil {
+		fmt.Println("Error decoding response from LCS")
 		fmt.Println(err)
 		reachedLCS, err2 := reportDecodeError(DecodeErrReportURL(Configuration), err.Error())
 		if reachedLCS {

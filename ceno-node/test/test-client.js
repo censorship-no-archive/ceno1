@@ -78,16 +78,25 @@ function handlePing(req, res) {
 // Handle reports from the CC indicating that it could not decode
 // our response.
 function handleDecodeError(req, res) {
-  lcs_log('Got decode error report. req.body = ');
-  lcs_log(req.body);
-  var error = req.body.error;
-  res.writeHead(200, {'Content-Type': 'text/plain'});
-  res.write('okay');
-  res.end();
+  lcs_log('Got decode error report.');
+  var body = '';
+  req.on('data', function (data) {
+    body += data;
+  });
+  req.on('end', function () {
+    var error = JSON.parse(body).error;
+    lcs_log('Error = ' + body);
+    res.writeHead(200, {'Content-Type': 'text/plain'});
+    res.write('okay');
+    res.end();
+  });
 }
 
+// Only want to serve the malformed data the first time, so we use
+// a global switch that gets changed to true after the first lookup.
+var servedMalformed = false;
+
 http.createServer(function (req, res) {
-  var servedMalformed = false;
   if (req.url.substring(0, '/error/decode'.length) === '/error/decode') {
     handleDecodeError(req, res);
   } else if (req.url.substring(0, '/lookup'.length) === '/lookup') {
