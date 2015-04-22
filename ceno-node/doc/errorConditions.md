@@ -40,7 +40,7 @@ it should send a ping request to the LCS to ensure it is available at that time.
 If the LCS responds to a request for a lookup by the CC with data that cannot be parsed into
 a Result structure
 ([see src/client.go](https://github.com/equalitie/ceno/blob/master/ceno-node/src/client.go)),
-then the CC should send a new request to the LCS to inform it that it failed to decide the data
+then the CC should send a new request to the LCS to inform it that it failed to decode the data
 it sent.  Ideally, the LCS would be able to adjust accordingly.
 
 
