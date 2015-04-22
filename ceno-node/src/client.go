@@ -9,7 +9,6 @@ import (
 	"encoding/json"
 	"regexp"
 	"errors"
-	//"github.com/parnurzeal/gorequest"
 )
 
 const CONFIG_FILE string = "../config/client.json"
