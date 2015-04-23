@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"io/ioutil"
-	"strings"
 	"bytes"
 	"encoding/json"
 	"regexp"
@@ -104,26 +103,22 @@ func lookup(lookupURL string) (Result, error) {
 			return Result{false, false, nil}, errors.New("Unsuccessful request to LCS\n" + err2.Error())
 		}
 	}
-	fmt.Println("Result")
-	fmt.Println(result)
 	return result, nil
 }
 
 // POST to the request server to have it start making a new bundle.
 func requestNewBundle(lookupURL string) error {
 	// We can ignore the content of the response since it is not used.
-	response, err := http.Post(
-		CreateBundleURL(Configuration, lookupURL),
-		"text/plain",
-		strings.NewReader(lookupURL))
-	fmt.Println("Sent POST request to Request Server")
-	if err != nil || response.StatusCode != 200 {
-		fmt.Println("Got error POSTing to request server or request did not return status 200")
-		fmt.Println(err)
-	} else {
-		response.Body.Close()
+	reader := bytes.NewReader([]byte(lookupURL))
+	URL := CreateBundleURL(Configuration, lookupURL)
+	req, err := http.NewRequest("POST", URL, reader)
+	if err != nil {
+		return err
 	}
-	return err
+	req.Header.Set("Content-Type", "text/plain")
+	client := &http.Client{}
+	_, err2 := client.Do(req)
+	return err2
 }
 
 // Handle incoming requests for bundles.
@@ -138,6 +133,7 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	result, err := lookup(URL)
+	fmt.Println("Result\n  Completed: ", result.Complete, "  Found: ", result.Found)
 	if err != nil {
 		w.Write(errorPage(err.Error()))
 	} else if result.Complete {
@@ -145,6 +141,8 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 			w.Write(result.Bundle)
 		} else {
 			err = requestNewBundle(URL)
+			fmt.Println("Error information from requestNewbundle")
+			fmt.Println(err)
 			if err != nil {
 				w.Header().Set("Content-Type", "text/plain")
 				w.Write(errorPage(err.Error()))

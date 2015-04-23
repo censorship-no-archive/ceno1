@@ -27,15 +27,19 @@ function rs_log(msg) {
 // Run a simple Request Server to allow for CC functionality
 // to follow through with simulated scenarios.
 http.createServer(function (req, res) {
+  rs_log('Got request to ' + req.url);
   if (req.url === '/ping') {
+    rs_log('Got PING request');
     res.writeHead(200, {'Content-Type': 'text/plain'});
     res.write('pong');
     res.end();
-    rs_log('Got PING request');
-  } else if (req.url === '/create') {
+    rs_log('Wrote pong response');
+  } else if (req.url.substring(0, '/create'.length) === '/create') {
+    rs_log('Got create request');
     res.writeHead(200, {'Content-Type': 'application/json'});
     res.write(JSON.stringify({ complete: true }));
     res.end();
+    rs_log('Wrote JSON response');
   }
 }).listen(rsPort);
 

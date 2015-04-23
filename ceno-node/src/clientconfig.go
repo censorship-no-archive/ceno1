@@ -61,7 +61,7 @@ func RSPingURL(configuration Config) string {
 
 // Produce a URL to request a new bundle be made by the RS
 func CreateBundleURL(configuration Config, URL string) string {
-	return configuration.RequestServer + RS_CREATE + "?url=" + url.QueryEscape(URL)
+	return configuration.RequestServer + RS_CREATE + "?url=" + URL
 }
 
 // Produce a URL to send to the LCS to report a response decode error
