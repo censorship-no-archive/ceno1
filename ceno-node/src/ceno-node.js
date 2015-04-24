@@ -46,6 +46,20 @@ try {
 }
 
 var server = http.createServer(function (req, res) {
+  //////////////////////////
+  // Handle PING requests //
+  //////////////////////////
+  if (req.url.substring(0, '/ping'.length) === '/ping') {
+    res.writeHead(200, {'Content-Type': 'text/plain'});
+    res.write('pong');
+    res.end();
+    bs_log('Responded to PING request');
+    return;
+  }
+
+  ////////////////////////////
+  // Handle bundle requests //
+  ////////////////////////////
   var requestedURL = qs.parse(url.parse(req.url).query).url;
   bs_log('Got request to bundle ' + requestedURL);
   var disconnected = false; // A flag set when the request is closed.
