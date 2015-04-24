@@ -46,7 +46,7 @@ const RS_RUN_INFO = "Please restart the request server."
 
 // Produce a URL to request a bundle be looked up by the LCS
 func BundleLookupURL(configuration Config, URL string) string {
-	return configuration.CacheServer + LCS_LOOKUP + "?url=" + url.QueryEscape(URL)
+	return configuration.CacheServer + LCS_LOOKUP + "?url=" + URL
 }
 
 // Produce a URL to ping the LCS to check on its availability
