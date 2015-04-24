@@ -1,26 +1,25 @@
-var request = require('request');
+var http = require('http');
 
-// The port number that the transport-node is running on
-var tpPort = 3093;
+var rrPort = 3092;
 
-// Send requests to bundle each of the following.
-var urls = [
-  'https://news.ycombinator.com',
-  'https://google.ca',
-  'https://equalit.ie'
-];
-
-for (var i = 0, len = urls.length; i < len; i++) {
-  var url = urls[i];
-  console.log('Making request to bundle ' + url);
-  request('http://localhost:' + tpPort + '?url=' + url, function (err, response, body) {
-    console.log(''); // Blank line
-    if (err) {
-      console.log('Error: ' + err.message);
-    } else {
-      var json = JSON.parse(body.toString());
-      console.log('Request for ' + json.url + ' complete.');
-      console.log('Bundle length ' + json.bundle.length);
-    }
-  });
+function rr_log(msg) {
+  console.log('[REQUEST RECEIVER] ' + msg);
 }
+
+// Run a Request Receiver (RR) server to handle incoming POST requests
+// for completed bundles.
+http.createServer(function (req, res) {
+  rr_log('Got ' + req.method + ' request for ' + req.url);
+  var body = '';
+  req.on('data', function (data) {
+    body += data;
+  });
+  req.on('end', function () {
+    rr_log('body = ' + body);
+    res.writeHead(200, {'Content-Type': 'text/plain'});
+    res.write('okay');
+    res.end();
+  });
+}).listen(rrPort);
+
+console.log('Running RR on port ' + rrPort);
