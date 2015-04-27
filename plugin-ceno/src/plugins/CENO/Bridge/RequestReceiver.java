@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import freenet.client.InsertException;
+import freenet.support.Logger;
 
 public class RequestReceiver {
 
@@ -58,10 +59,13 @@ public class RequestReceiver {
 						if (urlsRequested != null) {
 							for (String urlRequested : urlsRequested) {
 								try {
+									Logger.normal(this, "Received request for URL: " + urlRequested);
 									BundleInserter.insertBundle(urlRequested);
 								} catch (IOException e) {
+									Logger.error(this, "Error while requesting the bundle from BS for URL: " + urlRequested);
 									e.printStackTrace();
 								} catch (InsertException e) {
+									Logger.error(this, "Could not start the insertion of the bundle for the URL: " + urlRequested);
 									e.printStackTrace();
 								}
 							}
@@ -71,8 +75,8 @@ public class RequestReceiver {
 				}
 			} catch (InterruptedException e) {
 				continueLoop = false;
-				e.printStackTrace();
 			}
+			Logger.normal(this, "FreemailBox Looper thread terminated.");
 		}
 	}
 

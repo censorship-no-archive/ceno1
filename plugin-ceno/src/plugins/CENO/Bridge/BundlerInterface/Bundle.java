@@ -43,7 +43,8 @@ public class Bundle {
 	}
 
 	private void doRequest() throws IOException {
-		URL url = new URL("http", "127.0.0.1", CENOBridge.bundlerPort, "/?url=" + uri);
+		//TODO check for URL validity
+		URL url = new URL("http", "127.0.0.1", CENOBridge.bundlerPort, "/?url=http://" + uri);
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
 		BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));

@@ -15,8 +15,8 @@ const configFile = path.join('..', 'config', 'node.json');
 
 // Default configuration settings to use in case the config file doesn't exist.
 var defaultConfig = {
-  port: 3091,
-  requestReceiver: 'http://localhost:3092'
+  port: 3094,
+  requestReceiver: 'http://localhost:3093'
 }
 
 var config = defaultConfig;

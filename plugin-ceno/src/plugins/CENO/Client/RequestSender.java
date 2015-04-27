@@ -10,7 +10,7 @@ public class RequestSender {
 	private Hashtable<String, Date> requestTable;
 	private String[] bridgeFreemails;
 
-	private static final long REQUEST_TIMEOUT = TimeUnit.MINUTES.toMillis(15);
+	private static final long REQUEST_TIMEOUT = TimeUnit.MINUTES.toMillis(30);
 
 	private RequestSender(String[] bridgeFreemails) {
 		this.requestTable = new Hashtable<String, Date>();

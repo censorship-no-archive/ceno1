@@ -34,11 +34,11 @@ public class BundleInserter {
 		}
 
 		public void onSuccess(BaseClientPutter state, ObjectContainer container) {
-			Logger.normal(this, "Caching successful");
+			Logger.normal(this, "Bundle caching successful: " + cachedURI);
 		}
 
 		public void onFailure(InsertException e, BaseClientPutter state, ObjectContainer container) {
-			Logger.error(this, "Failed to insert freesite " + e);
+			Logger.error(this, "Failed to insert bundle: " + cachedURI + " Error Message: " + e);
 		}
 
 	}

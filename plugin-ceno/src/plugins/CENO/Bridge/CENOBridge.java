@@ -21,8 +21,8 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 
 	// Need to be read from config
 	public static final Integer cacheLookupPort = 3091;
-	public static final Integer cacheInsertPort = 3092;
-	public static final Integer bundlerPort = 3093;
+	public static final Integer cacheInsertPort = 3095;
+	public static final Integer bundlerPort = 3094;
 
 	private Server ceNoHttpServer;
 
