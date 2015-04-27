@@ -74,7 +74,7 @@ func DecodeErrReportURL(configuration Config) string {
 var DefaultConfiguration Config = Config {
 	":3090",
 	"http://localhost:3091",
-	"http://localhost:3093",
+	"http://localhost:3092",
 	"Page not found",
 	"views/wait.html",
 }

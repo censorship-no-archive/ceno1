@@ -6,8 +6,8 @@ var bsHandlerMaker = require('bshandler');
 const configFile = path.join('..', 'config', 'node.json');
 
 var defaultConfig = {
-  port: 3091,
-  requestReceiver: 'http://localhost:3092'
+  port: 3094,
+  requestReceiver: 'http://localhost:3093'
 };
 
 var config = defaultConfig;
