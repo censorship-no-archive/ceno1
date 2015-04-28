@@ -87,8 +87,8 @@ var rsServer = http.createServer(function (req, res) {
         console.log('Error from bundle server: ' + err.message);
       } else {
         // Act as the Bundle Inserter
-        console.log(body);
         cache[url] = JSON.parse(body.toString()).bundle;
+        console.log(cache[url]);
         console.log('Inserted bundle for ' + url + ' into the cache.');
       }
     });
