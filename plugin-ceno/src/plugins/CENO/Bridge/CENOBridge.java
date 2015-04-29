@@ -47,7 +47,7 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 		// Initialize interfaces with fred
 		pluginRespirator = pr;
 		client = new HighLevelSimpleClientInterface(pluginRespirator.getHLSimpleClient());
-		nodeInterface = new NodeInterface(pluginRespirator.getNode());
+		nodeInterface = new NodeInterface(pluginRespirator.getNode(), pluginRespirator);
 
 		// Read properties of the configuration file
 		initConfig = new Configuration(configPath);

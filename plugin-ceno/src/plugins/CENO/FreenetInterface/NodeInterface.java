@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
+import org.freenetproject.freemail.wot.ConcurrentWoTConnection;
+
 import freenet.client.ClientMetadata;
 import freenet.client.DefaultMIMETypes;
 import freenet.client.FetchContext;
@@ -20,16 +22,20 @@ import freenet.keys.FreenetURI;
 import freenet.keys.InsertableClientSSK;
 import freenet.node.Node;
 import freenet.node.RequestStarter;
+import freenet.pluginmanager.PluginRespirator;
 import freenet.support.api.Bucket;
 import freenet.support.io.BucketTools;
 
 public class NodeInterface implements FreenetInterface {
 
 	private Node node;
+	private PluginRespirator pr;
 	private FetchContext ULPRFC, localFC;
+	private ConcurrentWoTConnection wotConnection;
 
-	public NodeInterface(Node node) {
+	public NodeInterface(Node node, PluginRespirator pr) {
 		this.node = node;
+		this.pr = pr;
 
 		// Set up a FetchContext instance for Ultra-lightweight passive requests
 		this.ULPRFC = HighLevelSimpleClientInterface.getFetchContext();
@@ -38,6 +44,8 @@ public class NodeInterface implements FreenetInterface {
 
 		this.localFC = HighLevelSimpleClientInterface.getFetchContext();
 		this.localFC.localRequestOnly = true;
+		
+		wotConnection = new ConcurrentWoTConnection(pr);
 	}
 
 	public FetchResult fetchURI(FreenetURI uri) throws FetchException {

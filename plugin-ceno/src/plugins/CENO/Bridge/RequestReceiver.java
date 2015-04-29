@@ -56,7 +56,7 @@ public class RequestReceiver {
 				while (continueLoop) {
 					for (String freemailBox : freemailBoxes) {
 						urlsRequested = CENOBridge.nodeInterface.getUnreadMailsSubject(freemailBox, "CENO", "INBOX", true);
-						if (urlsRequested != null) {
+						if (urlsRequested != null && urlsRequested.length > 0) {
 							for (String urlRequested : urlsRequested) {
 								try {
 									Logger.normal(this, "Received request for URL: " + urlRequested);
