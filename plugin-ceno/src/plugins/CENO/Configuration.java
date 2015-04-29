@@ -48,7 +48,7 @@ public class Configuration {
 	public boolean configExists() {
 		try {
 			return new File(customConfigLocation).exists();
-		} catch(Exception e) {
+		} catch(SecurityException e) {
 			return false;
 		}
 	}
@@ -77,10 +77,11 @@ public class Configuration {
 	 */
 	public boolean readProperties() {
 		if (!configExists()) {
+			Logger.warning(this, "CENOBridge configuration was missing.");
 			if (createConfigFile(customConfigLocation)) {
 				return true;
 			} else {
-				Logger.warning(this, "CENO plugin could not create configuration file.");
+				Logger.error(this, "CENO plugin could not create configuration file.");
 				return false;
 			}
 		}
@@ -88,13 +89,14 @@ public class Configuration {
 		try {
 			configFileIn = new FileInputStream(customConfigLocation);
 		} catch (FileNotFoundException e) {
+			Logger.error(this, e.getMessage());
 			return false;
 		}
 		try {
 			properties.load(configFileIn);
 			configFileIn.close();
 		} catch (IOException e) {
-			e.printStackTrace();
+			Logger.error(this, e.getMessage());
 			return false;
 		}
 		return true;
@@ -147,11 +149,14 @@ public class Configuration {
 			FileOutputStream configFileOut = new FileOutputStream(customConfigLocation);
 			properties.store(configFileOut, null);
 			configFileOut.close();
+		} catch (SecurityException e) {
+			Logger.error(this, "Could not write properties to configuration file " + customConfigLocation);
+			return false;
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			Logger.error(this, "Could not open configuration file, is it a directory? " + customConfigLocation);
 			return false;
 		} catch (IOException e) {
-			e.printStackTrace();
+			Logger.error(this, "Could not store properties to configuration file " + customConfigLocation);
 			return false;
 		}
 		return true;
