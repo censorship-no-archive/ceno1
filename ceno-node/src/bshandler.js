@@ -1,7 +1,5 @@
 var fs = require('fs');
-var http = require('http');
 var qs = require('querystring');
-var path = require('path');
 var url = require('url');
 
 var request = require('request');
@@ -10,16 +8,6 @@ var b = require('equalitie-bundler');
 // The path on the RR to report a bundle that has been completed after the
 // request *from* the RR timed out.
 const RR_COMPLETE = '/complete';
-
-const configFile = path.join('..', 'config', 'node.json');
-
-// Default configuration settings to use in case the config file doesn't exist.
-var defaultConfig = {
-  port: 3094,
-  requestReceiver: 'http://localhost:3093'
-}
-
-var config = defaultConfig;
 
 function bs_log(msg) {
   console.log('[BUNDLE SERVER] ' + msg);
@@ -34,18 +22,8 @@ function reportCompleteBundle(config, data, cb) {
   }, cb);
 }
 
-// Read the config file into the global `config` object.
-// If something goes wrong, we use the default config.
-try {
-  config = JSON.parse(fs.readFileSync(configFile));
-} catch (ex) {
-  bs_log('Could not load config; Error: ' + ex.message);
-  config = defaultConfig;
-  bs_log('Using default configuration');
-  console.log(config);
-}
-
-var server = http.createServer(function (req, res) {
+module.exports = function (config) {
+  return function (req, res) {
   //////////////////////////
   // Handle PING requests //
   //////////////////////////
@@ -114,7 +92,5 @@ var server = http.createServer(function (req, res) {
       }
     }
   });
-});
-
-server.listen(config.port);
-bs_log('Running bundling server on port ' + config.port);
+}; // End HTTP request handler
+}; // End module-level closure over `config`

@@ -29,7 +29,7 @@ Plesae refresh this page in a few seconds to check if it is ready.
 type Result struct {
 	Complete bool
 	Found    bool
-	Bundle   []byte
+	Bundle   string
 	// Should add a Created field for the date created
 }
 
@@ -87,9 +87,9 @@ func reportDecodeError(reportURL, errMsg string) (bool, error) {
 func lookup(lookupURL string) (Result, error) {
 	response, err := http.Get(BundleLookupURL(Configuration, lookupURL))
 	if err != nil || response.StatusCode != 200 {
-		fmt.Print("error: ")
+	  fmt.Print("error: ")
 		fmt.Println(err)
-		return Result{false, false, nil}, errors.New("Unsuccessful request to LCS\n" + err.Error())
+		return Result{false, false, ""}, errors.New("Unsuccessful request to LCS\n" + err.Error())
 	}
 	decoder := json.NewDecoder(response.Body)
 	var result Result
@@ -98,9 +98,9 @@ func lookup(lookupURL string) (Result, error) {
 		fmt.Println(err)
 		reachedLCS, err2 := reportDecodeError(DecodeErrReportURL(Configuration), err.Error())
 		if reachedLCS {
-			return Result{false, false, nil}, errors.New("Could not decode LCS response\n" + err.Error())
+			return Result{false, false, ""}, errors.New("Could not decode LCS response\n" + err.Error())
 		} else {
-			return Result{false, false, nil}, errors.New("Unsuccessful request to LCS\n" + err2.Error())
+			return Result{false, false, ""}, errors.New("Unsuccessful request to LCS\n" + err2.Error())
 		}
 	}
 	return result, nil
@@ -134,11 +134,12 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	result, err := lookup(URL)
 	fmt.Println("Result\n  Completed: ", result.Complete, "  Found: ", result.Found)
+  fmt.Println(string(result.Bundle))
 	if err != nil {
 		w.Write(errorPage(err.Error()))
 	} else if result.Complete {
 		if result.Found {
-			w.Write(result.Bundle)
+			w.Write([]byte(result.Bundle))
 		} else {
 			err = requestNewBundle(URL)
 			fmt.Println("Error information from requestNewbundle")

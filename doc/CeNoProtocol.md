@@ -6,19 +6,23 @@ This document describes, at a high level, the protocol that should be adhered to
 
 ### Agents on the client's side
 
-`Ceno Client (CC)` is the client-side HTTP proxy application that receives requests for documents and communicates with other agents to find or create bundles for those documents.
+`Ceno Client (CC)` is the client-side HTTP proxy application that receives requests for documents and communicates with
+other agents to find or create bundles for those documents. Runs on port 3090.
 
-`Local Cache Server (LCS)` is responsible for retrieving and serving bundles from the underlying storage medium. This is a separate agent so that multiple storage mediums can be used interchangably or together.
+`Local Cache Server (LCS)` is responsible for retrieving and serving bundles from the underlying storage medium. This is
+a separate agent so that multiple storage mediums can be used interchangably or together. Runs on port 3091.
 
-`Request Sender (RS)` is responsible for forwarding requests to have bundles created to the bridge.  It will communicate with nodes in the network outside of the censored zone.
+`Request Sender (RS)` is responsible for forwarding requests to have bundles created to the bridge.  It will communicate
+with nodes in the network outside of the censored zone. Runs on port 3092.
 
 ### Agents on the bridge side
 
-`Request Receiver (RR)` receives requests from the Request Senders of clients and queues them to have the pages requested bundled.
+`Request Receiver (RR)` receives requests from the Request Senders of clients and queues them to have the pages
+requested bundled. Runs on port 3093.
 
-`Bundle Server (BS)` creates bundles for requested pages.
+`Bundle Server (BS)` creates bundles for requested pages. Runs on port 3094.
 
-`Bundle Inserter (BI)` stores bundles in the storage mediums accessible to clients.
+`Bundle Inserter (BI)` stores bundles in the storage mediums accessible to clients. Runs on port 3095.
 
 Any of the underlying technologies might provide the functionality of multiple agents. For example, in the case of freenet, the client-side plugin might server as BRS and RS at the same time.
 Also, agents are responsible for keeping their own state and act accordingly to interactions with other agents. As an example, RS should only send a single freemail for a URL no matter how many "send request to the bridge" messages receives from the CC.
