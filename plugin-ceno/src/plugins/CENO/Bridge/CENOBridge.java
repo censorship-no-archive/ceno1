@@ -20,9 +20,10 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 	private PluginRespirator pluginRespirator;
 
 	// Need to be read from config
-	public static final Integer cacheLookupPort = 3091;
-	public static final Integer cacheInsertPort = 3095;
-	public static final Integer bundlerPort = 3094;
+	//public static final Integer cacheLookupPort = 3091;
+	public static final Integer requestReceiverPort = 3093;
+	public static final Integer bundleServerPort = 3094;
+	public static final Integer bundleInserterPort = 3095;
 
 	private Server ceNoHttpServer;
 
@@ -61,7 +62,9 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 			initConfig.storeProperties();
 		}
 
+		// Initialize RequestReceiver
 		reqReceiver = new RequestReceiver(new String[]{bridgeFreemail});
+		// Start a thread for polling for new freemails
 		reqReceiver.loopFreemailBoxes();
 
 		// Configure the CeNo's jetty embedded server
@@ -84,15 +87,15 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 	 */
 	private void configHttpServer(Server ceNoHttpServer) {     
 		// Add a ServerConnector for each port
-		ServerConnector httpConnector = new ServerConnector(ceNoHttpServer);
+		/*ServerConnector httpConnector = new ServerConnector(ceNoHttpServer);
 		httpConnector.setName("cacheLookup");
-		httpConnector.setPort(cacheLookupPort);
+		httpConnector.setPort(cacheLookupPort);*/
 		ServerConnector cacheConnector = new ServerConnector(ceNoHttpServer);
 		cacheConnector.setName("cacheInsert");
-		cacheConnector.setPort(cacheInsertPort);
+		cacheConnector.setPort(bundleInserterPort);
 
 		// Set server's connectors the ones configured above
-		ceNoHttpServer.setConnectors(new ServerConnector[]{httpConnector, cacheConnector});
+		ceNoHttpServer.setConnectors(new ServerConnector[]{cacheConnector});
 
 		// Create a collection of ContextHandlers for the server
 		ContextHandlerCollection handlers = new ContextHandlerCollection();
@@ -100,15 +103,14 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 
 		// Configure ContextHandlers to listen to a specific port
 		// and upon request call the appropriate AbstractHandler subclass	
-		ContextHandler cacheLookupCtxHandler = new ContextHandler();
+		/*ContextHandler cacheLookupCtxHandler = new ContextHandler();
 		cacheLookupCtxHandler.setHandler(new CacheLookupHandler());
-		cacheLookupCtxHandler.setVirtualHosts(new String[]{"@cacheLookup"});
+		cacheLookupCtxHandler.setVirtualHosts(new String[]{"@cacheLookup"});*/
 		ContextHandler cacheInsertCtxHandler = new ContextHandler();
-		cacheInsertCtxHandler.setHandler(new CacheInsertHandler());
+		cacheInsertCtxHandler.setHandler(new BundleInserterHandler());
 		cacheInsertCtxHandler.setVirtualHosts(new String[]{"@cacheInsert"});
 
 		// Add the configured ContextHandlers to the server
-		handlers.addHandler(cacheLookupCtxHandler);
 		handlers.addHandler(cacheInsertCtxHandler);
 	}
 
@@ -121,12 +123,14 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 	}
 
 	/**
-	 * Method called before termination of the CeNo plugin
+	 * Method called before termination of the CENO bridge plugin
 	 * Terminates ceNoHttpServer and releases resources
 	 */
 	public void terminate()
 	{
+		// Stop the thread that is polling for freemails
 		reqReceiver.stopLooping();
+
 		// Stop ceNoHttpServer and unbind ports
 		if (ceNoHttpServer != null) {
 			try {
@@ -135,6 +139,7 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 				e.printStackTrace();
 			}
 		}
+
 		Logger.normal(this, pluginName + " terminated.");
 	}
 

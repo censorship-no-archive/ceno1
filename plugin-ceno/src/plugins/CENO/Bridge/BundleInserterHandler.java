@@ -25,13 +25,13 @@ import freenet.client.async.BaseClientPutter;
 /* ------------------------------------------------------------ */
 /** CeNo Plugin handler for requests to cache bundles
  * 	
- * CacheInsertHandler listens to {@link CENOBridge#cacheInsertPort} port
+ * CacheInsertHandler listens to {@link CENOBridge#bundleInserterPort} port
  * and under the "/store" route for POST requests.
  * Those POST requests include the bundled page as well as the original url.
  * The handler caches the given bundle under its signed subspace.
  * Upon successful insertion, the handler replies with "stored".
  */
-public class CacheInsertHandler extends CENOJettyHandler {
+public class BundleInserterHandler extends CENOJettyHandler {
 
 	// Insertion requests time out after 5 mins
 	static final long insertionRequestTimeout = 5 * 60 * 1000;
