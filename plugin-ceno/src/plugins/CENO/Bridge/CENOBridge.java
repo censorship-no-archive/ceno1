@@ -112,7 +112,7 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 
 		// Add the configured ContextHandler to the server
 		handlers.addHandler(cacheInsertCtxHandler);
-		
+
 		/*
 		 * Uncomment the following block if you need a lookup handler in the bridge side
 		 */
