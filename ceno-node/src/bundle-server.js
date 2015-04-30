@@ -1,7 +1,8 @@
+var fs = require('fs');
 var path = require('path');
 var http = require('http');
 
-var bsHandlerMaker = require('bshandler');
+var bsHandlerMaker = require('./bshandler');
 
 const configFile = path.join('..', 'config', 'node.json');
 
