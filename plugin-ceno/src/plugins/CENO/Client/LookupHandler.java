@@ -4,6 +4,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import net.minidev.json.JSONObject;
+import plugins.CENO.CENOErrCode;
+import plugins.CENO.CENOException;
 import plugins.CENO.URLtoUSKTools;
 import plugins.CENO.Client.ULPRManager.ulprStatus;
 import freenet.client.FetchException;
@@ -18,16 +20,19 @@ public class LookupHandler extends AbstractCENOClientHandler {
 
 		String urlParam = request.getParam("url", "");
 		if (urlParam.isEmpty()) {
-			return "Invalid URL";
-		} else if (Pattern.matches("freenet:|USK@|CHK@|SSK@", urlParam)) {
-			return "Lookup URL looks like a Freenet URI";
+			return returnErrorJSON(new CENOException(CENOErrCode.LCS_HANDLER_INVALID_URL));
+		} else if (urlParam.startsWith("/?url=http://")) {
+			urlParam = urlParam.replace("/?url=http://", "");
+		}
+		if (Pattern.matches("freenet:|USK@|CHK@|SSK@", urlParam)) {
+			return returnErrorJSON(new CENOException(CENOErrCode.LCS_HANDLER_INVALID_URL));
 		}
 
 		FreenetURI calculatedUSK = null;
 		try {
 			calculatedUSK = URLtoUSKTools.computeUSKfromURL(urlParam, CENOClient.bridgeKey);
 		} catch (Exception e) {
-			return "Error while calculating the USK for the lookup URL";
+			return returnErrorJSON(new CENOException(CENOErrCode.LCS_HANDLER_INVALID_URL));
 		}
 
 		String localFetchResult = null;
@@ -41,8 +46,8 @@ public class LookupHandler extends AbstractCENOClientHandler {
 
 		if (localFetchResult == null) {
 			ulprStatus urlULPRStatus = ULPRManager.lookupULPR(urlParam);
+			RequestSender.requestFromBridge(urlParam);
 			if (urlULPRStatus == ulprStatus.failed) {
-				RequestSender.requestFromBridge(urlParam);
 				if (clientIsHtml) {
 					return printStaticHTMLReplace("Resources/requestedFromBridge.html", "[urlRequested]", urlParam);
 				} else {

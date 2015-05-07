@@ -20,6 +20,9 @@ public class RequestReceiver {
 
 	/** The duration in seconds between two consecutive freemailBoxes polling */
 	private static final long FREEMAILBOX_POLLING_PAUSE = TimeUnit.SECONDS.toMillis(40);
+	
+	private RequestReceiver() {
+	}
 
 	/**
 	 * RequestReceiver constructor that follows the singleton pattern.
@@ -30,6 +33,7 @@ public class RequestReceiver {
 	public RequestReceiver(String[] freemailBoxesArray) {
 		synchronized (RequestReceiver.class) {
 			if (requestReceiver == null) {
+				requestReceiver = new RequestReceiver();
 				requestReceiver.freemailBoxes = new LinkedList<String>();
 				for (String freemailBox : freemailBoxesArray) {
 					addFreemailBox(freemailBox);
@@ -42,9 +46,9 @@ public class RequestReceiver {
 	 * Starts a thread that polls freemail boxes
 	 */
 	public void loopFreemailBoxes() {
-		if (requestReceiver.fmBoxLooper != null) {
+		if (requestReceiver.fmBoxLooper == null) {
 			requestReceiver.fmBoxLooper = new FreemailBoxLooper();
-			requestReceiver.looperThread = new Thread(fmBoxLooper);
+			requestReceiver.looperThread = new Thread(requestReceiver.fmBoxLooper);
 			requestReceiver.looperThread.start();
 		}
 	}

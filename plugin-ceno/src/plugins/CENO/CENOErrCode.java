@@ -8,6 +8,9 @@ package plugins.CENO;
 public enum CENOErrCode {
 	LCS_NODE_INITIALIZING(100, ErrAction.WAIT),
 	LCS_NODE_NOT_ENOUGH_PEERS(101, ErrAction.WAIT),
+	LCS_HANDLER_STATIC_NOT_FOUND(120, ErrAction.LOG),
+	LCS_HANDLER_STATIC_IO(121, ErrAction.LOG),
+	LCS_HANDLER_INVALID_URL(131, ErrAction.LOG),
 	BI_INVALID_URL(501, ErrAction.LOG);
 
 	private final int errCode;

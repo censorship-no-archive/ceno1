@@ -5,6 +5,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import net.minidev.json.JSONObject;
+import plugins.CENO.CENOErrCode;
+import plugins.CENO.CENOException;
 import freenet.pluginmanager.FredPluginHTTP;
 import freenet.pluginmanager.PluginHTTPException;
 import freenet.support.api.HTTPRequest;
@@ -17,7 +20,7 @@ public abstract class AbstractCENOClientHandler implements FredPluginHTTP {
 	protected String printStaticHTML(String filename) {
 		InputStream is = AbstractCENOClientHandler.class.getResourceAsStream(filename);
 		if (is == null) {
-			return "<http><body>HTML static file not found.</body></http>";
+			return returnErrorJSON(new CENOException(CENOErrCode.LCS_HANDLER_STATIC_NOT_FOUND));
 		}
 		BufferedReader br = new BufferedReader(new InputStreamReader(is));
 		String line = "";
@@ -28,7 +31,7 @@ public abstract class AbstractCENOClientHandler implements FredPluginHTTP {
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
-			return "<http><body>There was an error. Please refresh.</body></http>";
+			return returnErrorJSON(new CENOException(CENOErrCode.LCS_HANDLER_STATIC_IO));
 		}
 		return htmlContent.toString();
 	}
@@ -43,6 +46,13 @@ public abstract class AbstractCENOClientHandler implements FredPluginHTTP {
 			return true;
 		}
 		return false;
+	}
+	
+	protected String returnErrorJSON(CENOException cenoEx) {
+		JSONObject jsonResponse = new JSONObject();
+		jsonResponse.put("errCode", cenoEx.getErrCode());
+		jsonResponse.put("error", cenoEx.getMessage());
+		return jsonResponse.toJSONString();
 	}
 
 }

@@ -49,7 +49,7 @@ public class URLtoUSKTools {
 	 */
 	public static FreenetURI computeUSKfromURL(String requestPath, String requestURI) throws MalformedURLException {
 		Map<String, String> splitMap = splitURL(requestPath);
-		String computedKey = requestURI.replaceFirst("SSK", "USK") + splitMap.get("domain") + "/-1/" + splitMap.get("extraPath");
+		String computedKey = requestURI.replaceFirst("SSK", "USK") + splitMap.get("domain") + "/0/" + splitMap.get("extraPath");
 
 		return new FreenetURI(computedKey);
 	}
