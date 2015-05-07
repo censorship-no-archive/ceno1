@@ -30,8 +30,8 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 
 	// Bridge and freemail-specific constants
 	public static final String bridgeKey = "SSK@Rx6x6Ik1y93wGk8OtTvZaMQ~Ni6uqxFMclGP8BHrk5g,aBMErm8fkZ7xuFnSzSLnBKgHmjk6PR1Ng4V8ITxXzk8,AQACAAE/";
-	public static final String bridgeIdentityRequestURI = "USK@N2LbDs-ZctfDVwhDJQji0bR~k4BcJNzpPCD4aZpymec,ph3DsCpXmjIU1mFSp1eBGMmdRs~YPpzyuiDTqt01SxA,AQACAAE/WebOfTrust/0";
-	public static final String bridgeFreemail = "DEFLECTBridge@g5rnwdwp3fznpq2xbbbskchc2g2h5e4alqsnz2j4ed4gtgtsthtq.freemail";
+	public static final String bridgeIdentityRequestURI = "USK@QfqLw7-BJpGGMnhnJQ3~KkCiciMAsoihBCtSqy6nNbY,-lG83h70XIJ03r4ckdNnsY4zIQ-J8qTqwzSBeIG5q3s,AQACAAE/WebOfTrust/0";
+	public static final String bridgeFreemail = "DEFLECTBridge@ih5ixq57yetjdbrspbtskdp6fjake4rdacziriiefnjkwlvhgw3a.freemail";
 	
 	public static final String clientIdentityInsertURI = "USK@SNS-BKGDFS4ciG3HV6o5MQjvIdCDn9G8DfIeIK~7kBQ,WMeRYMzx2tQHM~O8UWglUmBnjIhp~bh8xue-6g2pmps,AQECAAE/WebOfTrust/0";
 	public static final String clientFreemail = "CENO@54u2ko3lssqgalpvfqbq44gwfquqrejm3itl4rxj5nt7v6mjy22q.freemail";
