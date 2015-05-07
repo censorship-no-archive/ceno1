@@ -1,6 +1,3 @@
 [submodule "plugin-ceno/pyFreenet"]
 	path = plugin-ceno/pyFreenet
 	url = git@github.com:misaakidis/pyFreenet.git
-[submodule "ceno-node/lib/bundler"]
-	path = ceno-node/lib/bundler
-	url = https://github.com/equalitie/bundler.git
