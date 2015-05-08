@@ -4,7 +4,6 @@ import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
 
-import plugins.CENO.Bridge.CENOBridge;
 import freenet.client.InsertException;
 import freenet.keys.FreenetURI;
 
@@ -56,7 +55,6 @@ public class URLtoUSKTools {
 
 	public static FreenetURI computeInsertURI(String domain, String insertURI) throws MalformedURLException {
 		FreenetURI insertURIconfig = new FreenetURI(insertURI);
-		//String computedKey = insertURI.replaceFirst("SSK", "USK") + "-1/";
 		FreenetURI result = new FreenetURI("USK", domain, insertURIconfig.getRoutingKey(), insertURIconfig.getCryptoKey(), insertURIconfig.getExtra());
 
 		try {

@@ -60,6 +60,11 @@ public class BundleInserter {
 		}
 
 		Map<String, String> splitMap = URLtoUSKTools.splitURL(url);
+		
+		if (splitMap.get("extraPath").isEmpty()) {
+			splitMap.put("extraPath", "index.html");
+		}
+		
 		FreenetURI insertKey = URLtoUSKTools.computeInsertURI(splitMap.get("domain"), CENOBridge.initConfig.getProperty("requestURI"));
 		insertFreesite(insertKey, splitMap.get("extraPath"), bundle.getContent(), insertCallback);
 	}
