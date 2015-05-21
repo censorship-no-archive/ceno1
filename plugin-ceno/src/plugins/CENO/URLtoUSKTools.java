@@ -1,8 +1,15 @@
 package plugins.CENO;
 
+import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
+
+import org.apache.commons.validator.routines.InetAddressValidator;
+import org.apache.commons.validator.routines.UrlValidator;
 
 import freenet.client.InsertException;
 import freenet.keys.FreenetURI;
@@ -10,9 +17,6 @@ import freenet.keys.FreenetURI;
 public class URLtoUSKTools {
 
 	public static Map<String, String> splitURL(String requestPath) throws MalformedURLException {
-		// Remove protocol from URL
-		requestPath = requestPath.replaceFirst("http://|https://", "");
-
 		// Extract domain and extra path
 		String domain, extraPath;
 		int slashIndex = requestPath.indexOf('/');
@@ -28,6 +32,14 @@ public class URLtoUSKTools {
 			domain = requestPath.substring(0, slashIndex);
 			extraPath = requestPath.substring(slashIndex + 1, requestPath.length());
 		}
+
+		/* Extract meta strings from FreenetURI
+		StringBuilder allMetaStrings = new StringBuilder();
+		for (String metaString : requestKey.getAllMetaStrings()) {
+			if (!metaString.isEmpty()) {
+				allMetaStrings.append("/" + metaString);
+			}
+		}*/	
 
 		Map<String, String> splitMap = new HashMap<String, String>();
 		splitMap.put("domain", domain);
@@ -65,12 +77,60 @@ public class URLtoUSKTools {
 		return result;
 	}
 
-	/* Extract meta strings from FreenetURI
-	StringBuilder allMetaStrings = new StringBuilder();
-	for (String metaString : requestKey.getAllMetaStrings()) {
-		if (!metaString.isEmpty()) {
-			allMetaStrings.append("/" + metaString);
+	/**
+	 * Validates a URL parameter and formats it accordingly
+	 * 
+	 * @param urlParam the URL to validate and format
+	 * @return the URL in format that can be processed by the CENO plugins
+	 * @throws MalformedURLException if URL parameter is not a valid URL
+	 */
+	public static String validateURL(String urlParam) throws MalformedURLException {
+		// Remove preceding slash
+		urlParam = urlParam.replaceFirst("^/", "");
+
+		// Remove the preceding "?url="
+		urlParam = urlParam.replaceFirst("(?i)^?url=", "");
+
+		// Remove the http/https protocols
+		urlParam = urlParam.replaceFirst("(?i)^https?://", "");
+
+
+		// Check if urlParam is a Freenet key
+		if (Pattern.matches("(?i)^(freenet:|USK@|CHK@|SSK@).*", urlParam)) {
+			throw new MalformedURLException("Given URL looks like a Freenet key");
 		}
-	}*/	
+
+		// Throws MalformedURLException if a URL object cannot be created
+		URL netURL = new URL("http://" + urlParam);
+
+		// Validate urlParm using org.apache.commons UrlValidator
+		UrlValidator urlValidator = new UrlValidator();
+		if (!urlValidator.isValid(netURL.toString())) {
+			throw new MalformedURLException("Given URL failed UrlValidator check");
+		}
+
+		// If the host is an Inet address, make sure it does not reference to a local resource
+		InetAddressValidator inetValidator = new InetAddressValidator();
+		if (inetValidator.isValid(netURL.getHost())) {
+			InetAddress inet;
+			try {
+				// !IMPORTANT!
+				// Make sure that URL host is in IPv4 or IPv6 format before calling InetAddress.getByName()
+				// because in case the host is a domain, it will be resolved and
+				// DNS resolution can expose the identity of the users.
+				inet = InetAddress.getByName(netURL.getHost());
+			} catch (UnknownHostException e) {
+				// Since we have already checked that the urlParam host is a valid Inet address,
+				// this UnknownHost exception will never be thrown
+				e.printStackTrace();
+				throw new MalformedURLException();
+			}
+			if (inet.isSiteLocalAddress()) {
+				throw new MalformedURLException("Given URL references to a local resource");
+			}
+		}
+
+		return urlParam;
+	}
 
 }

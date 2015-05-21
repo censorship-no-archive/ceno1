@@ -1,7 +1,7 @@
 package plugins.CENO.Client;
 
+import java.net.MalformedURLException;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
 
 import net.minidev.json.JSONObject;
 import plugins.CENO.CENOErrCode;
@@ -21,10 +21,14 @@ public class LookupHandler extends AbstractCENOClientHandler {
 		String urlParam = request.getParam("url", "");
 		if (urlParam.isEmpty()) {
 			return returnErrorJSON(new CENOException(CENOErrCode.LCS_HANDLER_INVALID_URL));
-		} else if (urlParam.startsWith("/?url=http://")) {
-			urlParam = urlParam.replace("/?url=http://", "");
 		}
-		if (Pattern.matches("freenet:|USK@|CHK@|SSK@", urlParam)) {
+		
+		try {
+			urlParam = URLtoUSKTools.validateURL(urlParam);
+		} catch (MalformedURLException e) {
+			if (clientIsHtml) {
+				return new CENOException(CENOErrCode.LCS_HANDLER_INVALID_URL).getMessage();
+			}
 			return returnErrorJSON(new CENOException(CENOErrCode.LCS_HANDLER_INVALID_URL));
 		}
 

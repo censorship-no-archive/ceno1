@@ -7,7 +7,7 @@ package plugins.CENO;
  */
 public class CENOException extends Exception {
 	private final CENOErrCode errCode;
-	
+
 	/**
 	 * Constructs a CENO exception with an error code
 	 * from the errorConditions doc file.
@@ -19,7 +19,12 @@ public class CENOException extends Exception {
 		super(errCode.toString());
 		this.errCode = errCode;
 	}
-	
+
+	public CENOException(CENOErrCode errCode, String message) {
+		super(message);
+		this.errCode = errCode;
+	}
+
 	/**
 	 * Getter for the CENOErrCode of the exception
 	 */

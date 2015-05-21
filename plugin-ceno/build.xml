@@ -16,6 +16,8 @@
 	<property name="jetty-all.location" value="lib/jetty-all-9.2.6.v20141205.jar"/>
 	<property name="json-smart.location" location="lib/json-smart-1.2.jar"/>
 	<property name="sun-mail.location" location="lib/mail.jar"/>
+	<property name="apache-commonsvalidator.location" location="lib/commons-validator-1.4.1.jar"/>
+
 
 	<available file="src/plugins/CENO/Version.java" property="version.present"/>
 	<available file="${junit.location}" property="junit.present"/>
@@ -67,6 +69,7 @@
 				<pathelement location="${jetty-serverlet.location}"/>
 				<pathelement location="${json-smart.location}"/>
 				<pathelement location="${sun-mail.location}"/>
+				<pathelement location="${apache-commonsvalidator.location}" />
 			</classpath>
 			<include name="**/*.java"/>
 			<exclude name="**/*Test.java"/>
@@ -126,6 +129,7 @@
 			</fileset>
 			<zipfileset src="${json-smart.location}" />
 			<zipfileset src="${sun-mail.location}" />
+			<zipfileset src="${apache-commonsvalidator.location}" excludes="META-INF/LICENSE.txt" />
 		</jar>
 		
 		<jar jarfile="${dist}/CENOBridge.jar" duplicate="fail">
@@ -139,6 +143,7 @@
 			<zipfileset src="${jetty-serverlet.location}" />
 			<zipfileset src="${json-smart.location}" />
 			<zipfileset src="${sun-mail.location}" excludes="META-INF/LICENSE.txt" />
+			<zipfileset src="${apache-commonsvalidator.location}" excludes="META-INF/LICENSE.txt" />
 		</jar>
 	</target>
 
