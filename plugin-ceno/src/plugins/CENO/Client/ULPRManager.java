@@ -42,6 +42,7 @@ public class ULPRManager {
 
 		public void onFailure(FetchException e, ClientGetter state,
 				ObjectContainer container) {
+			//TODO Handle not fatal errors (like permanent redirections)
 			updateULPRStatus(url, ulprStatus.failed);
 		}
 
@@ -88,7 +89,7 @@ public class ULPRManager {
 			return;
 		}
 		try {
-			CENOClient.nodeInterface.fetchULR(calculatedUSK, new ULPRGetCallback(url));
+			CENOClient.nodeInterface.fetchULPR(calculatedUSK, new ULPRGetCallback(url));
 		} catch (FetchException e) {
 			e.printStackTrace();
 			updateULPRStatus(url, ulprStatus.couldNotStart);

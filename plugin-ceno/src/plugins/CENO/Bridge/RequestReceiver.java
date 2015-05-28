@@ -1,10 +1,12 @@
 package plugins.CENO.Bridge;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import plugins.CENO.URLtoUSKTools;
 import freenet.client.InsertException;
 import freenet.support.Logger;
 
@@ -20,7 +22,7 @@ public class RequestReceiver {
 
 	/** The duration in seconds between two consecutive freemailBoxes polling */
 	private static final long FREEMAILBOX_POLLING_PAUSE = TimeUnit.SECONDS.toMillis(40);
-	
+
 	private RequestReceiver() {
 	}
 
@@ -111,15 +113,21 @@ public class RequestReceiver {
 						if (urlsRequested != null && urlsRequested.length > 0) {
 							for (String urlRequested : urlsRequested) {
 								try {
-									Logger.normal(this, "Received request for URL: " + urlRequested);
+									Logger.normal(this, "Freemail " + freemailBox + " received request for URL: " + urlRequested);
+									try {
+										urlRequested = URLtoUSKTools.validateURL(urlRequested);
+									} catch (MalformedURLException e) {
+										Logger.error(this, "URL failed validation, it will not be processed: " + urlRequested);
+										continue;
+									}
 									// Pass the request to the BundleInserter agent
 									BundleInserter.insertBundle(urlRequested);
 								} catch (IOException e) {
-									Logger.error(this, "Error while requesting the bundle from BS for URL: " + urlRequested);
-									Logger.error(this, e.getMessage());
+									Logger.error(this, "I/O exception while requesting/inserting the bundle for URL: " + urlRequested + 
+											"Error: " + e.getMessage());
 								} catch (InsertException e) {
-									Logger.error(this, "Could not start the insertion of the bundle for the URL: " + urlRequested);
-									Logger.error(this, e.getMessage());
+									Logger.error(this, "Could not insert the bundle for the URL: " + urlRequested 
+											+ " Error: " + e.getMessage());
 								}
 							}
 						}

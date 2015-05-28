@@ -1,7 +1,6 @@
 package plugins.CENO.Bridge;
 
 import java.io.IOException;
-import java.sql.Time;
 import java.util.concurrent.TimeUnit;
 
 import javax.servlet.ServletException;

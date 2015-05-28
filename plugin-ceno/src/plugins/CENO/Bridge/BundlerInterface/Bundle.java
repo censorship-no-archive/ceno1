@@ -6,6 +6,10 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import net.minidev.json.JSONObject;
+import net.minidev.json.JSONValue;
+import net.minidev.json.parser.ParseException;
+import plugins.CENO.URLtoUSKTools;
 import plugins.CENO.Bridge.CENOBridge;
 
 public class Bundle {
@@ -20,17 +24,21 @@ public class Bundle {
 	public String getContent() {
 		return content;
 	}
-	
+
 	public void setContent(String content) {
 		this.content = content;
 	}
-	
+
 	public void setContent(byte[] content) {
 		this.content = new String(content);
 	}
-	
+
 	public void requestFromBundler() throws IOException {
-		doRequest();
+		try {
+			doRequest();
+		} catch (ParseException e) {
+			throw new IOException(e.getMessage());
+		}
 	}
 
 	public void requestFromBundlerSafe() {
@@ -39,11 +47,13 @@ public class Bundle {
 		} catch (IOException e) {
 			content = "Error while requesting bundle:\n" + e.toString();
 			e.printStackTrace();
+		} catch (ParseException e) {
+			content = "Error while parsing response from bundle server: " + e.getMessage();
 		}
 	}
 
-	private void doRequest() throws IOException {
-		//TODO check for URL validity
+	private void doRequest() throws IOException, ParseException {
+		uri = URLtoUSKTools.validateURL(uri);
 		URL url = new URL("http", "127.0.0.1", CENOBridge.bundleServerPort, "/?url=http://" + uri);
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
@@ -55,7 +65,13 @@ public class Bundle {
 			response.append('\r');
 		}
 		in.close();
-		content = response.toString();
+
+		JSONObject jsonResponse = (JSONObject) JSONValue.parseWithException(response.toString());
+		if (jsonResponse.containsKey("error")) {
+			throw new IOException("Response from bundle server included error: " + jsonResponse.get("error"));
+		}
+		
+		content = (String) jsonResponse.get("bundle");
 		return;
 	}
 

@@ -50,8 +50,8 @@ public class URLtoUSKTools {
 	/**
 	 * Computes the USK for a given URL so that:
 	 * <ul>
-	 *   <li> CeNo can lookup if this URL has been cached before</li>
-	 *   <li> CeNo knows the insert USK to use when caching a bundle</li>
+	 *   <li> CENO can lookup if this URL has been cached before</li>
+	 *   <li> CENO knows the insert URI to use when caching a bundle</li>
 	 * </ul>
 	 * 
 	 * @param requestPath the URL requested by the user/bundler
@@ -72,7 +72,7 @@ public class URLtoUSKTools {
 		try {
 			result.checkInsertURI();
 		} catch (InsertException e) {
-			throw new MalformedURLException("The computed URI failed checkInsertURI()");
+			throw new MalformedURLException("The computed insertion key for domain " + domain + " failed validity check");
 		}
 		return result;
 	}
@@ -94,6 +94,10 @@ public class URLtoUSKTools {
 		// Remove the http/https protocols
 		urlParam = urlParam.replaceFirst("(?i)^https?://", "");
 
+		// Make sure that only http/https is allowed
+		if (Pattern.matches(".*://.*", urlParam)) {
+			throw new MalformedURLException("Unsupported protocol");
+		}
 
 		// Check if urlParam is a Freenet key
 		if (Pattern.matches("(?i)^(freenet:|USK@|CHK@|SSK@).*", urlParam)) {
@@ -107,6 +111,11 @@ public class URLtoUSKTools {
 		UrlValidator urlValidator = new UrlValidator();
 		if (!urlValidator.isValid(netURL.toString())) {
 			throw new MalformedURLException("Given URL failed UrlValidator check");
+		}
+
+		// Make sure the URL host is not localhost
+		if (netURL.getHost().equals("localhost")) {
+			throw new MalformedURLException("Given URL references a local resource");
 		}
 
 		// If the host is an Inet address, make sure it does not reference to a local resource
@@ -126,7 +135,7 @@ public class URLtoUSKTools {
 				throw new MalformedURLException();
 			}
 			if (inet.isSiteLocalAddress()) {
-				throw new MalformedURLException("Given URL references to a local resource");
+				throw new MalformedURLException("Given URL references a local resource");
 			}
 		}
 

@@ -20,9 +20,12 @@ public class LookupHandler extends AbstractCENOClientHandler {
 
 		String urlParam = request.getParam("url", "");
 		if (urlParam.isEmpty()) {
+			if (clientIsHtml) {
+				return new CENOException(CENOErrCode.LCS_HANDLER_INVALID_URL).getMessage();
+			}
 			return returnErrorJSON(new CENOException(CENOErrCode.LCS_HANDLER_INVALID_URL));
 		}
-		
+
 		try {
 			urlParam = URLtoUSKTools.validateURL(urlParam);
 		} catch (MalformedURLException e) {

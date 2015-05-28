@@ -127,6 +127,10 @@ public class HighLevelSimpleClientInterface {
 	//		ClientPutter clientPutter = HLSCInterface.client.insert(insert, filenameHint, isMetadata, ctx, cb);
 	//		return clientPutter;
 	//	}
+	
+	public static FreenetURI insert(InsertBlock insert, boolean getCHKOnly, String filenameHint) throws InsertException {
+		return HLSCInterface.client.insert(insert, getCHKOnly, filenameHint);
+	}
 
 	/**
 	 * Non-blocking insert.
@@ -139,6 +143,10 @@ public class HighLevelSimpleClientInterface {
 		return HLSCInterface.client.insert(insert, false, filenameHint, isMetadata, ctx, cb, priority);
 	}
 
+	public static FreenetURI insertManifest(FreenetURI insertURI, HashMap<String, Object> bucketsByName, String defaultName) throws InsertException {
+		return HLSCInterface.client.insertManifest(insertURI, bucketsByName, defaultName);
+	}
+	
 	public static FreenetURI insertManifest(FreenetURI insertURI, HashMap<String, Object> bucketsByName, String defaultName, short priorityClass) throws InsertException {
 		return HLSCInterface.client.insertManifest(insertURI, bucketsByName, defaultName, priorityClass);
 	}

@@ -19,12 +19,17 @@ public class BundleInserter {
 
 	public static class InsertCallback implements ClientPutCallback {
 		protected FreenetURI cachedURI;
+		protected String uri;
+
+		public void setUri(String uri) {
+			this.uri = uri;
+		}
 
 		public void onMajorProgress(ObjectContainer container) {
 		}
 
-		public void onGeneratedURI(FreenetURI uri, BaseClientPutter state, ObjectContainer container) {
-			this.cachedURI = uri;
+		public void onGeneratedURI(FreenetURI freenetUri, BaseClientPutter state, ObjectContainer container) {
+			this.cachedURI = freenetUri;
 		}
 
 		public void onGeneratedMetadata(Bucket metadata, BaseClientPutter state, ObjectContainer container) {
@@ -34,18 +39,21 @@ public class BundleInserter {
 		}
 
 		public void onSuccess(BaseClientPutter state, ObjectContainer container) {
-			Logger.normal(this, "Bundle caching successful: " + cachedURI);
+			Logger.normal(this, "Bundle caching for URL " + uri + " successful: " + cachedURI);
 		}
 
 		public void onFailure(InsertException e, BaseClientPutter state, ObjectContainer container) {
-			Logger.error(this, "Failed to insert bundle: " + cachedURI + " Error Message: " + e);
+			Logger.error(this, "Failed to insert bundle for URL " + uri + " Error Message: " + e);
+			e.printStackTrace();
 		}
 
 	}
 
 
 	public static void insertBundle(String url) throws IOException, InsertException {
-		insertBundle(url, new InsertCallback());
+		InsertCallback insertCb = new InsertCallback();
+		insertCb.setUri(url);
+		insertBundle(url, insertCb);
 	}
 
 	public static void insertBundle(String url, ClientPutCallback insertCallback) throws IOException, InsertException {
@@ -56,16 +64,12 @@ public class BundleInserter {
 
 	public static void insertBundle(String url, Bundle bundle, ClientPutCallback insertCallback) throws IOException, InsertException {
 		if (bundle.getContent().isEmpty()) {
-			throw new IOException();
+			throw new IOException("Bundle content for url " + url + " was empty.");
 		}
 
 		Map<String, String> splitMap = URLtoUSKTools.splitURL(url);
-		
-		if (splitMap.get("extraPath").isEmpty()) {
-			splitMap.put("extraPath", "index.html");
-		}
-		
-		FreenetURI insertKey = URLtoUSKTools.computeInsertURI(splitMap.get("domain"), CENOBridge.initConfig.getProperty("requestURI"));
+
+		FreenetURI insertKey = URLtoUSKTools.computeInsertURI(splitMap.get("domain"), CENOBridge.initConfig.getProperty("insertURI"));
 		insertFreesite(insertKey, splitMap.get("extraPath"), bundle.getContent(), insertCallback);
 	}
 
