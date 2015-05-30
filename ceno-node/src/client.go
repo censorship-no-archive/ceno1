@@ -22,7 +22,7 @@ const URL_REGEX = "(https?://)?(www\\.)?\\w+\\.\\w+"
 // plain text message to the user.
 const PLEASE_WAIT_PLAINTEXT = /* Multi-line strings, yeah! */ `
 The page you have requested is being prepared.
-Plesae refresh this page in a few seconds to check if it is ready.
+Please refresh this page in a few seconds to check if it is ready.
 `
 
 // Result of a bundle lookup from cache server.
@@ -193,6 +193,6 @@ func main() {
 //	}
 	// Create an HTTP proxy server
 	http.HandleFunc("/", proxyHandler)
-	fmt.Println("CeNo proxy server listening at http://localhost" + Configuration.PortNumber)
+	fmt.Println("CeNo proxy server listening at http://localhost:" + Configuration.PortNumber)
 	http.ListenAndServe(Configuration.PortNumber, nil)
 }
