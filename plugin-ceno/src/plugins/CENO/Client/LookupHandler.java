@@ -42,14 +42,7 @@ public class LookupHandler extends AbstractCENOClientHandler {
 			return returnErrorJSON(new CENOException(CENOErrCode.LCS_HANDLER_INVALID_URL));
 		}
 
-		String localFetchResult = null;
-		ClientGetSyncCallback getSyncCallback = new ClientGetSyncCallback();
-		try {
-			CENOClient.nodeInterface.localFetchURI(calculatedUSK, getSyncCallback);
-		} catch (FetchException e) {
-			e.printStackTrace();
-		}
-		localFetchResult = getSyncCallback.getResult(5L, TimeUnit.SECONDS);
+		String localFetchResult = localCacheLookup(calculatedUSK);
 
 		if (localFetchResult == null) {
 			ulprStatus urlULPRStatus = ULPRManager.lookupULPR(urlParam);
@@ -83,6 +76,22 @@ public class LookupHandler extends AbstractCENOClientHandler {
 				return jsonResponse.toJSONString();
 			}
 		}
+	}
+
+	private String localCacheLookup(FreenetURI calculatedUSK) {
+		ClientGetSyncCallback getSyncCallback = new ClientGetSyncCallback();
+		try {
+			CENOClient.nodeInterface.localFetchURI(calculatedUSK, getSyncCallback);
+		} catch (FetchException e) {
+			e.printStackTrace();
+		}
+		String fetchResult = null;
+		try {
+			fetchResult = getSyncCallback.getResult(5L, TimeUnit.SECONDS);
+		} catch (FetchException e) {
+			fetchResult = localCacheLookup(e.newURI);
+		}
+		return fetchResult;
 	}
 
 	public String handleHTTPPost(HTTPRequest request)

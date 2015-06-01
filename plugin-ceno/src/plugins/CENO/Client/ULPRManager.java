@@ -11,6 +11,7 @@ import freenet.client.FetchResult;
 import freenet.client.async.ClientGetCallback;
 import freenet.client.async.ClientGetter;
 import freenet.keys.FreenetURI;
+import freenet.support.Logger;
 
 public class ULPRManager {
 
@@ -43,7 +44,11 @@ public class ULPRManager {
 		public void onFailure(FetchException e, ClientGetter state,
 				ObjectContainer container) {
 			//TODO Handle not fatal errors (like permanent redirections)
-			updateULPRStatus(url, ulprStatus.failed);
+			if (e.getMode() == FetchException.PERMANENT_REDIRECT) {
+				initULPR(url, e.newURI.getEdition());
+			} else {
+				updateULPRStatus(url, ulprStatus.failed);
+			}
 		}
 
 	}
@@ -80,14 +85,19 @@ public class ULPRManager {
 	}
 
 	private void initULPR(String url) {
+		initULPR(url, 0);
+	}
+
+	private void initULPR(String url, long newEdition) {
 		updateULPRStatus(url, ulprStatus.starting);
 		FreenetURI calculatedUSK = null;
 		try {
 			calculatedUSK = URLtoUSKTools.computeUSKfromURL(url, CENOClient.bridgeKey);
 		} catch (Exception e) {
 			updateULPRStatus(url, ulprStatus.couldNotStart);
-			return;
+			Logger.error(this, "Could not start ULPR for URL: " + url);
 		}
+		calculatedUSK = calculatedUSK.setSuggestedEdition(newEdition);
 		try {
 			CENOClient.nodeInterface.fetchULPR(calculatedUSK, new ULPRGetCallback(url));
 		} catch (FetchException e) {
