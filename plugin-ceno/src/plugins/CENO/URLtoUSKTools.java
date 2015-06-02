@@ -91,6 +91,11 @@ public class URLtoUSKTools {
 		// Remove the preceding "?url="
 		urlParam = urlParam.replaceFirst("(?i)^?url=", "");
 
+		// Check if urlParam is a Freenet key
+		if (Pattern.matches("(?i)^(freenet:|USK@|CHK@|SSK@).*", urlParam)) {
+			throw new MalformedURLException("Given URL looks like a Freenet key");
+		}
+
 		// Remove the http/https protocols
 		urlParam = urlParam.replaceFirst("(?i)^https?://", "");
 
@@ -98,11 +103,9 @@ public class URLtoUSKTools {
 		if (Pattern.matches(".*://.*", urlParam)) {
 			throw new MalformedURLException("Unsupported protocol");
 		}
-
-		// Check if urlParam is a Freenet key
-		if (Pattern.matches("(?i)^(freenet:|USK@|CHK@|SSK@).*", urlParam)) {
-			throw new MalformedURLException("Given URL looks like a Freenet key");
-		}
+		
+		// If the url ends with slashes, remove them
+		urlParam = urlParam.replaceAll("/+$", "");
 
 		// Throws MalformedURLException if a URL object cannot be created
 		URL netURL = new URL("http://" + urlParam);

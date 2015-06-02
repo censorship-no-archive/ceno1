@@ -44,6 +44,7 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 		ULPRManager.init();
 		RequestSender.init(new String[]{bridgeFreemail});
 		nodeInterface = new NodeInterface(pluginRespirator.getNode(), pluginRespirator);
+		nodeInterface.copyAccprops(clientFreemail);
 	}
 
 	public String getVersion() {
