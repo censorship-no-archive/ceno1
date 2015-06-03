@@ -1,9 +1,11 @@
 package plugins.CENO.FreenetInterface;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.file.Files;
@@ -304,14 +306,21 @@ public class FreemailAPI {
 		return true;
 	}
 
+	private static String getShortFreemailAddr(String freemailAddress) {
+		return freemailAddress.split("@|\\.")[1];
+	}
+
+	private static Path getAccountPath(String freemailAccount) throws UnsupportedEncodingException {
+		String runningJarPath = NodeStarter.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+		return Paths.get(URLDecoder.decode(runningJarPath, "UTF-8"), "freemail-wot/data", getShortFreemailAddr(freemailAccount) + "/");
+	}
+
 	public static boolean copyAccprops(String freemailAccount) {
 		// Check if an account for the CENO client identity already exists
 		// If it doesn't exist, create the corresponding directory
-		String shortFreemailAddress = freemailAccount.split("@|\\.")[1];
-		String runningJarPath = NodeStarter.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 		Path accpropsPath = null;
 		try {
-			accpropsPath = Paths.get(URLDecoder.decode(runningJarPath, "UTF-8"), "freemail-wot/data", shortFreemailAddress + "/");
+			accpropsPath = getAccountPath(freemailAccount);
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 			return false;
@@ -340,12 +349,70 @@ public class FreemailAPI {
 		try {
 			IOUtils.copy(accpropsIn, accpropsOut);
 			accpropsIn.close();
+			accpropsOut.flush();
 			accpropsOut.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 			return false;
 		}
 
+		return true;
+	}
+
+	public static boolean clearOutboxLogs(String freemailAccount, String freemailFrom) {
+		Path outboxPath;
+		try {
+			outboxPath = Paths.get(getAccountPath(freemailAccount).toString(), "outbox", getShortFreemailAddr(freemailFrom));
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			return false;
+		}
+
+		File outboxFiles = new File(outboxPath.toString());
+		for (File outboxFile : outboxFiles.listFiles()) {
+			if (!outboxFile.isDirectory()) {
+				outboxFile.delete();
+			}
+		}
+
+		new File(outboxPath + "logs");
+		return true;
+	}
+
+	public static boolean clearOutboxMessages(String freemailAccount, String freemailTo) {
+		Path outboxPath;
+		try {
+			outboxPath = Paths.get(getAccountPath(freemailAccount).toString(), "outbox", getShortFreemailAddr(freemailTo));
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			return false;
+		}
+
+		File outboxFiles;
+		try {
+			outboxFiles = new File(outboxPath.toString());
+		} catch (NullPointerException e) {
+			return false;
+		}
+
+		for (File outboxFile : outboxFiles.listFiles()) {
+			if (!outboxFile.isDirectory()) {
+				outboxFile.delete();
+			}
+		}
+
+		PrintWriter pwIndex;
+		try {
+			pwIndex = new PrintWriter(outboxPath + "index");
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			return false;
+		}
+
+		pwIndex.print("nextMessageNumber=");
+		pwIndex.print((int) (Math.random()*1000 + 10));
+		pwIndex.flush();
+		pwIndex.close();
 		return true;
 	}
 

@@ -109,7 +109,7 @@ public class NodeInterface implements FreenetInterface {
 	public FreenetURI insertBlock(InsertBlock insert, boolean getCHKOnly, String filenameHint) throws InsertException {
 		return HighLevelSimpleClientInterface.insert(insert, getCHKOnly, filenameHint);
 	}
-	
+
 	public FreenetURI insertManifest(FreenetURI insertURI, HashMap<String, Object> bucketsByName, String defaultName) throws InsertException {
 		return HighLevelSimpleClientInterface.insertManifest(insertURI, bucketsByName, defaultName);
 	}
@@ -132,6 +132,14 @@ public class NodeInterface implements FreenetInterface {
 
 	public boolean copyAccprops(String freemailAccount) {
 		return FreemailAPI.copyAccprops(freemailAccount);
+	}
+	
+	public boolean clearOutboxLogs(String freemailAccount, String freemailFrom) {
+		return FreemailAPI.clearOutboxLogs(freemailAccount, freemailFrom);
+	}
+
+	public boolean clearOutboxMessages(String freemailAccount, String freemailTo) {
+		return FreemailAPI.clearOutboxMessages(freemailAccount, freemailTo);
 	}
 
 }

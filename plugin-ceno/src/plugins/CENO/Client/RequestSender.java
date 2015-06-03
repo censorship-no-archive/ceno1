@@ -10,7 +10,14 @@ public class RequestSender {
 	private Hashtable<String, Date> requestTable;
 	private String[] bridgeFreemails;
 
-	private static final long SHOULD_SEND_FREEMAIL = TimeUnit.MINUTES.toMillis(4);
+	/**
+	 * Time to wait since a request for a URL was originally received from CC before sending
+	 * a freemail to the bridge.
+	 */
+	private static final long SHOULD_SEND_FREEMAIL = TimeUnit.MINUTES.toMillis(5);
+	/**
+	 * Time to wait before sending a new freemail request for the same URL
+	 */
 	private static final long REQUEST_TIMEOUT = TimeUnit.MINUTES.toMillis(45);
 
 	private RequestSender(String[] bridgeFreemails) {
@@ -33,13 +40,16 @@ public class RequestSender {
 			}
 			if (shouldSendFreemail(url)) {
 				CENOClient.nodeInterface.sendFreemail(CENOClient.clientFreemail, requestSender.bridgeFreemails, url, "", "CENO");
+				for (String freemailTo : requestSender.bridgeFreemails) {
+					CENOClient.nodeInterface.clearOutboxMessages(CENOClient.clientFreemail, freemailTo);
+				}
 			}
 		}
 	}
 
 	private static boolean shouldSendFreemail(String url) {
 		if (new Date().getTime() - requestSender.requestTable.get(url).getTime() > SHOULD_SEND_FREEMAIL) {
-			requestSender.requestTable.put(url, new Date(new Date().getTime() + REQUEST_TIMEOUT));
+			requestSender.requestTable.put(url, new Date(new Date().getTime() + REQUEST_TIMEOUT - SHOULD_SEND_FREEMAIL));
 			return true;
 		} else {
 			return false;
