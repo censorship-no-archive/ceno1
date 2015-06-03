@@ -121,6 +121,10 @@ public class RequestReceiver {
 										continue;
 									}
 									// Pass the request to the BundleInserter agent
+									if (!BundleInserter.shouldInsert(urlRequested)) {
+										Logger.normal(this, "Bundle for URL: " + urlRequested + " is not stale yet, will not re-insert");
+										continue;
+									}
 									BundleInserter.insertBundle(urlRequested);
 								} catch (IOException e) {
 									Logger.error(this, "I/O exception while requesting/inserting the bundle for URL: " + urlRequested + 

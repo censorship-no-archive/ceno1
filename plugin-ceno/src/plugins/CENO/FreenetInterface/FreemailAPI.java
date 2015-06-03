@@ -369,6 +369,10 @@ public class FreemailAPI {
 		}
 
 		File outboxFiles = new File(outboxPath.toString());
+		if (!outboxFiles.isDirectory()) {
+			return false;
+		}
+
 		for (File outboxFile : outboxFiles.listFiles()) {
 			if (!outboxFile.isDirectory()) {
 				outboxFile.delete();
@@ -388,10 +392,8 @@ public class FreemailAPI {
 			return false;
 		}
 
-		File outboxFiles;
-		try {
-			outboxFiles = new File(outboxPath.toString());
-		} catch (NullPointerException e) {
+		File outboxFiles = new File(outboxPath.toString());
+		if (!outboxFiles.isDirectory()) {
 			return false;
 		}
 

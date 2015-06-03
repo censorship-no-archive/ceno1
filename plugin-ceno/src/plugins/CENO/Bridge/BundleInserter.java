@@ -1,7 +1,10 @@
 package plugins.CENO.Bridge;
 
 import java.io.IOException;
+import java.util.Date;
+import java.util.Hashtable;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import plugins.CENO.URLtoUSKTools;
 import plugins.CENO.Bridge.BundlerInterface.Bundle;
@@ -16,6 +19,10 @@ import freenet.support.Logger;
 import freenet.support.api.Bucket;
 
 public class BundleInserter {
+
+	private static Hashtable<String, Date> insertTable = new Hashtable<String, Date>();
+
+	private static final long SHOULD_REINSERT = TimeUnit.HOURS.toMillis(5);
 
 	public static class InsertCallback implements ClientPutCallback {
 		protected FreenetURI cachedURI;
@@ -49,7 +56,6 @@ public class BundleInserter {
 
 	}
 
-
 	public static void insertBundle(String url) throws IOException, InsertException {
 		InsertCallback insertCb = new InsertCallback();
 		insertCb.setUri(url);
@@ -75,6 +81,15 @@ public class BundleInserter {
 
 	public static void insertFreesite(FreenetURI insertURI, String docName, String content, ClientPutCallback insertCallback) throws IOException, InsertException {
 		CENOBridge.nodeInterface.insertFreesite(insertURI, docName, content, insertCallback);
+	}
+
+	public static boolean shouldInsert(String url) {
+		if (!insertTable.containsKey(url) || new Date().getTime() - insertTable.get(url).getTime() > SHOULD_REINSERT) {
+			insertTable.put(url, new Date(new Date().getTime() + SHOULD_REINSERT));
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 }

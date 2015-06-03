@@ -39,9 +39,11 @@ public class RequestSender {
 				requestSender.requestTable.put(url, new Date());
 			}
 			if (shouldSendFreemail(url)) {
-				CENOClient.nodeInterface.sendFreemail(CENOClient.clientFreemail, requestSender.bridgeFreemails, url, "", "CENO");
-				for (String freemailTo : requestSender.bridgeFreemails) {
-					CENOClient.nodeInterface.clearOutboxMessages(CENOClient.clientFreemail, freemailTo);
+				synchronized (requestSender.bridgeFreemails) {
+					CENOClient.nodeInterface.sendFreemail(CENOClient.clientFreemail, requestSender.bridgeFreemails, url, "", "CENO");
+					for (String freemailTo : requestSender.bridgeFreemails) {
+						CENOClient.nodeInterface.clearOutboxMessages(CENOClient.clientFreemail, freemailTo);
+					}
 				}
 			}
 		}
