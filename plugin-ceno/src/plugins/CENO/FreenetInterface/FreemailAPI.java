@@ -310,6 +310,10 @@ public class FreemailAPI {
 		return freemailAddress.split("@|\\.")[1];
 	}
 
+	private static String getShortIdentityURI(String identityRequestURI) {
+		return identityRequestURI.split("@|,")[1];
+	}
+
 	private static Path getAccountPath(String freemailAccount) throws UnsupportedEncodingException {
 		String runningJarPath = NodeStarter.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 		return Paths.get(URLDecoder.decode(runningJarPath, "UTF-8"), "freemail-wot/data", getShortFreemailAddr(freemailAccount) + "/");
@@ -359,10 +363,10 @@ public class FreemailAPI {
 		return true;
 	}
 
-	public static boolean clearOutboxLogs(String freemailAccount, String freemailFrom) {
+	public static boolean clearOutboxLog(String freemailAccount, String identityFrom) {
 		Path outboxPath;
 		try {
-			outboxPath = Paths.get(getAccountPath(freemailAccount).toString(), "outbox", getShortFreemailAddr(freemailFrom));
+			outboxPath = Paths.get(getAccountPath(freemailAccount).toString(), "outbox", getShortIdentityURI(identityFrom));
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 			return false;
@@ -379,7 +383,7 @@ public class FreemailAPI {
 			}
 		}
 
-		new File(outboxPath + "/logs");
+		new File(outboxPath + "/log");
 		return true;
 	}
 

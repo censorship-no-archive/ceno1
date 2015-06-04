@@ -134,7 +134,7 @@ public class RequestReceiver {
 											+ " Error: " + e.getMessage());
 								}
 							}
-							CENOBridge.nodeInterface.clearOutboxLogs(CENOBridge.bridgeFreemail, CENOBridge.clientFreemail);
+							CENOBridge.nodeInterface.clearOutboxLog(CENOBridge.bridgeFreemail, CENOBridge.clientIdentityRequestURI);
 						}
 					}
 					// Pause the looping thread

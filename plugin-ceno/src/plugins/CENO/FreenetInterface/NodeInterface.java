@@ -134,8 +134,8 @@ public class NodeInterface implements FreenetInterface {
 		return FreemailAPI.copyAccprops(freemailAccount);
 	}
 	
-	public boolean clearOutboxLogs(String freemailAccount, String freemailFrom) {
-		return FreemailAPI.clearOutboxLogs(freemailAccount, freemailFrom);
+	public boolean clearOutboxLog(String freemailAccount, String identityFrom) {
+		return FreemailAPI.clearOutboxLog(freemailAccount, identityFrom);
 	}
 
 	public boolean clearOutboxMessages(String freemailAccount, String freemailTo) {
