@@ -14,11 +14,11 @@ public class RequestSender {
 	 * Time to wait since a request for a URL was originally received from CC before sending
 	 * a freemail to the bridge.
 	 */
-	private static final long SHOULD_SEND_FREEMAIL = TimeUnit.MINUTES.toMillis(5);
+	private static final long SHOULD_SEND_FREEMAIL = TimeUnit.MINUTES.toMillis(3);
 	/**
 	 * Time to wait before sending a new freemail request for the same URL
 	 */
-	private static final long REQUEST_TIMEOUT = TimeUnit.MINUTES.toMillis(45);
+	private static final long REQUEST_TIMEOUT = TimeUnit.MINUTES.toMillis(40);
 
 	private RequestSender(String[] bridgeFreemails) {
 		this.requestTable = new Hashtable<String, Date>();

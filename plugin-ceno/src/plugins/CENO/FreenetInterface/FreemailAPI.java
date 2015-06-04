@@ -379,7 +379,7 @@ public class FreemailAPI {
 			}
 		}
 
-		new File(outboxPath + "logs");
+		new File(outboxPath + "/logs");
 		return true;
 	}
 
@@ -403,18 +403,14 @@ public class FreemailAPI {
 			}
 		}
 
-		PrintWriter pwIndex;
 		try {
-			pwIndex = new PrintWriter(outboxPath + "index");
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			PrintWriter pwIndex = new PrintWriter(outboxPath + "/index");
+			pwIndex.print("nextMessageNumber=");
+			pwIndex.print((int) (Math.random()*1000 + 10));
+			pwIndex.close();
+		} catch (IOException e) {
 			return false;
 		}
-
-		pwIndex.print("nextMessageNumber=");
-		pwIndex.print((int) (Math.random()*1000 + 10));
-		pwIndex.flush();
-		pwIndex.close();
 		return true;
 	}
 
