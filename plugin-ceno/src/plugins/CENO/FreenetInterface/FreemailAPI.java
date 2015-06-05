@@ -314,9 +314,8 @@ public class FreemailAPI {
 		return identityRequestURI.split("@|,")[1];
 	}
 
-	private static Path getAccountPath(String freemailAccount) throws UnsupportedEncodingException {
-		String runningJarPath = NodeStarter.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-		return Paths.get(URLDecoder.decode(runningJarPath, "UTF-8"), "freemail-wot/data", getShortFreemailAddr(freemailAccount) + "/");
+	private static Path getAccountDir(String freemailAccount) throws UnsupportedEncodingException {
+		return Paths.get("freemail-wot/data", getShortFreemailAddr(freemailAccount) + "/");
 	}
 
 	public static boolean copyAccprops(String freemailAccount) {
@@ -324,7 +323,7 @@ public class FreemailAPI {
 		// If it doesn't exist, create the corresponding directory
 		Path accpropsPath = null;
 		try {
-			accpropsPath = getAccountPath(freemailAccount);
+			accpropsPath = getAccountDir(freemailAccount);
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 			return false;
@@ -366,7 +365,7 @@ public class FreemailAPI {
 	public static boolean clearOutboxLog(String freemailAccount, String identityFrom) {
 		Path outboxPath;
 		try {
-			outboxPath = Paths.get(getAccountPath(freemailAccount).toString(), "outbox", getShortIdentityURI(identityFrom));
+			outboxPath = Paths.get(getAccountDir(freemailAccount).toString(), "outbox", getShortIdentityURI(identityFrom));
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 			return false;
@@ -383,14 +382,13 @@ public class FreemailAPI {
 			}
 		}
 
-		new File(outboxPath + "/log");
 		return true;
 	}
 
 	public static boolean clearOutboxMessages(String freemailAccount, String freemailTo) {
 		Path outboxPath;
 		try {
-			outboxPath = Paths.get(getAccountPath(freemailAccount).toString(), "outbox", getShortFreemailAddr(freemailTo));
+			outboxPath = Paths.get(getAccountDir(freemailAccount).toString(), "outbox", getShortFreemailAddr(freemailTo));
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 			return false;
