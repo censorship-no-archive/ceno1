@@ -133,7 +133,11 @@ public class NodeInterface implements FreenetInterface {
 	public boolean copyAccprops(String freemailAccount) {
 		return FreemailAPI.copyAccprops(freemailAccount);
 	}
-	
+
+	public boolean setRandomNextMsgNumber(String freemailAccount, String freemailTo) {
+		return FreemailAPI.setRandomNextMsgNumber(freemailAccount, freemailTo);
+	}
+
 	public boolean clearOutboxLog(String freemailAccount, String identityFrom) {
 		return FreemailAPI.clearOutboxLog(freemailAccount, identityFrom);
 	}

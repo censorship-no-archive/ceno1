@@ -40,10 +40,10 @@ public class RequestSender {
 			}
 			if (shouldSendFreemail(url)) {
 				synchronized (requestSender.bridgeFreemails) {
-					CENOClient.nodeInterface.sendFreemail(CENOClient.clientFreemail, requestSender.bridgeFreemails, url, "", "CENO");
 					for (String freemailTo : requestSender.bridgeFreemails) {
-						CENOClient.nodeInterface.clearOutboxMessages(CENOClient.clientFreemail, freemailTo);
+						CENOClient.nodeInterface.setRandomNextMsgNumber(CENOClient.clientFreemail, freemailTo);
 					}
+					CENOClient.nodeInterface.sendFreemail(CENOClient.clientFreemail, requestSender.bridgeFreemails, url, "", "CENO");	
 				}
 			}
 		}

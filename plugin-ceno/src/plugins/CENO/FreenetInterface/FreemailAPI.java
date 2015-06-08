@@ -362,6 +362,27 @@ public class FreemailAPI {
 		return true;
 	}
 
+	public static boolean setRandomNextMsgNumber(String freemailAccount, String freemailTo) {
+		Path outboxPath;
+		try {
+			outboxPath = Paths.get(getAccountDir(freemailAccount).toString(), "outbox", getShortFreemailAddr(freemailTo));
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			return false;
+		}
+
+		try {
+			PrintWriter pwIndex = new PrintWriter(outboxPath + "/index");
+			pwIndex.print("nextMessageNumber=");
+			pwIndex.print((int) (Math.random()*1000 + 10));
+			pwIndex.println(",");
+			pwIndex.close();
+		} catch (IOException e) {
+			return false;
+		}
+		return true;
+	}
+
 	public static boolean clearOutboxLog(String freemailAccount, String identityFrom) {
 		Path outboxPath;
 		try {
@@ -405,14 +426,6 @@ public class FreemailAPI {
 			}
 		}
 
-		try {
-			PrintWriter pwIndex = new PrintWriter(outboxPath + "/index");
-			pwIndex.print("nextMessageNumber=");
-			pwIndex.print((int) (Math.random()*1000 + 10));
-			pwIndex.close();
-		} catch (IOException e) {
-			return false;
-		}
 		return true;
 	}
 

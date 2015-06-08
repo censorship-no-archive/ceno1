@@ -29,6 +29,7 @@ public interface FreenetInterface {
 	boolean startIMAPMonitor(String freemail, String password, String idleFolder);
 	public String[] getUnreadMailsSubject(String freemail, String password, String inboxFolder, boolean shouldDelete);
 	public boolean copyAccprops(String freemailAccount);
+	public boolean setRandomNextMsgNumber(String freemailAccount, String freemailTo);
 	public boolean clearOutboxLog(String freemailAccount, String identityFrom);
 	public boolean clearOutboxMessages(String freemailAccount, String freemailTo);
 }

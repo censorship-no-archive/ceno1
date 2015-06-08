@@ -56,11 +56,12 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 	}
 
 	/**
-	 * Method called before termination of the CeNo plugin
-	 * Terminates ceNoHttpServer and releases resources
+	 * Method called before termination of the CENO plugin
 	 */
 	public void terminate()
 	{
+		// Clear the CENO client freemail outbox directory
+		nodeInterface.clearOutboxMessages(clientFreemail, bridgeFreemail);
 		Logger.normal(this, pluginName + " terminated.");
 	}
 
