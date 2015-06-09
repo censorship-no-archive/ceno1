@@ -4,6 +4,7 @@ import java.net.MalformedURLException;
 import java.util.concurrent.TimeUnit;
 
 import net.minidev.json.JSONObject;
+import net.minidev.json.JSONValue;
 import plugins.CENO.CENOErrCode;
 import plugins.CENO.CENOException;
 import plugins.CENO.URLtoUSKTools;
@@ -39,7 +40,11 @@ public class LookupHandler extends AbstractCENOClientHandler {
 		try {
 			calculatedUSK = URLtoUSKTools.computeUSKfromURL(urlParam, CENOClient.bridgeKey);
 		} catch (Exception e) {
-			return returnErrorJSON(new CENOException(CENOErrCode.LCS_HANDLER_INVALID_URL));
+			if (clientIsHtml) {
+				return new CENOException(CENOErrCode.LCS_HANDLER_INVALID_URL).getMessage();
+			} else {
+				return returnErrorJSON(new CENOException(CENOErrCode.LCS_HANDLER_INVALID_URL));
+			}
 		}
 
 		String localFetchResult = localCacheLookup(calculatedUSK);
@@ -53,7 +58,7 @@ public class LookupHandler extends AbstractCENOClientHandler {
 				} else {
 					JSONObject jsonResponse = new JSONObject();
 					jsonResponse.put("complete", true);
-					jsonResponse.put("found", "false");
+					jsonResponse.put("found", false);
 					return jsonResponse.toJSONString();
 				}
 			} else {
@@ -70,7 +75,7 @@ public class LookupHandler extends AbstractCENOClientHandler {
 				return localFetchResult;
 			} else {
 				JSONObject jsonResponse = new JSONObject();
-				jsonResponse.put("complete", "true");
+				jsonResponse.put("complete", true);
 				jsonResponse.put("found", true);
 				jsonResponse.put("bundle", localFetchResult);
 				return jsonResponse.toJSONString();
