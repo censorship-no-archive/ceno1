@@ -89,7 +89,7 @@ public class URLtoUSKTools {
 		urlParam = urlParam.replaceFirst("^/", "");
 
 		// Remove the preceding "?url="
-		urlParam = urlParam.replaceFirst("(?i)^?url=", "");
+		urlParam = urlParam.replaceFirst("(?i)^\\?url=", "");
 
 		// Check if urlParam is a Freenet key
 		if (Pattern.matches("(?i)^(freenet:|USK@|CHK@|SSK@).*", urlParam)) {
