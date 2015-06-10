@@ -27,6 +27,8 @@ Plesae refresh this page in a few seconds to check if it is ready.
 
 // Result of a bundle lookup from cache server.
 type Result struct {
+  ErrCode  ErrorCode
+  ErrMsg   string
 	Complete bool
 	Found    bool
 	Bundle   string
@@ -78,12 +80,12 @@ func reportDecodeError(reportURL, errMsg string) (bool, error) {
 }
 
 // Check with the local cache server to find a bundle for a given URL.
-func lookup(lookupURL string) (Result, error) {
+func lookup(lookupURL string) Result {
 	response, err := http.Get(BundleLookupURL(Configuration, lookupURL))
 	if err != nil || response.StatusCode != 200 {
 	  fmt.Print("error: ")
 		fmt.Println(err)
-		return Result{false, false, ""}, errors.New("Unsuccessful request to LCS\n" + err.Error())
+    return Result{ ERR_NO_CONNECT_LCS, err.Error, false, false, "" }
 	}
 	decoder := json.NewDecoder(response.Body)
 	var result Result
@@ -92,12 +94,13 @@ func lookup(lookupURL string) (Result, error) {
 		fmt.Println(err)
 		reachedLCS, err2 := reportDecodeError(DecodeErrReportURL(Configuration), err.Error())
 		if reachedLCS {
-			return Result{false, false, ""}, errors.New("Could not decode LCS response\n" + err.Error())
+			return Result{ ERR_MALFORMED_LCS_RESPONSE, err.Error(), false, false, "" }
 		} else {
-			return Result{false, false, ""}, errors.New("Unsuccessful request to LCS\n" + err2.Error())
+      errMsg := "Could not reach the local cache server to report decode eror"
+			return Result{ ERR_NO_CONNECT_LCS, errMsg, false, false, "" }
 		}
 	}
-	return result, nil
+	return result
 }
 
 // POST to the request server to have it start making a new bundle.
@@ -115,6 +118,16 @@ func requestNewBundle(lookupURL string) error {
 	return err2
 }
 
+func execPleaseWait(URL string, w http.ResponseWriter, r *http.Response) {
+  body, isHTML := pleaseWait(URL)
+  if isHTML {
+    w.Header().Set("Content-Type", "text/html")
+  } else {
+    w.Header().Set("Content-Type", "text/plain")
+  }
+  w.Write(body)
+}
+
 // Handle incoming requests for bundles.
 // 1. Initiate bundle lookup process
 // 2. Initiate bundle creation process when no bundle exists anywhere
@@ -123,14 +136,12 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 	matched, err := regexp.MatchString(URL_REGEX, URL)
 	if !matched || err != nil {
 		fmt.Println("Invalid URL " + URL)
-    ExecuteErrorPage(ERR_MALFORMED_URL, w, r)
+    ExecuteErrorPage(ERR_MALFORMED_URL, "Malformed URL \"" + URL + "\"", w, r)
 		return
 	}
-	result, err := lookup(URL)
-	fmt.Println("Result\n  Completed: ", result.Complete, "  Found: ", result.Found)
-  fmt.Println(string(result.Bundle))
-	if err != nil {
-    ExecuteErrorPage(ERR_MALFORMED_LCS_RESPONSE, w, r)
+	result := lookup(URL)
+	if result.ErrCode > 0 {
+    ExecuteErrorPage(ERR_FROM_LCS, result.ErrorMsg, w, r)
 	} else if result.Complete {
 		if result.Found {
 			w.Write([]byte(result.Bundle))
@@ -139,25 +150,13 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 			fmt.Println("Error information from requestNewbundle")
 			fmt.Println(err)
 			if err != nil {
-        ExecuteErrorPage(ERR_FROM_LCS, w, r)
+        ExecuteErrorPage(ERR_FROM_LCS, err.Error(), w, r)
 			} else {
-				body, isHTML := pleaseWait(URL)
-				if isHTML {
-					w.Header().Set("Content-Type", "text/html")
-				} else {
-					w.Header().Set("Content-Type", "text/plain")
-				}
-				w.Write(body)
+        execPleaseWait(URL, w, r)
 			}
 		}
 	} else {
-		body, isHTML := pleaseWait(URL)
-		if isHTML {
-			w.Header().Set("Content-Type", "text/html")
-		} else {
-			w.Header().Set("Content-Type", "text/plain")
-		}
-		w.Write(body)
+    execPleaseWait(URL, w, r)
 	}
 }
 
