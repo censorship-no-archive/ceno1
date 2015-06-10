@@ -42,15 +42,36 @@ var ErrorMakers = map[ErrorCode]func(string) ErrorSpec {
   ERR_FROM_LCS: emGenerator(`Fill with useful advice`),
   ERR_NO_CONNECT_RS: emGenerator(`Fill with useful advice`),
   ERR_MISSING_VIEW: emGenerator(`Fill with useful advice`),
+  ERR_INVALID_ERROR: emGenerator(`
+    Consult the maintainer of the node you are using and inform them
+    that their agent is returning an unknown error code.
+  `)
 }
 
+// Execute the error template or produce a helpful plaintext response to explain
+// the error and provide pre-composed advice
 func ExecuteErrorPage(errorCode ErrorCode, errorMsg string, w http.ResponseWriter, r *http.Request) {
   t, err := template.ParseFiles(path.Join(".", "views", "error.html"))
-  if err != nil {
-    // report missing template
+  errSpec, foundErr := ErrorMakers[errorCode](r.URL.String(), errorMsg)
+  if !foundErr {
+    ExecuteErrorPage(ERR_INVALID_ERROR, fmt.Sprintf("%v is not a recognized error code", errorCode), w, r)
+  } else if err != nil {
+    w.Headers().Set("Content-Type", "text/plain")
+    errSpec2 := ErrorMakers[ERR_MISSING_VIEW]("", "")
+    w.Write([]byte(fmt.Sprintf(`
+      An error occurred!
+      Error 1
+      Error code: %v
+      Error message: %s
+      What you can do: %s
+
+      Error 2
+      Error code: %v
+      Error message: %s
+      What you can do: %s
+    `, errorCode, errorMessage, errSpec.Advice,
+       ERR_MISSING_VIEW, "Missing error.html view", errSpec2.Advice)))
   } else {
-    // test that the provided errorCode exists
-    errSpec := ErrorMakers[errorCode](r.URL.String(), errorMsg)
     t.Execute(w, errSpec)
   }
 }
