@@ -193,6 +193,6 @@ func main() {
 //	}
 	// Create an HTTP proxy server
 	http.HandleFunc("/", proxyHandler)
-	fmt.Println("CeNo proxy server listening at http://localhost:" + Configuration.PortNumber)
+	fmt.Println("CeNo proxy server listening at http://localhost" + Configuration.PortNumber)
 	http.ListenAndServe(Configuration.PortNumber, nil)
 }
