@@ -33,12 +33,6 @@ type Result struct {
 	// Should add a Created field for the date created
 }
 
-// Present the user with a page informing them that something went wrong with
-// an action.
-func errorPage(errMsg string) []byte {
-	return []byte("Error: " + errMsg)
-}
-
 // Serve a page to inform the user that a bundle for the site they requested is
 // being prepared. It will automatically initiate new requests to retrieve the same
 // URL in an interval.
@@ -129,14 +123,14 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 	matched, err := regexp.MatchString(URL_REGEX, URL)
 	if !matched || err != nil {
 		fmt.Println("Invalid URL " + URL)
-		w.Write(errorPage(URL + " is not a valid URL."))
+    ExecuteErrorPage(ERR_MALFORMED_URL, w, r)
 		return
 	}
 	result, err := lookup(URL)
 	fmt.Println("Result\n  Completed: ", result.Complete, "  Found: ", result.Found)
   fmt.Println(string(result.Bundle))
 	if err != nil {
-		w.Write(errorPage(err.Error()))
+    ExecuteErrorPage(ERR_MALFORMED_LCS_RESPONSE, w, r)
 	} else if result.Complete {
 		if result.Found {
 			w.Write([]byte(result.Bundle))
@@ -145,8 +139,7 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 			fmt.Println("Error information from requestNewbundle")
 			fmt.Println(err)
 			if err != nil {
-				w.Header().Set("Content-Type", "text/plain")
-				w.Write(errorPage(err.Error()))
+        ExecuteErrorPage(ERR_FROM_LCS, w, r)
 			} else {
 				body, isHTML := pleaseWait(URL)
 				if isHTML {
