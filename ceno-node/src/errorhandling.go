@@ -3,6 +3,7 @@ package main
 import (
   "html/template"
   "net/http"
+  "path"
 )
 
 const ( // CC errors
@@ -42,7 +43,7 @@ var ErrorMakers = map[uint32]func(string) ErrorSpec {
 }
 
 func ExecuteErrorPage(errorCode uint32, w http.ResponseWriter, r *http.Request) {
-  t, err := template.ParseFiles(path.join(".", "views", "error.html"))
+  t, err := template.ParseFiles(path.Join(".", "views", "error.html"))
   if err != nil {
     // report missing template
   } else {
