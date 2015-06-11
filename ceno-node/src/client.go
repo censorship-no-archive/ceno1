@@ -135,12 +135,16 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 	matched, err := regexp.MatchString(URL_REGEX, URL)
 	if !matched || err != nil {
 		fmt.Println("Invalid URL " + URL)
-    ExecuteErrorPage(ERR_MALFORMED_URL, "Malformed URL \"" + URL + "\"", w, r)
+    state := ErrorState{
+      "responseWriter": w, "request": r, "errorMsg": "Malformed URL \"" + URL + "\"",
+    }
+    ErrorHandlers[ERR_MALFORMED_URL](state)
 		return
 	}
 	result := lookup(URL)
 	if result.ErrCode > 0 {
-    ExecuteErrorPage(ERR_FROM_LCS, result.ErrMsg, w, r)
+    state := ErrorState{ "responseWriter": w, "request": r, "errorMsg": result.ErrMsg }
+    ErrorHandlers[ERR_FROM_LCS](state)
 	} else if result.Complete {
 		if result.Found {
 			w.Write([]byte(result.Bundle))
@@ -149,7 +153,8 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 			fmt.Println("Error information from requestNewbundle")
 			fmt.Println(err)
 			if err != nil {
-        ExecuteErrorPage(ERR_FROM_LCS, err.Error(), w, r)
+        state := ErrorState{ "responseWriter": w, "request": r, "errorMsg": err.Error() }
+        ErrorHandlers[ERR_FROM_LCS](state)
 			} else {
         execPleaseWait(URL, w, r)
 			}
