@@ -50,8 +50,8 @@ public abstract class AbstractCENOClientHandler implements FredPluginHTTP {
 	
 	protected String returnErrorJSON(CENOException cenoEx) {
 		JSONObject jsonResponse = new JSONObject();
-		jsonResponse.put("errCode", cenoEx.getErrCode());
-		jsonResponse.put("error", cenoEx.getMessage());
+		jsonResponse.put("errCode", cenoEx.getErrCode().getCode());
+		jsonResponse.put("errMsg", cenoEx.getMessage());
 		return jsonResponse.toJSONString();
 	}
 
