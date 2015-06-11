@@ -3,10 +3,11 @@ package main
 import (
 	"os"
 	"encoding/json"
+  "encoding/base64"
 	"strconv"
 	"net/url"
+  "path"
 	"fmt"
-  "base64"
 )
 
 // Configuration struct containing fields required by client to run proxy server
@@ -47,7 +48,7 @@ const RS_RUN_INFO = "Please restart the request server."
 
 // Produce a URL to request a bundle be looked up by the LCS
 func BundleLookupURL(configuration Config, URL string) string {
-  encodedURL := base64.EncodeToString([]byte(URL))
+  encodedURL := base64.StdEncoding.EncodeToString([]byte(URL))
 	return configuration.CacheServer + LCS_LOOKUP + "?url=" + encodedURL
 }
 
@@ -63,7 +64,7 @@ func RSPingURL(configuration Config) string {
 
 // Produce a URL to request a new bundle be made by the RS
 func CreateBundleURL(configuration Config, URL string) string {
-  encodedURL := base64.EncodeToString([]byte(URL))
+  encodedURL := base64.StdEncoding.EncodeToString([]byte(URL))
 	return configuration.RequestServer + RS_CREATE + "?url=" + encodedURL
 }
 
@@ -79,7 +80,7 @@ var DefaultConfiguration Config = Config {
 	"http://localhost:3091",
 	"http://localhost:3092",
 	"Page not found",
-  path.join(".", "views", "wait.html")
+  path.Join(".", "views", "wait.html"),
 }
 
 // Functions to verify that each configuration field is well formed.
