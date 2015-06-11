@@ -7,7 +7,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"regexp"
-	"errors"
 )
 
 const CONFIG_FILE string = "../config/client.json"
@@ -85,7 +84,7 @@ func lookup(lookupURL string) Result {
 	if err != nil || response.StatusCode != 200 {
 	  fmt.Print("error: ")
 		fmt.Println(err)
-    return Result{ ERR_NO_CONNECT_LCS, err.Error, false, false, "" }
+    return Result{ ERR_NO_CONNECT_LCS, err.Error(), false, false, "" }
 	}
 	decoder := json.NewDecoder(response.Body)
 	var result Result
@@ -94,7 +93,7 @@ func lookup(lookupURL string) Result {
 		fmt.Println(err)
 		reachedLCS, err2 := reportDecodeError(DecodeErrReportURL(Configuration), err.Error())
 		if reachedLCS {
-			return Result{ ERR_MALFORMED_LCS_RESPONSE, err.Error(), false, false, "" }
+			return Result{ ERR_MALFORMED_LCS_RESPONSE, err2.Error(), false, false, "" }
 		} else {
       errMsg := "Could not reach the local cache server to report decode eror"
 			return Result{ ERR_NO_CONNECT_LCS, errMsg, false, false, "" }
@@ -118,7 +117,7 @@ func requestNewBundle(lookupURL string) error {
 	return err2
 }
 
-func execPleaseWait(URL string, w http.ResponseWriter, r *http.Response) {
+func execPleaseWait(URL string, w http.ResponseWriter, r *http.Request) {
   body, isHTML := pleaseWait(URL)
   if isHTML {
     w.Header().Set("Content-Type", "text/html")
@@ -141,7 +140,7 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	result := lookup(URL)
 	if result.ErrCode > 0 {
-    ExecuteErrorPage(ERR_FROM_LCS, result.ErrorMsg, w, r)
+    ExecuteErrorPage(ERR_FROM_LCS, result.ErrMsg, w, r)
 	} else if result.Complete {
 		if result.Found {
 			w.Write([]byte(result.Bundle))
