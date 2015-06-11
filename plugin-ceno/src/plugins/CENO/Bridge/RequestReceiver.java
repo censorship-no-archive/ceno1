@@ -128,7 +128,7 @@ public class RequestReceiver {
 									BundleInserter.insertBundle(urlRequested);
 								} catch (IOException e) {
 									Logger.error(this, "I/O exception while requesting/inserting the bundle for URL: " + urlRequested + 
-											"Error: " + e.getMessage());
+											" Error: " + e.getMessage());
 								} catch (InsertException e) {
 									Logger.error(this, "Could not insert the bundle for the URL: " + urlRequested 
 											+ " Error: " + e.getMessage());

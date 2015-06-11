@@ -2,6 +2,8 @@ package plugins.CENO.FreenetInterface;
 
 import java.util.HashMap;
 
+import plugins.CENO.Bridge.BundleInserter.InsertCallback;
+
 import com.db4o.ObjectContainer;
 
 import freenet.client.FetchContext;
@@ -15,6 +17,8 @@ import freenet.client.async.ClientGetCallback;
 import freenet.client.async.ClientGetter;
 import freenet.client.async.ClientPutCallback;
 import freenet.client.async.ClientPutter;
+import freenet.client.async.DatabaseDisabledException;
+import freenet.client.async.SimpleManifestPutter;
 import freenet.keys.FreenetURI;
 import freenet.node.Node;
 import freenet.node.NodeClientCore;
@@ -24,7 +28,7 @@ import freenet.node.RequestStarter;
 public class HighLevelSimpleClientInterface {
 
 	protected static final boolean realTimeFlag = false;
-	
+
 	private static volatile HighLevelSimpleClientInterface HLSCInterface = null;
 	private static HLSCRequestClient requestClient;
 
@@ -61,11 +65,12 @@ public class HighLevelSimpleClientInterface {
 		}
 	}
 
-	public HighLevelSimpleClientInterface(HighLevelSimpleClient hlSimpleClient) {
+	public HighLevelSimpleClientInterface(Node node, HighLevelSimpleClient hlSimpleClient) {
 		synchronized (HighLevelSimpleClientInterface.class) {
 			if (HLSCInterface == null) {
 				HLSCInterface = new HighLevelSimpleClientInterface();
 				HLSCInterface.client = hlSimpleClient;
+				HLSCInterface.node = node;
 				HLSCInterface.requestClient = new HLSCRequestClient();
 			}
 		}
@@ -127,7 +132,7 @@ public class HighLevelSimpleClientInterface {
 	//		ClientPutter clientPutter = HLSCInterface.client.insert(insert, filenameHint, isMetadata, ctx, cb);
 	//		return clientPutter;
 	//	}
-	
+
 	public static FreenetURI insert(InsertBlock insert, boolean getCHKOnly, String filenameHint) throws InsertException {
 		return HLSCInterface.client.insert(insert, getCHKOnly, filenameHint);
 	}
@@ -146,9 +151,20 @@ public class HighLevelSimpleClientInterface {
 	public static FreenetURI insertManifest(FreenetURI insertURI, HashMap<String, Object> bucketsByName, String defaultName) throws InsertException {
 		return HLSCInterface.client.insertManifest(insertURI, bucketsByName, defaultName);
 	}
-	
+
 	public static FreenetURI insertManifest(FreenetURI insertURI, HashMap<String, Object> bucketsByName, String defaultName, short priorityClass) throws InsertException {
 		return HLSCInterface.client.insertManifest(insertURI, bucketsByName, defaultName, priorityClass);
+	}
+
+	public static FreenetURI insertManifestCb(FreenetURI insertURI, HashMap<String, Object> bucketsByName, String defaultName, short priorityClass, byte[] forceCryptoKey, ClientPutCallback insertCb) throws InsertException {
+		SimpleManifestPutter putter = new SimpleManifestPutter(insertCb, SimpleManifestPutter.bucketsByNameToManifestEntries(bucketsByName), priorityClass, insertURI, defaultName, getInsertContext(true), 
+				false, requestClient, false, false, forceCryptoKey, null, HLSCInterface.node.clientCore.clientContext);
+		try {
+			HLSCInterface.node.clientCore.clientContext.start(putter);
+		} catch (DatabaseDisabledException e) {
+			// Impossible
+		}
+		return insertURI;
 	}
 
 }

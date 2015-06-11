@@ -11,6 +11,7 @@ import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 
 import plugins.CENO.Configuration;
 import plugins.CENO.Version;
+import plugins.CENO.FreenetInterface.FreenetInterface;
 import plugins.CENO.FreenetInterface.HighLevelSimpleClientInterface;
 import plugins.CENO.FreenetInterface.NodeInterface;
 
@@ -47,7 +48,7 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 	{
 		// Initialize interfaces with fred
 		pluginRespirator = pr;
-		client = new HighLevelSimpleClientInterface(pluginRespirator.getHLSimpleClient());
+		client = new HighLevelSimpleClientInterface(pluginRespirator.getNode(), pluginRespirator.getHLSimpleClient());
 		nodeInterface = new NodeInterface(pluginRespirator.getNode(), pluginRespirator);
 
 		// Read properties of the configuration file
@@ -63,6 +64,7 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 			initConfig.storeProperties();
 		}
 
+		nodeInterface.clearOutboxLog(bridgeFreemail, clientFreemail);
 		// Initialize RequestReceiver
 		reqReceiver = new RequestReceiver(new String[]{bridgeFreemail});
 		// Start a thread for polling for new freemails
@@ -127,7 +129,7 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 		cacheLookupCtxHandler.setVirtualHosts(new String[]{"@cacheLookup"});
 
 		handlers.addHandler(cacheLookupCtxHandler);
-		*/
+		 */
 	}
 
 	public String getVersion() {
@@ -146,6 +148,7 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 	{
 		// Stop the thread that is polling for freemails
 		reqReceiver.stopLooping();
+		nodeInterface.clearOutboxLog(bridgeFreemail, clientFreemail);
 
 		// Stop cenoHttpServer and unbind ports
 		if (cenoHttpServer != null) {
