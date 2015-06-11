@@ -132,18 +132,20 @@ func execPleaseWait(URL string, w http.ResponseWriter, r *http.Request) {
 // 2. Initiate bundle creation process when no bundle exists anywhere
 func proxyHandler(w http.ResponseWriter, r *http.Request) {
 	URL := r.URL.String()
+  fmt.Printf("Got a request for %s\n", URL)
 	matched, err := regexp.MatchString(URL_REGEX, URL)
 	if !matched || err != nil {
 		fmt.Println("Invalid URL " + URL)
     state := ErrorState{
-      "responseWriter": w, "request": r, "errorMsg": "Malformed URL \"" + URL + "\"",
+      "responseWriter": w, "request": r, "errMsg": "Malformed URL \"" + URL + "\"",
     }
     ErrorHandlers[ERR_MALFORMED_URL](state)
 		return
 	}
 	result := lookup(URL)
 	if result.ErrCode > 0 {
-    state := ErrorState{ "responseWriter": w, "request": r, "errorMsg": result.ErrMsg }
+    fmt.Printf("Got error from LCS: Error %v: %s\n", result.ErrCode, result.ErrMsg)
+    state := ErrorState{ "responseWriter": w, "request": r, "errMsg": result.ErrMsg }
     ErrorHandlers[ERR_FROM_LCS](state)
 	} else if result.Complete {
 		if result.Found {
@@ -153,7 +155,7 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 			fmt.Println("Error information from requestNewbundle")
 			fmt.Println(err)
 			if err != nil {
-        state := ErrorState{ "responseWriter": w, "request": r, "errorMsg": err.Error() }
+        state := ErrorState{ "responseWriter": w, "request": r, "errMsg": err.Error() }
         ErrorHandlers[ERR_FROM_LCS](state)
 			} else {
         execPleaseWait(URL, w, r)
