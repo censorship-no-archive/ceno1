@@ -1,12 +1,21 @@
 *~
 \#*\#
 .\#*
+.metadata
 node_modules
 /cache
 */cache
 */*/cache
 /cache
 proxy.log
+
+# Test cache server bundle storage
+src/bundles/
+bundles/
+
+# CeNo client build
+src/client
+client
 
 ../fred
 

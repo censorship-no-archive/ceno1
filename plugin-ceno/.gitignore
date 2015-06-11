@@ -2,3 +2,5 @@
 /dist/
 /build/
 /build-test/
+antSign.properties
+src/plugins/CENO/Version.java

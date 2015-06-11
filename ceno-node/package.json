@@ -15,10 +15,12 @@
     "crypto-js": "latest",
     "request": "latest",
     "colors": "latest",
-    "mime": "latest",
+    "mime": "~1.2.11",
     "js-yaml": "latest",
     "cheerio": "latest",
-    "require": "latest"
+    "require": "latest",
+    "equalitie-bundler": "~1.0.0",
+    "superagent": "latest"
   },
   "devDependencies": {
     "grunt-contrib-jshint": "latest",
