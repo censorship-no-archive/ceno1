@@ -39,6 +39,7 @@ module.exports = function (config) {
   // Handle bundle requests //
   ////////////////////////////
   var requestedURL = qs.parse(url.parse(req.url).query).url;
+  requestedURL = (new Buffer(requestedURL, 'base64')).toString();
   bs_log('Got request to bundle ' + requestedURL);
   var disconnected = false; // A flag set when the request is closed.
 

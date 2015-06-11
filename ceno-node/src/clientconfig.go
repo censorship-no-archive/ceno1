@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"net/url"
 	"fmt"
+  "base64"
 )
 
 // Configuration struct containing fields required by client to run proxy server
@@ -46,7 +47,8 @@ const RS_RUN_INFO = "Please restart the request server."
 
 // Produce a URL to request a bundle be looked up by the LCS
 func BundleLookupURL(configuration Config, URL string) string {
-	return configuration.CacheServer + LCS_LOOKUP + "?url=" + URL
+  encodedURL := base64.EncodeToString([]byte(URL))
+	return configuration.CacheServer + LCS_LOOKUP + "?url=" + encodedURL
 }
 
 // Produce a URL to ping the LCS to check on its availability
@@ -61,7 +63,8 @@ func RSPingURL(configuration Config) string {
 
 // Produce a URL to request a new bundle be made by the RS
 func CreateBundleURL(configuration Config, URL string) string {
-	return configuration.RequestServer + RS_CREATE + "?url=" + URL
+  encodedURL := base64.EncodeToString([]byte(URL))
+	return configuration.RequestServer + RS_CREATE + "?url=" + encodedURL
 }
 
 // Produce a URL to send to the LCS to report a response decode error
