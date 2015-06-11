@@ -374,8 +374,7 @@ public class FreemailAPI {
 		try {
 			PrintWriter pwIndex = new PrintWriter(outboxPath + "/index");
 			pwIndex.print("nextMessageNumber=");
-			pwIndex.print((int) (Math.random()*1000 + 10));
-			pwIndex.println(", ");
+			pwIndex.println((int) (Math.random() * (Integer.MAX_VALUE * 0.8)));
 			pwIndex.close();
 		} catch (IOException e) {
 			return false;

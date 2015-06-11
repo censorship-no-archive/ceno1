@@ -3,7 +3,6 @@ package plugins.CENO.FreenetInterface;
 import java.io.IOException;
 import java.util.HashMap;
 
-import plugins.CENO.Bridge.BundlerInterface.Bundle;
 import freenet.client.FetchException;
 import freenet.client.FetchResult;
 import freenet.client.InsertBlock;
@@ -22,7 +21,7 @@ public interface FreenetInterface {
 	FreenetURI[] generateKeyPair();
 	FreenetURI insertBlock(InsertBlock insert, boolean getCHKOnly, String filenameHint) throws InsertException;
 	boolean insertFreesite(FreenetURI insertURI, String docName, String content, ClientPutCallback cb) throws IOException, InsertException;
-	FreenetURI insertBundleManifest(FreenetURI insertURI, Bundle bundle) throws IOException, InsertException;
+	FreenetURI insertBundleManifest(FreenetURI insertURI, String content, String defaultName, ClientPutCallback cb) throws IOException, InsertException;
 	Bucket makeBucket(int length) throws IOException;
 	FreenetURI insertManifest(FreenetURI insertURI, HashMap<String, Object> bucketsByName, String defaultName, short priorityClass) throws InsertException;
 	boolean sendFreemail(String freemailFrom, String freemailTo[], String subject, String content, String password);

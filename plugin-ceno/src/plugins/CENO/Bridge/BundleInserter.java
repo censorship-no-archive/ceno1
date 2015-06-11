@@ -76,7 +76,12 @@ public class BundleInserter {
 		Map<String, String> splitMap = URLtoUSKTools.splitURL(url);
 
 		FreenetURI insertKey = URLtoUSKTools.computeInsertURI(splitMap.get("domain"), CENOBridge.initConfig.getProperty("insertURI"));
-		insertFreesite(insertKey, splitMap.get("extraPath"), bundle.getContent(), insertCallback);
+		Logger.normal(BundleInserter.class, "Initiating bundle insertion for URL: " + url);
+		insertBundleManifest(insertKey, splitMap.get("extraPath"), bundle.getContent(), insertCallback);
+	}
+	
+	public static void insertBundleManifest(FreenetURI insertURI, String docName, String content, ClientPutCallback insertCallback) throws IOException, InsertException {
+		CENOBridge.nodeInterface.insertBundleManifest(insertURI, content, docName, insertCallback);
 	}
 
 	public static void insertFreesite(FreenetURI insertURI, String docName, String content, ClientPutCallback insertCallback) throws IOException, InsertException {

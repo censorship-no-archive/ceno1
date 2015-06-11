@@ -6,14 +6,14 @@ import freenet.pluginmanager.FredPluginVersioned;
 public class Version implements FredPluginVersioned, FredPluginRealVersioned {
 	
 	// Versions of the plugin, in human-readable and "real" format
-	public static final String CLIENT_VERSION = "0.2.1";
-	public static final int CLIENT_REAL_VERSION = 3;
+	public static final String CLIENT_VERSION = "0.3.0-rc1";
+	public static final int CLIENT_REAL_VERSION = 5;
 	
-	public static final String BRIDGE_VERSION = "0.2.0";
-	public static final int BRIDGE_REAL_VERSION = 2;
+	public static final String BRIDGE_VERSION = "0.3.0-rc1";
+	public static final int BRIDGE_REAL_VERSION = 3;
 	
 	/** Revision number of Version.java as read from CVS */
-	public static final String cvsRevision = "@custom@";
+	public static final String cvsRevision = "v0.2.1";
 	
 	public enum PluginType { CLIENT, BRIDGE };
 	

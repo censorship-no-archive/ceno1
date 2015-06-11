@@ -7,6 +7,7 @@ import java.util.HashMap;
 
 import org.freenetproject.freemail.wot.ConcurrentWoTConnection;
 
+import plugins.CENO.Bridge.BundleInserter.InsertCallback;
 import plugins.CENO.Bridge.BundlerInterface.Bundle;
 import freenet.client.ClientMetadata;
 import freenet.client.DefaultMIMETypes;
@@ -16,9 +17,12 @@ import freenet.client.FetchResult;
 import freenet.client.InsertBlock;
 import freenet.client.InsertContext;
 import freenet.client.InsertException;
+import freenet.client.PutWaiter;
 import freenet.client.async.ClientGetCallback;
 import freenet.client.async.ClientGetter;
 import freenet.client.async.ClientPutCallback;
+import freenet.client.async.DatabaseDisabledException;
+import freenet.client.async.SimpleManifestPutter;
 import freenet.keys.FreenetURI;
 import freenet.keys.InsertableClientSSK;
 import freenet.node.Node;
@@ -77,17 +81,21 @@ public class NodeInterface implements FreenetInterface {
 		return node.clientCore.persistentTempBucketFactory.makeBucket(length);
 	}
 
-	public FreenetURI insertBundleManifest(FreenetURI insertURI, Bundle bundle) throws IOException, InsertException {
-		Bucket bucket = node.clientCore.persistentTempBucketFactory.makeBucket(bundle.getContentLength());
-		bucket.getOutputStream().write(bundle.getContent().getBytes());
-		bucket.setReadOnly();
+	public FreenetURI insertBundleManifest(FreenetURI insertURI, String content, String defaultName, ClientPutCallback insertCb) throws IOException, InsertException {
+		String defName;
+		if (defaultName == null || defaultName.isEmpty()) {
+			defName = "default.html";
+		} else {
+			defName = defaultName;
+		}
+
+		Bucket bucket = node.clientCore.tempBucketFactory.makeBucket(content.length());
+		BucketTools.copyFrom(bucket, new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8), 0, content.length()), content.length());
 
 		HashMap<String, Object> bucketsByName = new HashMap<String, Object>();
-		bucketsByName.put("index.html", bucket);
+		bucketsByName.put(defName, bucket);
 
-		FreenetURI requestURI = HighLevelSimpleClientInterface.insertManifest(insertURI, bucketsByName, "index.html");
-
-		bucket.free();
+		FreenetURI requestURI = HighLevelSimpleClientInterface.insertManifestCb(insertURI, bucketsByName, defName, RequestStarter.BULK_SPLITFILE_PRIORITY_CLASS, null, insertCb);
 		return requestURI;
 	}
 
@@ -116,6 +124,10 @@ public class NodeInterface implements FreenetInterface {
 
 	public FreenetURI insertManifest(FreenetURI insertURI, HashMap<String, Object> bucketsByName, String defaultName, short priorityClass) throws InsertException {
 		return HighLevelSimpleClientInterface.insertManifest(insertURI, bucketsByName, defaultName, priorityClass);
+	}
+
+	public boolean insertManifestCb(FreenetURI insertURI, HashMap<String, Object> bucketsByName, String defaultName, short priorityClass) throws InsertException {
+		return true;	
 	}
 
 	public boolean sendFreemail(String freemailFrom, String freemailTo[], String subject, String content, String password) {

@@ -4,6 +4,8 @@ import java.util.Date;
 import java.util.Hashtable;
 import java.util.concurrent.TimeUnit;
 
+import freenet.support.Logger;
+
 public class RequestSender {
 
 	private static RequestSender requestSender = null;
@@ -40,10 +42,8 @@ public class RequestSender {
 			}
 			if (shouldSendFreemail(url)) {
 				synchronized (requestSender.bridgeFreemails) {
-					for (String freemailTo : requestSender.bridgeFreemails) {
-						CENOClient.nodeInterface.setRandomNextMsgNumber(CENOClient.clientFreemail, freemailTo);
-					}
 					CENOClient.nodeInterface.sendFreemail(CENOClient.clientFreemail, requestSender.bridgeFreemails, url, "", "CENO");	
+					Logger.normal(RequestSender.class, "Sent request to the bridge for URL: " + url);
 				}
 			}
 		}
