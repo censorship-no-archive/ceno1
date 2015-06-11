@@ -1,5 +1,7 @@
 package plugins.CENO.Client;
 
+import plugins.CENO.CENOErrCode;
+import plugins.CENO.CENOException;
 import freenet.pluginmanager.PluginHTTPException;
 import freenet.support.api.HTTPRequest;
 
@@ -15,7 +17,11 @@ public class ClientHandler extends AbstractCENOClientHandler {
 		} else if (path.startsWith("/lookup")) {
 			return lookupHandler.handleHTTPGet(request);
 		}
-		return "404: Requested path is invalid.";
+		if (isClientHtml(request)) {
+			return "404: Requested path is invalid.";
+		} else {
+			return returnErrorJSON(new CENOException(CENOErrCode.LCS_HANDLER_INVALID_URL));
+		}
 	}
 
 	public String handleHTTPPost(HTTPRequest request) throws PluginHTTPException {

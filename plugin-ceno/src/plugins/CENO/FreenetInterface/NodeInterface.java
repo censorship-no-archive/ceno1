@@ -95,7 +95,7 @@ public class NodeInterface implements FreenetInterface {
 		HashMap<String, Object> bucketsByName = new HashMap<String, Object>();
 		bucketsByName.put(defName, bucket);
 
-		FreenetURI requestURI = HighLevelSimpleClientInterface.insertManifestCb(insertURI, bucketsByName, defName, RequestStarter.BULK_SPLITFILE_PRIORITY_CLASS, null, insertCb);
+		FreenetURI requestURI = HighLevelSimpleClientInterface.insertManifestCb(insertURI, bucketsByName, defName, RequestStarter.INTERACTIVE_PRIORITY_CLASS, null, insertCb);
 		return requestURI;
 	}
 

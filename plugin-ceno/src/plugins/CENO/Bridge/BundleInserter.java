@@ -56,6 +56,10 @@ public class BundleInserter {
 
 	}
 
+	public static void updateTableEntry(String url) {
+		insertTable.put(url, new Date(new Date().getTime() + SHOULD_REINSERT));
+	}
+
 	public static void insertBundle(String url) throws IOException, InsertException {
 		InsertCallback insertCb = new InsertCallback();
 		insertCb.setUri(url);
@@ -77,11 +81,12 @@ public class BundleInserter {
 
 		FreenetURI insertKey = URLtoUSKTools.computeInsertURI(splitMap.get("domain"), CENOBridge.initConfig.getProperty("insertURI"));
 		Logger.normal(BundleInserter.class, "Initiating bundle insertion for URL: " + url);
-		insertBundleManifest(insertKey, splitMap.get("extraPath"), bundle.getContent(), insertCallback);
+		insertBundleManifest(url, insertKey, splitMap.get("extraPath"), bundle.getContent(), insertCallback);
 	}
-	
-	public static void insertBundleManifest(FreenetURI insertURI, String docName, String content, ClientPutCallback insertCallback) throws IOException, InsertException {
+
+	public static void insertBundleManifest(String url, FreenetURI insertURI, String docName, String content, ClientPutCallback insertCallback) throws IOException, InsertException {
 		CENOBridge.nodeInterface.insertBundleManifest(insertURI, content, docName, insertCallback);
+		updateTableEntry(url);
 	}
 
 	public static void insertFreesite(FreenetURI insertURI, String docName, String content, ClientPutCallback insertCallback) throws IOException, InsertException {
@@ -90,7 +95,6 @@ public class BundleInserter {
 
 	public static boolean shouldInsert(String url) {
 		if (!insertTable.containsKey(url) || new Date().getTime() - insertTable.get(url).getTime() > SHOULD_REINSERT) {
-			insertTable.put(url, new Date(new Date().getTime() + SHOULD_REINSERT));
 			return true;
 		} else {
 			return false;
