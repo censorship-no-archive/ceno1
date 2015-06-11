@@ -76,7 +76,7 @@ var DefaultConfiguration Config = Config {
 	"http://localhost:3091",
 	"http://localhost:3092",
 	"Page not found",
-	"views/wait.html",
+  path.join(".", "views", "wait.html")
 }
 
 // Functions to verify that each configuration field is well formed.

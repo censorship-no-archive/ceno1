@@ -9,7 +9,7 @@ import (
 	"regexp"
 )
 
-const CONFIG_FILE string = "../config/client.json"
+const CONFIG_FILE string = "./config/client.json"
 
 // A global configuration instance. Must be instantiated properly in main().
 var Configuration Config
