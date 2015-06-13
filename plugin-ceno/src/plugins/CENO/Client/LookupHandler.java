@@ -4,7 +4,6 @@ import java.net.MalformedURLException;
 import java.util.concurrent.TimeUnit;
 
 import net.minidev.json.JSONObject;
-import net.minidev.json.JSONValue;
 import plugins.CENO.CENOErrCode;
 import plugins.CENO.CENOException;
 import plugins.CENO.URLtoUSKTools;
@@ -12,6 +11,8 @@ import plugins.CENO.Client.ULPRManager.ulprStatus;
 import freenet.client.FetchException;
 import freenet.keys.FreenetURI;
 import freenet.pluginmanager.PluginHTTPException;
+import freenet.support.Base64;
+import freenet.support.IllegalBase64Exception;
 import freenet.support.api.HTTPRequest;
 
 public class LookupHandler extends AbstractCENOClientHandler {
@@ -27,13 +28,22 @@ public class LookupHandler extends AbstractCENOClientHandler {
 			return returnErrorJSON(new CENOException(CENOErrCode.LCS_HANDLER_INVALID_URL));
 		}
 
+		if (!clientIsHtml) {
+			try {
+				urlParam = Base64.decodeUTF8(urlParam);
+			} catch (IllegalBase64Exception e) {
+				return returnErrorJSON(new CENOException(CENOErrCode.LCS_HANDLER_INVALID_URL));
+			}
+		}
+
 		try {
 			urlParam = URLtoUSKTools.validateURL(urlParam);
 		} catch (MalformedURLException e) {
 			if (clientIsHtml) {
 				return new CENOException(CENOErrCode.LCS_HANDLER_INVALID_URL).getMessage();
+			} else {
+				return returnErrorJSON(new CENOException(CENOErrCode.LCS_HANDLER_INVALID_URL));
 			}
-			return returnErrorJSON(new CENOException(CENOErrCode.LCS_HANDLER_INVALID_URL));
 		}
 
 		FreenetURI calculatedUSK = null;
