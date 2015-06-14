@@ -40,7 +40,6 @@ public class NodeInterface implements FreenetInterface {
 		// Set up a FetchContext instance for Ultra-lightweight passive requests
 		this.ULPRFC = HighLevelSimpleClientInterface.getFetchContext();
 		this.ULPRFC.canWriteClientCache = true;
-		this.ULPRFC.filterData = true;
 		this.ULPRFC.maxNonSplitfileRetries = -1;
 		this.ULPRFC.followRedirects = true;
 		this.ULPRFC.allowSplitfiles = true;
@@ -50,7 +49,6 @@ public class NodeInterface implements FreenetInterface {
 
 		this.localFC = HighLevelSimpleClientInterface.getFetchContext();
 		this.localFC.localRequestOnly = true;
-		this.localFC.filterData = true;
 		this.localFC.followRedirects = true;
 		this.localFC.allowSplitfiles = true;
 		this.localFC.maxRecursionLevel = 10;

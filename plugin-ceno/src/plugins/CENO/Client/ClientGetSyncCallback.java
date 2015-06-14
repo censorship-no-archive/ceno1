@@ -42,7 +42,7 @@ public class ClientGetSyncCallback implements ClientGetCallback {
 			e.printStackTrace();
 			return null;
 		}
-		if (fe != null) {
+		if (fe != null && ! fe.isDNF()) {
 			throw fe;
 		}
 		return fetchResult;
