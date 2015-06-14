@@ -57,7 +57,7 @@ public class BundleInserter {
 	}
 
 	public static void updateTableEntry(String url) {
-		insertTable.put(url, new Date(new Date().getTime() + SHOULD_REINSERT));
+		insertTable.put(url, new Date(new Date().getTime()));
 	}
 
 	public static void insertBundle(String url) throws IOException, InsertException {

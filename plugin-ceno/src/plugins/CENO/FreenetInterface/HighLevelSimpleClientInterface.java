@@ -2,8 +2,6 @@ package plugins.CENO.FreenetInterface;
 
 import java.util.HashMap;
 
-import plugins.CENO.Bridge.BundleInserter.InsertCallback;
-
 import com.db4o.ObjectContainer;
 
 import freenet.client.FetchContext;

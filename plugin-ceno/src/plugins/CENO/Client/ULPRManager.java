@@ -16,9 +16,9 @@ import freenet.support.Logger;
 public class ULPRManager {
 
 	private static ULPRManager ulprManager = null;
-	private Hashtable<String, ulprStatus> ulprTable;
+	private Hashtable<String, ULPRStatus> ulprTable;
 
-	public enum ulprStatus {
+	public enum ULPRStatus {
 		starting,
 		inProgress,
 		succeeded,
@@ -38,7 +38,7 @@ public class ULPRManager {
 
 		public void onSuccess(FetchResult result, ClientGetter state,
 				ObjectContainer container) {
-			updateULPRStatus(url, ulprStatus.succeeded);
+			updateULPRStatus(url, ULPRStatus.succeeded);
 		}
 
 		public void onFailure(FetchException e, ClientGetter state,
@@ -47,14 +47,15 @@ public class ULPRManager {
 			if (e.getMode() == FetchException.PERMANENT_REDIRECT) {
 				initULPR(url, e.newURI.getEdition());
 			} else {
-				updateULPRStatus(url, ulprStatus.failed);
+				updateULPRStatus(url, ULPRStatus.failed);
+				Logger.error(this, "ULPR failed for url: " + url);
 			}
 		}
 
 	}
 
 	private ULPRManager() {
-		this.ulprTable = new Hashtable<String, ULPRManager.ulprStatus>();
+		this.ulprTable = new Hashtable<String, ULPRManager.ULPRStatus>();
 	}
 
 	public static void init() {
@@ -65,7 +66,7 @@ public class ULPRManager {
 		}
 	}
 
-	public static ulprStatus lookupULPR(String url) {
+	public static ULPRStatus lookupULPR(String url) {
 		if (!urlExistsInTable(url)) {
 			ulprManager.initULPR(url);
 		}
@@ -76,11 +77,11 @@ public class ULPRManager {
 		return ulprManager.ulprTable.containsKey(url);
 	}
 
-	private static ulprStatus getULPRStatus(String url) {
+	private static ULPRStatus getULPRStatus(String url) {
 		return ulprManager.ulprTable.get(url);
 	}
 
-	private static void updateULPRStatus(String url, ulprStatus status) {
+	private static void updateULPRStatus(String url, ULPRStatus status) {
 		ulprManager.ulprTable.put(url, status);
 	}
 
@@ -89,12 +90,12 @@ public class ULPRManager {
 	}
 
 	private void initULPR(String url, long newEdition) {
-		updateULPRStatus(url, ulprStatus.starting);
+		updateULPRStatus(url, ULPRStatus.starting);
 		FreenetURI calculatedUSK = null;
 		try {
 			calculatedUSK = URLtoUSKTools.computeUSKfromURL(url, CENOClient.bridgeKey);
 		} catch (Exception e) {
-			updateULPRStatus(url, ulprStatus.couldNotStart);
+			updateULPRStatus(url, ULPRStatus.couldNotStart);
 			Logger.error(this, "Could not start ULPR for URL: " + url);
 		}
 		calculatedUSK = calculatedUSK.setSuggestedEdition(newEdition);
@@ -102,10 +103,10 @@ public class ULPRManager {
 			CENOClient.nodeInterface.fetchULPR(calculatedUSK, new ULPRGetCallback(url));
 		} catch (FetchException e) {
 			e.printStackTrace();
-			updateULPRStatus(url, ulprStatus.couldNotStart);
+			updateULPRStatus(url, ULPRStatus.couldNotStart);
 			return;
 		}
-		updateULPRStatus(url, ulprStatus.inProgress);
+		updateULPRStatus(url, ULPRStatus.inProgress);
 	}
 
 }
