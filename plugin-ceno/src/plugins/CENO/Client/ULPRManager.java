@@ -38,6 +38,7 @@ public class ULPRManager {
 
 		public void onSuccess(FetchResult result, ClientGetter state,
 				ObjectContainer container) {
+			Logger.normal(this, "ULPR completed successfully for URL: " + url);
 			updateULPRStatus(url, ULPRStatus.succeeded);
 		}
 
@@ -48,7 +49,7 @@ public class ULPRManager {
 				initULPR(url, e.newURI.getEdition());
 			} else {
 				updateULPRStatus(url, ULPRStatus.failed);
-				Logger.error(this, "ULPR failed for url: " + url);
+				Logger.error(this, "ULPR failed for url: " + url + " Exception: " + e.getMessage());
 			}
 		}
 

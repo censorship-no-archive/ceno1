@@ -7,8 +7,6 @@ import java.util.HashMap;
 
 import org.freenetproject.freemail.wot.ConcurrentWoTConnection;
 
-import plugins.CENO.Bridge.BundleInserter.InsertCallback;
-import plugins.CENO.Bridge.BundlerInterface.Bundle;
 import freenet.client.ClientMetadata;
 import freenet.client.DefaultMIMETypes;
 import freenet.client.FetchContext;
@@ -17,12 +15,9 @@ import freenet.client.FetchResult;
 import freenet.client.InsertBlock;
 import freenet.client.InsertContext;
 import freenet.client.InsertException;
-import freenet.client.PutWaiter;
 import freenet.client.async.ClientGetCallback;
 import freenet.client.async.ClientGetter;
 import freenet.client.async.ClientPutCallback;
-import freenet.client.async.DatabaseDisabledException;
-import freenet.client.async.SimpleManifestPutter;
 import freenet.keys.FreenetURI;
 import freenet.keys.InsertableClientSSK;
 import freenet.node.Node;
@@ -44,11 +39,23 @@ public class NodeInterface implements FreenetInterface {
 
 		// Set up a FetchContext instance for Ultra-lightweight passive requests
 		this.ULPRFC = HighLevelSimpleClientInterface.getFetchContext();
+		this.ULPRFC.canWriteClientCache = true;
+		this.ULPRFC.filterData = true;
 		this.ULPRFC.maxNonSplitfileRetries = -1;
 		this.ULPRFC.followRedirects = true;
+		this.ULPRFC.allowSplitfiles = true;
+		this.ULPRFC.maxRecursionLevel = 10;
+		this.ULPRFC.maxTempLength = Long.MAX_VALUE;
+		this.ULPRFC.maxOutputLength = Long.MAX_VALUE;
 
 		this.localFC = HighLevelSimpleClientInterface.getFetchContext();
 		this.localFC.localRequestOnly = true;
+		this.localFC.filterData = true;
+		this.localFC.followRedirects = true;
+		this.localFC.allowSplitfiles = true;
+		this.localFC.maxRecursionLevel = 10;
+		this.localFC.maxTempLength = Long.MAX_VALUE;
+		this.localFC.maxOutputLength = Long.MAX_VALUE;
 
 		wotConnection = new ConcurrentWoTConnection(pr);
 	}

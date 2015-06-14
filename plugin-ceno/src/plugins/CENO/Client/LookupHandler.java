@@ -99,15 +99,15 @@ public class LookupHandler extends AbstractCENOClientHandler {
 		String fetchResult = null;
 		try {
 			CENOClient.nodeInterface.localFetchURI(calculatedUSK, getSyncCallback);
-			fetchResult = getSyncCallback.getResult(5L, TimeUnit.SECONDS);
+			fetchResult = getSyncCallback.getResult(45L, TimeUnit.SECONDS);
 		} catch (FetchException e) {
 			if (e.getMode() == FetchException.PERMANENT_REDIRECT) {
 				fetchResult = localCacheLookup(e.newURI);
 			} else if (e.isFatal()) {
-				Logger.warning(this, "Fatal fetch exception while looking in the local cache for USK: " + calculatedUSK);
+				Logger.warning(this, "Fatal fetch exception while looking in the local cache for USK: " + calculatedUSK + " Exception: " + e.getMessage());
 				//TODO Throw custom CENOException
 			} else {
-				Logger.error(this, "Unhandled exception while looking in the local cache for USK: " + calculatedUSK);
+				Logger.error(this, "Unhandled exception while looking in the local cache for USK: " + calculatedUSK + " Exception: " + e.getMessage());
 			}
 		}
 		return fetchResult;
