@@ -1,5 +1,6 @@
 {
-  "PortNumber": ":3090",
+  "PortNumber": ":3089",
+  "PortNumberTLS": ":3090",
   "CacheServer": "http://127.0.0.1:8888/plugins/plugins.CENO.Client.CENOClient",
   "RequestServer": "http://localhost:3092",
   "ErrorMsg": "Page not found",
