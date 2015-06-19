@@ -4,6 +4,11 @@ This directory contains an extension for the Google Chrome and Chromium web brow
 It exists to solve the problem of HTTPS being incompatible with CeNo.  Below is an
 explanation of this problem.
 
+A browser plugin was chosen as the vehicle for this solution to be manifested within
+because they are granted a great deal of control of the browser they are installed in.
+Such control is necessary to overcome the browser's earnest efforts to encrypt traffic
+to sites with known certificates, or that use HSTS.
+
 ## HTTPS Incompatibility
 
 There are two problems caused by the use of HTTPS with CeNo.  The first affects CeNo
