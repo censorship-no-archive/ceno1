@@ -1,0 +1,8 @@
+language: go
+
+go:
+  - tip
+
+script:
+  - cd ceno-node/src/
+  - ./build.sh
