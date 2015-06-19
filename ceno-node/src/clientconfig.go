@@ -14,6 +14,7 @@ import (
 // and reach other agents it must interact with.
 type Config struct {
 	PortNumber     string
+  PortNumberTLS  string
 	CacheServer    string
 	RequestServer  string
 	ErrorMsg       string
@@ -76,7 +77,8 @@ func DecodeErrReportURL(configuration Config) string {
 // The default config values, hardcoded, to be provided as examples to the user
 // should they be asked to provide configuration information.
 var DefaultConfiguration Config = Config {
-	":3090",
+	":3089",
+  ":3090",
 	"http://localhost:3091",
 	"http://localhost:3092",
 	"Page not found",

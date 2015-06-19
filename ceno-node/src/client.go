@@ -191,6 +191,15 @@ func main() {
 //	}
 	// Create an HTTP proxy server
 	http.HandleFunc("/", proxyHandler)
-	fmt.Println("CeNo proxy server listening at http://localhost" + Configuration.PortNumber)
-	http.ListenAndServe(Configuration.PortNumber, nil)
+  go func() {
+	  fmt.Println("CeNo proxy server listening for HTTPS requests at http://localhost" + Configuration.PortNumberTLS)
+    if err := http.ListenAndServeTLS(Configuration.PortNumberTLS, "cenocert.pem", "cenokey.pem", nil); err != nil {
+      fmt.Println("Error in TLS")
+      panic(err)
+    }
+  }()
+	fmt.Println("CeNo proxy server listening for HTTP requests at http://localhost" + Configuration.PortNumber)
+	if err = http.ListenAndServe(Configuration.PortNumber, nil); err != nil {
+    panic(err)
+  }
 }

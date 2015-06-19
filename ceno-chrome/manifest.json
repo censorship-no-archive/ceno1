@@ -1,0 +1,18 @@
+{
+  "manifest_version": 2,
+  "name": "CeNo Intercept",
+  "description": "Facilitates interaction with the CeNo Client, your gateway to the CeNo network.",
+  "version": "0.0",
+  "browser_action": {
+    "default_title": "CeNo Intercept",
+    "default_icon": "icon.png",
+    "default_popup": "popup.html"
+  },
+  "permissions": [
+    "activeTab",
+    "webRequest",
+    "webRequestBlocking",
+    "https://*/*",
+    "http://*/*"
+  ] 
+}
