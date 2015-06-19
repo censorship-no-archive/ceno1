@@ -36,7 +36,7 @@ commands into your operating system's `terminal` program.
 ```
 # <path-to-ceno> must be replaced with the path to where you installed CeNo
 cd <path-to-ceno>/ceno-node/src/
-go build client.go clientconfig.go
+./build.sh
 ./client
 ```
 
