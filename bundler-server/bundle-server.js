@@ -4,7 +4,7 @@ var http = require('http');
 
 var bsHandlerMaker = require('./bshandler');
 
-const configFile = path.join('..', 'config', 'node.json');
+const configFile = path.join('config', 'node.json');
 
 var defaultConfig = {
   port: 3094,

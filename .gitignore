@@ -14,8 +14,7 @@ src/bundles/
 bundles/
 
 # CeNo client build
-src/client
-client
+src/client/client
 
 ../fred
 
