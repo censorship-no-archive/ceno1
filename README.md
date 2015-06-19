@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/equalitie/ceno.svg)](https://travis-ci.org/equalitie/ceno)
+
 # CeNo
 
 **Censorship, no thank you!**
