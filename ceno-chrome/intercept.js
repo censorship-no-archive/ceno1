@@ -23,10 +23,10 @@ document.addEventListener('DOMContentLoaded', function() {
     if (activateBox.checked) {
       renderStatus('Your browser will proxy requests to CeNo ' +
         'through http://' + cenoAddr + ':' + cenoPort);
-      bg.activateCeNo();
+      bg.activateCeNo(sendToProxy);
     } else {
       renderStatus('Your browser is will not proxy requests to CeNo');
-      bg.deactivateCeNo();
+      bg.deactivateCeNo(sendToProxy);
     }
   });
 });
