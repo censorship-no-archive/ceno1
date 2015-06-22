@@ -3,6 +3,9 @@
   "name": "CeNo Intercept",
   "description": "Facilitates interaction with the CeNo Client, your gateway to the CeNo network.",
   "version": "0.0",
+  "background": {
+    "page": "background.html"
+  },
   "browser_action": {
     "default_title": "CeNo Intercept",
     "default_icon": "icon.png",

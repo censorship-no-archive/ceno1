@@ -2,34 +2,12 @@
 var cenoPort = 3090;
 var cenoAddr = '127.0.0.1';
 
-var activated = false;
-
 /* Render a status message in the popup displayed by the plugin.
  * @param {string} statusText - The status message to display
  */
 function renderStatus(statusText) {
   document.getElementById('status').textContent = statusText;
   console.log('Set status text');
-}
-
-/* Add listeners to the event fired when a site is requested or a
- * redirect is issued to use the CeNo proxy.
- */
-function activateCeNo() {
-  chrome.webRequest.onBeforeRequest.addListener(
-    sendToProxy, {urls: ['https://*/*', 'http://*/*']}, ['blocking']);
-  //chrome.webRequest.onBeforeRedirect.addListener(
-  //  sendToProxy, {urls: ['https://*/*', 'http://*/*']});
-  console.log('Activated CeNo');
-}
-
-/* Remove listeners to the event fired when a site is requested or a
- * redirect is issued to use the CeNo proxy.
- */
-function deactivateCeNo() {
-  chrome.webRequest.onBeforeRequest.removeListener(sendToProxy);
-  //chrome.webRequest.onBeforeRedirect.removeListener(sendToProxy);
-  console.log('Deactivated CeNo');
 }
 
 /* Attach event handlers to UI elements
@@ -41,13 +19,14 @@ document.addEventListener('DOMContentLoaded', function() {
   activateBox = document.getElementById('useCeno');
   activateBox.addEventListener('click', function (evt) {
     console.log('Checkbox click event fired');
+    var bg = chrome.extension.getBackgroundPage();
     if (activateBox.checked) {
       renderStatus('Your browser will proxy requests to CeNo ' +
         'through http://' + cenoAddr + ':' + cenoPort);
-      activateCeNo();
+      bg.activateCeNo();
     } else {
       renderStatus('Your browser is will not proxy requests to CeNo');
-      deactivateCeNo();
+      bg.deactivateCeNo();
     }
   });
 });
