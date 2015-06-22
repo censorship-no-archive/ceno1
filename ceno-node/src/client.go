@@ -145,8 +145,22 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 	result := lookup(URL)
 	if result.ErrCode > 0 {
     fmt.Printf("Got error from LCS: Error %v: %s\n", result.ErrCode, result.ErrMsg)
-    state := ErrorState{ "responseWriter": w, "request": r, "errMsg": result.ErrMsg }
-    ErrorHandlers[ERR_FROM_LCS](state)
+    // Assuming the reason the response is malformed is because of the formation of the bundle,
+    // so we will request that a new bundle be created.
+    if result.ErrCode == ERR_MALFORMED_LCS_RESPONSE {
+      err = requestNewBundle(URL)
+      fmt.Printf("Requested new bundle; Error: ")
+      fmt.Println(err)
+      if err != nil {
+        state := ErrorState{ "responseWriter": w, "request": r, "errMsg": err.Error() }
+        ErrorHandlers[ERR_FROM_LCS](state)
+      } else {
+        execPleaseWait(URL, w, r)
+      }
+    } else {
+      state := ErrorState{ "responseWriter": w, "request": r, "errMsg": result.ErrMsg }
+      ErrorHandlers[ERR_FROM_LCS](state)
+    }
 	} else if result.Complete {
 		if result.Found {
 			w.Write([]byte(result.Bundle))
