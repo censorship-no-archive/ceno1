@@ -189,20 +189,6 @@ func main() {
 	} else {
 		Configuration = conf
 	}
-	// Ensure the LCS is available at startup time
-//	available := testLCSAvailability()
-//	if !available {
-//		fmt.Println("Local cache server is not responding to requests.")
-//		fmt.Println(LCS_RUN_INFO)
-//		return
-//	}
-	// Ensure the RS is available at startup time
-//	available = testRSAvailability()
-//	if !available {
-//		fmt.Println("Request server is not responding to requests.")
-//		fmt.Println(RS_RUN_INFO)
-//		return
-//	}
 	// Create an HTTP proxy server
 	http.HandleFunc("/", proxyHandler)
 	fmt.Println("CeNo proxy server listening for HTTP requests at http://localhost" + Configuration.PortNumber)

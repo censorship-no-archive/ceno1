@@ -56,8 +56,7 @@ send any request to the LCS.
 **Error code: 1200**
 
 In the case that the client cannot connect to the LCS, an error page should be displayed to the
-user with instructions about how to obtain and start the server.  At the time the client starts up,
-it should send a ping request to the LCS to ensure it is available at that time.
+user with instructions about how to obtain and start the server.
 
 ### Malformed response from LCS
 
@@ -81,8 +80,7 @@ operational error response.
 **Error code: 1203**
 
 In the case that the client cannot connect to the RS, an error page should be displayed to the
-user with instructions about how to obtain and start the server.  At the time the client starts up,
-it should send a ping request to the RS to ensure it is available at that time.
+user with instructions about how to obtain and start the server.
 
 ### Missing view
 
@@ -236,8 +234,7 @@ RS tries to send the freemail again
 **Error code: 4200**
 
 If the RR cannot connect to the BS to request bundles, an error message should be
-logged in such a way that it is very noticable to the user/admin.  At the time the RR
-starts up, it should ping the BS to ensure that a connection can be made.
+logged in such a way that it is very noticable to the user/admin.
 
 ### Timeout during request for bundle
 
@@ -252,7 +249,7 @@ is handled by the **RR closes connection** case under **BS**.
 
 If the RR cannot connect to the BI to request bundles be stored, it should ping the BI
 periodically and ignore requests to create new bundles until it succeeds in establishing
-a connection to the BI.  The RR should also ping the BI at startup.
+a connection to the BI.
 
 ### RR cannot load
 
