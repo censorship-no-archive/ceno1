@@ -9,6 +9,7 @@ var activated = false;
  */
 function renderStatus(statusText) {
   document.getElementById('status').textContent = statusText;
+  console.log('Set status text');
 }
 
 /* Add listeners to the event fired when a site is requested or a
@@ -19,6 +20,7 @@ function activateCeNo() {
     sendToProxy, {urls: ['https://*/*', 'http://*/*']}, ['blocking']);
   //chrome.webRequest.onBeforeRedirect.addListener(
   //  sendToProxy, {urls: ['https://*/*', 'http://*/*']});
+  console.log('Activated CeNo');
 }
 
 /* Remove listeners to the event fired when a site is requested or a
@@ -27,6 +29,7 @@ function activateCeNo() {
 function deactivateCeNo() {
   chrome.webRequest.onBeforeRequest.removeListener(sendToProxy);
   //chrome.webRequest.onBeforeRedirect.removeListener(sendToProxy);
+  console.log('Deactivated CeNo');
 }
 
 /* Attach event handlers to UI elements
@@ -37,6 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
   renderStatus('Your browser is will not proxy requests to CeNo');
   activateBox = document.getElementById('useCeno');
   activateBox.addEventListener('click', function (evt) {
+    console.log('Checkbox click event fired');
     if (activateBox.checked) {
       renderStatus('Your browser will proxy requests to CeNo ' +
         'through http://' + cenoAddr + ':' + cenoPort);
@@ -76,6 +80,7 @@ function sendToProxy(details) {
     // Do something special with POST/PUT/... requests?
   }
   var url = stripHTTPS(details.url);
+  console.log('Stipped url: ' + url);
   return { redirectUrl: url };
   /*
   var xhr = new XMLHttpRequest();
