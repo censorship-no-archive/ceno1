@@ -45,6 +45,12 @@ HTTP methods (GET, POST, PUT, ...) or `write` in the case of a response.
 2. The URL and POST body (as JSON) in the case of a POST/PUT request. E.g. `[POST website.com/path {"hello": "world"}]`
 3. The literal response to a request-maker in the case of a `write` (respond) mesage.
 
+## Special Notes
+
+### Special Headers
+
+Every response written by CeNo client should have a `X-CeNo-Proxy` header set with the value `yxorP-oNeC-X`.
+
 ## Protocol
 
 The cases described here do not account for interaction with the User

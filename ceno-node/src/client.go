@@ -34,6 +34,15 @@ type Result struct {
 	// Should add a Created field for the date created
 }
 
+// Set a header on responses that indicates that the response
+// was served by the CeNo client. The header can be referenced
+// by pages, browser plugins, and so on to check if CeNo client
+// is running.
+func WriteProxyHeader(w http.ResponseWriter) http.ResponseWriter {
+  w.Header().Add("X-CeNo-Proxy", "yxorP-oNeC-X")
+  return w
+}
+
 // Serve a page to inform the user that a bundle for the site they requested is
 // being prepared. It will automatically initiate new requests to retrieve the same
 // URL in an interval.
@@ -119,6 +128,7 @@ func requestNewBundle(lookupURL string) error {
 
 func execPleaseWait(URL string, w http.ResponseWriter, r *http.Request) {
   body, isHTML := pleaseWait(URL)
+  w = WriteProxyHeader(w)
   if isHTML {
     w.Header().Set("Content-Type", "text/html")
   } else {
@@ -131,6 +141,7 @@ func execPleaseWait(URL string, w http.ResponseWriter, r *http.Request) {
 // 1. Initiate bundle lookup process
 // 2. Initiate bundle creation process when no bundle exists anywhere
 func proxyHandler(w http.ResponseWriter, r *http.Request) {
+  w = WriteProxyHeader(w)
 	URL := r.URL.String()
   fmt.Printf("Got a request for %s\n", URL)
 	matched, err := regexp.MatchString(URL_REGEX, URL)
