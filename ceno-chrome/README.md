@@ -54,9 +54,7 @@ stored into Freenet, and for users' requests to remain anonymous.
 
 ## Testing
 
-At this point in time, this extension is in extremely early stages of development.
-It exists more as a proof of concept than a functioning part of the CeNo system.
-To test that it works for yourself, follow these instructions:
+To test that the plugin works, follow these instructions:
 
 1. Start the Freenet plugin (instructions provided with CeNo Client)
 2. Start CeNo Client
@@ -66,9 +64,8 @@ To test that it works for yourself, follow these instructions:
 6. Click the `Load unpacked extension...` button
 7. Open this directory in the dialog that appears
 8. Open a new tab and type a URL like `https://google.com` into the omnibox
-9. Right click the addon's logo (white `C` with red background) and click `Inspect popup`
-10. Check the checkbox in the plugin's panel
-11. Select the omnibox again and click enter to request the URL you entered
+9. Click the plugin's icon and click the `Toggle CeNo button` to activate CeNo
+10. Select the omnibox again and click enter to request the URL you entered
 
 You should observe output in the terminal within which you started CeNo Client
 informing you that a request for `http://<URL>` was received.
