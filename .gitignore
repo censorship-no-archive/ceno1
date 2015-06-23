@@ -14,8 +14,9 @@ src/bundles/
 bundles/
 
 # CeNo client build
-src//client
-ceno-node/src/client
+ceno-node/client
+ceno-node/FreenetCENO.tar.gz
+ceno-node/FreenetCENO
 
 ../fred
 
