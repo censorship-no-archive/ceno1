@@ -12,6 +12,10 @@ const NO_PROXY_MSG = 'CeNo Client not active. Please configure your browser' +
 const CENO_HEADER = 'X-Ceno-Proxy';
 const CENO_HEADER_VALUE = 'yxorP-oneC-X';
 
+// Paths to the icons used by the plugin
+const REGULAR_ICON = 'icon.png';
+const INVERTED_ICON = 'iconinv.png';
+
 /* If the URL has the https scheme, make it http so that CeNo client
  * can actually handle it for us.
  *
@@ -63,6 +67,14 @@ function deactivateCeNo() {
   document.getElementById('activeState').value = 'false';
 }
 
+/* Set the extension's icon.
+ *
+ * @param {boolean} regular - Use the regular icon (true) or inverted one (false)
+ */
+function setIcon(iconPath) {
+  chrome.browserAction.setIcon({ path: iconPath});
+}
+
 /* Check whether the extension is active by reading the state of
  * the hidden input in the background page.
  *
@@ -100,15 +112,18 @@ chrome.extension.onMessage.addListener(function (req, sender, respond) {
     isActive(function (active) {
       if (active) {
         deactivateCeNo();
+        setIcon(REGULAR_ICON);
         alert('Deactivating CeNo.');
         respond({ statusActive: false });
       } else {
         ensureProxyIsSet(function (proxyIsSet) {
           if (proxyIsSet) {
             activateCeNo();
+            setIcon(INVERTED_ICON);
             alert('Activating CeNo!');
             respond({ statusActive: true });
           } else {
+            setIcon(REGULAR_ICON);
             alert(NO_PROXY_MSG);
             respond({ statusActive: false });
           }
