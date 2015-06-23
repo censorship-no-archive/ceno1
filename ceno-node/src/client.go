@@ -39,7 +39,7 @@ type Result struct {
 // by pages, browser plugins, and so on to check if CeNo client
 // is running.
 func WriteProxyHeader(w http.ResponseWriter) http.ResponseWriter {
-  w.Header().Add("X-CeNo-Proxy", "yxorP-oNeC-X")
+  w.Header().Add("X-Ceno-Proxy", "yxorP-oneC-X")
   return w
 }
 
@@ -128,7 +128,6 @@ func requestNewBundle(lookupURL string) error {
 
 func execPleaseWait(URL string, w http.ResponseWriter, r *http.Request) {
   body, isHTML := pleaseWait(URL)
-  w = WriteProxyHeader(w)
   if isHTML {
     w.Header().Set("Content-Type", "text/html")
   } else {

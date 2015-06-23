@@ -1,7 +1,3 @@
-// CeNo configuration settings
-var cenoPort = 3090;
-var cenoAddr = '127.0.0.1';
-
 /* Attach event handlers to UI elements.
  * When the toggle button in the popup is clicked, we want to
  * notify the background script of the event and display a
@@ -13,13 +9,8 @@ document.addEventListener('DOMContentLoaded', function() {
   toggleBtn.addEventListener('click', function (evt) {
     console.log('Button click event fired');
     chrome.extension.sendMessage({
-      directive: 'icon-clicked',
+      directive: 'button-clicked'
     }, function (response) {
-      if (response.statusActive) {
-        alert('CeNo has been activated!');
-      } else {
-        alert('CeNo has been deactivated.');
-      }
       this.close();
     });
   });
