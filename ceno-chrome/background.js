@@ -113,14 +113,12 @@ chrome.extension.onMessage.addListener(function (req, sender, respond) {
       if (active) {
         deactivateCeNo();
         setIcon(REGULAR_ICON);
-        alert('Deactivating CeNo.');
         respond({ statusActive: false });
       } else {
         ensureProxyIsSet(function (proxyIsSet) {
           if (proxyIsSet) {
             activateCeNo();
             setIcon(INVERTED_ICON);
-            alert('Activating CeNo!');
             respond({ statusActive: true });
           } else {
             setIcon(REGULAR_ICON);
