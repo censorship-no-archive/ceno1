@@ -8,22 +8,75 @@
         background-color: #f4f4f3;
         color: #4c4a4a;
         font-size: 100%;
+        width: 350px;
+      }
+      #container {
+        width: 350px;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
       }
       #status {
-        width: 350px;
+        font-size: 14px;
+        padding-left: 15px;
+        padding-right: 15px;
       }
       #logo {
         float: right;
+      }
+      #eq-logo {
+        width: inherit;
+      }
+      #eq-logo img {
+        float: left;
+        width: 32px;
+        height: 32px;
+        margin-left: 5px;
+        margin-bottom: 10px;
+      }
+      #eq-logo p {
+        padding-top: 5px;
+        font-size: 10px;
+      }
+      button {
+        width: 160px;
+        height: 75px;
+        background-color: #e43624;
+        color: #f4f4f3;
+        border: none;
+        border-radius: 1px;
+        font-size: 16px;
+        font-weight: 400;
+      }
+      .red {
+        color: #e43624;
       }
     </style>
     <script src="intercept.js"></script>
   </head>
   <body>
-    <div id="logo">
-      <img src="eq-logo.png" />
-    </div>
+    <div id="container">
     <button id="useCeno">Toggle CeNo</button>
-    <div id="status"></div>
+    <div id="logo">
+      <img src="logo_ceno.png" />
+    </div>
+    <div id="status">
+      <p>
+        While active,
+        <span class="red">this extension intercepts requests for sites using HTTPS</span>
+        to prevent your browser from encrypting them. You are 
+        secured by CeNo. 
+      </p>
+    </div>
+    <div id="eq-logo">
+      <img src="eq-logo.png" />
+      <p>
+        <span class="red">eQualit.ie</span>
+        develops open and reusable systems with a focus on privacy, online security,
+        and information management.
+      </p>
+    </div>
+    </div>
   </body>
 </html>
 
