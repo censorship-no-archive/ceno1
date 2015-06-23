@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "CeNo Intercept",
   "description": "Facilitates interaction with the CeNo Client, your gateway to the CeNo network.",
-  "version": "0.0",
+  "version": "0.1",
   "background": {
     "page": "background.html"
   },
