@@ -72,6 +72,13 @@ Step | Description                                        | Message
 4    | LCS reports that no bundle exists for `<url>` yet  | `[write {"complete": true, "found": false}]`
 5    | CC requests that a new bundle be created by bridge | `[POST <RS>/create?url=<url>`
 6    | RS signals RR on bridge to create new bundle       | Send freemail to RR
+7    | RR requests `<url>` read from Freemail             | `[GET <BS>/lookup?url=<url>]`
+8    | BS creates a bundle and returns it to the RR       | `[write {"created": <now>, "url": <url>,  "bundle":
+<bundle>}]`
+9    | RR requests the BI insert the bundle into Freenet  | `[POST
+<BI>/insert?created=<created>&url=<url>&bundle=<bundle>]`
+10   | BI acknowledges the request for insertion          | `[write "okay"]`
+
 
 #### Notes
 
