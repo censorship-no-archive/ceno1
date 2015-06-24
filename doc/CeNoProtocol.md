@@ -29,13 +29,14 @@ Also, agents are responsible for keeping their own state and act accordingly to 
 
 ## Syntax
 
-`<url>` will always refer to the URL to be fetched, bundled, and cached.
+`<url>` will always refer to the URL to be fetched, bundled, and cached. The URL will always be base64-encoded after
+leaving the CC except during processing.
+
+`<now>` will always refer to a datetime value corresponding to whatever the current time is.
 
 `<bundle>` will always refer to the bundled document corresponding to `<url>`.
 
-`<LCS>` refers to the address of the Local Cache Server
-
-`<RS>` will always refer to the address of the Request Sender.
+`<[agent]>` refers to the address of a given agent.
 
 `[<METHOD> <value>]` is the notation that will be used to describe an HTTP request, where `METHOD` will be one of the standard
 HTTP methods (GET, POST, PUT, ...) or `write` in the case of a response.
@@ -73,10 +74,8 @@ Step | Description                                        | Message
 5    | CC requests that a new bundle be created by bridge | `[POST <RS>/create?url=<url>`
 6    | RS signals RR on bridge to create new bundle       | Send freemail to RR
 7    | RR requests `<url>` read from Freemail             | `[GET <BS>/lookup?url=<url>]`
-8    | BS creates a bundle and returns it to the RR       | `[write {"created": <now>, "url": <url>,  "bundle":
-<bundle>}]`
-9    | RR requests the BI insert the bundle into Freenet  | `[POST
-<BI>/insert?created=<created>&url=<url>&bundle=<bundle>]`
+8    | BS creates a bundle and returns it to the RR       | `[write {"created": <now>, "url": <url>,  "bundle": <bundle>}]`
+9    | RR requests the BI insert the bundle into Freenet  | `[POST <BI>/insert?created=<created>&url=<url>&bundle=<bundle>]`
 10   | BI acknowledges the request for insertion          | `[write "okay"]`
 
 
@@ -119,14 +118,8 @@ certain facts, for example that a given server is running, and to communicate
 new requirements or requests outside of the standard set of interactions
 required for regular use cases.
 
-### Ping to LCS
-
-LCS should respond to ping messages from CC to signal its active status.
-
-Step | Description        | Message
------|--------------------|-------------------
-1    | CC pings LCS       | `[GET <LCS>/ping]`
-2    | LCS pongs back     | `[write "pong"]`
+Error conditions that CeNo components can encounter are described in `doc/errorConditions.md`
+and specify error codes that classify them.
 
 ### CC reports decode error to LCS
 
@@ -137,16 +130,8 @@ The report is sent in the case that it cannot.
 
 Step | Description              | Message
 -----|--------------------------|-------------------
-1    | CC reports error to LCS  | `[POST <LCS>/error/decode {"error": <message>}]`
+1    | CC reports error to LCS  | `[POST <LCS>/error/decode {"errCode": <code>, "errMsg": <message>}]`
 2    | LCS acknowledges report  | `[write "okay"]`
-
-### Reporting operational errors
-
-Operational errors, such as the LCS being unable to connect to the
-distributed cache, should be reported in HTML responses with a standard
-error field.
-
-**Format:** `{ "error": <message> }`
 
 ### BS prompts RR to accept bundle
 
@@ -157,21 +142,3 @@ Step | Description                   | Message
 -----|-------------------------------|-------------------
 1    | BS prompts RR to store bundle | `[POST <RR>/complete {"bundle": <bundle>, "url": <url>, "created": <date_created>}]`
 2    | RR reports acknowledgement    | `[write "okay"]`
-
-### Ping to BS
-
-BS should respond to ping messages from RR to signal its active status.
-
-Step | Description       | Message
------|-------------------|-------------------
-1    | RR pings BS       | `[GET <BS>/ping]`
-2    | BS pongs back     | `[write "pong"]`
-
-### Ping to BI
-
-BI should respond to ping messages from RR to signal its active status.
-
-Step | Description       | Message
------|-------------------|-------------------
-1    | RR pings BI       | `[GET <BI>/ping]`
-2    | BI pongs back     | `[write "pong"]`
