@@ -13,6 +13,9 @@
     "require": "latest",
     "equalitie-bundler": "~1.0.0"
   },
+  "devDependencies": {
+    "should": "latest"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/equalitie/ceno.git"
