@@ -95,6 +95,10 @@ public class LookupHandler extends AbstractCENOClientHandler {
 	}
 
 	private String localCacheLookup(FreenetURI calculatedUSK) {
+		if (calculatedUSK.getSuggestedEdition() < 0) {
+			calculatedUSK = calculatedUSK.setSuggestedEdition(0);
+		}
+
 		ClientGetSyncCallback getSyncCallback = new ClientGetSyncCallback();
 		String fetchResult = null;
 		try {
