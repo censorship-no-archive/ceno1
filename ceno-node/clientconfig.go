@@ -35,10 +35,8 @@ const (
 // Request paths to LCS and RS
 const (
 	LCS_LOOKUP = "/lookup"
-	LCS_PING = "/ping"
 	LCS_DECODE_ERR = "/error/decode"
 	RS_CREATE = "/create"
-	RS_PING = "/ping"
 )
 
 // Information about how to get and run the local cache server
@@ -51,16 +49,6 @@ const RS_RUN_INFO = "Please restart the request server."
 func BundleLookupURL(configuration Config, URL string) string {
   encodedURL := base64.StdEncoding.EncodeToString([]byte(URL))
 	return configuration.CacheServer + LCS_LOOKUP + "?url=" + encodedURL
-}
-
-// Produce a URL to ping the LCS to check on its availability
-func LCSPingURL(configuration Config) string {
-	return configuration.CacheServer + LCS_PING
-}
-
-// Produce a URL to ping the RS to check on its availability
-func RSPingURL(configuration Config) string {
-	return configuration.RequestServer + RS_PING
 }
 
 // Produce a URL to request a new bundle be made by the RS

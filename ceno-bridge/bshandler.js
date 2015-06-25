@@ -24,17 +24,6 @@ function reportCompleteBundle(config, data, cb) {
 
 module.exports = function (config) {
   return function (req, res) {
-  //////////////////////////
-  // Handle PING requests //
-  //////////////////////////
-  if (req.url.substring(0, '/ping'.length) === '/ping') {
-    res.writeHead(200, {'Content-Type': 'text/plain'});
-    res.write('pong');
-    res.end();
-    bs_log('Responded to PING request');
-    return;
-  }
-
   ////////////////////////////
   // Handle bundle requests //
   ////////////////////////////
