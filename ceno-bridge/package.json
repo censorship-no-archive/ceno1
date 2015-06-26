@@ -6,7 +6,8 @@
   "author": "Zack Mullaly <redwire@riseup.net>",
   "main": "./bundle-server.js",
   "scripts": {
-    "start": "node bundle-server.js"
+    "start": "node bundle-server.js",
+    "test": "mocha tests/lookup-failure.js"
   },
   "dependencies": {
     "request": "latest",
@@ -14,7 +15,8 @@
     "equalitie-bundler": "~1.0.0"
   },
   "devDependencies": {
-    "should": "latest"
+    "should": "latest",
+    "mocha": "latest"
   },
   "repository": {
     "type": "git",

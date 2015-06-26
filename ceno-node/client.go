@@ -56,18 +56,6 @@ func pleaseWait(url string) ([]byte, bool) {
 	}
 }
 
-// Ping the LCS to see if it is available at a given time.
-func testLCSAvailability() bool {
-	response, err := http.Get(LCSPingURL(Configuration))
-	return err == nil && response.StatusCode == 200
-}
-
-// Ping the RS to see if it is available at a given time.
-func testRSAvailability() bool {
-	response, err := http.Get(RSPingURL(Configuration))
-	return err == nil && response.StatusCode == 200
-}
-
 // Report that an error occured trying to decode the response from the LCS
 // The LCS is expected to respond to this request with just the string "okay",
 // so we will ignore it for now.

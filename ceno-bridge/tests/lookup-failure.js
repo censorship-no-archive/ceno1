@@ -12,11 +12,11 @@ var request = require('request');
 describe('bundler-server', function () {
   before(function (done) {
     // Run an instance of the bundle-server using the request handler written for it.
-    this.config = JSON.parse(fs.readFileSync(path.join('..', 'config', 'node.json')));
-    var handler = require('../bshandler')(config);
+    this.config = JSON.parse(fs.readFileSync(path.join('config', 'node.json')));
+    var handler = require('../bshandler')(this.config);
 
     this.bServer = http.createServer(handler);
-    this.bServer.listen(config.port);
+    this.bServer.listen(this.config.port);
     done();
   });
 
