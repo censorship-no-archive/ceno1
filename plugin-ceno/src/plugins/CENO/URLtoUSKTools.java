@@ -13,6 +13,7 @@ import org.apache.commons.validator.routines.UrlValidator;
 
 import freenet.client.InsertException;
 import freenet.keys.FreenetURI;
+import freenet.support.Base64;
 
 public class URLtoUSKTools {
 
@@ -59,15 +60,18 @@ public class URLtoUSKTools {
 	 * @throws MalformedURLException
 	 */
 	public static FreenetURI computeUSKfromURL(String requestPath, String requestURI) throws MalformedURLException {
-		Map<String, String> splitMap = splitURL(requestPath);
-		String computedKey = requestURI.replaceFirst("SSK", "USK") + splitMap.get("domain") + "/-1/";
+		//TODO Once insertions with manifests that point to previous inserted files under the same domain
+		// are implemented, remove Base64 encoding and use USKs in the format:
+		// USK@{bridge public key, decryption key, encryption settings}/{domain}/{version}/{extra Path}
+		
+		String computedKey = requestURI.replaceFirst("SSK", "USK") + Base64.encodeStandardUTF8(requestPath) + "/-1/";
 
 		return new FreenetURI(computedKey);
 	}
 
 	public static FreenetURI computeInsertURI(String domain, String insertURI) throws MalformedURLException {
 		FreenetURI insertURIconfig = new FreenetURI(insertURI);
-		FreenetURI result = new FreenetURI("USK", domain, insertURIconfig.getRoutingKey(), insertURIconfig.getCryptoKey(), insertURIconfig.getExtra());
+		FreenetURI result = new FreenetURI("USK", Base64.encodeStandardUTF8(domain), insertURIconfig.getRoutingKey(), insertURIconfig.getCryptoKey(), insertURIconfig.getExtra());
 
 		try {
 			result.checkInsertURI();
