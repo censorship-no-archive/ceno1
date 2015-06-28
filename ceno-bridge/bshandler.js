@@ -9,16 +9,24 @@ var b = require('equalitie-bundler');
 // request *from* the RR timed out.
 const RR_COMPLETE = '/complete';
 
+// The header used to signify that the request for http://site.com was rewritten
+// from one for https://site.com.  Note that Nodejs' http.IncomingMessage.headers
+// object stores headers with all lowercase keys.
+const REWRITTEN_HEADER = 'x-ceno-rewritten';
+
 function bs_log(msg) {
   console.log('[BUNDLE SERVER] ' + msg);
 }
 
 // POST to the RR to prompt it to accept a completed bundle.
-function reportCompleteBundle(config, data, cb) {
+function reportCompleteBundle(config, data, wasRewritten, cb) {
+  var headers = {};
+  headers[REWRITTEN_HEADER] = wasRewritten;
   request({
     url: config.requestReceiver + RR_COMPLETE,
     method: 'POST',
-    json: data
+    json: data,
+    headers: headers
   }, cb);
 }
 
@@ -30,7 +38,20 @@ module.exports = function (config) {
   var requestedURL = qs.parse(url.parse(req.url).query).url;
   requestedURL = (new Buffer(requestedURL, 'base64')).toString();
   bs_log('Got request to bundle ' + requestedURL);
+  var rewrittenHeaderValue = req.headers[REWRITTEN_HEADER];
+  var wasRewritten = typeof(rewrittenHeaderValue ) !== 'undefined' && rewrittenHeaderValue === 'true';
+  bs_log('Request was rewritten: ' + wasRewritten.toString());
   var disconnected = false; // A flag set when the request is closed.
+
+  // Rewrite requests for http://site.com back to https://site.com
+  if (wasRewritten) {
+    var index = requestedURL.indexOf('http://');
+    if (index !== 0) {
+      requestedURL = 'https://' + requestedURL;
+    } else {
+      requestedURL = requestedURL.replace('http://', 'https://');
+    }
+  }
 
   req.on('close', function () {
     disconnected = true;
@@ -75,7 +96,7 @@ module.exports = function (config) {
         // rather than letting the bundling effort go to waste, we will POST to
         // the RR to prompt it to accept the now complete bundle.
         bs_log('Reporting bundle completion to RR');
-        reportCompleteBundle(config, data, function () {
+        reportCompleteBundle(config, data, wasRewritten, function () {
           res.end();
           bs_log('Sent POST to RR to prompt it to accept bundle');
         });
