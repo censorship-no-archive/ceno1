@@ -16,6 +16,7 @@
     "activeTab",
     "webRequest",
     "webRequestBlocking",
+    "requestHeaders",
     "https://*/*",
     "http://*/*"
   ] 

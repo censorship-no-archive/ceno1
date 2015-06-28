@@ -12,9 +12,19 @@ const NO_PROXY_MSG = 'CeNo Client not active. Please configure your browser' +
 const CENO_HEADER = 'X-Ceno-Proxy';
 const CENO_HEADER_VALUE = 'yxorP-oneC-X';
 
+// A special header to signify to the CC that the request for http://site.com
+// was rewritten from a request for https://site.com
+const REWRITTEN_HEADER = 'X-Ceno-Rewritten';
+
 // Paths to the icons used by the plugin
 const REGULAR_ICON = 'icon.png';
 const INVERTED_ICON = 'iconinv.png';
+
+// A stack containing recently rewritten URLs.
+// If a site like `http://google.com` appears here, then we have rewritten it from
+// `https://google.com`, and a header should be associated with the response
+// to indicate to the CC that it should pass this information along to the RR and BS.
+var rewrittenURLs = [];
 
 /* If the URL has the https scheme, make it http so that CeNo client
  * can actually handle it for us.
@@ -25,7 +35,8 @@ const INVERTED_ICON = 'iconinv.png';
  */
 function stripHTTPS(url) {
   if (url.match('^https') !== null) {
-    return url.replace('https', 'http');
+    url = url.replace('https', 'http');
+    rewrittenURLs.push(url);
   }
   return url;
 }
@@ -47,12 +58,30 @@ function sendToProxy(details) {
   return { redirectUrl: url };
 }
 
+/* Set a special header in requests being redirected to the CC informing it
+ * that the request for http://site.com was originally for https://site.com.
+ *
+ * @param {object} details - Information about the headers and request
+ */
+function setRewrittenHeader(details) {
+  for (var i = rewrittenURLs.length - 1; i >= 0; i--) {
+    if (details.url === rewrittenURLs[i]) {
+      details.requestHeaders.push({name: REWRITTEN_HEADER, value: 'true'});
+      rewrittenURLs.splice(i, 1);
+      break;
+    }
+  }
+  return {requestHeaders: details.requestHeaders};
+}
+
 /* Add listeners to the event fired when a site is requested or a
  * redirect is issued to use the CeNo proxy.
  */
 function activateCeNo() {
   chrome.webRequest.onBeforeRequest.addListener(
     sendToProxy, {urls: ['https://*/*', 'http://*/*']}, ['blocking']);
+  chrome.webRequest.onBeforeSendHeaders.addListener(
+    setRewrittenHeader, {urls: ['http://*/*']}, ['blocking', 'requestHeaders']);
   //chrome.webRequest.onBeforeRedirect.addListener(
   //  sendToProxy, {urls: ['https://*/*', 'http://*/*']});
   document.getElementById('activeState').value = 'true';
