@@ -77,11 +77,9 @@ public class BundleInserter {
 			throw new IOException("Bundle content for url " + url + " was empty.");
 		}
 
-		Map<String, String> splitMap = URLtoUSKTools.splitURL(url);
-
-		FreenetURI insertKey = URLtoUSKTools.computeInsertURI(splitMap.get("domain"), CENOBridge.initConfig.getProperty("insertURI"));
+		FreenetURI insertKey = URLtoUSKTools.computeInsertURI(url, CENOBridge.initConfig.getProperty("insertURI"));
 		Logger.normal(BundleInserter.class, "Initiating bundle insertion for URL: " + url);
-		insertBundleManifest(url, insertKey, splitMap.get("extraPath"), bundle.getContent(), insertCallback);
+		insertBundleManifest(url, insertKey, null, bundle.getContent(), insertCallback);
 	}
 
 	public static void insertBundleManifest(String url, FreenetURI insertURI, String docName, String content, ClientPutCallback insertCallback) throws IOException, InsertException {

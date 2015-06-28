@@ -24,16 +24,16 @@ public class LookupHandler extends AbstractCENOClientHandler {
 		String urlParam = request.getParam("url", "");
 		if (urlParam.isEmpty()) {
 			if (clientIsHtml) {
-				return new CENOException(CENOErrCode.LCS_HANDLER_INVALID_URL).getMessage();
+				return new CENOException(CENOErrCode.LCS_HANDLER_URL_INVALID).getMessage();
 			}
-			return returnErrorJSON(new CENOException(CENOErrCode.LCS_HANDLER_INVALID_URL));
+			return returnErrorJSON(new CENOException(CENOErrCode.LCS_HANDLER_URL_INVALID));
 		}
 
 		if (!clientIsHtml) {
 			try {
 				urlParam = Base64.decodeUTF8(urlParam);
 			} catch (IllegalBase64Exception e) {
-				return returnErrorJSON(new CENOException(CENOErrCode.LCS_HANDLER_INVALID_URL));
+				return returnErrorJSON(new CENOException(CENOErrCode.LCS_HANDLER_URL_INVALID));
 			}
 		}
 
@@ -41,9 +41,9 @@ public class LookupHandler extends AbstractCENOClientHandler {
 			urlParam = URLtoUSKTools.validateURL(urlParam);
 		} catch (MalformedURLException e) {
 			if (clientIsHtml) {
-				return new CENOException(CENOErrCode.LCS_HANDLER_INVALID_URL).getMessage();
+				return new CENOException(CENOErrCode.LCS_HANDLER_URL_INVALID).getMessage();
 			} else {
-				return returnErrorJSON(new CENOException(CENOErrCode.LCS_HANDLER_INVALID_URL));
+				return returnErrorJSON(new CENOException(CENOErrCode.LCS_HANDLER_URL_INVALID));
 			}
 		}
 
@@ -52,9 +52,9 @@ public class LookupHandler extends AbstractCENOClientHandler {
 			calculatedUSK = URLtoUSKTools.computeUSKfromURL(urlParam, CENOClient.bridgeKey);
 		} catch (Exception e) {
 			if (clientIsHtml) {
-				return new CENOException(CENOErrCode.LCS_HANDLER_INVALID_URL).getMessage();
+				return new CENOException(CENOErrCode.LCS_HANDLER_URL_INVALID).getMessage();
 			} else {
-				return returnErrorJSON(new CENOException(CENOErrCode.LCS_HANDLER_INVALID_URL));
+				return returnErrorJSON(new CENOException(CENOErrCode.LCS_HANDLER_URL_INVALID));
 			}
 		}
 

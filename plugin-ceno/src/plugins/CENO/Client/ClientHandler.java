@@ -20,7 +20,7 @@ public class ClientHandler extends AbstractCENOClientHandler {
 		if (isClientHtml(request)) {
 			return "404: Requested path is invalid.";
 		} else {
-			return returnErrorJSON(new CENOException(CENOErrCode.LCS_HANDLER_INVALID_URL));
+			return returnErrorJSON(new CENOException(CENOErrCode.LCS_HANDLER_URL_INVALID));
 		}
 	}
 
