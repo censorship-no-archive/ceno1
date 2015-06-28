@@ -139,7 +139,8 @@ func execPleaseWait(URL string, w http.ResponseWriter, r *http.Request) {
 func proxyHandler(w http.ResponseWriter, r *http.Request) {
   w = WriteProxyHeader(w)
 	URL := r.URL.String()
-  fmt.Printf("Got a request for %s\n", URL)
+  wasRewritten := r.Header.Get(REWRITTEN_HEADER) == "true"
+  fmt.Printf("Got a request for %s\nRewritten: %v\n", URL, wasRewritten)
 	matched, err := regexp.MatchString(URL_REGEX, URL)
 	if !matched || err != nil {
 		fmt.Println("Invalid URL " + URL)
@@ -155,7 +156,6 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
     // Assuming the reason the response is malformed is because of the formation of the bundle,
     // so we will request that a new bundle be created.
     if result.ErrCode == ERR_MALFORMED_LCS_RESPONSE {
-      wasRewritten := r.Header().Get(REWRITTEN_HEADER) == "true"
       err = requestNewBundle(URL, wasRewritten)
       fmt.Printf("Requested new bundle; Error: ")
       fmt.Println(err)
@@ -173,7 +173,7 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 		if result.Found {
 			w.Write([]byte(result.Bundle))
 		} else {
-			err = requestNewBundle(URL)
+			err = requestNewBundle(URL, wasRewritten)
 			fmt.Println("Error information from requestNewbundle")
 			fmt.Println(err)
 			if err != nil {
