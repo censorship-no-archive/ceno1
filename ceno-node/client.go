@@ -24,6 +24,10 @@ The page you have requested is being prepared.
 Plesae refresh this page in a few seconds to check if it is ready.
 `
 
+// The header used to communicate from the browser extension to the bundle server
+// that a request for http://site.com was rewritten from one for https://site.com.
+const REWRITTEN_HEADER = "X-Ceno-Rewritten"
+
 // Result of a bundle lookup from cache server.
 type Result struct {
   ErrCode  ErrorCode
@@ -100,7 +104,7 @@ func lookup(lookupURL string) Result {
 }
 
 // POST to the request server to have it start making a new bundle.
-func requestNewBundle(lookupURL string) error {
+func requestNewBundle(lookupURL string, wasRewritten bool) error {
 	// We can ignore the content of the response since it is not used.
 	reader := bytes.NewReader([]byte(lookupURL))
 	URL := CreateBundleURL(Configuration, lookupURL)
@@ -109,6 +113,11 @@ func requestNewBundle(lookupURL string) error {
 		return err
 	}
 	req.Header.Set("Content-Type", "text/plain")
+  if wasRewritten {
+    req.Header.Set(REWRITTEN_HEADER, "true")
+  } else {
+    req.Header.Set(REWRITTEN_HEADER, "false")
+  }
 	client := &http.Client{}
 	_, err2 := client.Do(req)
 	return err2
@@ -146,7 +155,8 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
     // Assuming the reason the response is malformed is because of the formation of the bundle,
     // so we will request that a new bundle be created.
     if result.ErrCode == ERR_MALFORMED_LCS_RESPONSE {
-      err = requestNewBundle(URL)
+      wasRewritten := r.Header().Get(REWRITTEN_HEADER) == "true"
+      err = requestNewBundle(URL, wasRewritten)
       fmt.Printf("Requested new bundle; Error: ")
       fmt.Println(err)
       if err != nil {
