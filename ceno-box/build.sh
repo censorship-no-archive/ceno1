@@ -1,6 +1,9 @@
 #! /bin/bash
 
 # This script will create a CENO all-in-one box ready for distribution
+# If the -d (debug) flag is enabled, the bundle will include a CENO.jar build
+# with the latest local modifications.
+#
 # This bundle includes:
 #  * A Freenet node, preloaded with the WebOfTrust, Freemail and CENO plugins,
 #    as well as preconfigured with the CENO Client identity. Opennet is
@@ -10,6 +13,17 @@
 #    the CENO Freenet plugin.
 #  * A Firefox profile that forwards all traffic to the CENOClient proxy.
 #  * A plugin for chrome that will rewrite HTTPS requests to HTTP ones.
+
+
+# Parse options to check if DEBUG mode is enabled
+while getopts "d" OPTION
+do
+  case $OPTION in
+    d)
+      DEBUG=1
+      ;;
+  esac
+done
 
 # Clean files and directories from previous builds
 if [ -d CENOBox ]; then
@@ -39,13 +53,6 @@ if [ -a client ]; then
 fi
 sh ./build.sh
 cd ..
-
-# Build CENO client Freenet plugin
-echo "Building CENO client Freenet plugin"
-cd ../plugin-ceno
-ant dist > /dev/null
-cp dist/CENO.jar ../ceno-box/ceno-freenet/plugins/
-cd ../ceno-box
 
 # Copy necessary files from the Freenet installation
 echo "Copying necessary files from the existing Freenet installation"
@@ -80,6 +87,17 @@ cp -rL ceno-{chrome,firefox} CENOBox
 cp -r ceno-{freenet,extra}/* CENOBox
 mkdir CENOBox/ceno-client
 cp -r ceno-node/{client,views,config} CENOBox/ceno-client
+
+if [[ $DEBUG == 1 ]]; then
+  # Build CENO client Freenet plugin
+  echo "Building CENO client Freenet plugin"
+  cd ../plugin-ceno
+  ant dist > /dev/null
+  cp dist/CENO.jar ../ceno-box/ceno-freenet/plugins/
+  cd ../ceno-box
+  cp ceno-freenet/plugins/CENO.jar CENOBox/
+  cp ceno-freenet/freenet.ini.debug CENOBox/freenet.ini
+fi
 
 echo "Creating the distribution tar"
 tar -pczf CENOBox.tar.gz CENOBox/
