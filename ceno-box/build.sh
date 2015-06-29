@@ -93,10 +93,9 @@ if [[ $DEBUG == 1 ]]; then
   echo "Building CENO client Freenet plugin"
   cd ../plugin-ceno
   ant dist > /dev/null
-  cp dist/CENO.jar ../ceno-box/ceno-freenet/plugins/
+  cp dist/CENO.jar ../ceno-box/ceno-debug/
   cd ../ceno-box
-  cp ceno-freenet/plugins/CENO.jar CENOBox/
-  cp ceno-freenet/freenet.ini.debug CENOBox/freenet.ini
+  cp -r ceno-debug/* CENOBox/
 fi
 
 echo "Creating the distribution tar"
