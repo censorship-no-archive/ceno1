@@ -162,3 +162,8 @@ chrome.extension.onMessage.addListener(function (req, sender, respond) {
     console.log('Unrecognized directive');
   };
 });
+
+/* In case the user doesn't toggle the extension off before closing the browser,
+ * change the icon to the regular one on startup to avoid any confusion.
+ */
+setIcon(REGULAR_ICON);
