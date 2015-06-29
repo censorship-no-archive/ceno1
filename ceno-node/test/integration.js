@@ -7,49 +7,34 @@ var urllib = require('url');
 var querystring = require('querystring');
 var request = require('request');
 
+// Header set by extension to signal a rewrite from HTTPS to HTTP
+// Node's http.IncomingMessage.headers use lowercase for header names
+const REWRITTEN_HEADER = 'x-ceno-rewritten';
+
 ////////////////////////
 // Local Cache Server //
 ////////////////////////
 
-var cache = {}; // Map URLs to bundles.
-
 var lcsServer = http.createServer(function (req, res) {
-  if (req.url.substring(0, '/ping'.length) === '/ping') {
-    res.writeHead(200, {'Content-Type': 'text/plain'});
-    res.write('pong');
-    res.end();
-    console.log('LCS got ping. Wrote pong.');
-  } else if (req.url.substring(0, '/lookup'.length) === '/lookup') {
-    console.log('LCS got lookup');
-    var url = querystring.parse(urllib.parse(req.url).query).url;
-    res.writeHead(200, {'Content-Type': 'application/json'});
-    if (cache.hasOwnProperty(url)) {
-      res.write(JSON.stringify({
-        complete: true,
-        found: true,
-        bundle: cache[url]
-      }));
-      res.end();
-      console.log('LCS wrote cached bundle');
-    } else {
-      res.write(JSON.stringify({
-        complete: true,
-        found: false
-      }));
-      res.end();
-      console.log('LCS wrote complete true found false');
-    }
-  }
+  console.log('LCS got lookup');
+  var url = querystring.parse(urllib.parse(req.url).query).url;
+  url = (new Buffer(url, 'base64')).toString();
+  res.writeHead(200, {'Content-Type': 'application/json'});
+  res.write(JSON.stringify({
+    complete: true,
+    found: false
+  }));
+  res.end();
 });
 
-lcsServer.listen(3091);
-console.log('Local Cache Server listening on port 3091');
+lcsServer.listen(8888);
+console.log('Local Cache Server listening on port 8888');
 
 ///////////////////
 // Bundle Server //
 ///////////////////
 
-var bsHandlerMaker = require('../src/bshandler');
+var bsHandlerMaker = require('../../ceno-bridge/bshandler');
 
 var bsConfig = {
   port: 3094,
@@ -70,27 +55,40 @@ console.log('Bundle Server listening on port ' + bsConfig.port);
 // The request sender will also act as the request receiver, so this server will
 // immediately forward requests to the bundle server.
 var rsServer = http.createServer(function (req, res) {
-  if (req.url.substring(0, '/ping'.length) === '/ping') {
-    res.writeHead(200, {'Content-Type': 'text/plain'});
-    res.write('pong');
-    res.end();
-    console.log('RS got ping, wrote pong');
-  } else if (req.url.substring(0, '/create'.length) === '/create') {
+  if (req.url.substring(0, '/create'.length) === '/create') {
     console.log('RS got create');
     var url = querystring.parse(urllib.parse(req.url).query).url;
+    url = (new Buffer(url, 'base64')).toString();
+    console.log('RS got URL ' + url);
     res.writeHead(200, {'Content-Type': 'text/plain'});
     res.write('okay');
     res.end();
     console.log('RS wrote okay');
-    request('http://localhost:3094?url=' + url, function (err, response, body) {
+    var headers = {};
+    headers[REWRITTEN_HEADER] = req.headers[REWRITTEN_HEADER];
+    url = (new Buffer(url)).toString('base64');
+    request({
+      url: 'http://localhost:3094?url=' + url,
+      headers: headers
+    }, function (err, response, body) {
       if (err) {
-        console.log('Error from bundle server: ' + err.message);
+        console.log('RS got an error from bundle server: ' + err.message);
       } else {
         // Act as the Bundle Inserter
-        cache[url] = JSON.parse(body.toString()).bundle;
-        console.log(cache[url]);
-        console.log('Inserted bundle for ' + url + ' into the cache.');
+        console.log('RS got a bundle back from the bundle server');
       }
+    });
+  } else if (req.url.substring(0, '/complete'.length) === '/complete') {
+    var jsonData = '';
+    req.on('data', function (data) {
+      jsonData += data;
+    });
+    req.on('end', function () {
+      var data = JSON.parse(jsonData);
+      var url = (new Buffer(data.url, 'base64')).toString();
+      console.log('RS got bundle for ' + url);
+      res.write('okay');
+      res.end();
     });
   }
 });
