@@ -57,11 +57,9 @@ function directLookupURL(url, rewritten) {
  * @param {string} url - The URL being requested, must not contain extraneous characters
  */
 function stripHTTPS(url) {
-  console.log('### Got request rewrite ' + url);
   var rewritten = false;
   if (url.match('^https') !== null) {
     url = url.replace('https', 'http');
-    console.log('Rewritten URL');
     rewritten = true;
   }
   return {url: directLookupURL(url, rewritten), rewritten: rewritten};
@@ -73,7 +71,6 @@ function stripHTTPS(url) {
  */
 function sendToProxy(event) {
   let channel = event.subject.QueryInterface(Ci.nsIHttpChannel);
-  console.log('###### Original URL received is ' + channel.URI.spec + ' ######'); 
   // If we get back a request that is already directed straight to the CC, ignore it
   if (/^http:\/\/127\.0\.0\.1:3090/.test(channel.URI.spec)) {
     channel.setRequestHeader(REWRITTEN_HEADER, /rewritten=true$/.test(channel.URI.spec).toString(), false);
@@ -162,16 +159,13 @@ panel.port.on('toggle-clicked', function () {
   if (active) {
     deactivateCeNo();
     setIcon(REGULAR_ICON);
-    console.log('Deactivated');
   } else {
     ensureProxyIsRunning(function (proxyIsSet) {
       if (proxyIsSet) {
         activateCeNo();
         setIcon(INVERTED_ICON);
-        console.log('Activated');
       } else {
         setIcon(REGULAR_ICON);
-        console.log('Proxy is not running. Not activating');
         panel.port.emit('issue-alert', NO_PROXY_MSG);
       }
     });
