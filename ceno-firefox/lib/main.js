@@ -44,9 +44,9 @@ let active = false;
  *
  * @param {string} url - The orginal URL to request
  */
-function directLookupURL(url) {
+function directLookupURL(url, rewritten) {
   let b64url = base64.encode(url, 'utf-8');
-  return 'http://' + CENO_ADDR + ':' + CENO_PORT + '/lookup?url=' + b64url;//.replace(/=/g, '%3D');
+  return 'http://' + CENO_ADDR + ':' + CENO_PORT + '/lookup?url=' + b64url + '&rewritten=' + rewritten;
 }
 
 /* If the URL has the https scheme, make it http so that CeNo client
@@ -58,12 +58,13 @@ function directLookupURL(url) {
  */
 function stripHTTPS(url) {
   console.log('### Got request rewrite ' + url);
-  let rewritten = false;
+  var rewritten = false;
   if (url.match('^https') !== null) {
     url = url.replace('https', 'http');
+    console.log('Rewritten URL');
     rewritten = true;
   }
-  return {url: directLookupURL(url), rewritten: rewritten};
+  return {url: directLookupURL(url, rewritten), rewritten: rewritten};
 }
 
 /* Handler for intercepted requests.
@@ -75,15 +76,12 @@ function sendToProxy(event) {
   console.log('###### Original URL received is ' + channel.URI.spec + ' ######'); 
   // If we get back a request that is already directed straight to the CC, ignore it
   if (/^http:\/\/127\.0\.0\.1:3090/.test(channel.URI.spec)) {
+    channel.setRequestHeader(REWRITTEN_HEADER, /rewritten=true$/.test(channel.URI.spec).toString(), false);
+    channel.setRequestHeader(CENO_HEADER, CENO_HEADER_VALUE, false);
     return;
   }
-  let values = stripHTTPS(channel.URI.spec);
-  if (values.rewritten) {
-    console.log('###### Rewrote URL to ' + values.url + ' ######');
-  }
-  channel.setRequestHeader(CENO_HEADER, CENO_HEADER_VALUE, false);
-  channel.setRequestHeader(REWRITTEN_HEADER, values.rewritten.toString(), false);
-  channel.redirectTo(newURI(values.url));
+  let directURL = stripHTTPS(channel.URI.spec).url;
+  channel.redirectTo(newURI(directURL));
 }
 
 /* Listen for events fired when a site is requested and redirect it to the CeNo client.
