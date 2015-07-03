@@ -77,7 +77,6 @@ function sendToProxy(event) {
   // If we get back a request that is already directed straight to the CC, ignore it
   if (/^http:\/\/127\.0\.0\.1:3090/.test(channel.URI.spec)) {
     channel.setRequestHeader(REWRITTEN_HEADER, /rewritten=true$/.test(channel.URI.spec).toString(), false);
-    channel.setRequestHeader(CENO_HEADER, CENO_HEADER_VALUE, false);
     return;
   }
   let directURL = stripHTTPS(channel.URI.spec).url;
