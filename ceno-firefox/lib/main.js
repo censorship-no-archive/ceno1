@@ -30,6 +30,10 @@ const REWRITTEN_HEADER = 'X-Ceno-Rewritten';
 const REGULAR_ICON = 'icon.png';
 const INVERTED_ICON = 'iconinv.png';
 
+// Firefox preference names of things relevant to how the use of HTTPS is enforced
+const PROXY_HTTP_ADDR = 'network.proxy.http';
+const PROXY_HTTP_PORT = 'network.proxy.http_port';
+
 // Global switch to keep track of the state of the extension.
 let active = false;
 
@@ -41,6 +45,7 @@ let active = false;
  * @param {string} url - The URL being requested, must not contain extraneous characters
  */
 function stripHTTPS(url) {
+  console.log('### Got request rewrite ' + url);
   let rewritten = false;
   if (url.match('^https') !== null) {
     url = url.replace('https', 'http');
@@ -52,12 +57,19 @@ function stripHTTPS(url) {
 /* Handler for intercepted requests.
  * `subject` contains all the relevant information about the request.
  */
-function sendToProxy({subject, type, data}) {
+function sendToProxy(args) {
+  console.log('args in sendToProxy');
+  console.log(args);
+  subject = args['subject'];
+  console.log('Subject in sendToProxy');
+  console.log(subject);
+  subject.QueryInterface(Ci.nsIHttpChannel);
+  console.log('Subject.URI.spec is now');
+  console.log(subject.URI.spec);
   let values = stripHTTPS(subject.URI.spec);
-  if (values.rewritten) { console.log('Rewrote URL to ' + url); }
-  subject.Queryinterface(Ci.nsIHttpChannel);
+  if (values.rewritten) { console.log('Rewrote URL to ' + values.url); }
   subject.setRequestHeader(CENO_HEADER, CENO_HEADER_VALUE, false);
-  subject.setRequestHeader(REWRITTEN_HEADER, value.rewritten.toString(), false);
+  subject.setRequestHeader(REWRITTEN_HEADER, values.rewritten.toString(), false);
   subject.redirectTo(newURI(values.url));
 }
 
@@ -65,8 +77,8 @@ function sendToProxy({subject, type, data}) {
  */
 function activateCeNo() {
   on('http-on-modify-request', sendToProxy, true);
-  preferences.set('network.proxy.http', CENO_ADDR);
-  preferences.set('network.proxy.http_port', CENO_PORT);
+  preferences.set(PROXY_HTTP_ADDR, CENO_ADDR);
+  preferences.set(PROXY_HTTP_PORT, CENO_PORT);
   // Turn proxying on
   preferences.set('network.proxy.type', 1);
   activated = true;
@@ -103,7 +115,7 @@ function ensureProxyIsRunning(callback) {
       callback(typeof value !== 'undefined' 
             && value !== null
             && value === CENO_HEADER_VALUE);
-    });
+    }
   }).get();
 }
 
