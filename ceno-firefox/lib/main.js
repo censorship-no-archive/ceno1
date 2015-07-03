@@ -1,12 +1,13 @@
 let { ToggleButton } = require('sdk/ui/button/toggle');
 let { Ci } = require('chrome');
-let { on, off } = require('sdk/system/events');
 let { newURI } = require('sdk/url/utils');
+let events = require('sdk/system/events');
 let preferences = require('sdk/preferences/service');
 let Request = require('sdk/request').Request;
 let panels = require('sdk/panel');
 let self = require('sdk/self');
 let tabs = require('sdk/tabs');
+let base64 = require('sdk/base64');
 
 // CeNo configuration settings
 const CENO_PORT = 3090;
@@ -33,9 +34,20 @@ const INVERTED_ICON = 'iconinv.png';
 // Firefox preference names of things relevant to how the use of HTTPS is enforced
 const PROXY_HTTP_ADDR = 'network.proxy.http';
 const PROXY_HTTP_PORT = 'network.proxy.http_port';
+const PROXY_SSL_ADDR = 'network.proxy.ssl';
+const PROXY_SSL_PORT = 'network.proxy.ssl_port';
 
 // Global switch to keep track of the state of the extension.
 let active = false;
+
+/* Create the URL that can be requested to directly ask the CC for a site.
+ *
+ * @param {string} url - The orginal URL to request
+ */
+function directLookupURL(url) {
+  let b64url = base64.encode(url, 'utf-8');
+  return 'http://' + CENO_ADDR + ':' + CENO_PORT + '/lookup?url=' + b64url;//.replace(/=/g, '%3D');
+}
 
 /* If the URL has the https scheme, make it http so that CeNo client
  * can actually handle it for us.
@@ -51,34 +63,37 @@ function stripHTTPS(url) {
     url = url.replace('https', 'http');
     rewritten = true;
   }
-  return {url: url, rewritten: rewritten};
+  return {url: directLookupURL(url), rewritten: rewritten};
 }
 
 /* Handler for intercepted requests.
- * `subject` contains all the relevant information about the request.
+ *
+ * @param {object} event - An object containing information about the event
  */
-function sendToProxy(args) {
-  console.log('args in sendToProxy');
-  console.log(args);
-  subject = args['subject'];
-  console.log('Subject in sendToProxy');
-  console.log(subject);
-  subject.QueryInterface(Ci.nsIHttpChannel);
-  console.log('Subject.URI.spec is now');
-  console.log(subject.URI.spec);
-  let values = stripHTTPS(subject.URI.spec);
-  if (values.rewritten) { console.log('Rewrote URL to ' + values.url); }
-  subject.setRequestHeader(CENO_HEADER, CENO_HEADER_VALUE, false);
-  subject.setRequestHeader(REWRITTEN_HEADER, values.rewritten.toString(), false);
-  subject.redirectTo(newURI(values.url));
+function sendToProxy(event) {
+  let channel = event.subject.QueryInterface(Ci.nsIHttpChannel);
+  console.log('###### Original URL received is ' + channel.URI.spec + ' ######'); 
+  // If we get back a request that is already directed straight to the CC, ignore it
+  if (/^http:\/\/127\.0\.0\.1:3090/.test(channel.URI.spec)) {
+    return;
+  }
+  let values = stripHTTPS(channel.URI.spec);
+  if (values.rewritten) {
+    console.log('###### Rewrote URL to ' + values.url + ' ######');
+  }
+  channel.setRequestHeader(CENO_HEADER, CENO_HEADER_VALUE, false);
+  channel.setRequestHeader(REWRITTEN_HEADER, values.rewritten.toString(), false);
+  channel.redirectTo(newURI(values.url));
 }
 
 /* Listen for events fired when a site is requested and redirect it to the CeNo client.
  */
 function activateCeNo() {
-  on('http-on-modify-request', sendToProxy, true);
+  events.on('http-on-modify-request', sendToProxy);
   preferences.set(PROXY_HTTP_ADDR, CENO_ADDR);
   preferences.set(PROXY_HTTP_PORT, CENO_PORT);
+  preferences.set(PROXY_SSL_ADDR, CENO_ADDR);
+  preferences.set(PROXY_SSL_PORT, CENO_PORT);
   // Turn proxying on
   preferences.set('network.proxy.type', 1);
   activated = true;
@@ -87,7 +102,7 @@ function activateCeNo() {
 /* Remove listeners for vents fired when a site is requested.
  */
 function deactivateCeNo() {
-  off('http-on-modify-request', sendToProxy);
+  events.off('http-on-modify-request', sendToProxy);
   // Turn the proxying off
   preferences.set('network.proxy.type', 0);
   activated = false;
