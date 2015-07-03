@@ -8,6 +8,7 @@ let panels = require('sdk/panel');
 let self = require('sdk/self');
 let tabs = require('sdk/tabs');
 let base64 = require('sdk/base64');
+let ss = require('sdk/simple-storage');
 
 // CeNo configuration settings
 const CENO_PORT = 3090;
@@ -36,9 +37,12 @@ const PROXY_HTTP_ADDR = 'network.proxy.http';
 const PROXY_HTTP_PORT = 'network.proxy.http_port';
 const PROXY_SSL_ADDR = 'network.proxy.ssl';
 const PROXY_SSL_PORT = 'network.proxy.ssl_port';
+const PROXY_TYPE = 'network.proxy.type';
+const PROXY_TYPE_MANUAL = 1;
+const PROXY_TYPE_NONE = 0;
 
-// Global switch to keep track of the state of the extension.
-let active = false;
+// Initialize the extension's active status to false.
+ss.storage.active = false;
 
 /* Create the URL that can be requested to directly ask the CC for a site.
  *
@@ -89,8 +93,8 @@ function activateCeNo() {
   preferences.set(PROXY_SSL_ADDR, CENO_ADDR);
   preferences.set(PROXY_SSL_PORT, CENO_PORT);
   // Turn proxying on
-  preferences.set('network.proxy.type', 1);
-  activated = true;
+  preferences.set(PROXY_TYPE, PROXY_TYPE_MANUAL);
+  ss.storage.active = true;
 }
 
 /* Remove listeners for vents fired when a site is requested.
@@ -98,8 +102,8 @@ function activateCeNo() {
 function deactivateCeNo() {
   events.off('http-on-modify-request', sendToProxy);
   // Turn the proxying off
-  preferences.set('network.proxy.type', 0);
-  activated = false;
+  preferences.set(PROXY_TYPE, PROXY_TYPE_NONE);
+  ss.storage.active = false;
 }
 
 /* Set the extension's icon.
@@ -107,6 +111,7 @@ function deactivateCeNo() {
  * @param {string} iconPath - Path to the icon to use, starting from the data directory
  */
 function setIcon(iconPath) {
+  console.log('Setting icon to ' + iconPath);
   button.state('window', {
     icon: self.data.url(iconPath)
   });
@@ -156,20 +161,31 @@ let panel = panels.Panel({
  * the toggle button was clicked.
  */
 panel.port.on('toggle-clicked', function () {
-  if (active) {
+  if (ss.storage.active) {
     deactivateCeNo();
+    console.log('Deactivated');
     setIcon(REGULAR_ICON);
   } else {
     ensureProxyIsRunning(function (proxyIsSet) {
       if (proxyIsSet) {
         activateCeNo();
+        console.log('Activated');
         setIcon(INVERTED_ICON);
       } else {
+        console.log('Not activating');
         setIcon(REGULAR_ICON);
         panel.port.emit('issue-alert', NO_PROXY_MSG);
       }
     });
   }
+});
+
+/* Listen for messages asking whether the extension is actively intercepting
+ * requests currently and emit back a response.
+ */
+panel.port.on('check-activity', function () {
+  console.log('Got request to retrieve activity state. Current value = ' + ss.storage.active);
+  panel.port.emit('inform-activity', ss.storage.active);
 });
 
 /* Show the information panel.
