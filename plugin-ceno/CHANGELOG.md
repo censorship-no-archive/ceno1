@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-## [v0.3.0-rc1]
+## [v0.3.0-rc1] - 2015-06-15
 ### Added
   - Improved CC-LCS integration and error handling
   - Support for requesting too big bundles
@@ -22,7 +22,7 @@
 
 
 
-## [v0.3.0-rc0]
+## [v0.3.0-rc0] - 2015-06-11
 ### Added
   - Improved CC-LCS integration and error handling
   - Improved URL validation
@@ -41,7 +41,7 @@
 
 
 
-## [v0.2.1]
+## [v0.2.1] - 2015-07-15
 ### Added
   - Basic support for errors and polished integration of LCS with CC
   - Support for FCP messaging with the WOT plugin
@@ -55,7 +55,7 @@
 
 
 
-## [v0.2.0]
+## [v0.2.0] - 2015-04-19
 ### Added
   - Request for bundles from the bridge over Freemail
   - Support HTML and JSON clients
@@ -86,3 +86,4 @@
 [v0.3.0-rc0]: https://github.com/equalitie/ceno/compare/v0.2.1...v0.3.0-rc0
 [v0.2.1]: https://github.com/equalitie/ceno/compare/v0.2.0...v0.2.1
 [v0.2.0]: https://github.com/equalitie/ceno/compare/v0.1.0...v0.2.0
+[v0.1.0]: https://github.com/equalitie/ceno/compare/48c7c207...v0.1.0

@@ -9,7 +9,7 @@
   5. Once the WebOfTrust plugin has been loaded, you will see a `Community` option in the navigation bar (you might have to reload the page in order to see that). Visit the `Own anonymous identities` sub-item, or use the direct link [http://127.0.0.1:8888/WebOfTrust/OwnIdentities](http://127.0.0.1:8888/WebOfTrust/OwnIdentities).
   6. In the form under `Restore an own identity from Freenet` paste the insertion URI of the Client identity `USK@SNS-BKGDFS4ciG3HV6o5MQjvIdCDn9G8DfIeIK~7kBQ,WMeRYMzx2tQHM~O8UWglUmBnjIhp~bh8xue-6g2pmps,AQECAAE/WebOfTrust/0` and click on restore. Wait till the identity is restored.
   7. Head back to the `Configuration > Plugins` page.
-  8. Copy `USK@kWKE67nhHNp6C-lgD5QtpL5qnIgmsnM6B5i7xxJGXIQ,UhZYJ2R6egIAjdMGAQbsjPcos1~CIJ~CbUKjpuUlwXA,AQACAAE/CENO-plugin/0/CENO.jar` at the text box right below the `Add an Unofficial Plugin` header and click `Load`.
+  8. Copy `USK@kWKE67nhHNp6C-lgD5QtpL5qnIgmsnM6B5i7xxJGXIQ,UhZYJ2R6egIAjdMGAQbsjPcos1~CIJ~CbUKjpuUlwXA,AQACAAE/CENO-plugin/-1/CENO.jar` at the text box right below the `Add an Unofficial Plugin` header and click `Load`.
   9. Make sure CENO has been successfully loaded, by finding the corresponding row in the `Plugins currently loaded` list.
   10. Start the CENOClient, configure appropriately your browser to use it as a proxy, and surf anonymously the Web evading censorship.
 

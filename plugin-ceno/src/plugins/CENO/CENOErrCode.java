@@ -24,7 +24,7 @@ public enum CENOErrCode {
 
 	LCS_LOOKUP_LOCAL(2130, ErrAction.LOG, "Lookup in the local cache failed"),
 	LCS_LOOKUP_ULPR(2140, ErrAction.LOG, "Lookup in the distributed cache failed"),
-	LCS_LOOKUP_ULPR_INIT(2141, ErrAction.RETRY, "Could not initialize ULPR"),
+	LCS_LOOKUP_ULPR_INIT(2141, ErrAction.RETRY, "Could not initiate a ULPR"),
 	LCS_LOOKUP_ULPR_FAILED(2142, ErrAction.LOG, "Passive request in the distributed cache failed"),
 
 	// LCS inter-agent errors
