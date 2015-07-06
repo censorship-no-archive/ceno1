@@ -1,6 +1,16 @@
 # Change Log
 
 ## Unreleased
+### Added  
+  - LCS will try to fetch the latest version, using -1 as the suggested version in the ULPR request
+  - Support for every type of URL
+  - Automated the process of releasing the CENOBox
+
+### Changed
+  - USK calculation is using the base64 encoded version of the whole URL, instead of the domain
+  - Updated LCS and RS error codes and default messages
+  - RR base64 encodes the URL before sending it to BS
+
 
 ## [v0.3.0-rc1] - 2015-06-15
 ### Added
