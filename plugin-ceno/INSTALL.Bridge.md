@@ -3,23 +3,27 @@
 ## What is a CENO Bridge?
 CENO users rely on special nodes, the so-called Bridges, to fetch for them and insert in the distributed cache bundles for URLs that haven't been requested before, or their cached version is too old (stale). The Bridges are run by organizations or individual volunteers who want to protect the right of Freedom of Information of people living in censored network environments.
 The Bridge is responsible for the following tasks:
+
   * Provide the means for establishing an anonymous secure channel with CENO clients
   * Receive requests for URLs users want to access via CENO
   * Validate the URL, request it over an anonymous overlay network and prepare a bundle for it
   * Insert the bundle in the distributed cache in a way that it can be retrieved anonymously, verified and decrypted by the clients
   * Keep a table with the latest insertion of a specific URL, in order to avoid serving multiple requests for the same resource
-In order to satisfy the need for inserting bundles in the distributed cache in a way that it can be discovered and verified by clients, as well as updating them when needed, CENO is using the Signed Space Freenet keys (SSKs) that are based on the paradigm of public key cryptography.
+
+In order to satisfy the need for inserting bundles in the distributed cache in a way that it can be discovered and verified by clients, as well as updating them when needed, CENO is using the Signed Space Freenet keys (SSKs) that are based on the paradigm of public key cryptography.  
 In the current implementation (v0.3.0), the secure channel over which clients forward their requests is the Freemail service, running on top of Freenet. A Freemail address has a 1-1 relationship with a WebOfTrust identity. Ownership of a WebOfTrust identity is granted with a private insertion key.
 
 
 ## What is a CENO Insertion Authority?
 Since demand is high, clusters of bridges can cope much better with the increasing requests for bundle insertions.
 A CENO Insertion Authority (CENO IA) is such a cluster. In order to start serving CENO clients, an CENO IA needs to share the following information about it:
+
   * The Freenet Signed Space Key (public SSK) it will be using for inserting bundles
   * A Freenet WebOfTrust identity request key
   * A Freemail address clients can use for sending requests for URLs to be bundled
   * The CENOBridge plugin version they are running
-In the future, users will be able to configure their CENO Client Proxy accordingly in order to select which Insertion Authorities to trust and make requests to. A user might do lookups in the signed space of multiple Insertion Authorities.
+
+In the future, users will be able to configure their CENO Client Proxy accordingly in order to select which Insertion Authorities to trust and make requests to. A user might do lookups in the signed space of multiple Insertion Authorities.  
 As an alternative, there have been discussions on building upon the existing spam-proof message boards of Freenet for requesting bundles from independent bridge owners, and fetching the best option based on the Web Of Trust identity scores. This will require CENO users to create a unique identity for themselves, solve CAPTCHA puzzles and wait till their identity is discovered by the bridge owners.
 
 
