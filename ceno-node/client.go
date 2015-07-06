@@ -3,10 +3,13 @@ package main
 import (
 	"fmt"
 	"net/http"
+  "net/url"
 	"io/ioutil"
 	"bytes"
 	"encoding/json"
+  "encoding/base64"
 	"regexp"
+  "strings"
 )
 
 const CONFIG_FILE string = "./config/client.json"
@@ -133,6 +136,60 @@ func execPleaseWait(URL string, w http.ResponseWriter, r *http.Request) {
   w.Write(body)
 }
 
+// Strip out the S in HTTPS so that the requests that get passed along fit the
+// rest of the protocol.
+// Returns the stripped URL as well as a bool indicating whether a rewrite
+// took place at all.
+func stripHttps(URL string) (string, bool) {
+  if strings.Index(URL, "https") != 0 {
+    return URL, false
+  } else {
+    return strings.Replace(URL, "https", "http", 1), true
+  }
+}
+
+// Handle requests of the form `http://127.0.0.1:3090/lookup?url=<base64-enc-url>`
+// so that we can simplify the problem of certain browsers trying particularly hard
+// to enforce HTTPS.  Rather than trying to deal with infinite redirecting between
+// HTTP and HTTPS, we can make requests directly to the client.
+func directHandler(w http.ResponseWriter, r *http.Request) {
+  qs := r.URL.Query()
+  URLS, found := qs["url"]
+  if !found {
+    state := ErrorState{
+      "responseWriter": w, "request": r, "errMsg": "No URL provided in query string",
+    }
+    ErrorHandlers[ERR_MALFORMED_URL](state)
+  } else {
+    // Decode the URL so we can save effort by just passing the modified request to
+    // the proxyHandler function from here.
+    decodedBytes, err := base64.StdEncoding.DecodeString(URLS[0])
+    if err != nil {
+      state := ErrorState{
+        "responseWriter": w, "request": r, "errMsg": "URL provided to /lookup must be base64 encoded",
+      }
+      ErrorHandlers[ERR_MALFORMED_URL](state)
+    } else {
+      decodedURL := string(decodedBytes)
+      stripped, rewritten := stripHttps(decodedURL)
+      if rewritten {
+        r.Header.Set(REWRITTEN_HEADER, "true")
+      }
+      newURL, parseErr := url.Parse(stripped)
+      if parseErr != nil {
+        state := ErrorState{
+          "responseWriter": w, "request": r, "errMsg": "Malformed URL " + stripped,
+        }
+        ErrorHandlers[ERR_MALFORMED_URL](state)
+      } else {
+        // Finally we can pass the modified request onto the proxy server.
+        r.URL = newURL
+        proxyHandler(w, r)
+      }
+    }
+  }
+}
+
 // Handle incoming requests for bundles.
 // 1. Initiate bundle lookup process
 // 2. Initiate bundle creation process when no bundle exists anywhere
@@ -198,6 +255,7 @@ func main() {
 		Configuration = conf
 	}
 	// Create an HTTP proxy server
+  http.HandleFunc("/lookup", directHandler)
 	http.HandleFunc("/", proxyHandler)
 	fmt.Println("CeNo proxy server listening for HTTP requests at http://localhost" + Configuration.PortNumber)
 	if err = http.ListenAndServe(Configuration.PortNumber, nil); err != nil {
