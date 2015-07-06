@@ -5,7 +5,6 @@ var toggleBtn = document.getElementById('useCeno');
 toggleBtn.addEventListener('click', function (evt) {
   console.log('Button click event fired');
   self.port.emit('toggle-clicked');
-  self.port.emit('check-activity');
 });
 
 /* Set the status message describing whether the extension is active or inactive.
@@ -13,6 +12,7 @@ toggleBtn.addEventListener('click', function (evt) {
  * @param {boolean} isActive - True if the extension is active and false otherwise
  */
 function setActivityStatus(isActive) {
+  console.log('Got activity status ' + isActive.toString());
   var statusName = document.getElementById('activeStatus');
   if (isActive) {
     statusName.textContent = 'active';
@@ -23,14 +23,7 @@ function setActivityStatus(isActive) {
   }
 }
 
-/* When the panel is shown, get the activity status of the extension and update a
- * short message informing the user whether it's on or off.
- */
-document.onload = function () {
-  self.port.emit('check-activity');
-};
-
-// Listen for responses to the 'check-activity' message
+// Listen for information about whether the extension is activated or deactivated
 self.port.on('inform-activity', setActivityStatus);
 
 // alert() a message to the user when the backend requests it
