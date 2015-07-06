@@ -113,14 +113,6 @@ function deactivateCeNo(callback) {
   }, callback);
 }
 
-/* Set the extension's icon.
- *
- * @param {boolean} regular - Use the regular icon (true) or inverted one (false)
- */
-function setIcon(iconPath) {
-  chrome.browserAction.setIcon({ path: iconPath});
-}
-
 /* Check whether the extension is active by reading the state of
  * the hidden input in the background page.
  *
@@ -162,7 +154,6 @@ chrome.extension.onMessage.addListener(function (req, sender, respond) {
         console.log('Plugin determined to be active');
         deactivateCeNo(function () {
           document.getElementById('activeState').value = 'false';
-          setIcon(REGULAR_ICON);
           console.log('Deactived CeNo');
           respond({ statusActive: false });
         });
@@ -173,13 +164,11 @@ chrome.extension.onMessage.addListener(function (req, sender, respond) {
             console.log('Proxy is running');
             activateCeNo(function () {
               document.getElementById('activeState').value = 'true';
-              setIcon(INVERTED_ICON);
               console.log('Actived CeNo');
               respond({ statusActive: true });
             });
           } else {
             console.log('Proxy is not running. Not activating');
-            setIcon(REGULAR_ICON);
             alert(NO_PROXY_MSG);
             respond({ statusActive: false });
           }
@@ -187,12 +176,14 @@ chrome.extension.onMessage.addListener(function (req, sender, respond) {
       }
     });
     break;
+  case 'check-activity':
+    console.log('Request for activity status');
+    isActive(function (active) {
+      console.log('Status: ' + active.toString());
+      respond({ statusActive: active });
+    });
+    break;
   default:
     console.log('Unrecognized directive');
   };
 });
-
-/* In case the user doesn't toggle the extension off before closing the browser,
- * change the icon to the regular one on startup to avoid any confusion.
- */
-setIcon(REGULAR_ICON);
