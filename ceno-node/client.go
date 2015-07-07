@@ -1,7 +1,6 @@
 package main
 
 import (
-  "github.com/gosexy/gettext"
 	"fmt"
 	"net/http"
   "net/url"
@@ -13,8 +12,6 @@ import (
   "strings"
 )
 
-var _T = gettext.Gettext
-
 const CONFIG_FILE string = "./config/client.json"
 
 // A global configuration instance. Must be instantiated properly in main().
@@ -25,10 +22,10 @@ const URL_REGEX = "(https?://)?(www\\.)?\\w+\\.\\w+"
 
 // In the case that wait.html cannot be served, we will respond with a
 // plain text message to the user.
-const PLEASE_WAIT_PLAINTEXT = _T(`
+const PLEASE_WAIT_PLAINTEXT = /* Multi-line strings, yeah! */ `
 The page you have requested is being prepared.
 Plesae refresh this page in a few seconds to check if it is ready.
-`)
+`
 
 // The header used to communicate from the browser extension to the bundle server
 // that a request for http://site.com was rewritten from one for https://site.com.

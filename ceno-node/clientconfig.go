@@ -1,7 +1,6 @@
 package main
 
 import (
-  "github.com/gosexy/gettext"
 	"os"
 	"encoding/json"
   "encoding/base64"
@@ -10,8 +9,6 @@ import (
   "path"
 	"fmt"
 )
-
-var _T = gettext.Gettext
 
 // Configuration struct containing fields required by client to run proxy server
 // and reach other agents it must interact with.
@@ -145,7 +142,7 @@ func GetConfigFromUser() Config {
 	for !done {
 		vPort = validPortNumber(configuration.PortNumber)
 		if !vPort {
-			fmt.Print(_T("Proxy server port number [" + DefaultConfiguration.PortNumber + "]: "))
+			fmt.Print("Proxy server port number [" + DefaultConfiguration.PortNumber + "]: ")
 			fmt.Scanln(&configuration.PortNumber)
 			if len(configuration.PortNumber) == 0 {
 				configuration.PortNumber = DefaultConfiguration.PortNumber
@@ -154,7 +151,7 @@ func GetConfigFromUser() Config {
 		}
 		vCS = validCacheServer(configuration.CacheServer)
 		if !vCS {
-			fmt.Print(_T("Address of local cache server (LCS) [" + DefaultConfiguration.CacheServer + "]: "))
+			fmt.Print("Address of local cache server (LCS) [" + DefaultConfiguration.CacheServer + "]: ")
 			fmt.Scanln(&configuration.CacheServer)
 			if len(configuration.CacheServer) == 0 {
 				configuration.CacheServer = DefaultConfiguration.CacheServer
@@ -163,7 +160,7 @@ func GetConfigFromUser() Config {
 		}
 		vRS = validRequestServer(configuration.RequestServer)
 		if !vRS {
-			fmt.Print(_T("Address of request server (RS) [" + DefaultConfiguration.RequestServer + "]: "))
+			fmt.Print("Address of request server (RS) [" + DefaultConfiguration.RequestServer + "]: ")
 			fmt.Scanln(&configuration.RequestServer)
 			if len(configuration.RequestServer) == 0 {
 				configuration.RequestServer = DefaultConfiguration.RequestServer
@@ -172,7 +169,7 @@ func GetConfigFromUser() Config {
 		}
 		vPWPage = validPleaseWaitPage(configuration.PleaseWaitPage)
 		if !vPWPage {
-			fmt.Print(_T("Path to please wait page [" + DefaultConfiguration.PleaseWaitPage + "]: "))
+			fmt.Print("Path to please wait page [" + DefaultConfiguration.PleaseWaitPage + "]: ")
 			fmt.Scanln(&configuration.PleaseWaitPage)
 			if len(configuration.PleaseWaitPage) == 0 {
 				configuration.PleaseWaitPage = DefaultConfiguration.PleaseWaitPage
@@ -181,10 +178,10 @@ func GetConfigFromUser() Config {
 		}
 		done = vPort && vCS && vRS && vPWPage
 		if !done {
-			fmt.Println(_T("Some data was entered incorrectly. Please try again."))
+			fmt.Println("Some data was entered incorrectly. Please try again.")
 		}
 	}
-	fmt.Print(_T("Error message for undiscovered pages [" + DefaultConfiguration.ErrorMsg + "]: "))
+	fmt.Print("Error message for undiscovered pages [" + DefaultConfiguration.ErrorMsg + "]: ")
 	fmt.Scanln(&configuration.ErrorMsg)
 	if len(configuration.ErrorMsg) == 0 {
 		configuration.ErrorMsg = DefaultConfiguration.ErrorMsg
