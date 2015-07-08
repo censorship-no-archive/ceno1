@@ -1,0 +1,18 @@
+language: go
+
+go:
+  - tip
+
+before_install:
+  - sudo apt-get update -qq
+  - sudo apt-get install ant junit4
+
+script:
+  - cd ceno-node/src/
+  - ./build.sh
+  - cd ../../
+  - rm -r fred; mkdir -p fred/dist/ && mkdir -p fred/lib/freenet/
+  - wget https://github.com/freenet/fred/releases/download/build01467/freenet-build01467.jar -O fred/dist/freenet.jar
+  - wget https://downloads.freenetproject.org/latest/freenet-ext.jar -O fred/lib/freenet/freenet-ext.jar
+  - cd plugin-ceno/
+  - ant dist
