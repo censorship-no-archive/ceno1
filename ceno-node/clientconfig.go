@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/nicksnyder/go-i18n/i18n"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/nicksnyder/go-i18n/i18n"
 	"net/url"
 	"os"
 	"path"
@@ -129,7 +129,7 @@ func ReadConfigFile(fileName string) (Config, error) {
 // Read configuration information from stdin
 func GetConfigFromUser() Config {
 	var configuration Config
-  T, _ := i18n.Tfunc(os.Getenv("LANGUAGE"), "en-us")
+	T, _ := i18n.Tfunc(os.Getenv("LANGUAGE"), "en-us")
 	// We will accept an error message once at the end
 	vPort, vCS, vRS, vPWPage := false, false, false, false
 	done := false
@@ -138,9 +138,9 @@ func GetConfigFromUser() Config {
 	for !done {
 		vPort = validPortNumber(configuration.PortNumber)
 		if !vPort {
-      fmt.Print(T("proxy_port_num_cfg", map[string]interface{} {
-        Default: DefaultConfiguration.PortNumber
-      }))
+			fmt.Print(T("proxy_port_num_cfg", map[string]interface{}{
+				"Default": DefaultConfiguration.PortNumber,
+			}))
 			fmt.Scanln(&configuration.PortNumber)
 			if len(configuration.PortNumber) == 0 {
 				configuration.PortNumber = DefaultConfiguration.PortNumber
@@ -149,9 +149,9 @@ func GetConfigFromUser() Config {
 		}
 		vCS = validCacheServer(configuration.CacheServer)
 		if !vCS {
-      fmt.Print(T("lcs_addr_cfg", map[string]interface{} {
-        Default: DefaultConfiguration.CacheServer
-      }))
+			fmt.Print(T("lcs_addr_cfg", map[string]interface{}{
+				"Default": DefaultConfiguration.CacheServer,
+			}))
 			fmt.Scanln(&configuration.CacheServer)
 			if len(configuration.CacheServer) == 0 {
 				configuration.CacheServer = DefaultConfiguration.CacheServer
@@ -160,9 +160,9 @@ func GetConfigFromUser() Config {
 		}
 		vRS = validRequestServer(configuration.RequestServer)
 		if !vRS {
-      fmt.Print(T("rs_addr_cfg", map[string]interface{} {
-        Default: DefaultConfiguration.RequestServer
-      }))
+			fmt.Print(T("rs_addr_cfg", map[string]interface{}{
+				"Default": DefaultConfiguration.RequestServer,
+			}))
 			fmt.Scanln(&configuration.RequestServer)
 			if len(configuration.RequestServer) == 0 {
 				configuration.RequestServer = DefaultConfiguration.RequestServer
@@ -171,9 +171,9 @@ func GetConfigFromUser() Config {
 		}
 		vPWPage = validPleaseWaitPage(configuration.PleaseWaitPage)
 		if !vPWPage {
-      fmt.Print(T("pwp_path_cfg", map[string]interface{} {
-        Default: DefaultConfiguration.PleaseWaitPage
-      }))
+			fmt.Print(T("pwp_path_cfg", map[string]interface{}{
+				"Default": DefaultConfiguration.PleaseWaitPage,
+			}))
 			fmt.Scanln(&configuration.PleaseWaitPage)
 			if len(configuration.PleaseWaitPage) == 0 {
 				configuration.PleaseWaitPage = DefaultConfiguration.PleaseWaitPage
@@ -185,9 +185,9 @@ func GetConfigFromUser() Config {
 			fmt.Println(T("incorrect_data_cfg"))
 		}
 	}
-	fmt.Print(T("undisc_page_errmsg_cfg", map[string]interface{} {
-    Default: DefaultConfiguration.ErrorMsg
-  }))
+	fmt.Print(T("undisc_page_errmsg_cfg", map[string]interface{}{
+		"Default": DefaultConfiguration.ErrorMsg,
+	}))
 	fmt.Scanln(&configuration.ErrorMsg)
 	if len(configuration.ErrorMsg) == 0 {
 		configuration.ErrorMsg = DefaultConfiguration.ErrorMsg

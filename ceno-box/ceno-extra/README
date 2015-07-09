@@ -1,9 +1,9 @@
-   _____ ______ _   _  ____  
-  / ____|  ____| \ | |/ __ \ 
+   _____ ______ _   _  ____
+  / ____|  ____| \ | |/ __ \
  | |    | |__  |  \| | |  | |
  | |    |  __| | . ` | |  | |
  | |____| |____| |\  | |__| |
-  \_____|______|_| \_|\____/ 
+  \_____|______|_| \_|\____/
 
 
 
@@ -15,14 +15,20 @@ README
 
   This all-in-one package includes the following:
     * A Freenet node, preloaded with the WebOfTrust, Freemail and CENO plugins in a way that they will automatically updated via Freenet, as well as preconfigured with the CENO Client identity. Opennet is enabled by default, meaning that your node will try to connect to seed nodes once it gets started.
-    * The CENOClient proxy that will forward your browser's traffic via the CENO Freenet plugin.
-    * A Firefox profile that forwards all traffic to the CENOClient proxy.
+    * The CENO Client proxy that will forward your browser's traffic via the CENO Freenet plugin.
+    * A Chrome and a Firefox plugin that forward all traffic to the CENO Client proxy.
+
+
+
+DISCLAIMER
+
+  By using CENO, other people will know that you are using Internet censorship circumvention tools. They won't be able to tell though what websites and files you are trying to access with it.
 
 
 
 INSTALL
 
-  1. Un-tar the CENOFreenet.tar.gz in a directory in your machine.
+  1. Un-tar the CENOBox.tar.gz in a directory in your machine.
   2. Navigate to that directory and execute the CENO script:
       ./CENO.sh
      This will start the Freenet node, the CENO client proxy, and a Firefox private session pre-configured to proxy traffic through CENO.
@@ -34,7 +40,7 @@ INSTALL
   - If you would like to use a browser other than Firefox or Chrome/Chromium, you have to manually configure proxy settings so that all traffic is proxied through "127.0.0.1:3090". Again, remember to always use a private/incognito session when using CENO.
 
 
-  Next time you want to use CENO, you can navigate to the directory you had initially un-tared CENOFreenet.tar.gz and execute the CENO.sh script.
+  Next time you want to use CENO, you can navigate to the directory you had initially un-tared CENOBox.tar.gz and execute the CENO.sh script.
   Remember to configure your browser accordingly and always use a private/incognito session.
 
   Detailed instructions on how to build and load the CENO client plugin on a running Freenet node can be found at the CENO repository:

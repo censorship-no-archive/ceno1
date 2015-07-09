@@ -76,32 +76,41 @@ function setRewrittenHeader(details) {
 
 /* Add listeners to the event fired when a site is requested or a
  * redirect is issued to use the CeNo proxy.
+ *
+ * @param {function()} callback - A function to be invoked after the proxy settings are changed
  */
-function activateCeNo() {
+function activateCeNo(callback) {
   chrome.webRequest.onBeforeRequest.addListener(
     sendToProxy, {urls: ['https://*/*', 'http://*/*']}, ['blocking']);
   chrome.webRequest.onBeforeSendHeaders.addListener(
     setRewrittenHeader, {urls: ['http://*/*']}, ['blocking', 'requestHeaders']);
-  //chrome.webRequest.onBeforeRedirect.addListener(
-  //  sendToProxy, {urls: ['https://*/*', 'http://*/*']});
-  document.getElementById('activeState').value = 'true';
+  console.log('Setting proxy server settings');
+  chrome.proxy.settings.set({
+    scope: 'regular',
+    value: {
+      mode: 'fixed_servers',
+      rules: {
+        proxyForHttp: {
+          scheme: 'http',
+          host: '127.0.0.1',
+          port: 3090
+        }
+      }
+    }
+  }, callback);
 }
 
 /* Remove listeners to the event fired when a site is requested or a
  * redirect is issued to use the CeNo proxy.
- */
-function deactivateCeNo() {
-  chrome.webRequest.onBeforeRequest.removeListener(sendToProxy);
-  //chrome.webRequest.onBeforeRedirect.removeListener(sendToProxy);
-  document.getElementById('activeState').value = 'false';
-}
-
-/* Set the extension's icon.
  *
- * @param {boolean} regular - Use the regular icon (true) or inverted one (false)
+ * @param {function()} callback - A function to be invoked are proxy settings are cleared
  */
-function setIcon(iconPath) {
-  chrome.browserAction.setIcon({ path: iconPath});
+function deactivateCeNo(callback) {
+  chrome.webRequest.onBeforeRequest.removeListener(sendToProxy);
+  chrome.webRequest.onBeforeSendHeaders.removeListener(setRewrittenHeader);
+  chrome.proxy.settings.clear({
+    scope: 'regular'
+  }, callback);
 }
 
 /* Check whether the extension is active by reading the state of
@@ -119,9 +128,9 @@ function isActive(callback) {
  *
  * @param {function(boolean)} callback - A callback to be invoked with the active status of the proxy
  */
-function ensureProxyIsSet(callback) {
+function ensureProxyIsRunning(callback) {
   var xhr = new XMLHttpRequest();
-  xhr.open('GET', 'http://garblygookshouldfail', true);
+  xhr.open('GET', 'http://localhost:3090/', true);
   xhr.onreadystatechange = function () {
     if (xhr.readyState === 4) {
       var value = xhr.getResponseHeader(CENO_HEADER);
@@ -136,26 +145,42 @@ function ensureProxyIsSet(callback) {
  * a toggle button was clicked.
  */
 chrome.extension.onMessage.addListener(function (req, sender, respond) {
+  console.log('Background script got message');
   switch (req.directive) {
   case 'button-clicked':
+    console.log('Button-clicked received');
     isActive(function (active) {
       if (active) {
-        deactivateCeNo();
-        setIcon(REGULAR_ICON);
-        respond({ statusActive: false });
+        console.log('Plugin determined to be active');
+        deactivateCeNo(function () {
+          document.getElementById('activeState').value = 'false';
+          console.log('Deactived CeNo');
+          respond({ statusActive: false });
+        });
       } else {
-        ensureProxyIsSet(function (proxyIsSet) {
+        console.log('Plugin determined to be inactive');
+        ensureProxyIsRunning(function (proxyIsSet) {
           if (proxyIsSet) {
-            activateCeNo();
-            setIcon(INVERTED_ICON);
-            respond({ statusActive: true });
+            console.log('Proxy is running');
+            activateCeNo(function () {
+              document.getElementById('activeState').value = 'true';
+              console.log('Actived CeNo');
+              respond({ statusActive: true });
+            });
           } else {
-            setIcon(REGULAR_ICON);
+            console.log('Proxy is not running. Not activating');
             alert(NO_PROXY_MSG);
             respond({ statusActive: false });
           }
         });
       }
+    });
+    break;
+  case 'check-activity':
+    console.log('Request for activity status');
+    isActive(function (active) {
+      console.log('Status: ' + active.toString());
+      respond({ statusActive: active });
     });
     break;
   default:

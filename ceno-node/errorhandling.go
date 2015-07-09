@@ -1,9 +1,10 @@
 package main
 
 import (
-	"fmt"
+	"github.com/nicksnyder/go-i18n/i18n"
 	"html/template"
 	"net/http"
+	"os"
 	"path"
 )
 
@@ -93,20 +94,20 @@ func downloadViewsAndServeError(state ErrorState) bool {
 func ExecuteErrorPage(errorCode ErrorCode, errorMsg string, w http.ResponseWriter, r *http.Request) {
 	t, err := template.ParseFiles(path.Join(".", "views", "error.html"))
 	advice, foundErr := ErrorAdvice[errorCode]
+	T, _ := i18n.Tfunc(os.Getenv("LANGUAGE"), "en-us")
 	if !foundErr {
-    ExecuteErrorPage(
-      ERR_INVALID_ERROR, T("unrecognized_error_code", map[string]interface{} {
-        ErrorCode: errorCode
-      }
-    ), w, r)
+		ExecuteErrorPage(ERR_INVALID_ERROR,
+			T("unrecognized_error_code", map[string]interface{}{
+				"ErrCode": errorCode,
+			}), w, r)
 		return
 	}
 	errSpec := ErrorSpec{r.URL.String(), errorMsg, advice}
 	if err != nil {
 		w.Header().Set("Content-Type", "text/plain")
-		w.Write([]byte(T("missing_view", map[string]interface{} {
-      View: "error.html"
-    }))
+		w.Write([]byte(T("missing_view", map[string]interface{}{
+			"View": "error.html",
+		})))
 	} else {
 		t.Execute(w, errSpec)
 	}
