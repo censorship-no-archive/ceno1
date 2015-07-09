@@ -1,18 +1,12 @@
 package main
 
 import (
+  "github.com/nicksnyder/go-i18n/i18n"
   "html/template"
   "net/http"
   "path"
   "fmt"
 )
-
-const contactInfo = `
-
-(Zack Mullaly - zack@equalit.ie or Prometheas - prometheas@autistici.org)
-
-See the "Reporting Errors" section of the README for instruction on how to securely and helpfully
-report your problem.`
 
 const ( // CC errors
   ERR_NO_CONFIG = 1100
@@ -25,6 +19,8 @@ const ( // CC errors
   ERR_INVALID_ERROR = 100
 )
 
+const contactInfo = "ceno@equalit.ie"
+
 type ErrorSpec struct {
   Url    string // Requested URL
   Error  string // Name of error
@@ -35,43 +31,17 @@ type ErrorCode uint32
 type ErrorState map[string]interface{}
 type ErrorHandler func(ErrorState) bool
 
-// TODO
-// Load advice from POT files for translation purposes
-// Explanations of errors and steps to handlet them.
+
+// Map error codes to the ids of explanations of errors that are localizable
 var ErrorAdvice = map[ErrorCode]string {
-  ERR_NO_CONFIG: `
-    Information about config files
-  `,
-  ERR_MALFORMED_URL: `
-    Check that you have typed the URL of the site you want to visit correctly.
-  `,
-  ERR_NO_CONNECT_LCS: `
-    Check that all components of CENO are running. If you do not see an issue,
-    contact one of the primary CENO developers.
-    ` + contactInfo + `
-  `,
-  ERR_MALFORMED_LCS_RESPONSE: `
-    Contact one of the primary CENO developers with an explanation of
-    what circumstances led to this error being reported.
-    ` + contactInfo + `
-  `,
-  ERR_FROM_LCS: `
-    Refer to the README to find detailed instructions about how to handle
-    the specific error you have been presented with.
-  `,
-  ERR_NO_CONNECT_RS: `
-    Check that all components of CENO are running. If you do not see an issue,
-    contact one of the primary CENO developers.
-    ` + contactInfo + `
-  `,
-  ERR_MISSING_VIEW: `
-    Download the client view file package and refer to the README to understand
-    how to apply the files.
-  `,
-  ERR_INVALID_ERROR: `
-    Consult the maintainer of the node you are using and inform them
-    that their agent is returning an unknown error code.
-  `,
+  ERR_NO_CONFIG: "missing_config_err",
+  ERR_MALFORMED_URL: "malformed_url_err",
+  ERR_NO_CONNECT_LCS:"agent_communication_err",
+  ERR_MALFORMED_LCS_RESPONSE: "contact_devs_err",
+  ERR_FROM_LCS: "consult_readme_err",
+  ERR_NO_CONNECT_RS: "agent_communication_err",
+  ERR_MISSING_VIEW: "download_package_err",
+  ERR_INVALID_ERROR: "contact_devs_err",
 }
 
 // An error handler for each of the errors that CC is expected to be responsible for.
@@ -133,20 +103,7 @@ func ExecuteErrorPage(errorCode ErrorCode, errorMsg string, w http.ResponseWrite
   if err != nil {
     w.Header().Set("Content-Type", "text/plain")
     advice2 := ErrorAdvice[ERR_MISSING_VIEW]
-    w.Write([]byte(fmt.Sprintf(`
-      An error occurred!
-
-      Error 1
-      Error code: %v
-      Error message: %s
-      What you can do: %s
-
-      Error 2
-      Error code: %v
-      Error message: %s
-      What you can do: %s
-    `, errorCode, errorMsg, advice,
-       ERR_MISSING_VIEW, "Missing error.html view", advice2)))
+    w.Write([]byte("Missing error.html view"))
   } else {
     t.Execute(w, errSpec)
   }

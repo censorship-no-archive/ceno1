@@ -1,0 +1,26 @@
+[
+  {
+    "id": "missing_config_err",
+    "translation": "A configuration file for the client could not be found."
+  },
+  {
+    "id": "malformed_url_err",
+    "translation": "Check that you have typed the URL of the site you want to visit correctly."
+  },
+  {
+    "id": "agent_communication_err",
+    "translation": "Check that all of the components of CENO are running."
+  },
+  {
+    "id": "contact_devs_err",
+    "translation": "Email ceno@equalit.ie with the details of the error that has occurred."
+  },
+  {
+    "id": "consult_readme_err",
+    "translation": "Refer to the README to find detailed instructions about how to handle the specific error you have been presented with."
+  },
+  {
+    "id": "download_package_err",
+    "translation": "Download the view and config package and consult the README for installation instructions."
+  }
+]
