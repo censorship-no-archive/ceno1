@@ -1,5 +1,17 @@
 [
   {
+    "id": "please_wait_txt",
+    "translation": "The page you have requested is being prepared. Please refresh this page in a few moments to check if it's ready."
+  },
+  {
+    "id": "unrecognized_error_code",
+    "translation": "{{.ErrCode}} is not a recognized error code."
+  },
+  {
+    "id": "missing_view",
+    "translation": "Missing {{.View}} view."
+  },
+  {
     "id": "missing_config_err",
     "translation": "A configuration file for the client could not be found."
   },
