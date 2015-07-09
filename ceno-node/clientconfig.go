@@ -1,20 +1,21 @@
 package main
 
 import (
-	"os"
+	"github.com/nicksnyder/go-i18n/i18n"
+	"encoding/base64"
 	"encoding/json"
-  "encoding/base64"
-	"strconv"
-	"net/url"
-  "path"
 	"fmt"
+	"net/url"
+	"os"
+	"path"
+	"strconv"
 )
 
 // Configuration struct containing fields required by client to run proxy server
 // and reach other agents it must interact with.
 type Config struct {
 	PortNumber     string
-  PortNumberTLS  string
+	PortNumberTLS  string
 	CacheServer    string
 	RequestServer  string
 	ErrorMsg       string
@@ -24,36 +25,30 @@ type Config struct {
 // An enum-like set of constants representing whether any of the fields in a
 // config struct is malformed. One constant per field.
 const (
-	NO_CONFIG_ERROR = iota
-	PORT_NUMBER_ERROR = iota
-	CACHE_SERVER_ERROR = iota
-	REQUEST_SERVER_ERROR = iota
-	ERROR_MESSAGE_ERROR = iota
+	NO_CONFIG_ERROR        = iota
+	PORT_NUMBER_ERROR      = iota
+	CACHE_SERVER_ERROR     = iota
+	REQUEST_SERVER_ERROR   = iota
+	ERROR_MESSAGE_ERROR    = iota
 	PLEASE_WAIT_PAGE_ERROR = iota
 )
 
 // Request paths to LCS and RS
 const (
-	LCS_LOOKUP = "/lookup"
+	LCS_LOOKUP     = "/lookup"
 	LCS_DECODE_ERR = "/error/decode"
-	RS_CREATE = "/create"
+	RS_CREATE      = "/create"
 )
-
-// Information about how to get and run the local cache server
-const LCS_RUN_INFO = "Please restart the local cache server."
-
-// Information about how to get and run the request server
-const RS_RUN_INFO = "Please restart the request server."
 
 // Produce a URL to request a bundle be looked up by the LCS
 func BundleLookupURL(configuration Config, URL string) string {
-  encodedURL := base64.StdEncoding.EncodeToString([]byte(URL))
+	encodedURL := base64.StdEncoding.EncodeToString([]byte(URL))
 	return configuration.CacheServer + LCS_LOOKUP + "?url=" + encodedURL
 }
 
 // Produce a URL to request a new bundle be made by the RS
 func CreateBundleURL(configuration Config, URL string) string {
-  encodedURL := base64.StdEncoding.EncodeToString([]byte(URL))
+	encodedURL := base64.StdEncoding.EncodeToString([]byte(URL))
 	return configuration.RequestServer + RS_CREATE + "?url=" + encodedURL
 }
 
@@ -64,13 +59,13 @@ func DecodeErrReportURL(configuration Config) string {
 
 // The default config values, hardcoded, to be provided as examples to the user
 // should they be asked to provide configuration information.
-var DefaultConfiguration Config = Config {
+var DefaultConfiguration Config = Config{
 	":3089",
-  ":3090",
+	":3090",
 	"http://localhost:3091",
 	"http://localhost:3092",
 	"Page not found",
-  path.Join(".", "views", "wait.html"),
+	path.Join(".", "views", "wait.html"),
 }
 
 // Functions to verify that each configuration field is well formed.
@@ -120,13 +115,13 @@ func validPleaseWaitPage(location string) bool {
 func ReadConfigFile(fileName string) (Config, error) {
 	file, fopenErr := os.Open(fileName)
 	if fopenErr != nil {
-		return Config {}, fopenErr
+		return Config{}, fopenErr
 	}
 	var configuration Config
 	decoder := json.NewDecoder(file)
 	err := decoder.Decode(&configuration)
 	if err != nil {
-		return Config {}, err
+		return Config{}, err
 	}
 	return configuration, nil
 }
@@ -134,15 +129,18 @@ func ReadConfigFile(fileName string) (Config, error) {
 // Read configuration information from stdin
 func GetConfigFromUser() Config {
 	var configuration Config
+  T, _ := i18n.Tfunc(os.Getenv("LANGUAGE"), "en-us")
 	// We will accept an error message once at the end
 	vPort, vCS, vRS, vPWPage := false, false, false, false
 	done := false
-	fmt.Println("Please provide new settings using the format of the examples provided to configure CeNo.")
-	fmt.Println("You can press enter/return without entering anything else to use the default.")
+	fmt.Println(T("provide_new_settings_cfg"))
+	fmt.Println(T("how_to_default_cfg"))
 	for !done {
 		vPort = validPortNumber(configuration.PortNumber)
 		if !vPort {
-			fmt.Print("Proxy server port number [" + DefaultConfiguration.PortNumber + "]: ")
+      fmt.Print(T("proxy_port_num_cfg", map[string]interface{} {
+        Default: DefaultConfiguration.PortNumber
+      }))
 			fmt.Scanln(&configuration.PortNumber)
 			if len(configuration.PortNumber) == 0 {
 				configuration.PortNumber = DefaultConfiguration.PortNumber
@@ -151,7 +149,9 @@ func GetConfigFromUser() Config {
 		}
 		vCS = validCacheServer(configuration.CacheServer)
 		if !vCS {
-			fmt.Print("Address of local cache server (LCS) [" + DefaultConfiguration.CacheServer + "]: ")
+      fmt.Print(T("lcs_addr_cfg", map[string]interface{} {
+        Default: DefaultConfiguration.CacheServer
+      }))
 			fmt.Scanln(&configuration.CacheServer)
 			if len(configuration.CacheServer) == 0 {
 				configuration.CacheServer = DefaultConfiguration.CacheServer
@@ -160,7 +160,9 @@ func GetConfigFromUser() Config {
 		}
 		vRS = validRequestServer(configuration.RequestServer)
 		if !vRS {
-			fmt.Print("Address of request server (RS) [" + DefaultConfiguration.RequestServer + "]: ")
+      fmt.Print(T("rs_addr_cfg", map[string]interface{} {
+        Default: DefaultConfiguration.RequestServer
+      }))
 			fmt.Scanln(&configuration.RequestServer)
 			if len(configuration.RequestServer) == 0 {
 				configuration.RequestServer = DefaultConfiguration.RequestServer
@@ -169,7 +171,9 @@ func GetConfigFromUser() Config {
 		}
 		vPWPage = validPleaseWaitPage(configuration.PleaseWaitPage)
 		if !vPWPage {
-			fmt.Print("Path to please wait page [" + DefaultConfiguration.PleaseWaitPage + "]: ")
+      fmt.Print(T("pwp_path_cfg", map[string]interface{} {
+        Default: DefaultConfiguration.PleaseWaitPage
+      }))
 			fmt.Scanln(&configuration.PleaseWaitPage)
 			if len(configuration.PleaseWaitPage) == 0 {
 				configuration.PleaseWaitPage = DefaultConfiguration.PleaseWaitPage
@@ -178,10 +182,12 @@ func GetConfigFromUser() Config {
 		}
 		done = vPort && vCS && vRS && vPWPage
 		if !done {
-			fmt.Println("Some data was entered incorrectly. Please try again.")
+			fmt.Println(T("incorrect_data_cfg"))
 		}
 	}
-	fmt.Print("Error message for undiscovered pages [" + DefaultConfiguration.ErrorMsg + "]: ")
+	fmt.Print(T("undisc_page_errmsg_cfg", map[string]interface{} {
+    Default: DefaultConfiguration.ErrorMsg
+  }))
 	fmt.Scanln(&configuration.ErrorMsg)
 	if len(configuration.ErrorMsg) == 0 {
 		configuration.ErrorMsg = DefaultConfiguration.ErrorMsg

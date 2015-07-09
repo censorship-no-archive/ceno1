@@ -34,5 +34,37 @@
   {
     "id": "download_package_err",
     "translation": "Download the view and config package and consult the README for installation instructions."
+  },
+  {
+    "id": "provide_new_settings_cfg",
+    "translation": "Please provide new settings using the format of the examples provided to configure CeNo."
+  },
+  {
+    "id": "how_to_default_cfg",
+    "translation": "You can press enter/return without entering anything else to use the default."
+  },
+  {
+    "id": "proxy_port_num_cfg",
+    "translation": "Proxy server port number [{{.Default}}]: "
+  },
+  {
+    "id": "lcs_addr_cfg",
+    "translation": "Address of local cache server (LCS) [{{.Default}}]: "
+  },
+  {
+    "id": "rs_addr_cfg",
+    "translation": "Address of the request server (RS) [{{.Default}}]: "
+  },
+  {
+    "id": "pwp_path_cfg",
+    "translation": "Path to please wait page [{{.Default}}]: "
+  },
+  {
+    "id": "incorrect_data_cfg",
+    "translation": "Some data was entered incorrectly. Please try again."
+  },
+  {
+    "id": "undisc_page_errmsg_cfg",
+    "translation": "Error message for pages that could not be found [{{.Default}}]: "
   }
 ]
