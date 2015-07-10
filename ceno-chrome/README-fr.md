@@ -1,8 +1,8 @@
 # HTTPS Nowhere (CeNo Interceptor/Chrome)
 
 Read this document in
-[English](https://github.com/equalitie/ceno/blob/master/README.md) /
-[French](https://github.com/equalitie/ceno/blob/master/README-fr.md)
+[English](https://github.com/equalitie/ceno/blob/master/ceno-chrome/README.md) /
+[French](https://github.com/equalitie/ceno/blob/master/ceno-chrome/README-fr.md)
 
 This directory contains an extension for the Google Chrome and Chromium web browsers.
 It exists to solve the problem of HTTPS being incompatible with CeNo.  Below is an
