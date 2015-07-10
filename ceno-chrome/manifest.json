@@ -2,6 +2,7 @@
   "manifest_version": 2,
   "name": "CENO Intercept",
   "description": "Facilitates interaction with the CENO Client, your gateway to the CENO network.",
+  "default_locale": "en",
   "version": "0.1",
   "background": {
     "page": "background.html"
