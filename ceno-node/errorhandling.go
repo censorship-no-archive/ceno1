@@ -111,10 +111,10 @@ func ExecuteErrorPage(errorCode ErrorCode, errorMsg string, w http.ResponseWrite
 		t.Execute(w, map[string]string{
 			"Url":              r.URL.String(),
 			"Error":            errorMsg,
-			"Advice":           advice,
-			"NoBundlePrepared": T("no_bundle_prepared_page"),
+			"Advice":           T(advice),
+			"NoBundlePrepared": T("no_bundle_prepared_html"),
 			"YouAskedFor":      T("you_asked_for_html"),
-			"ErrorWeGot":       T("error_we_got"),
+			"ErrorWeGot":       T("error_we_got_html"),
 			"WhatYouCanDo":     T("what_you_can_do_html"),
 			"Retry":            T("retry_html"),
 			"Report":           T("report_html"),
