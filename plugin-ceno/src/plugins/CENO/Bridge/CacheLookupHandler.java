@@ -20,14 +20,14 @@ import freenet.client.FetchResult;
 import freenet.keys.FreenetURI;
 
 /* ------------------------------------------------------------ */
-/** CeNo Plugin Http Communication and Serving server.
- *  CeNo nodes talk to CeNo through HTTP, 
- * - CeNo Client reply the url.
+/** CENO Plugin Http Communication and Serving server.
+ *  CENO nodes talk to CENO through HTTP, 
+ * - CENO Client reply the url.
  * - Plugin either serve the content or DNF.
  * - In case of DNF, the client send a request asking plugin
  * - to ping a bridge to bundle the content.
  * - If Freenet being pingged, the plugin will send a 
- *   url to the CeNo bridge to bundle the content
+ *   url to the CENO bridge to bundle the content
  * - The Bridge then will serve the bundle to the plugin
  *   to insert into Freenet
  */

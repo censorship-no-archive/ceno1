@@ -1,6 +1,6 @@
-# CeNo bundle-fetching protocol
+# CENO bundle-fetching protocol
 
-This document describes, at a high level, the protocol that should be adhered to by the components of CeNo to effectively retrieve, create, and store bundles of web pages to be served to users.
+This document describes, at a high level, the protocol that should be adhered to by the components of CENO to effectively retrieve, create, and store bundles of web pages to be served to users.
 
 ## Agents
 
@@ -50,12 +50,12 @@ HTTP methods (GET, POST, PUT, ...) or `write` in the case of a response.
 
 ### Special Headers
 
-Every response written by CeNo client should have a `X-CeNo-Proxy` header set with the value `yxorP-oNeC-X`.
+Every response written by CENO client should have a `X-CENO-Proxy` header set with the value `yxorP-oNeC-X`.
 
 ## Protocol
 
 The cases described here do not account for interaction with the User
-requesting a page. We assume that CeNo client will continue to serve a
+requesting a page. We assume that CENO client will continue to serve a
 "please wait" page until it has received a bundle, and that it serves the
 bundle once it has been received and a request for it arrives.
 
@@ -118,7 +118,7 @@ certain facts, for example that a given server is running, and to communicate
 new requirements or requests outside of the standard set of interactions
 required for regular use cases.
 
-Error conditions that CeNo components can encounter are described in `doc/errorConditions.md`
+Error conditions that CENO components can encounter are described in `doc/errorConditions.md`
 and specify error codes that classify them.
 
 ### CC reports decode error to LCS

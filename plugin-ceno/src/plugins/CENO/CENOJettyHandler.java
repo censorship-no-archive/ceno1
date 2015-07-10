@@ -22,11 +22,11 @@ public abstract class CENOJettyHandler extends AbstractHandler {
 	protected void writeWelcome(Request baseRequest, HttpServletResponse response, String requestPath) throws IOException {
 		response.setContentType("text/html;charset=utf-8");
 		response.setStatus(HttpServletResponse.SC_OK);
-		response.getWriter().print("Welcome to CeNo.");
+		response.getWriter().print("Welcome to CENO.");
 		baseRequest.setHandled(true);
 	}
 
-	//TODO: Define error codes that CeNo plugins will be using
+	//TODO: Define error codes that CENO plugins will be using
 	// Give a descriptive message for each of them (like Malformed URL)
 	protected void writeError(Request baseRequest, HttpServletResponse response, String requestPath) throws IOException {
 		response.setContentType("text/html;charset=utf-8");

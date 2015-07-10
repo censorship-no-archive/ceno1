@@ -1,12 +1,12 @@
 # Error Conditions
 
 This document outlines the different error conditions that can be encountered by each agent
-in the CeNo system and defines how they will be handled.  The writing of this document is a
-collaborative effort and should serve as a guide for developers involved in CeNo to understand
+in the CENO system and defines how they will be handled.  The writing of this document is a
+collaborative effort and should serve as a guide for developers involved in CENO to understand
 possible sources of trouble and how to handle them.  Each agent should operate under the
 assumption that other agents will handle errors in the way described here.
 
-See the [protocol specification](https://github.com/equalitie/ceno/blob/master/ceno-node/doc/CeNoProtocol.md)
+See the [protocol specification](https://github.com/equalitie/ceno/blob/master/ceno-node/doc/CENOProtocol.md)
 for information about agents described in this document.
 
 This document should not be used to outline the specifics of how agents will interact in a

@@ -1,6 +1,6 @@
 /* This file contains code to test that the bundle-server correctly implements the `lookup failure`
- * portion of the CeNo protocol described at
- * https://github.com/equalitie/ceno/blob/master/doc/CeNoProtocol.md#lookup-failure
+ * portion of the CENO protocol described at
+ * https://github.com/equalitie/ceno/blob/master/doc/CENOProtocol.md#lookup-failure
  */
 
 var fs = require('fs');

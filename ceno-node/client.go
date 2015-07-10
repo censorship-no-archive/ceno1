@@ -38,8 +38,8 @@ type Result struct {
 }
 
 // Set a header on responses that indicates that the response
-// was served by the CeNo client. The header can be referenced
-// by pages, browser plugins, and so on to check if CeNo client
+// was served by the CENO client. The header can be referenced
+// by pages, browser plugins, and so on to check if CENO client
 // is running.
 func WriteProxyHeader(w http.ResponseWriter) http.ResponseWriter {
 	w.Header().Add("X-Ceno-Proxy", "yxorP-oneC-X")
@@ -260,7 +260,7 @@ func main() {
 	// Create an HTTP proxy server
 	http.HandleFunc("/lookup", directHandler)
 	http.HandleFunc("/", proxyHandler)
-	fmt.Println("CeNo proxy server listening for HTTP requests at http://localhost" + Configuration.PortNumber)
+	fmt.Println("CENO proxy server listening for HTTP requests at http://localhost" + Configuration.PortNumber)
 	if err = http.ListenAndServe(Configuration.PortNumber, nil); err != nil {
 		panic(err)
 	}

@@ -1,13 +1,13 @@
-// CeNo configuration settings
+// CENO configuration settings
 const CENO_PORT = 3090;
 const CENO_ADDR = '127.0.0.1';
 
 // A message to alert to the user if their browser is not configured
-// to use CeNo Client as a proxy.
+// to use CENO Client as a proxy.
 const NO_PROXY_MSG = chrome.i18n.getMessage('noProxyMsg');
 
 // The special header and associated value that will be set on
-// all responses served by CeNo Client.
+// all responses served by CENO Client.
 const CENO_HEADER = 'X-Ceno-Proxy';
 const CENO_HEADER_VALUE = 'yxorP-oneC-X';
 
@@ -25,7 +25,7 @@ const INVERTED_ICON = 'iconinv.png';
 // to indicate to the CC that it should pass this information along to the RR and BS.
 var rewrittenURLs = [];
 
-/* If the URL has the https scheme, make it http so that CeNo client
+/* If the URL has the https scheme, make it http so that CENO client
  * can actually handle it for us.
  *
  * I would call this extension HTTPS Nowhere, but EFF might be mad.
@@ -74,11 +74,11 @@ function setRewrittenHeader(details) {
 }
 
 /* Add listeners to the event fired when a site is requested or a
- * redirect is issued to use the CeNo proxy.
+ * redirect is issued to use the CENO proxy.
  *
  * @param {function()} callback - A function to be invoked after the proxy settings are changed
  */
-function activateCeNo(callback) {
+function activateCENO(callback) {
   chrome.webRequest.onBeforeRequest.addListener(
     sendToProxy, {urls: ['https://*/*', 'http://*/*']}, ['blocking']);
   chrome.webRequest.onBeforeSendHeaders.addListener(
@@ -99,11 +99,11 @@ function activateCeNo(callback) {
 }
 
 /* Remove listeners to the event fired when a site is requested or a
- * redirect is issued to use the CeNo proxy.
+ * redirect is issued to use the CENO proxy.
  *
  * @param {function()} callback - A function to be invoked are proxy settings are cleared
  */
-function deactivateCeNo(callback) {
+function deactivateCENO(callback) {
   chrome.webRequest.onBeforeRequest.removeListener(sendToProxy);
   chrome.webRequest.onBeforeSendHeaders.removeListener(setRewrittenHeader);
   chrome.proxy.settings.clear({
@@ -121,7 +121,7 @@ function isActive(callback) {
   callback(input.value === 'true');
 }
 
-/* Ensure that the user has configured their browser to use CeNo Client
+/* Ensure that the user has configured their browser to use CENO Client
  * as an HTTP proxy.
  *
  * @param {function(boolean)} callback - A callback to be invoked with the active status of the proxy
@@ -146,14 +146,14 @@ chrome.extension.onMessage.addListener(function (req, sender, respond) {
   case 'button-clicked':
     isActive(function (active) {
       if (active) {
-        deactivateCeNo(function () {
+        deactivateCENO(function () {
           document.getElementById('activeState').value = 'false';
           respond({ statusActive: false });
         });
       } else {
         ensureProxyIsRunning(function (proxyIsSet) {
           if (proxyIsSet) {
-            activateCeNo(function () {
+            activateCENO(function () {
               document.getElementById('activeState').value = 'true';
               respond({ statusActive: true });
             });

@@ -10,17 +10,17 @@ let tabs = require('sdk/tabs');
 let base64 = require('sdk/base64');
 let ss = require('sdk/simple-storage');
 
-// CeNo configuration settings
+// CENO configuration settings
 const CENO_PORT = 3090;
 const CENO_ADDR = '127.0.0.1';
 
 // A message to alert to the user if their browser is not configured
-// to use CeNo Client as a proxy.
-const NO_PROXY_MSG = 'CeNo Client not active. Please configure your browser' +
+// to use CENO Client as a proxy.
+const NO_PROXY_MSG = 'CENO Client not active. Please configure your browser' +
 ' to use ' + CENO_ADDR + ' port ' + CENO_PORT + ' as an HTTP proxy.';
 
 // The special header and associated value that will be set on
-// all responses served by CeNo Client.
+// all responses served by CENO Client.
 const CENO_HEADER = 'X-Ceno-Proxy';
 const CENO_HEADER_VALUE = 'yxorP-oneC-X';
 
@@ -50,7 +50,7 @@ function directLookupURL(url, rewritten) {
   return 'http://' + CENO_ADDR + ':' + CENO_PORT + '/lookup?url=' + b64url + '&rewritten=' + rewritten;
 }
 
-/* If the URL has the https scheme, make it http so that CeNo client
+/* If the URL has the https scheme, make it http so that CENO client
  * can actually handle it for us.
  *
  * I would call this extension HTTPS Nowhere, but EFF might be mad.
@@ -81,9 +81,9 @@ function sendToProxy(event) {
   channel.redirectTo(newURI(directURL));
 }
 
-/* Listen for events fired when a site is requested and redirect it to the CeNo client.
+/* Listen for events fired when a site is requested and redirect it to the CENO client.
  */
-function activateCeNo() {
+function activateCENO() {
   events.on('http-on-modify-request', sendToProxy);
   preferences.set(PROXY_HTTP_ADDR, CENO_ADDR);
   preferences.set(PROXY_HTTP_PORT, CENO_PORT);
@@ -95,13 +95,13 @@ function activateCeNo() {
 
 /* Remove listeners for vents fired when a site is requested.
  */
-function deactivateCeNo() {
+function deactivateCENO() {
   events.off('http-on-modify-request', sendToProxy);
   // Turn the proxying off
   preferences.set(PROXY_TYPE, PROXY_TYPE_NONE);
 }
 
-/* Ensure that the user has the CeNo client started so we can use it to proxy HTTP requests.
+/* Ensure that the user has the CENO client started so we can use it to proxy HTTP requests.
  *
  * @param {function(boolean)} callback - A function to be invoked with a bool- true if proxy active
  */
@@ -123,7 +123,7 @@ function ensureProxyIsRunning(callback) {
  */
 let button = ToggleButton({
   id: 'ceno-toggle',
-  label: 'CeNo Intercept',
+  label: 'CENO Intercept',
   icon: {
     '16': './icon.png',
     '32': './icon.png',
@@ -146,14 +146,14 @@ let panel = panels.Panel({
  */
 panel.port.on('toggle-clicked', function () {
   if (ss.storage.active || false) {
-    deactivateCeNo();
+    deactivateCENO();
     ss.storage.active = false;
     console.log('Deactivated');
     panel.port.emit('inform-activity', false);
   } else {
     ensureProxyIsRunning(function (proxyIsSet) {
       if (proxyIsSet) {
-        activateCeNo();
+        activateCENO();
         ss.storage.active = true;
         console.log('Activated');
         panel.port.emit('inform-activity', true);
