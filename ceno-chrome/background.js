@@ -4,8 +4,7 @@ const CENO_ADDR = '127.0.0.1';
 
 // A message to alert to the user if their browser is not configured
 // to use CeNo Client as a proxy.
-const NO_PROXY_MSG = 'CeNo Client not active. Please configure your browser' +
-' to use ' + CENO_ADDR + ' port ' + CENO_PORT + ' as an HTTP proxy.';
+const NO_PROXY_MSG = chrome.i18n.getMessage('noProxyMsg');
 
 // The special header and associated value that will be set on
 // all responses served by CeNo Client.
@@ -84,7 +83,6 @@ function activateCeNo(callback) {
     sendToProxy, {urls: ['https://*/*', 'http://*/*']}, ['blocking']);
   chrome.webRequest.onBeforeSendHeaders.addListener(
     setRewrittenHeader, {urls: ['http://*/*']}, ['blocking', 'requestHeaders']);
-  console.log('Setting proxy server settings');
   chrome.proxy.settings.set({
     scope: 'regular',
     value: {
@@ -134,7 +132,6 @@ function ensureProxyIsRunning(callback) {
   xhr.onreadystatechange = function () {
     if (xhr.readyState === 4) {
       var value = xhr.getResponseHeader(CENO_HEADER);
-      console.log('Calling callback from ensureProxyIsSet');
       callback(value !== null && value === CENO_HEADER_VALUE);
     }
   };
@@ -145,30 +142,22 @@ function ensureProxyIsRunning(callback) {
  * a toggle button was clicked.
  */
 chrome.extension.onMessage.addListener(function (req, sender, respond) {
-  console.log('Background script got message');
   switch (req.directive) {
   case 'button-clicked':
-    console.log('Button-clicked received');
     isActive(function (active) {
       if (active) {
-        console.log('Plugin determined to be active');
         deactivateCeNo(function () {
           document.getElementById('activeState').value = 'false';
-          console.log('Deactived CeNo');
           respond({ statusActive: false });
         });
       } else {
-        console.log('Plugin determined to be inactive');
         ensureProxyIsRunning(function (proxyIsSet) {
           if (proxyIsSet) {
-            console.log('Proxy is running');
             activateCeNo(function () {
               document.getElementById('activeState').value = 'true';
-              console.log('Actived CeNo');
               respond({ statusActive: true });
             });
           } else {
-            console.log('Proxy is not running. Not activating');
             alert(NO_PROXY_MSG);
             respond({ statusActive: false });
           }
@@ -177,9 +166,7 @@ chrome.extension.onMessage.addListener(function (req, sender, respond) {
     });
     break;
   case 'check-activity':
-    console.log('Request for activity status');
     isActive(function (active) {
-      console.log('Status: ' + active.toString());
       respond({ statusActive: active });
     });
     break;

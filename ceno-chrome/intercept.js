@@ -26,12 +26,10 @@ document.addEventListener('DOMContentLoaded', function() {
   chrome.extension.sendMessage({
     directive: 'check-activity'
   }, function (response) {
-    console.log('Activity status received: ' + response.statusActive.toString());
     setActivityStatus(response.statusActive);
   });
   var toggleBtn = document.getElementById('useCeno');
   toggleBtn.addEventListener('click', function (evt) {
-    console.log('Button click event fired');
     setActivityStatus(!active);
     chrome.extension.sendMessage({
       directive: 'button-clicked'
