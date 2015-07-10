@@ -1,0 +1,102 @@
+[
+  {
+    "id": "please_wait_txt",
+    "translation": "La page est demandée Vous avez préparé. S'il vous plaît rafraîchir la page dans quelques instants pour vérifier si elle est prête."
+  },
+  {
+    "id": "unrecognized_error_code",
+    "translation": "{{.ErrCode}} ne soit pas un code d'erreur reconnu."
+  },
+  {
+    "id": "missing_view",
+    "translation": "Vue {{.View}} manquant."
+  },
+  {
+    "id": "missing_config_err",
+    "translation": "A configuration file for the client could not be found."
+  },
+  {
+    "id": "malformed_url_err",
+    "translation": "Vérifiez que vous avez tapé l'URL du site que vous souhaitez visiter correctement."
+  },
+  {
+    "id": "agent_communication_err",
+    "translation": "Check that all of the components of CENO are running."
+  },
+  {
+    "id": "contact_devs_err",
+    "translation": "Email ceno@equalit.ie with the details of the error that has occurred."
+  },
+  {
+    "id": "consult_readme_err",
+    "translation": "Refer to the README to find detailed instructions about how to handle the specific error you have been presented with."
+  },
+  {
+    "id": "download_package_err",
+    "translation": "Download the view and config package and consult the README for installation instructions."
+  },
+  {
+    "id": "provide_new_settings_cfg",
+    "translation": "Please provide new settings using the format of the examples provided to configure CENO."
+  },
+  {
+    "id": "how_to_default_cfg",
+    "translation": "You can press enter/return without entering anything else to use the default."
+  },
+  {
+    "id": "proxy_port_num_cfg",
+    "translation": "Proxy server port number [{{.Default}}]: "
+  },
+  {
+    "id": "lcs_addr_cfg",
+    "translation": "Address of local cache server (LCS) [{{.Default}}]: "
+  },
+  {
+    "id": "rs_addr_cfg",
+    "translation": "Address of the request server (RS) [{{.Default}}]: "
+  },
+  {
+    "id": "pwp_path_cfg",
+    "translation": "Path to please wait page [{{.Default}}]: "
+  },
+  {
+    "id": "incorrect_data_cfg",
+    "translation": "Some data was entered incorrectly. Please try again."
+  },
+  {
+    "id": "undisc_page_errmsg_cfg",
+    "translation": "Error message for pages that could not be found [{{.Default}}]: "
+  },
+  {
+    "id": "please_wait_p1_html",
+    "translation": "La page que vous recherchez est en préparation."
+  },
+  {
+    "id": "please_wait_p2_html",
+    "translation": "S'il vous plaît attendre patiemment et vous serez redirigé quand il est prêt."
+  },
+  {
+    "id": "no_bundle_prepared_html",
+    "translation": "Nous ne pouvions pas préparer votre forfait!"
+  },
+  {
+    "id": "you_asked_for_html",
+    "translation": "You asked for "
+  },
+  {
+    "id": "error_we_got_html",
+    "translation": "Here's the error we got: "
+  },
+  {
+    "id": "what_you_can_do_html",
+    "translation": "What you can do"
+  },
+  {
+    "id": "retry_html",
+    "translation": "Refaire"
+  },
+  {
+    "id": "report_html",
+    "translation": "Rapport"
+  }
+]
