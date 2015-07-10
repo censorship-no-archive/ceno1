@@ -51,12 +51,16 @@ func WriteProxyHeader(w http.ResponseWriter) http.ResponseWriter {
 // URL in an interval.
 // The second bool return value specifies whether the response is HTML or not
 func pleaseWait(url string) ([]byte, bool) {
+  T, _ := i18n.Tfunc(os.Getenv("LANGUAGE"), "en-us")
 	content, err := ioutil.ReadFile(Configuration.PleaseWaitPage)
 	if err != nil {
 		T, _ := i18n.Tfunc(os.Getenv("LANGUAGE"), "en-us")
 		return []byte(T("please_wait_txt")), false
 	} else {
-		return bytes.Replace(content, []byte("{{REDIRECT}}"), []byte(url), 1), true
+    content := bytes.replace(content, []byte("{{.Paragraph1}}"), []byte(T("please_wait_p1_html")), 1)
+    content := bytes.replace(content, []byte("{{.Paragraph2}}"), []byte(T("please_wait_p2_html")), 1)
+    content := bytes.Replace(content, []byte("{{.Redirect}}"), []byte(url), 1)
+		return content, true
 	}
 }
 

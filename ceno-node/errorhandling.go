@@ -92,6 +92,7 @@ func downloadViewsAndServeError(state ErrorState) bool {
 // Execute the error template or produce a helpful plaintext response to explain
 // the error and provide pre-composed advice
 func ExecuteErrorPage(errorCode ErrorCode, errorMsg string, w http.ResponseWriter, r *http.Request) {
+  T, _ := i18n.Tfunc(os.Getenv("LANGUAGE"), "en-us")
 	t, err := template.ParseFiles(path.Join(".", "views", "error.html"))
 	advice, foundErr := ErrorAdvice[errorCode]
 	T, _ := i18n.Tfunc(os.Getenv("LANGUAGE"), "en-us")
@@ -109,6 +110,16 @@ func ExecuteErrorPage(errorCode ErrorCode, errorMsg string, w http.ResponseWrite
 			"View": "error.html",
 		})))
 	} else {
-		t.Execute(w, errSpec)
+		t.Execute(w, map[string]string {
+      "Url": r.URL.String(),
+      "Error": errorMsg,
+      "Advice": advice,
+      "NoBundlePrepared": T("no_bundle_prepared_page"),
+      "YouAskedFor": T("you_asked_for_html"),
+      "ErrorWeGot": T("error_we_got"),
+      "WhatYouCanDo": T("what_you_can_do_html"),
+      "Retry": T("retry_html"),
+      "Report": T("report_html"),
+    })
 	}
 }

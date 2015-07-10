@@ -68,11 +68,35 @@
     "translation": "Error message for pages that could not be found [{{.Default}}]: "
   },
   {
-    "id": "please_wait_p1_page",
+    "id": "please_wait_p1_html",
     "translation": "The page you requested is being prepared."
   },
   {
-    "id": "please_wait_p2_page",
+    "id": "please_wait_p2_html",
     "translation": "Please wait patiently and you will be redirected when it is ready."
+  },
+  {
+    "id": "no_bundle_prepared_html",
+    "translation": "We couldn't prepare your bundle!"
+  },
+  {
+    "id": "you_asked_for_html",
+    "translation": "You asked for "
+  },
+  {
+    "id": "error_we_got_html",
+    "translation": "Here's the error we got: "
+  },
+  {
+    "id": "what_you_can_do_html",
+    "translation": "What you can do"
+  },
+  {
+    "id": "retry_html",
+    "translation": "Retry"
+  },
+  {
+    "id": "report_html",
+    "translation": "Report"
   }
 ]
