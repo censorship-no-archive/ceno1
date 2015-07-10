@@ -66,5 +66,13 @@
   {
     "id": "undisc_page_errmsg_cfg",
     "translation": "Error message for pages that could not be found [{{.Default}}]: "
+  },
+  {
+    "id": "please_wait_p1_page",
+    "translation": "The page you requested is being prepared."
+  },
+  {
+    "id": "please_wait_p2_page",
+    "translation": "Please wait patiently and you will be redirected when it is ready."
   }
 ]

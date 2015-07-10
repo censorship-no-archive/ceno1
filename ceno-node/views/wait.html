@@ -4,10 +4,10 @@
     <title>Please wait</title>
   </head>
   <body>
-    <p>The page you requested is being prepared.<p>
-    <p>Please wait patiently and you will be redirected when it is ready.</p>
+    <p>{{.Paragraph1}}<p>
+    <p>{{.Paragraph2}}</p>
     <script>
-      var url = '{{REDIRECT}}';
+      var url = '{{.Redirect}}';
       setTimeout(function () {
         window.location.href = url;
       }, 5000);
