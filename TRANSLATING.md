@@ -71,3 +71,13 @@ with the following content (related to the example above):
   }
 }
 ```
+
+**IMPORTANT**
+
+Chrome extensions do not have a built-in means of dealing with translations for HTML pages, so the popup
+document has to be handled a little differently.
+
+When creating a translation for the popup to, say, Spanish, one should create `ceno-chrome/popup-es.html`
+and replace the English text with the translated text.  Then, in the messages file,
+`ceno-chrome/_locals/es/messages.json` here, change the `message` value for the `browserActionPage` object
+to the appropriate html document name (e.g. `popup-es.html`).
