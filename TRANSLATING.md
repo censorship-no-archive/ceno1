@@ -40,3 +40,34 @@ The translations can then be merged with the `go18n` tool:
 cd ceno-node/translations
 go18n *.json
 ```
+
+## CENO Chrome
+
+A tutorial is available explaining how internationalization is handled in Chrome extensions on
+[the official Google extension API site](https://developer.chrome.com/extensions/i18n).  In a
+nutshell, the `ceno-chrome/_locals/` directory contains directories corresponding to each
+language that CENO Chrome has been translated into.  For example, the `ceno-chrome/_locals/en`
+directory contains the English strings.  Each of these directories must contain only a
+`messages.json` file, which contains a single object of the following form:
+
+```js
+{
+  "greeting": {
+    "message": "Hello world!"
+  }
+}
+```
+
+That is, each key is an ID to identify the string, and that ID maps to another object containing
+a `message` key that maps to the translated string.
+
+To create a new translation, for example to Spanish, one would create `ceno-chrome/_locals/es/messages.json`
+with the following content (related to the example above):
+
+```js
+{
+  "greeting": {
+    "message": "Hola mundo!"
+  }
+}
+```
