@@ -81,3 +81,43 @@ When creating a translation for the popup to, say, Spanish, one should create `c
 and replace the English text with the translated text.  Then, in the messages file,
 `ceno-chrome/_locals/es/messages.json` here, change the `message` value for the `browserActionPage` object
 to the appropriate html document name (e.g. `popup-es.html`).
+
+## CENO Firefox
+
+Translation files fore the Firefox extension can be found in the `ceno-firefox/locale` directory.
+Each target locale is named like `en-US.properties` or `fr-FR.properties`.  The format for these files
+is more like YAML than the JSON used throughout the rest of the client-side codebase, because Firefox has
+to be a special snowflake.
+
+While the format is different, the content of the Firefox locale files is almost completely the same as
+those of the Chrome extension.  Rather than having both translated, the Chrome extension's content (and
+HTML documents) should be translated, and then the Firefox locale content can be collected from the
+Chrome content translations.
+
+## CENO Bridge
+
+The translation files for the CENO bridge can be found in `ceno-bridge/locales` and are all named with
+the form `<locale>.json`.  For example, the English locale is stored in `ceno-bridge/locales/en.json`.
+These files map strings as they appear in the source code to the localized version of the same string.
+
+Interpolation substrings such as `%s` and `%d` must be left unchanged, as they are used by the program to
+output different values within the program.  To create a translation for the bridge, such as for German,
+create a new locale file (e.g. `ceno-bridge/locales/de.json`) and replace the values from the original
+`en.json` with their translated (here, German) counterparts, with the interpolation substrings in the
+appropriate location.
+
+As an example, if `ceno-bridge/locales/en.json` contained
+
+```js
+{
+  "Good day, %s!": "Good day, %s!"
+}
+```
+
+The German translation, `ceno-bridge/locales/de.json` would contain
+
+```js
+{
+  "Good day, %s!", "Guten Tag, %s!" 
+}
+```

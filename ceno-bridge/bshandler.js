@@ -1,9 +1,11 @@
-var fs = require('fs');
+)var fs = require('fs');
 var qs = require('querystring');
 var url = require('url');
 
 var request = require('request');
 var b = require('equalitie-bundler');
+
+var _t = require('./translations');
 
 // The path on the RR to report a bundle that has been completed after the
 // request *from* the RR timed out.
@@ -37,10 +39,10 @@ module.exports = function (config) {
   ////////////////////////////
   var requestedURL = qs.parse(url.parse(req.url).query).url;
   requestedURL = (new Buffer(requestedURL, 'base64')).toString();
-  bs_log('Got request to bundle ' + requestedURL);
+  bs_log(_t.__('Got request to bundle %s', requestedURL));
   var rewrittenHeaderValue = req.headers[REWRITTEN_HEADER];
   var wasRewritten = typeof(rewrittenHeaderValue ) !== 'undefined' && rewrittenHeaderValue === 'true';
-  bs_log('Request was rewritten: ' + wasRewritten.toString());
+  bs_log(_t.__('Request was rewritten: %s', wasRewritten.toString()));
   var disconnected = false; // A flag set when the request is closed.
 
   // Rewrite requests for http://site.com back to https://site.com
@@ -55,7 +57,7 @@ module.exports = function (config) {
 
   req.on('close', function () {
     disconnected = true;
-    bs_log('Request ended prematurely.');
+    bs_log(_t.__('Request ended prematurely'));
   });
 
   // Bundle as many resources in requested pages as possible, without any
@@ -78,27 +80,27 @@ module.exports = function (config) {
         }));
         res.end();
       }
-      bs_log('Encountered error creating bundle for ' + requestedURL);
-      bs_log('Error: ' + err.message);
+      bs_log(_t.__('Encountered error creating bundle for %s', requestedURL));
+      bs_log(_t.__('Error: %s', err.message));
     } else { // !err
       var data = {
         created: new Date(),
         url: requestedURL,
         bundle: bundle
       };
-      bs_log('Successfully created bundle for ' + requestedURL);
+      bs_log(_t.__('Successfully created bundle for %s', requestedURL));
       if (!disconnected) {
         res.write(JSON.stringify(data));
         res.end();
-        bs_log('Sent bundle to RR');
+        bs_log(_t.__('Sent bundle to RR'));
       } else { // disconnected
         // If the connection to the RR is closed before we can send the bundle,
         // rather than letting the bundling effort go to waste, we will POST to
         // the RR to prompt it to accept the now complete bundle.
-        bs_log('Reporting bundle completion to RR');
+        bs_log(_t.__('Reporting bundle completion to RR'));
         reportCompleteBundle(config, data, wasRewritten, function () {
           res.end();
-          bs_log('Sent POST to RR to prompt it to accept bundle');
+          bs_log(_t.__('Sent POST to RR to prompt it to accept bundle'));
         });
       }
     }
