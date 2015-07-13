@@ -1,15 +1,16 @@
 {
   "manifest_version": 2,
-  "name": "CeNo Intercept",
-  "description": "Facilitates interaction with the CeNo Client, your gateway to the CeNo network.",
+  "name": "CENO Intercept",
+  "description": "Facilitates interaction with the CENO Client, your gateway to the CENO network.",
+  "default_locale": "en",
   "version": "0.1",
   "background": {
     "page": "background.html"
   },
   "browser_action": {
-    "default_title": "CeNo Intercept",
+    "default_title": "CENO Intercept",
     "default_icon": "icon.png",
-    "default_popup": "popup.html"
+    "default_popup": "__MSG_browserActionPage__"
   },
   "permissions": [
     "tabs",

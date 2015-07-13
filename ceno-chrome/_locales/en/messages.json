@@ -1,0 +1,14 @@
+{
+  "browserActionPage": {
+    "message": "popup.html"
+  },
+  "noProxyMsg": {
+    "message": "CENO Client is not active. Please make sure you have started it before activating this extension."
+  },
+  "activeWord": {
+    "message": "active"
+  },
+  "inactiveWord": {
+    "message": "inactive"
+  }
+}

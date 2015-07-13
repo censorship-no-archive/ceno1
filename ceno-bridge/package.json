@@ -12,7 +12,8 @@
   "dependencies": {
     "request": "latest",
     "require": "latest",
-    "equalitie-bundler": "~1.0.0"
+    "equalitie-bundler": "~1.0.0",
+    "i18n": "latest"
   },
   "devDependencies": {
     "should": "latest",

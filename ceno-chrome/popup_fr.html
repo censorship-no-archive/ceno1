@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
   <head>
-    <title>CENO Intercept</title>
+    <title>CENO Interception</title>
     <style>
       body {
         font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
@@ -11,7 +11,7 @@
         width: 400px;
       }
       #container {
-        width: 400px;
+        width: 350px;
         margin-left: auto;
         margin-right: auto;
         text-align: center;
@@ -52,30 +52,31 @@
         color: #e43624;
       }
     </style>
+    <script src="intercept.js"></script>
   </head>
   <body>
     <div id="container">
     <div>
       <p>
-        <span data-l10n-id="current_status"></span><span data-l10n-id="inactive" id='activeStatus'></span>.
+        Statut actuel: <span id='activeStatus'>inactif</span>.
       </p>
     </div>
-    <button data-l10n-id="toggle_ceno" id="useCeno"></button>
+    <button id="useCeno">Basculer CENO</button>
     <div id="logo">
       <img src="logo_ceno.png" />
     </div>
     <div id="status">
       <p>
-        <span data-l10n-id="while_active"></span>
-        <span data-l10n-id="intercepts_requests" class="red"></span>
-        <span data-l10n-id="secured_by_ceno"></span>
+        tout actif,
+        <span class="red">cette intercepte les demandes d'extension de sites utilisant le protocole HTTPS</span>
+        pour empêcher votre navigateur d'les cryptant. Vous êtes assuré par CENO.
       </p>
     </div>
     <div id="eq-logo">
       <img src="eq-logo.png" />
       <p>
         <span class="red">eQualit.ie</span>
-        <span data-l10n-id="about_eq"></span>
+        développe des systèmes ouverts et réutilisables avec un accent sur la vie privée, la sécurité en ligne et la gestion de l'information.
       </p>
     </div>
     </div>

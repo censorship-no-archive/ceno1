@@ -15,7 +15,7 @@ public class Configuration {
 	private String customConfigLocation;
 
 	/**
-	 * Properties instance to keep configuration properties during the execution of CeNo.
+	 * Properties instance to keep configuration properties during the execution of CENO.
 	 * When calling {{@link #storeProperties()}, the current values of this variable
 	 * get stored in the configuration file in use.
 	 */

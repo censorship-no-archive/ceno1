@@ -1,0 +1,14 @@
+{
+  "Could not load config; Error: %s": "Could not load config; Error: %s",
+  "Using default config.": "Using default config.",
+	"Running bundler server on port %d.": "Running bundler server on port %d.",
+  "Got request to bundle %s": "Got request to bundle %s",
+  "Request was rewritten: %s": "Request was rewritten: %s",
+  "Request ended prematurely": "Request ended prematurely",
+  "Encountered error creating bundle for %s": "Encountered error creating bundle for %s",
+  "Error: %s": "Error: %s",
+  "Successfully created bundle for %s": "Successfully created bundle for %s",
+  "Sent bundle to RR": "Sent bundle to RR",
+  "Reporting bundle completion to RR": "Reporting bundle completion to RR",
+  "Sent POST to RR to prompt it to accept bundle": "Sent POST to RR to prompt it to accept bundle"
+}

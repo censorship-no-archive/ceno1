@@ -1,11 +1,11 @@
 # Reporting Errors
 
-CeNo is designed to handle errors and misconfiguration issues as gracefully as possible, but from time to time,
+CENO is designed to handle errors and misconfiguration issues as gracefully as possible, but from time to time,
 something will happen that could not be perfectly anticipated and recovered from.  In such cases you will be presented
 with an error page upon requesting a document from the web.  Before reporting your error to the developers, you should
 try to troubleshoot the problem in reference to the **Handling Errors** section of this document.
 
-In the case that an error that CeNo cannot recover from on its own occurs, you will be presented with a message
+In the case that an error that CENO cannot recover from on its own occurs, you will be presented with a message
 instructing you that it may be worthwhile to contact the developers.  If this is the case, or there is an issue you have
 encountered and cannot find a solution for, you can report issues on Github's [public issue tracker](https://github.com/equalitie/ceno/issues). This will require
 that you possess and use a Github account, however it will give your problem more visibility and open up a space for
