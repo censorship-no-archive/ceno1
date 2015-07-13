@@ -98,5 +98,48 @@
   {
     "id": "report_html",
     "translation": "Report"
-  }
+  },
+  {
+    "id": "error_cli",
+    "translation": "Error: {{.Message}}"
+  },
+  {
+    "id": "decode_error_cli",
+    "translation": "Error decoding response from LCS: {{.Message}}"
+  },
+  {
+    "id": "no_reach_lcs_cli",
+    "translation": "Could not reach the local cache server to report decode error"
+  },
+  {
+    "id": "querystring_no_url_cli",
+    "translation": "No URL provided in query string"
+  },
+  {
+    "id": "url_b64_cli",
+    "translation":  "URL provided to /lookup must be base64 encoded"
+  },
+  {
+    "id": "malformed_url_cli",
+    "translation": "Malformed URL {{.URL}}"
+  },
+  {
+    "id": "got_request_msg_cli",
+    "translation": "Got a request for {{.URL}}.  Was rewritten? {{.Rewritten}}"
+  },
+  {
+    "id": "err_from_lcs_cli",
+    "translation": "Got error {{.Code}} from LCS: {{.Message}}"
+  },
+  {
+    "id": "bundle_err_cli",
+    "translation": "Bundler encountered an error: {{.Message}}"
+  },
+  {
+    "id": "no_config_cli",
+    "translation": "Could not read configuration file at {{.Location}}"
+  },
+  {
+    "id": "listening_msg_cli",
+    "translation": "CENO proxy server listening for HTTP requests at http://127.0.0.1{{.Port}}" 
 ]

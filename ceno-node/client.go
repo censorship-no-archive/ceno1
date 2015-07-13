@@ -37,6 +37,8 @@ type Result struct {
 	// Should add a Created field for the date created
 }
 
+type TransArgs map[string]interface{}
+
 // Set a header on responses that indicates that the response
 // was served by the CENO client. The header can be referenced
 // by pages, browser plugins, and so on to check if CENO client
@@ -86,21 +88,24 @@ func reportDecodeError(reportURL, errMsg string) (bool, error) {
 // Check with the local cache server to find a bundle for a given URL.
 func lookup(lookupURL string) Result {
 	response, err := http.Get(BundleLookupURL(Configuration, lookupURL))
+	T, _ := i18n.Tfunc(os.Getenv("LANGUAGE"), "en-us")
 	if err != nil || response.StatusCode != 200 {
-		fmt.Print("error: ")
-		fmt.Println(err)
+		fmt.Println(T("error_cli", TransArgs{
+			"Message": err.Error(),
+		}))
 		return Result{ERR_NO_CONNECT_LCS, err.Error(), false, false, ""}
 	}
 	decoder := json.NewDecoder(response.Body)
 	var result Result
 	if err := decoder.Decode(&result); err != nil {
-		fmt.Println("Error decoding response from LCS")
-		fmt.Println(err)
+		fmt.Println(T("decode_error_cli", TransArgs{
+			"Message": err.Error(),
+		}))
 		reachedLCS, err2 := reportDecodeError(DecodeErrReportURL(Configuration), err.Error())
 		if reachedLCS {
 			return Result{ERR_MALFORMED_LCS_RESPONSE, err2.Error(), false, false, ""}
 		} else {
-			errMsg := "Could not reach the local cache server to report decode eror"
+			errMsg := T("no_reach_lcs_cli")
 			return Result{ERR_NO_CONNECT_LCS, errMsg, false, false, ""}
 		}
 	}
@@ -156,9 +161,10 @@ func stripHttps(URL string) (string, bool) {
 func directHandler(w http.ResponseWriter, r *http.Request) {
 	qs := r.URL.Query()
 	URLS, found := qs["url"]
+	T, _ := i18n.Tfunc(os.Getenv("LANGUAGE"), "en-us")
 	if !found {
 		state := ErrorState{
-			"responseWriter": w, "request": r, "errMsg": "No URL provided in query string",
+			"responseWriter": w, "request": r, "errMsg": T("querystring_no_url_cli"),
 		}
 		ErrorHandlers[ERR_MALFORMED_URL](state)
 	} else {
@@ -167,7 +173,7 @@ func directHandler(w http.ResponseWriter, r *http.Request) {
 		decodedBytes, err := base64.StdEncoding.DecodeString(URLS[0])
 		if err != nil {
 			state := ErrorState{
-				"responseWriter": w, "request": r, "errMsg": "URL provided to /lookup must be base64 encoded",
+				"responseWriter": w, "request": r, "errMsg": T("url_b64_cli"),
 			}
 			ErrorHandlers[ERR_MALFORMED_URL](state)
 		} else {
@@ -179,7 +185,9 @@ func directHandler(w http.ResponseWriter, r *http.Request) {
 			newURL, parseErr := url.Parse(stripped)
 			if parseErr != nil {
 				state := ErrorState{
-					"responseWriter": w, "request": r, "errMsg": "Malformed URL " + stripped,
+					"responseWriter": w, "request": r, "errMsg": T("malformed_url_cli", TransArgs{
+						"URL": stripped,
+					}),
 				}
 				ErrorHandlers[ERR_MALFORMED_URL](state)
 			} else {
@@ -198,28 +206,34 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 	w = WriteProxyHeader(w)
 	URL := r.URL.String()
 	T, _ := i18n.Tfunc(os.Getenv("LANGUAGE"), "en-us")
-	str_ng := T("test1")
-	fmt.Println(str_ng)
 	wasRewritten := r.Header.Get(REWRITTEN_HEADER) == "true"
-	fmt.Printf("Got a request for %s\nRewritten: %v\n", URL, wasRewritten)
+	fmt.Println(T("got_request_msg_cli", TransArgs{
+		"URL":       URL,
+		"Rewritten": wasRewritten,
+	}))
 	matched, err := regexp.MatchString(URL_REGEX, URL)
 	if !matched || err != nil {
-		fmt.Println("Invalid URL " + URL)
 		state := ErrorState{
-			"responseWriter": w, "request": r, "errMsg": "Malformed URL \"" + URL + "\"",
+			"responseWriter": w, "request": r, "errMsg": T("malformed_url_cli", TransArgs{
+				"URL": URL,
+			}),
 		}
 		ErrorHandlers[ERR_MALFORMED_URL](state)
 		return
 	}
 	result := lookup(URL)
 	if result.ErrCode > 0 {
-		fmt.Printf("Got error from LCS: Error %v: %s\n", result.ErrCode, result.ErrMsg)
+		fmt.Println(T("err_from_lcs_cli", TransArgs{
+			"Code":    result.ErrCode,
+			"Message": result.ErrMsg,
+		}))
 		// Assuming the reason the response is malformed is because of the formation of the bundle,
 		// so we will request that a new bundle be created.
 		if result.ErrCode == ERR_MALFORMED_LCS_RESPONSE {
 			err = requestNewBundle(URL, wasRewritten)
-			fmt.Printf("Requested new bundle; Error: ")
-			fmt.Println(err)
+			fmt.Println(T("bundle_err_cli", TransArgs{
+				"Message": err.Error(),
+			}))
 			if err != nil {
 				state := ErrorState{"responseWriter": w, "request": r, "errMsg": err.Error()}
 				ErrorHandlers[ERR_FROM_LCS](state)
@@ -235,9 +249,10 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 			w.Write([]byte(result.Bundle))
 		} else {
 			err = requestNewBundle(URL, wasRewritten)
-			fmt.Println("Error information from requestNewbundle")
-			fmt.Println(err)
 			if err != nil {
+				fmt.Println(T("bundle_err_cli", TransArgs{
+					"Message": err.Error(),
+				}))
 				state := ErrorState{"responseWriter": w, "request": r, "errMsg": err.Error()}
 				ErrorHandlers[ERR_FROM_LCS](state)
 			} else {
@@ -253,10 +268,13 @@ func main() {
 	// Configure the i18n library to use the preferred language set in the LANGUAGE environement variable
 	language := os.Getenv("LANGUAGE")
 	i18n.MustLoadTranslationFile(path.Join("translations", language+".all.json"))
+	T, _ := i18n.Tfunc(os.Getenv("LANGUAGE"), "en-us")
 	// Read an existing configuration file or have the user supply settings
 	conf, err := ReadConfigFile(CONFIG_FILE)
 	if err != nil {
-		fmt.Print("Could not read configuration file at " + CONFIG_FILE)
+		fmt.Println(T("no_config_cli", TransArgs{
+			"Location": CONFIG_FILE,
+		}))
 		Configuration = GetConfigFromUser()
 	} else {
 		Configuration = conf
@@ -264,7 +282,9 @@ func main() {
 	// Create an HTTP proxy server
 	http.HandleFunc("/lookup", directHandler)
 	http.HandleFunc("/", proxyHandler)
-	fmt.Println("CENO proxy server listening for HTTP requests at http://localhost" + Configuration.PortNumber)
+	fmt.Println(T("listening_msg_cli", TransArgs{
+		"Port": Configuration.PortNumber,
+	}))
 	if err = http.ListenAndServe(Configuration.PortNumber, nil); err != nil {
 		panic(err)
 	}
