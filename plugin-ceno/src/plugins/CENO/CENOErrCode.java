@@ -24,13 +24,14 @@ public enum CENOErrCode {
 
 	LCS_LOOKUP_LOCAL(2130, ErrAction.LOG, "Lookup in the local cache failed"),
 	LCS_LOOKUP_ULPR(2140, ErrAction.LOG, "Lookup in the distributed cache failed"),
-	LCS_LOOKUP_ULPR_INIT(2141, ErrAction.RETRY, "Could not initiate a ULPR"),
+	LCS_LOOKUP_ULPR_INIT(2141, ErrAction.RETRY, "Could not initiate a Passive Request in the distributed cache"),
 	LCS_LOOKUP_ULPR_FAILED(2142, ErrAction.LOG, "Passive request in the distributed cache failed"),
 
 	// LCS inter-agent errors
 	LCS_CC(2210, ErrAction.LOG, "Error in communication with the CC agent"),
 	LCS_CC_COMPOSE(2211, ErrAction.RETRY, "Could not compose response for CC"),
-	LCS_CC_RESPOND(2212, ErrAction.LOG, "Could not respond to CC"),
+	LCS_CC_REACH(2212, ErrAction.RETRY, "Could not reach the CC agent"),
+	LCS_CC_RESPOND(2213, ErrAction.LOG, "Could not respond to CC"),
 
 	// Freenet node errors
 	LCS_NODE(2300, ErrAction.LOG, "Freenet node error"),
@@ -45,6 +46,7 @@ public enum CENOErrCode {
 	RS_URL(3100, ErrAction.LOG, "Error while processing the URL"),
 	RS_URL_MALFORMED(3111, ErrAction.LOG, "Malformed request URL"),
 	RS_URL_DECODE(3112, ErrAction.LOG, "Could not decode URL value"),
+	RS_HANDLER_URL_INVALID(3113, ErrAction.LOG, "Requested URL is invalid"),
 	RS_URL_TO_USK(3114, ErrAction.LOG, "Could not translate URL to a Freenet key"),
 	RS_URL_WONT_SERVE(3115, ErrAction.LOG, "Requested URL is pointing to a resource RS won't request"),
 
@@ -78,9 +80,14 @@ public enum CENOErrCode {
 	RS_IMAP_ERR(3420, ErrAction.RETRY, "Receiving Freemail over IMAP failed"),
 
 	/////////////////////
+	// RR Agent Errors //
+	/////////////////////
+	BI(4000, ErrAction.LOG, "General Request Receiver agent error"),
+
+	/////////////////////
 	// BI Agent Errors //
 	/////////////////////
-	BI_INVALID_URL(501, ErrAction.LOG, "Requested URL is invalid");
+	BI(6000, ErrAction.LOG, "General Bundler Inserter agent error");
 
 	private final int errCode;
 	private final ErrAction errAction;
