@@ -1,9 +1,5 @@
 package plugins.CENO.Bridge;
 
-import freenet.keys.FreenetURI;
-import freenet.pluginmanager.*;
-import freenet.support.Logger;
-
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ContextHandler;
@@ -11,9 +7,14 @@ import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 
 import plugins.CENO.Configuration;
 import plugins.CENO.Version;
-import plugins.CENO.FreenetInterface.FreenetInterface;
 import plugins.CENO.FreenetInterface.HighLevelSimpleClientInterface;
 import plugins.CENO.FreenetInterface.NodeInterface;
+import freenet.keys.FreenetURI;
+import freenet.pluginmanager.FredPlugin;
+import freenet.pluginmanager.FredPluginRealVersioned;
+import freenet.pluginmanager.FredPluginVersioned;
+import freenet.pluginmanager.PluginRespirator;
+import freenet.support.Logger;
 
 
 public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRealVersioned {
@@ -101,6 +102,7 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 		// Add a ServerConnector for the BundlerInserter agent
 		ServerConnector bundleInserterConnector = new ServerConnector(cenoHttpServer);
 		bundleInserterConnector.setName("bundleInserter");
+		bundleInserterConnector.setHost("localhost");
 		bundleInserterConnector.setPort(bundleInserterPort);
 
 		// Add the connector to the server
