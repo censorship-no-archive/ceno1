@@ -20,4 +20,12 @@ i18n.configure({
   directory: localeDir
 });
 
+// Set the locale to use by reading its name from an environment variable
+var desiredLocale = process.env.LANGUAGE;
+if (locales.indexOf(desiredLocale) < 0) {
+  fmtLocales = locales.join(', ');
+  throw new Error(desiredLocale + ' is not a valid locale.  Available locales: ' + fmtLocales);
+}
+i18n.setLocale(desiredLocale);
+
 module.exports = i18n;
