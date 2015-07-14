@@ -110,7 +110,7 @@ another tool.
    not intending to use this node in any other way.
   7. Visit Freemail and login with the new identity and using as password `CENO`.
   8. Build CENOBridge plugins following the
-   [building instructions](https://github.com/equalitie/ceno/blob/master/plugin-ceno/README.building.md).
+   [building instructions](https://github.com/equalitie/ceno/blob/master/ceno-freenet/README.building.md).
    You will have to modify the value of `bridgeFreemail` in `CENOBRidge.java` to match the Freemail address you
    have just generated.
   9. Navigate back to the `Configuration > Plugins` and locate the textbox under the "Load an Unofficial Plugin" label.

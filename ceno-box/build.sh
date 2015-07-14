@@ -91,7 +91,7 @@ cp -r ceno-node/{client,views,config} CENOBox/ceno-client
 if [[ $DEBUG == 1 ]]; then
   # Build CENO client Freenet plugin
   echo "Building CENO client Freenet plugin"
-  cd ../plugin-ceno
+  cd ../ceno-freenet
   ant dist > /dev/null
   cp dist/CENO.jar ../ceno-box/ceno-debug/
   cd ../ceno-box
