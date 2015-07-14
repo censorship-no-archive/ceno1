@@ -14,7 +14,7 @@ However Transifex's JSON format is a simple
   "some_identifier": "Text in some language"
 }
 
-Format.  This utility converts the existing en-en.json file into the format preferred
+Format.  This utility converts the existing en-us.json file into the format preferred
 by Transifex and back.
 
 To convert to the Transifex format, run
@@ -34,21 +34,25 @@ import sys
 import json
 
 def convert_to_transifex():
-  '''Convert the en-en.json file contents to a simple "id": "text" format'''
-  content = json.load(open('../translations/en-en.json', 'r'))
+  '''Convert the en-us.json file contents to a simple "id": "text" format'''
+  f = open('../translations/en-us.json', 'r')
+  content = json.load(f)
+  f.close()
   id_texts = {}
   for pair in content:
     id_texts[pair['id']] = pair['translation']
-  json.dump(id_texts, open('./en-en.json', 'w'))
+  json.dump(id_texts, open('./en-us.json', 'w'), indent=4)
 
 
-def convert_from_transifex(locale, filename)
+def convert_from_transifex(locale, filename):
   '''Convert a translated file from transifex's format to goi18n's format'''
   content = json.load(open(filename, 'r'))
   pairs = []
   for identifier in content.keys():
     pairs.append({ 'id': identifier, 'translation': content[identifier] })
-  json.dump(pairs, open('../translations' + locale + '.json', 'w'))
+  f = open('../translations/' + locale + '.json', 'w')
+  json.dump(pairs, f, indent=4)
+  f.close()
 
 
 def main():
@@ -58,7 +62,7 @@ def main():
   if sys.argv[1] == 'to':
     convert_to_transifex()
   else:
-    convert_from_transifex()
+    convert_from_transifex(sys.argv[2], sys.argv[3])
 
 
 if __name__ == '__main__':

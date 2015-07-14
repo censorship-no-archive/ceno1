@@ -142,4 +142,5 @@
   {
     "id": "listening_msg_cli",
     "translation": "CENO proxy server listening for HTTP requests at http://127.0.0.1{{.Port}}" 
+  }
 ]
