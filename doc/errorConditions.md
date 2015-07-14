@@ -6,7 +6,7 @@ collaborative effort and should serve as a guide for developers involved in CENO
 possible sources of trouble and how to handle them.  Each agent should operate under the
 assumption that other agents will handle errors in the way described here.
 
-See the [protocol specification](https://github.com/equalitie/ceno/blob/master/ceno-node/doc/CENOProtocol.md)
+See the [protocol specification](https://github.com/equalitie/ceno/blob/master/ceno-client/doc/CENOProtocol.md)
 for information about agents described in this document.
 
 This document should not be used to outline the specifics of how agents will interact in a
@@ -39,7 +39,7 @@ Error codes consist of four digits where
 
 If no configuration file (`config/client.json`) exists, the user should be prompted to enter
 values for each required field.  A default configuration structure should be hardcoded in the
-client (`src/client.go`) to require fewer editions by the user.  When configuration information
+client (`client.go`) to require fewer editions by the user.  When configuration information
 has been supplied, the values should be written to `config/client.json`.
 
 ### Malformed request URL
@@ -64,7 +64,7 @@ user with instructions about how to obtain and start the server.
 
 If the LCS responds to a request for a lookup by the CC with data that cannot be parsed into
 a Result structure
-([see src/client.go](https://github.com/equalitie/ceno/blob/master/ceno-node/src/client.go)),
+([see client.go](https://github.com/equalitie/ceno/blob/master/ceno-client/client.go)),
 then the CC should send a new request to the LCS to inform it that it failed to decode the data
 it sent.  Ideally, the LCS would be able to adjust accordingly.
 

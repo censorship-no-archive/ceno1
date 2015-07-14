@@ -9,7 +9,7 @@ to the component corresponding to the particular body of text.
 
 The CENO Client is using the [go-i18n](https://github.com/nicksnyder/go-i18n) library to handle
 internationalization.  All of the ready-for-translation texts can be found in the
-`ceno-node/translations/` directory contains json files containing an array of objects pairing strings
+`ceno-client/translations/` directory contains json files containing an array of objects pairing strings
 to be translated with an id that can be referenced from the source code.
 
 e.g.
@@ -30,7 +30,7 @@ e.g.
 Note that the `"id"` fields should not be changed.
 Also, the text inside (and including) `{{}}` should be left alone as it is used by the software.
 
-To create a translation, simply create a new file such as `ceno-node/translations/fr-fr.json` with
+To create a translation, simply create a new file such as `ceno-client/translations/fr-fr.json` with
 the same structure- objects mapping the same IDs to the French (in this case) translations of the
 text.
 
@@ -47,12 +47,12 @@ however the client is an exception.  Transifex expects JSON files to be of the f
 ```
 
 which clearly doesn't match the form goi18n uses. To cope with this, the 
-`ceno-node/tools/json-translation.py` script was created.  This script will read
-`ceno-node/translations/en-us.json` and produce `ceno-node/tools/en-us.json` that will be in the
+`ceno-client/tools/json-translation.py` script was created.  This script will read
+`ceno-client/translations/en-us.json` and produce `ceno-client/tools/en-us.json` that will be in the
 format preferred by Transifex.  This first step is accomplished by running
 
 ```
-cd ceno-node/tools
+cd ceno-client/tools
 python json-translation.py to
 ```
 
@@ -63,7 +63,7 @@ used by goi18n with the following command, assuming as an example that we have o
 python json-translation.py from de-de de-de.json
 ```
 
-This will create `ceno-node/translations/de-de.json` in the format that can be merged with our other
+This will create `ceno-client/translations/de-de.json` in the format that can be merged with our other
 supported locales with goi18n.
 
 ### goi18n
@@ -82,7 +82,7 @@ The `goi18n` command should now be available:
 The translations can then be merged with the `go18n` tool:
 
 ```
-cd ceno-node/translations
+cd ceno-client/translations
 $GOPATH/bin/go18n *.json
 ```
 

@@ -47,7 +47,7 @@ mkdir CENOBox
 
 # Build CENO Client
 echo "Building CENO client with latest updates"
-cd ceno-node
+cd ceno-client
 if [ -a client ]; then
   rm client
 fi
@@ -84,7 +84,7 @@ echo "Copying extra CENO specific directories"
 cp -rL ceno-{chrome,firefox} CENOBox
 cp -r ceno-{freenet,extra}/* CENOBox
 mkdir CENOBox/ceno-client
-cp -r ceno-node/{client,views,config} CENOBox/ceno-client
+cp -r ceno-client/{client,views,config} CENOBox/ceno-client
 
 if [[ $DEBUG == 1 ]]; then
   # Build CENO client Freenet plugin

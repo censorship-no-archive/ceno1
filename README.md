@@ -35,14 +35,14 @@ commands into your operating system's `terminal` program.
 
 ```
 # <path-to-ceno> must be replaced with the path to where you installed CENO
-cd <path-to-ceno>/ceno-node/src/
+cd <path-to-ceno>/ceno-client/
 ./build.sh
 ./client
 ```
 
 Next you must configure your browser or operating system to use CENO client as
 an HTTP proxy.  The address/hostname you will want to use is `localhost` and
-the port number is specified in the `PortNumber` field of `ceno-node/config/client.json`, the default being `3090`.
+the port number is specified in the `PortNumber` field of `ceno-client/config/client.json`, the default being `3090`.
 
 [Instructions for Google Chrome](https://support.google.com/chrome/answer/96815?hl=en)
 
@@ -59,7 +59,7 @@ be securely handled by CENO.
 
 ### Configuring the client
 
-The `ceno-node/config/client.json` file contains the configuration settings
+The `ceno-client/config/client.json` file contains the configuration settings
 for the client. You can change any setting you like by modifying the value
 between quotation marks on the right side of the colon (:) symbol. The fields
 in the configuration file are as follows.

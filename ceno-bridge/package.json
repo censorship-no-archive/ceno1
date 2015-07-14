@@ -1,5 +1,5 @@
 {
-  "name": "ceno-node",
+  "name": "ceno-client",
   "description": "",
   "version": "0.3.0",
   "engines": ">= 0.12.0",

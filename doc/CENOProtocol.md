@@ -125,7 +125,7 @@ and specify error codes that classify them.
 
 The CC should be able to signal decoding issues to the LCS after a lookup.
 The client should be able to decide the LCS' response into a
-[Result structure](https://github.com/equalitie/ceno/blob/master/ceno-node/src/client.go).
+[Result structure](https://github.com/equalitie/ceno/blob/master/ceno-client/client.go).
 The report is sent in the case that it cannot.
 
 Step | Description              | Message
