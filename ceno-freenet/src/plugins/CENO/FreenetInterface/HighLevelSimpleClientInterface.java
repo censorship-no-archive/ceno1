@@ -11,17 +11,19 @@ import freenet.client.HighLevelSimpleClient;
 import freenet.client.InsertBlock;
 import freenet.client.InsertContext;
 import freenet.client.InsertException;
+import freenet.client.async.BaseManifestPutter;
 import freenet.client.async.ClientGetCallback;
 import freenet.client.async.ClientGetter;
 import freenet.client.async.ClientPutCallback;
 import freenet.client.async.ClientPutter;
-import freenet.client.async.DatabaseDisabledException;
-import freenet.client.async.SimpleManifestPutter;
+import freenet.client.async.DefaultManifestPutter;
+import freenet.client.async.PersistenceDisabledException;
+import freenet.client.async.TooManyFilesInsertException;
 import freenet.keys.FreenetURI;
 import freenet.node.Node;
-import freenet.node.NodeClientCore;
 import freenet.node.RequestClient;
 import freenet.node.RequestStarter;
+import freenet.support.Logger;
 
 public class HighLevelSimpleClientInterface {
 
@@ -52,7 +54,7 @@ public class HighLevelSimpleClientInterface {
 	private HighLevelSimpleClientInterface() {
 	}
 
-	public HighLevelSimpleClientInterface(Node node, NodeClientCore core) {
+	public HighLevelSimpleClientInterface(Node node) {
 		synchronized (HighLevelSimpleClientInterface.class) {
 			if (HLSCInterface == null) {
 				HLSCInterface = new HighLevelSimpleClientInterface();
@@ -94,6 +96,10 @@ public class HighLevelSimpleClientInterface {
 	public static InsertContext getInsertContext(boolean b) {
 		return HLSCInterface.client.getInsertContext(b);
 	}
+	
+	public static RequestClient getRequestClient() {
+		return HLSCInterface.requestClient;
+	}
 
 	/**
 	 * Synchronously fetch a file from Freenet, given a FreenetURI
@@ -116,7 +122,7 @@ public class HighLevelSimpleClientInterface {
 	 */
 	public static ClientGetter fetchURI(FreenetURI uri, long maxSize, 
 			ClientGetCallback callback, FetchContext fctx) throws FetchException {
-		return HLSCInterface.client.fetch(uri, maxSize, HLSCInterface.requestClient, callback, fctx);
+		return HLSCInterface.client.fetch(uri, maxSize, callback, fctx);
 	}
 
 	//	/**
@@ -143,7 +149,7 @@ public class HighLevelSimpleClientInterface {
 	 * @param ctx Insert context so you can customise the insertion process.
 	 */
 	public static ClientPutter insert(InsertBlock insert, String filenameHint, boolean isMetadata, InsertContext ctx, ClientPutCallback cb, short priority) throws InsertException {
-		return HLSCInterface.client.insert(insert, false, filenameHint, isMetadata, ctx, cb, priority);
+		return HLSCInterface.client.insert(insert, filenameHint, isMetadata, ctx, cb, priority);
 	}
 
 	public static FreenetURI insertManifest(FreenetURI insertURI, HashMap<String, Object> bucketsByName, String defaultName) throws InsertException {
@@ -155,12 +161,18 @@ public class HighLevelSimpleClientInterface {
 	}
 
 	public static FreenetURI insertManifestCb(FreenetURI insertURI, HashMap<String, Object> bucketsByName, String defaultName, short priorityClass, byte[] forceCryptoKey, ClientPutCallback insertCb) throws InsertException {
-		SimpleManifestPutter putter = new SimpleManifestPutter(insertCb, SimpleManifestPutter.bucketsByNameToManifestEntries(bucketsByName), priorityClass, insertURI, defaultName, getInsertContext(true), 
-				false, requestClient, false, false, forceCryptoKey, null, HLSCInterface.node.clientCore.clientContext);
+		DefaultManifestPutter putter;
+		try {
+			putter = new DefaultManifestPutter(insertCb, BaseManifestPutter.bucketsByNameToManifestEntries(bucketsByName), priorityClass, insertURI, defaultName, getInsertContext(true), false, forceCryptoKey, null);
+		} catch (TooManyFilesInsertException e) {
+			Logger.warning(HighLevelSimpleClientInterface.class, "TooManyFiles in a single directory to fit in a single Manifest file, will not insert URI: " + insertURI.toASCIIString());
+			return null;
+		}
 		try {
 			HLSCInterface.node.clientCore.clientContext.start(putter);
-		} catch (DatabaseDisabledException e) {
-			// Impossible
+		} catch (PersistenceDisabledException e) {
+			Logger.warning(HighLevelSimpleClientInterface.class, "Could not start Manifest insertion for URI: " + insertURI.toASCIIString() + " Error: " + e.getMessage());
+			return null;
 		}
 		return insertURI;
 	}

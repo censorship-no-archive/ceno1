@@ -3,15 +3,16 @@ package plugins.CENO.Client;
 import java.util.Hashtable;
 
 import plugins.CENO.URLtoUSKTools;
-
-import com.db4o.ObjectContainer;
-
 import freenet.client.FetchException;
+import freenet.client.FetchException.FetchExceptionMode;
 import freenet.client.FetchResult;
+import freenet.client.async.ClientContext;
 import freenet.client.async.ClientGetCallback;
 import freenet.client.async.ClientGetter;
 import freenet.keys.FreenetURI;
+import freenet.node.RequestClient;
 import freenet.support.Logger;
+import freenet.support.io.ResumeFailedException;
 
 public class ULPRManager {
 
@@ -33,24 +34,29 @@ public class ULPRManager {
 			this.url = url;
 		}
 
-		public void onMajorProgress(ObjectContainer container) {
-		}
-
-		public void onSuccess(FetchResult result, ClientGetter state,
-				ObjectContainer container) {
+		public void onSuccess(FetchResult result, ClientGetter state) {
 			Logger.normal(this, "ULPR completed successfully for URL: " + url);
 			updateULPRStatus(url, ULPRStatus.succeeded);
 		}
 
-		public void onFailure(FetchException e, ClientGetter state,
-				ObjectContainer container) {
+		public void onFailure(FetchException e, ClientGetter state) {
 			//TODO Handle not fatal errors (like permanent redirections)
-			if (e.getMode() == FetchException.PERMANENT_REDIRECT) {
+			if (e.getMode() == FetchExceptionMode.PERMANENT_REDIRECT) {
 				initULPR(url, e.newURI.getEdition());
 			} else {
 				updateULPRStatus(url, ULPRStatus.failed);
 				Logger.error(this, "ULPR failed for url: " + url + " Exception: " + e.getMessage());
 			}
+		}
+
+		public void onResume(ClientContext context)
+				throws ResumeFailedException {
+			// TODO Auto-generated method stub
+			
+		}
+
+		public RequestClient getRequestClient() {
+			return CENOClient.nodeInterface.getRequestClient();
 		}
 
 	}

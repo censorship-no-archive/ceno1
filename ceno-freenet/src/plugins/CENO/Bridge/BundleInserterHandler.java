@@ -50,8 +50,8 @@ public class BundleInserterHandler extends CENOJettyHandler {
 		}
 
 		@Override
-		public void onSuccess(BaseClientPutter state, ObjectContainer container) {
-			super.onSuccess(state, container);
+		public void onSuccess(BaseClientPutter state) {
+			super.onSuccess(state);
 			response.setContentType("text/html;charset=utf-8");
 			response.setStatus(HttpServletResponse.SC_OK);
 			try {
@@ -65,8 +65,8 @@ public class BundleInserterHandler extends CENOJettyHandler {
 		}
 
 		@Override
-		public void onFailure(InsertException e, BaseClientPutter state, ObjectContainer container) {
-			super.onFailure(e, state, container);
+		public void onFailure(InsertException e, BaseClientPutter state) {
+			super.onFailure(e, state);
 			try {
 				writeError(baseRequest, response, "not stored");
 			} catch (IOException e1) {

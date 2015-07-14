@@ -31,7 +31,7 @@ You are advised to go through the [official instructions](https://freenetproject
 
 ### Downloading or building CENO
 CENO is distributed as a prebuilt jar file from within freenet, with the USK [freenet:USK@kWKE67nhHNp6C-lgD5QtpL5qnIgmsnM6B5i7xxJGXIQ,UhZYJ2R6egIAjdMGAQbsjPcos1~CIJ~CbUKjpuUlwXA,AQACAAE/CENO-plugin/-1/CENO.jar](http://127.0.0.1:8888/freenet:USK@kWKE67nhHNp6C-lgD5QtpL5qnIgmsnM6B5i7xxJGXIQ,UhZYJ2R6egIAjdMGAQbsjPcos1~CIJ~CbUKjpuUlwXA,AQACAAE/CENO-plugin/-1/CENO.jar).
-Being a free project and licensed under GPLv3, you can get the source code from the [official repository](https://github.com/equalitie/ceno) and build CENO yourself, following the [building instructions](https://github.com/equalitie/ceno/blob/master/plugin-ceno/README.building.md).
+Being a free project and licensed under GPLv3, you can get the source code from the [official repository](https://github.com/equalitie/ceno) and build CENO yourself, following the [building instructions](https://github.com/equalitie/ceno/blob/master/ceno-freenet/README.building.md).
 
 
 ### Loading CENO to a running freenet node

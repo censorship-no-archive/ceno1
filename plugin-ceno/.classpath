@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<classpath>
-	<classpathentry kind="src" path="src/plugins/CeNo"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="/home/vmon/doc/code/freenite/fred-staging/dist/freenet.jar"/>
-	<classpathentry kind="lib" path="/home/vmon/doc/code/freenite/freenet-repo-fred-staging/lib/freenet/freenet-ext.jar"/>
-	<classpathentry kind="output" path="bin"/>
-</classpath>

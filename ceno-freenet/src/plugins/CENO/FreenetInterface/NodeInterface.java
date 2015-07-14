@@ -4,9 +4,11 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.RandomAccess;
 
 import org.freenetproject.freemail.wot.ConcurrentWoTConnection;
 
+import plugins.CENO.FreenetInterface.ConnectionOverview.NodeConnections;
 import freenet.client.ClientMetadata;
 import freenet.client.DefaultMIMETypes;
 import freenet.client.FetchContext;
@@ -21,9 +23,11 @@ import freenet.client.async.ClientPutCallback;
 import freenet.keys.FreenetURI;
 import freenet.keys.InsertableClientSSK;
 import freenet.node.Node;
+import freenet.node.RequestClient;
 import freenet.node.RequestStarter;
 import freenet.pluginmanager.PluginRespirator;
 import freenet.support.api.Bucket;
+import freenet.support.api.RandomAccessBucket;
 import freenet.support.io.BucketTools;
 
 public class NodeInterface implements FreenetInterface {
@@ -31,11 +35,13 @@ public class NodeInterface implements FreenetInterface {
 	private Node node;
 	private PluginRespirator pr;
 	private FetchContext ULPRFC, localFC;
+	private ConnectionOverview connectionOverview;
 	private ConcurrentWoTConnection wotConnection;
 
 	public NodeInterface(Node node, PluginRespirator pr) {
 		this.node = node;
 		this.pr = pr;
+		this.connectionOverview = new ConnectionOverview(node);
 
 		// Set up a FetchContext instance for Ultra-lightweight passive requests
 		this.ULPRFC = HighLevelSimpleClientInterface.getFetchContext();
@@ -81,6 +87,10 @@ public class NodeInterface implements FreenetInterface {
 		FreenetURI requestURI = key.getURI();
 		return new FreenetURI[]{insertURI, requestURI};
 	}
+	
+	public RequestClient getRequestClient() {
+		return HighLevelSimpleClientInterface.getRequestClient();
+	}
 
 	public Bucket makeBucket(int length) throws IOException {
 		return node.clientCore.persistentTempBucketFactory.makeBucket(length);
@@ -110,7 +120,7 @@ public class NodeInterface implements FreenetInterface {
 			mimeType = "text/html";
 		}
 
-		Bucket bucket = node.clientCore.tempBucketFactory.makeBucket(content.length());
+		RandomAccessBucket bucket = node.clientCore.tempBucketFactory.makeBucket(content.length());
 		BucketTools.copyFrom(bucket, new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8), 0, content.length()), content.length());
 
 		InsertBlock ib = new InsertBlock(bucket, new ClientMetadata(mimeType), insertURI);
@@ -133,6 +143,10 @@ public class NodeInterface implements FreenetInterface {
 
 	public boolean insertManifestCb(FreenetURI insertURI, HashMap<String, Object> bucketsByName, String defaultName, short priorityClass) throws InsertException {
 		return true;	
+	}
+	
+	public NodeConnections getConnections() {
+		return connectionOverview.getConnections();
 	}
 
 	public boolean sendFreemail(String freemailFrom, String freemailTo[], String subject, String content, String password) {
