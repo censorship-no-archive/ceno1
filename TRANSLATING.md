@@ -34,6 +34,40 @@ To create a translation, simply create a new file such as `ceno-node/translation
 the same structure- objects mapping the same IDs to the French (in this case) translations of the
 text.
 
+### Translating with Transifex
+
+eQualit.ie relies on [Transifex](https://www.transifex.com/) to translate CENO.  Transifex is very
+adaptable in supporting a the file formats for every other component of CENO (w.r.t. i18n documents)
+however the client is an exception.  Transifex expects JSON files to be of the form
+
+```js
+{
+  "identifier": "Text for translation"
+}
+```
+
+which clearly doesn't match the form goi18n uses. To cope with this, the 
+`ceno-node/tools/json-translation.py` script was created.  This script will read
+`ceno-node/translations/en-us.json` and produce `ceno-node/tools/en-us.json` that will be in the
+format preferred by Transifex.  This first step is accomplished by running
+
+```
+cd ceno-node/tools
+python json-translation.py to
+```
+
+Once we have obtained a translation for `en-us.json`, we can convert the new file back to the format
+used by goi18n with the following command, assuming as an example that we have obtained `de-de.json`,
+
+```
+python json-translation.py from de-de de-de.json
+```
+
+This will create `ceno-node/translations/de-de.json` in the format that can be merged with our other
+supported locales with goi18n.
+
+### goi18n
+
 To install goi18n, you must have `GOPATH` and `GOROOT` environment variables defined.
 The [golang documentation](https://golang.org/doc/code.html#GOPATH) suggests setting `GOPATH` to
 `$HOME/go`.  Next, you can install goi18n by running
