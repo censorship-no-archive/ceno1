@@ -39,19 +39,21 @@ type Result struct {
 
 type TransArgs map[string]interface{}
 
-// Set a header on responses that indicates that the response
-// was served by the CENO client. The header can be referenced
-// by pages, browser plugins, and so on to check if CENO client
-// is running.
+/**
+ * Set a header on responses that indicates that the response was served by the CENO client.
+ * Useful for checking if the CENO Client is running via an HTTP request.
+ * @param {ResponseWriter} w - The ResponseWriter used to serve the current request's response.
+ */
 func WriteProxyHeader(w http.ResponseWriter) http.ResponseWriter {
 	w.Header().Add("X-Ceno-Proxy", "yxorP-oneC-X")
 	return w
 }
 
-// Serve a page to inform the user that a bundle for the site they requested is
-// being prepared. It will automatically initiate new requests to retrieve the same
-// URL in an interval.
-// The second bool return value specifies whether the response is HTML or not
+/**
+ * Serve a page to inform the user that the bundle for the site they requested is being prepared.
+ * The second return value is true when the response is HTML and false when text/plain.
+ * @param {string} url - The URL that was originally requested
+ */
 func pleaseWait(url string) ([]byte, bool) {
 	T, _ := i18n.Tfunc(os.Getenv("LANGUAGE"), "en-us")
 	content, err := ioutil.ReadFile(Configuration.PleaseWaitPage)
@@ -66,9 +68,11 @@ func pleaseWait(url string) ([]byte, bool) {
 	}
 }
 
-// Report that an error occured trying to decode the response from the LCS
-// The LCS is expected to respond to this request with just the string "okay",
-// so we will ignore it for now.
+/**
+ * Report that an error occurred trying to decode the response from the LCS.
+ * @param {string} reportURL - The URL to POST to to report the error.
+ * @param {string} errMsg - The message to write to the LCS
+ */
 func reportDecodeError(reportURL, errMsg string) (bool, error) {
 	mapping := map[string]interface{}{
 		"error": errMsg,
@@ -85,7 +89,10 @@ func reportDecodeError(reportURL, errMsg string) (bool, error) {
 	return response.StatusCode == 200, err
 }
 
-// Check with the local cache server to find a bundle for a given URL.
+/**
+ * Request that the LCS start a lookup process for a particular URL.
+ * @param {string} lookupURL - The URL to try to find in the distributed cache
+ */
 func lookup(lookupURL string) Result {
 	response, err := http.Get(BundleLookupURL(Configuration, lookupURL))
 	T, _ := i18n.Tfunc(os.Getenv("LANGUAGE"), "en-us")
@@ -112,7 +119,11 @@ func lookup(lookupURL string) Result {
 	return result
 }
 
-// POST to the request server to have it start making a new bundle.
+/**
+ * Request that the RS issue a request to create a new bundle.
+ * @param {string} lookupURL - The URL of the site to create a bundle for
+ * @param {bool} wasRewritten - True of the requested URL was rewritten from HTTPS to HTTP
+ */
 func requestNewBundle(lookupURL string, wasRewritten bool) error {
 	// We can ignore the content of the response since it is not used.
 	reader := bytes.NewReader([]byte(lookupURL))
@@ -142,10 +153,11 @@ func execPleaseWait(URL string, w http.ResponseWriter, r *http.Request) {
 	w.Write(body)
 }
 
-// Strip out the S in HTTPS so that the requests that get passed along fit the
-// rest of the protocol.
-// Returns the stripped URL as well as a bool indicating whether a rewrite
-// took place at all.
+/**
+ * Strip out the S in HTTPS from URLs provided to the CC via the /lookup path.
+ * Returns the written URL and a boolean indicating whether the downgrade was made.
+ * @param {string} URL - The decoded (from b64) URL being requested
+ */
 func stripHttps(URL string) (string, bool) {
 	if strings.Index(URL, "https") != 0 {
 		return URL, false
@@ -154,10 +166,14 @@ func stripHttps(URL string) (string, bool) {
 	}
 }
 
-// Handle requests of the form `http://127.0.0.1:3090/lookup?url=<base64-enc-url>`
-// so that we can simplify the problem of certain browsers trying particularly hard
-// to enforce HTTPS.  Rather than trying to deal with infinite redirecting between
-// HTTP and HTTPS, we can make requests directly to the client.
+/**
+ * Handle requests of the form `http://127.0.0.1:3090/lookup?url=<base64-enc-url>`
+ * so that we can simplify the problem of certain browsers trying particularly hard
+ * to enforce HTTPS.  Rather than trying to deal with infinite redirecting between
+ * HTTP and HTTPS, we can make requests directly to the client.
+ * @param {ResponseWriter} w - The object used to handle writing responses to the client
+ * @param {*Request} r - Information about the request
+ */
 func directHandler(w http.ResponseWriter, r *http.Request) {
 	qs := r.URL.Query()
 	URLS, found := qs["url"]
@@ -199,9 +215,65 @@ func directHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Handle incoming requests for bundles.
-// 1. Initiate bundle lookup process
-// 2. Initiate bundle creation process when no bundle exists anywhere
+/**
+ * Check if a provided URL is well-formed.  If not, serve an error page.
+ * This call terminates requests when the return value is false (i.e. invalid URL).
+ * @param {string} URL - The URL being requested
+ * @param {ResponseWriter} w - The object handling writing responses to the client
+ * @param {*Request} r - Information about the request
+ */
+func validateURL(URL string, w http.ResponseWriter, r *http.Request) bool {
+  isValid, err := regexp.MatchString(URL_REGEX, URL)
+  if !isValid || err != nil {
+    state := ErrorState {
+      "responseWriter": w, "request": r, "errMsg": T("malformed_url_cli", TransArgs {
+        "URL": URL,
+      }),
+    }
+    ErrorHandlers[ERR_MALFORMED_URL](state)
+    return false
+  }
+  return true
+}
+
+/**
+ * Handle errors reported by the LCS.  This function should terminate requests.
+ * @param {Result} errInfo - Information (ErrCode and ErrMsg) about the error
+ * @param {ResponseWriter} w - The object handling responding to the client
+ * @param {*Request} r - Information about the request
+ */
+func handleLCSErrors(errInfo Result, w http.ResponseWriter, r *http.Request) {
+  state := ErrorState{"responseWriter": w, "request": r, "errMsg": errInfo.ErrMsg}
+  ErrorHandlers[ERR_FROM_LCS](state)
+}
+
+/**
+ * Try to request a new bundle be created and serve the please wait page.
+ * This function should terminate requests.
+ * @param {string} URL - The URL to POST to to request a new bundle
+ * @param {bool} rewritten - True if the request was downgraded from HTTPS to HTTP else false
+ * @param {ResponseWriter} w - the object handling responding to the client
+ * @param {*Request} r - Information about the request
+ */
+func tryRequestBundle(URL string, rewritten bool, w http.ResponseWriter, r *http.Response) {
+  err := requestNewBundle(URL, rewritten)
+  if err != nil {
+    fmt.Println(T("bundle_err_cli", TransArgs {
+      "Message": err.Error(),
+    }))
+    handleLCSErrors(err, w, r)
+  } else {
+    execPleaseWait(URL, w, r)
+  }
+}
+
+/**
+ * Handle incoming requests for bundles.
+ * 1. Initiate bundle lookup process
+ * 2. Initiate bundle creation process when no bundle exists anywhere
+ * @param {ResponseWriter} w - The object handling responding to the client
+ * @param {*Request} r - Information about the request
+ */
 func proxyHandler(w http.ResponseWriter, r *http.Request) {
 	w = WriteProxyHeader(w)
 	URL := r.URL.String()
@@ -211,16 +283,9 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 		"URL":       URL,
 		"Rewritten": wasRewritten,
 	}))
-	matched, err := regexp.MatchString(URL_REGEX, URL)
-	if !matched || err != nil {
-		state := ErrorState{
-			"responseWriter": w, "request": r, "errMsg": T("malformed_url_cli", TransArgs{
-				"URL": URL,
-			}),
-		}
-		ErrorHandlers[ERR_MALFORMED_URL](state)
-		return
-	}
+  if isValidURL := validateURL(URL, w, r); !isValidURL {
+    return
+  }
 	result := lookup(URL)
 	if result.ErrCode > 0 {
 		fmt.Println(T("err_from_lcs_cli", TransArgs{
@@ -230,34 +295,15 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 		// Assuming the reason the response is malformed is because of the formation of the bundle,
 		// so we will request that a new bundle be created.
 		if result.ErrCode == ERR_MALFORMED_LCS_RESPONSE {
-			err = requestNewBundle(URL, wasRewritten)
-			fmt.Println(T("bundle_err_cli", TransArgs{
-				"Message": err.Error(),
-			}))
-			if err != nil {
-				state := ErrorState{"responseWriter": w, "request": r, "errMsg": err.Error()}
-				ErrorHandlers[ERR_FROM_LCS](state)
-			} else {
-				execPleaseWait(URL, w, r)
-			}
+      tryrequestBundle(URL, wasRewritten, w, r)
 		} else {
-			state := ErrorState{"responseWriter": w, "request": r, "errMsg": result.ErrMsg}
-			ErrorHandlers[ERR_FROM_LCS](state)
+      handleLCSErrors(Result{ ErrCode: result.ErrCode, ErrMsg: result.ErrMsg }, w, r)
 		}
 	} else if result.Complete {
 		if result.Found {
 			w.Write([]byte(result.Bundle))
 		} else {
-			err = requestNewBundle(URL, wasRewritten)
-			if err != nil {
-				fmt.Println(T("bundle_err_cli", TransArgs{
-					"Message": err.Error(),
-				}))
-				state := ErrorState{"responseWriter": w, "request": r, "errMsg": err.Error()}
-				ErrorHandlers[ERR_FROM_LCS](state)
-			} else {
-				execPleaseWait(URL, w, r)
-			}
+      tryRequestBundle(URL, wasRewritten, w, r)
 		}
 	} else {
 		execPleaseWait(URL, w, r)

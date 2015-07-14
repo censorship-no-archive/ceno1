@@ -89,8 +89,14 @@ func downloadViewsAndServeError(state ErrorState) bool {
 	return serveError(state)
 }
 
-// Execute the error template or produce a helpful plaintext response to explain
-// the error and provide pre-composed advice
+/**
+ * Execute the error template or produce a helpful plaintext response to explain
+ * the error and provide pre-composed advice.
+ * @param {ErrorCode} errorCode - The code number identifying the error that occurred
+ * @param {string} errorMsg - A message to go along with the error report
+ * @param {ResponseWriter} w - The object handling responding to the client
+ * @param {*Request} r - Information about the request
+ */
 func ExecuteErrorPage(errorCode ErrorCode, errorMsg string, w http.ResponseWriter, r *http.Request) {
 	T, _ := i18n.Tfunc(os.Getenv("LANGUAGE"), "en-us")
 	t, err := template.ParseFiles(path.Join(".", "views", "error.html"))

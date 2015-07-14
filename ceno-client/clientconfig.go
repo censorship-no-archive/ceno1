@@ -40,19 +40,30 @@ const (
 	RS_CREATE      = "/create"
 )
 
-// Produce a URL to request a bundle be looked up by the LCS
+/**
+ * Produce a URL to request a bundle be looked up by the LCS.
+ * @param {Config} configuration - The Configuration for the CC
+ * @param {string} URL - The URL to request be looked up
+ */
 func BundleLookupURL(configuration Config, URL string) string {
 	encodedURL := base64.StdEncoding.EncodeToString([]byte(URL))
 	return configuration.CacheServer + LCS_LOOKUP + "?url=" + encodedURL
 }
 
-// Produce a URL to request a new bundle be made by the RS
+/**
+ * Produce a URL to request a new bundle be made by the RS.
+ * @param {Config} configuration - The Configuration for the CC
+ * @param {string} URL - The URL to request a bundle be created for
+ */
 func CreateBundleURL(configuration Config, URL string) string {
 	encodedURL := base64.StdEncoding.EncodeToString([]byte(URL))
 	return configuration.RequestServer + RS_CREATE + "?url=" + encodedURL
 }
 
-// Produce a URL to send to the LCS to report a response decode error
+/**
+ * Produce a URL to send to the LCS to report a response decode error.
+ * @param {Config} configuration - The Configuration for the CC
+ */
 func DecodeErrReportURL(configuration Config) string {
 	return configuration.CacheServer + LCS_DECODE_ERR
 }
@@ -126,7 +137,9 @@ func ReadConfigFile(fileName string) (Config, error) {
 	return configuration, nil
 }
 
-// Read configuration information from stdin
+/**
+ * Read configuration information from stdin.
+ */
 func GetConfigFromUser() Config {
 	var configuration Config
 	T, _ := i18n.Tfunc(os.Getenv("LANGUAGE"), "en-us")
