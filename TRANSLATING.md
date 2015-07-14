@@ -34,11 +34,21 @@ To create a translation, simply create a new file such as `ceno-node/translation
 the same structure- objects mapping the same IDs to the French (in this case) translations of the
 text.
 
+To install goi18n, you must have `GOPATH` and `GOROOT` environment variables defined.
+The [golang documentation](https://golang.org/doc/code.html#GOPATH) suggests setting `GOPATH` to
+`$HOME/go`.  Next, you can install goi18n by running
+
+    go get github.com/nicksnyder/go-i18n/goi18n
+
+The `goi18n` command should now be available:
+
+    $GOPATH/bin/goi18n --help
+
 The translations can then be merged with the `go18n` tool:
 
 ```
 cd ceno-node/translations
-go18n *.json
+$GOPATH/bin/go18n *.json
 ```
 
 ## CENO Chrome
