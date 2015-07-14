@@ -82,7 +82,7 @@ public enum CENOErrCode {
 	/////////////////////
 	// RR Agent Errors //
 	/////////////////////
-	BI(4000, ErrAction.LOG, "General Request Receiver agent error"),
+	RR(4000, ErrAction.LOG, "General Request Receiver agent error"),
 
 	/////////////////////
 	// BI Agent Errors //
