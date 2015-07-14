@@ -12,6 +12,7 @@ import freenet.client.async.ClientGetCallback;
 import freenet.client.async.ClientGetter;
 import freenet.client.async.ClientPutCallback;
 import freenet.keys.FreenetURI;
+import freenet.node.RequestClient;
 import freenet.support.api.Bucket;
 
 public interface FreenetInterface {
@@ -20,6 +21,7 @@ public interface FreenetInterface {
 	ClientGetter localFetchURI(FreenetURI uri, ClientGetCallback callback) throws FetchException;
 	ClientGetter fetchULPR(FreenetURI uri, ClientGetCallback callback) throws FetchException;
 	FreenetURI[] generateKeyPair();
+	RequestClient getRequestClient();
 	FreenetURI insertBlock(InsertBlock insert, boolean getCHKOnly, String filenameHint) throws InsertException;
 	boolean insertFreesite(FreenetURI insertURI, String docName, String content, ClientPutCallback cb) throws IOException, InsertException;
 	FreenetURI insertBundleManifest(FreenetURI insertURI, String content, String defaultName, ClientPutCallback cb) throws IOException, InsertException;

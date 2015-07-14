@@ -21,10 +21,8 @@ import freenet.client.async.PersistenceDisabledException;
 import freenet.client.async.TooManyFilesInsertException;
 import freenet.keys.FreenetURI;
 import freenet.node.Node;
-import freenet.node.NodeClientCore;
 import freenet.node.RequestClient;
 import freenet.node.RequestStarter;
-import freenet.pluginmanager.FredPluginFCPMessageHandler.PrioritizedMessageHandler;
 import freenet.support.Logger;
 
 public class HighLevelSimpleClientInterface {
@@ -97,6 +95,10 @@ public class HighLevelSimpleClientInterface {
 
 	public static InsertContext getInsertContext(boolean b) {
 		return HLSCInterface.client.getInsertContext(b);
+	}
+	
+	public static RequestClient getRequestClient() {
+		return HLSCInterface.requestClient;
 	}
 
 	/**

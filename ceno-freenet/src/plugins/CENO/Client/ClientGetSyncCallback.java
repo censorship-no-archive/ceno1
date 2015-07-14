@@ -51,8 +51,7 @@ public class ClientGetSyncCallback implements ClientGetCallback {
 	}
 
 	public RequestClient getRequestClient() {
-		// TODO Auto-generated method stub
-		return null;
+		return CENOClient.nodeInterface.getRequestClient();
 	}
 
 }

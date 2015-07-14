@@ -59,8 +59,7 @@ public class BundleInserter {
 		}
 
 		public RequestClient getRequestClient() {
-			// TODO Auto-generated method stub
-			return null;
+			return CENOBridge.nodeInterface.getRequestClient();
 		}
 
 	}

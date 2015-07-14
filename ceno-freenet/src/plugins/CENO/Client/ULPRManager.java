@@ -3,9 +3,6 @@ package plugins.CENO.Client;
 import java.util.Hashtable;
 
 import plugins.CENO.URLtoUSKTools;
-
-import com.db4o.ObjectContainer;
-
 import freenet.client.FetchException;
 import freenet.client.FetchException.FetchExceptionMode;
 import freenet.client.FetchResult;
@@ -59,8 +56,7 @@ public class ULPRManager {
 		}
 
 		public RequestClient getRequestClient() {
-			// TODO Auto-generated method stub
-			return null;
+			return CENOClient.nodeInterface.getRequestClient();
 		}
 
 	}

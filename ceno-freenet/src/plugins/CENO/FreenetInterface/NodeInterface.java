@@ -23,6 +23,7 @@ import freenet.client.async.ClientPutCallback;
 import freenet.keys.FreenetURI;
 import freenet.keys.InsertableClientSSK;
 import freenet.node.Node;
+import freenet.node.RequestClient;
 import freenet.node.RequestStarter;
 import freenet.pluginmanager.PluginRespirator;
 import freenet.support.api.Bucket;
@@ -85,6 +86,10 @@ public class NodeInterface implements FreenetInterface {
 		FreenetURI insertURI = key.getInsertURI();
 		FreenetURI requestURI = key.getURI();
 		return new FreenetURI[]{insertURI, requestURI};
+	}
+	
+	public RequestClient getRequestClient() {
+		return HighLevelSimpleClientInterface.getRequestClient();
 	}
 
 	public Bucket makeBucket(int length) throws IOException {
