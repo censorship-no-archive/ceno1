@@ -58,10 +58,8 @@ cd ..
 echo "Copying necessary files from the existing Freenet installation"
 cp -r $FREENET_DIR/{\
 bin,\
-freemail-wot,\
 lib,\
 Uninstaller,\
-WebOfTrust,\
 bcprov-jdk15on-151.jar,\
 freenet.ico,\
 freenet.jar,\
