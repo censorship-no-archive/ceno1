@@ -70,7 +70,8 @@ supported locales with goi18n.
 
 To install goi18n, you must have `GOPATH` and `GOROOT` environment variables defined.
 The [golang documentation](https://golang.org/doc/code.html#GOPATH) suggests setting `GOPATH` to
-`$HOME/go`.  Next, you can install goi18n by running
+`$HOME/go`.  `GOROOT` should be set to the installation location of go, probably `/usr/local/go`.
+Next, you can install goi18n by running
 
     go get github.com/nicksnyder/go-i18n/goi18n
 
