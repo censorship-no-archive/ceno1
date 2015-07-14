@@ -9,6 +9,7 @@ import plugins.CENO.CENOException;
 import plugins.CENO.URLtoUSKTools;
 import plugins.CENO.Client.ULPRManager.ULPRStatus;
 import freenet.client.FetchException;
+import freenet.client.FetchException.FetchExceptionMode;
 import freenet.keys.FreenetURI;
 import freenet.pluginmanager.PluginHTTPException;
 import freenet.support.Base64;
@@ -105,7 +106,7 @@ public class LookupHandler extends AbstractCENOClientHandler {
 			CENOClient.nodeInterface.localFetchURI(calculatedUSK, getSyncCallback);
 			fetchResult = getSyncCallback.getResult(45L, TimeUnit.SECONDS);
 		} catch (FetchException e) {
-			if (e.getMode() == FetchException.PERMANENT_REDIRECT) {
+			if (e.getMode() == FetchExceptionMode.PERMANENT_REDIRECT) {
 				fetchResult = localCacheLookup(e.newURI);
 			} else if (e.isFatal()) {
 				Logger.warning(this, "Fatal fetch exception while looking in the local cache for USK: " + calculatedUSK + " Exception: " + e.getMessage());

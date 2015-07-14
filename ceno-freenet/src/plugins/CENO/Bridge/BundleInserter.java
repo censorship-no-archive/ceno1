@@ -3,7 +3,6 @@ package plugins.CENO.Bridge;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Hashtable;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import plugins.CENO.URLtoUSKTools;
@@ -13,10 +12,13 @@ import com.db4o.ObjectContainer;
 
 import freenet.client.InsertException;
 import freenet.client.async.BaseClientPutter;
+import freenet.client.async.ClientContext;
 import freenet.client.async.ClientPutCallback;
 import freenet.keys.FreenetURI;
+import freenet.node.RequestClient;
 import freenet.support.Logger;
 import freenet.support.api.Bucket;
+import freenet.support.io.ResumeFailedException;
 
 public class BundleInserter {
 
@@ -32,26 +34,33 @@ public class BundleInserter {
 			this.uri = uri;
 		}
 
-		public void onMajorProgress(ObjectContainer container) {
-		}
-
-		public void onGeneratedURI(FreenetURI freenetUri, BaseClientPutter state, ObjectContainer container) {
+		public void onGeneratedURI(FreenetURI freenetUri, BaseClientPutter state) {
 			this.cachedURI = freenetUri;
 		}
 
-		public void onGeneratedMetadata(Bucket metadata, BaseClientPutter state, ObjectContainer container) {
+		public void onGeneratedMetadata(Bucket metadata, BaseClientPutter state) {
 		}
 
-		public void onFetchable(BaseClientPutter state, ObjectContainer container) {
+		public void onFetchable(BaseClientPutter state) {
 		}
 
-		public void onSuccess(BaseClientPutter state, ObjectContainer container) {
+		public void onSuccess(BaseClientPutter state) {
 			Logger.normal(this, "Bundle caching for URL " + uri + " successful: " + cachedURI);
 		}
 
-		public void onFailure(InsertException e, BaseClientPutter state, ObjectContainer container) {
+		public void onFailure(InsertException e, BaseClientPutter state) {
 			Logger.error(this, "Failed to insert bundle for URL " + uri + " Error Message: " + e);
 			e.printStackTrace();
+		}
+
+		public void onResume(ClientContext context)
+				throws ResumeFailedException {
+			// TODO Auto-generated method stub
+		}
+
+		public RequestClient getRequestClient() {
+			// TODO Auto-generated method stub
+			return null;
 		}
 
 	}

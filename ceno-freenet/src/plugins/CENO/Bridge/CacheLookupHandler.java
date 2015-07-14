@@ -16,6 +16,7 @@ import plugins.CENO.URLtoUSKTools;
 import plugins.CENO.Bridge.BundlerInterface.Bundle;
 import plugins.CENO.FreenetInterface.HighLevelSimpleClientInterface;
 import freenet.client.FetchException;
+import freenet.client.FetchException.FetchExceptionMode;
 import freenet.client.FetchResult;
 import freenet.keys.FreenetURI;
 
@@ -53,7 +54,7 @@ public class CacheLookupHandler extends CENOJettyHandler {
 				return;
 			} catch (FetchException e) {
 				// USK key has been updated, redirect to the new URI
-				if (e.getMode() == FetchException.PERMANENT_REDIRECT) {
+				if (e.getMode() == FetchExceptionMode.PERMANENT_REDIRECT) {
 					String newURI = "/".concat(e.newURI.toString());
 					response.sendRedirect(newURI);
 				} else if (e.isDNF()) {
