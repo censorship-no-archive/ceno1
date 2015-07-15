@@ -19,6 +19,12 @@ const ( // CC errors
 	ERR_INVALID_ERROR          = 100
 )
 
+const ( // LCS errors that can be reported to the CC
+  ERR_LCS_MALFORMED_URL = 2111
+  ERR_LCS_URL_DECODE = 2112
+
+)
+
 const contactInfo = "ceno@equalit.ie"
 
 type ErrorSpec struct {
