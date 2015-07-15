@@ -9,9 +9,9 @@ assumption that other agents will handle errors in the way described here.
 See the [protocol specification](https://github.com/equalitie/ceno/blob/master/ceno-client/doc/CENOProtocol.md)
 for information about agents described in this document.
 
-This document should not be used to outline the specifics of how agents will interact in a
-particular erroneous scenario.  The protocol specification will outline all of the details.  As this
-document grows, so too should the protocol specification.
+  This document should not be used to outline the specifics of how agents will interact in a
+  particular erroneous scenario.  The protocol specification will outline all of the details.  As this
+  document grows, so too should the protocol specification.
 
 # Error Codes
 
@@ -93,7 +93,7 @@ of the view, the information should be formatted and served to the user as plain
 
 ### Malformed URL
 
-**Error code: 2111**
+**Error code: 2110**
 
 Generic error when handler could not process a URL. The LCS will return the error to the agent
 that initiated the request and will not proceed with making lookups for it.
@@ -105,7 +105,7 @@ The message provided will describe the specifics of the problem with the URL.
 
 The URL could not be decoded from base64.
 
-### Resource not found
+### Will not serve
 
 **Error code: 2120**
 
@@ -119,12 +119,19 @@ Can also occur in the case that the LCS received a request for a resource that i
 An error occurred during the process of performing a synchronous lookup into the local cache or into the
 distributed cache (e.g. Freenet).
 
-### Error with the Freenet node
+### Waiting for Freenet node
 
 **Error code: 2300**
 
 General error to be returned to CC when there is something wrong with the Freenet node.
 Can occur if the node is still initializing or if it is not connected to enough peers, for example.
+
+### Could not connect to peers
+
+**Error code: 2301**
+
+The Freenet node could not connect to enough peers for operation.  The user may have to change their
+firewall settings among other things.
 
 ## RS
 
@@ -134,7 +141,7 @@ Can occur if the node is still initializing or if it is not connected to enough 
 
 In case the request URL is malformed, RS should not continue with the process of forwarding it to the BS.
 
-#### Could not decode URL value
+### Could not decode URL value
 
 **Error code: 3112**
 
@@ -168,13 +175,6 @@ Can occur, for example, if the Freemail plugin is not loaded or not responding.
 Sending a freemail over SMTP failed. RS will respond to the agent that initiated the request with
 this error code, will not add the domain in the corresponding hash table and will log the incident.
 
-### Receiving Freemail over IMAP failed
-
-**Error code 3420**
-
-RS was not able to poll a freemail box over IMAP and will log the corresponding error code, along
-with an informative message of what has caused the failure.
-
 ## RR
 
 ### Cannot connect to BS
@@ -183,6 +183,7 @@ with an informative message of what has caused the failure.
 
 If the RR cannot connect to the BS to request bundles, an error message should be
 logged in such a way that it is very noticable to the user/admin.
+Can maintain a list of URLs received in Freemail requests until the BS becomes available.
 
 ### Timeout during request for bundle
 
@@ -199,77 +200,6 @@ If the RR cannot connect to the BI to request bundles be stored, it should ping 
 periodically and ignore requests to create new bundles until it succeeds in establishing
 a connection to the BI.
 
-### RR cannot load
-
-**Error code: 4100**
-
-#### Jetty servlets cannot start
-##### Cannot bind to the default ports (already in use?)
-#### Out of Memory
-RR logs that and fails loudly
-
-### Error while loading/writing the configuration file
-
-**Error code: 4101**
-
-#### User running freenet has no read/write rights for the ~/.CENO directory (how would that be possible?)
-#### There is not enough disk space
-#### IO Exception
-#### Malformed file
-RR logs that and fails loudly during loading
-
-### Cannot connect to WOT
-
-**Error code: 4300**
-
-#### WOT is not loaded
-#### WOT is not responding
-RR uses FCP to (re)load WOT
-#### WOT is being downloaded
-#### WOT is starting (might take some minutes)
-RR keeps waiting till the WOT is loaded
-
-### Bridge WOT identity is not available
-
-**Error code: 4301**
-
-#### Bridge indentity was not inserted
-#### Bridge identity is being downloaded
-#### Bridge identity insertion failed
-
-### Cannot connect to freemail over IMAP
-
-**Error code: 4302**
-
-#### Freemail is not loaded
-RS re-loads freemail plugin using FCP
-#### Freemail is loaded but WOT is missing?
-RS re-loads WOT plugin using FCP
-#### Freemail uses different IMAP port
-RR reads the port from freemail-wot/globalconfigs
-#### Connecting with IMAP throws an exception
-RR logs that
-
-### Cannot connect to Bridge account
-
-**Error code: 4200**
-
-#### There is no Bridge accprops
-#### Bridge account has a password other than "CENO"
-RR logs that
-
-### Thread polling freemail boxes terminates abnormally
-
-**Error code: 4303**
-
-RR restarts the polling thread
-
-### IMAP connection / Freemail folder closes before freemail is read
-
-**Error code: 4304**
-
-RR logs that
-
 ## BS
 
 ### Bundling error
@@ -278,6 +208,13 @@ RR logs that
 
 If the bundling process encounters an error, BS should report it using the
 standard error response format.
+
+### Internet connectivity error
+
+**Error code: 5401**
+
+The bundle server could not communicate a request to the internet at large.  May be due to a
+misconfigured proxy or network settings.
 
 ### Config file not found
 
@@ -298,24 +235,12 @@ the RR to accept the completed bundle.
 
 ## BI
 
-### BI cannot load
-
-**Error code: 6100**
-
-#### Jetty servlets cannot start
-##### Cannot bind to the default ports (already in use?)
-#### Out of Memory
-BI logs that fails loudly during loading
-
-### Error while loading/writing the configuration file
+### Agent not initialized
 
 **Error code: 6101**
 
-#### User running freenet has no read/write rights for the ~/.CENO directory (how would that be possible?)
-#### There is not enough disk space
-#### IO Exception
-#### Malformed file
-BI logs that and fails loudly during loading
+The bundle inserter is not ready to start handling requests.  An agent-specific way of handling
+postponing requests.
 
 ### Malformed URL
 
@@ -327,26 +252,19 @@ BI logs that and does not continue the process of insertion
 
 **Error code: 6300**
 
-#### Node cannot connect to peers
-BI logs that
-#### Node is not connected to enough peers
-BI postpones the insertion
+Something is preventing the bundle inserter from inserting bundles into the distributed cache.
+May be able to restart the appropriate plugin.
 
 ### Could not insert the bundle
 
 **Error code: 6301**
 
-#### Not supported exception: file format not supported (e.g. swf), over size limit etc.
-#### Exception while calculating the insertion URI
-BI logs that and stops the process of insertion
-#### Exception while creating the Manifest
-#### InsertException
-#### Generic Exception
-BI logs that and tries again
+The insertion process could not start.  The RR could inform the bridge owner or suggest
+checking the configuration.
 
 ### Bundle received is malformed
 
 **Error code: 6200**
 
-#### Exception while escaping bundle from Javascript etc.
-BI logs that and stops insertion
+If the bundle received is detected to have an incorrect format or is malformed for some reason,
+the RR may be informed so as to be able to issue a new request to the bundle server.
