@@ -29,6 +29,16 @@ The CENO client must currently be built from its source. To do this, you must
 have the most recent version of Google's Golang compiler installed on your.
 See the [official site](https://golang.org/doc/install) for instructions.
 
+You will then have to set environment variables that will specify where Go binaries can
+be found and where the Go installation is located.  Assuming you installed Go to `/usr/local/bin`,
+run
+
+```bash
+export GOPATH=$HOME/go
+export GOROOT=/usr/lib/go
+export PATH=$PATH:$GOROOT/bin
+```
+
 If you have already configured the client or would like to stick with the
 default configuration, you can run the client by executing the following
 commands into your operating system's `terminal` program.
@@ -42,7 +52,8 @@ cd <path-to-ceno>/ceno-client/
 
 Next you must configure your browser or operating system to use CENO client as
 an HTTP proxy.  The address/hostname you will want to use is `localhost` and
-the port number is specified in the `PortNumber` field of `ceno-client/config/client.json`, the default being `3090`.
+the port number is specified in the `PortNumber` field of `ceno-client/config/client.json`, 
+the default being `3090`.
 
 [Instructions for Google Chrome](https://support.google.com/chrome/answer/96815?hl=en)
 

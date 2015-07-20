@@ -69,15 +69,20 @@ supported locales with goi18n.
 ### goi18n
 
 To install goi18n, you must have `GOPATH` and `GOROOT` environment variables defined.
-The [golang documentation](https://golang.org/doc/code.html#GOPATH) suggests setting `GOPATH` to
-`$HOME/go`.  `GOROOT` should be set to the installation location of go, probably `/usr/local/go`.
+
+```bash
+export GOPATH=$HOME/go
+export GOROOT=/usr/lib/go
+export PATH=$PATH:$GOROOT/bin
+```
+
 Next, you can install goi18n by running
 
     go get github.com/nicksnyder/go-i18n/goi18n
 
 The `goi18n` command should now be available:
 
-    $GOPATH/bin/goi18n --help
+    goi18n --help
 
 The translations can then be merged with the `go18n` tool:
 
