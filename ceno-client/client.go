@@ -37,8 +37,6 @@ type Result struct {
 	// Should add a Created field for the date created
 }
 
-type TransArgs map[string]interface{}
-
 /**
  * Set a header on responses that indicates that the response was served by the CENO client.
  * Useful for checking if the CENO Client is running via an HTTP request.
@@ -97,7 +95,7 @@ func lookup(lookupURL string) Result {
 	response, err := http.Get(BundleLookupURL(Configuration, lookupURL))
 	T, _ := i18n.Tfunc(os.Getenv("LANGUAGE"), "en-us")
 	if err != nil || response.StatusCode != 200 {
-		fmt.Println(T("error_cli", TransArgs{
+		fmt.Println(T("error_cli", map[string]interface{}{
 			"Message": err.Error(),
 		}))
 		return Result{ERR_NO_CONNECT_LCS, err.Error(), false, false, ""}
@@ -105,7 +103,7 @@ func lookup(lookupURL string) Result {
 	decoder := json.NewDecoder(response.Body)
 	var result Result
 	if err := decoder.Decode(&result); err != nil {
-		fmt.Println(T("decode_error_cli", TransArgs{
+		fmt.Println(T("decode_error_cli", map[string]interface{}{
 			"Message": err.Error(),
 		}))
 		reachedLCS, err2 := reportDecodeError(DecodeErrReportURL(Configuration), err.Error())
@@ -201,7 +199,7 @@ func directHandler(w http.ResponseWriter, r *http.Request) {
 			newURL, parseErr := url.Parse(stripped)
 			if parseErr != nil {
 				state := ErrorState{
-					"responseWriter": w, "request": r, "errMsg": T("malformed_url_cli", TransArgs{
+					"responseWriter": w, "request": r, "errMsg": T("malformed_url_cli", map[string]interface{}{
 						"URL": stripped,
 					}),
 				}
@@ -223,17 +221,18 @@ func directHandler(w http.ResponseWriter, r *http.Request) {
  * @param {*Request} r - Information about the request
  */
 func validateURL(URL string, w http.ResponseWriter, r *http.Request) bool {
-  isValid, err := regexp.MatchString(URL_REGEX, URL)
-  if !isValid || err != nil {
-    state := ErrorState {
-      "responseWriter": w, "request": r, "errMsg": T("malformed_url_cli", TransArgs {
-        "URL": URL,
-      }),
-    }
-    ErrorHandlers[ERR_MALFORMED_URL](state)
-    return false
-  }
-  return true
+	isValid, err := regexp.MatchString(URL_REGEX, URL)
+	T, _ := i18n.Tfunc(os.Getenv("LANGUAGE"), "en-us")
+	if !isValid || err != nil {
+		state := ErrorState{
+			"responseWriter": w, "request": r, "errMsg": T("malformed_url_cli", map[string]interface{}{
+				"URL": URL,
+			}),
+		}
+		ErrorHandlers[ERR_MALFORMED_URL](state)
+		return false
+	}
+	return true
 }
 
 /**
@@ -243,8 +242,8 @@ func validateURL(URL string, w http.ResponseWriter, r *http.Request) bool {
  * @param {*Request} r - Information about the request
  */
 func handleLCSErrors(errInfo Result, w http.ResponseWriter, r *http.Request) {
-  state := ErrorState{"responseWriter": w, "request": r, "errMsg": errInfo.ErrMsg}
-  ErrorHandlers[ERR_FROM_LCS](state)
+	state := ErrorState{"responseWriter": w, "request": r, "errMsg": errInfo.ErrMsg}
+	ErrorHandlers[ERR_FROM_LCS](state)
 }
 
 /**
@@ -255,16 +254,17 @@ func handleLCSErrors(errInfo Result, w http.ResponseWriter, r *http.Request) {
  * @param {ResponseWriter} w - the object handling responding to the client
  * @param {*Request} r - Information about the request
  */
-func tryRequestBundle(URL string, rewritten bool, w http.ResponseWriter, r *http.Response) {
-  err := requestNewBundle(URL, rewritten)
-  if err != nil {
-    fmt.Println(T("bundle_err_cli", TransArgs {
-      "Message": err.Error(),
-    }))
-    handleLCSErrors(err, w, r)
-  } else {
-    execPleaseWait(URL, w, r)
-  }
+func tryRequestBundle(URL string, rewritten bool, w http.ResponseWriter, r *http.Request) {
+	err := requestNewBundle(URL, rewritten)
+	T, _ := i18n.Tfunc(os.Getenv("LANGUAGE"), "en-us")
+	if err != nil {
+		fmt.Println(T("bundle_err_cli", map[string]interface{}{
+			"Message": err.Error(),
+		}))
+		handleLCSErrors(Result{ERR_NO_CONNECT_RS, err.Error(), false, false, ""}, w, r)
+	} else {
+		execPleaseWait(URL, w, r)
+	}
 }
 
 /**
@@ -279,31 +279,31 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 	URL := r.URL.String()
 	T, _ := i18n.Tfunc(os.Getenv("LANGUAGE"), "en-us")
 	wasRewritten := r.Header.Get(REWRITTEN_HEADER) == "true"
-	fmt.Println(T("got_request_msg_cli", TransArgs{
+	fmt.Println(T("got_request_msg_cli", map[string]interface{}{
 		"URL":       URL,
 		"Rewritten": wasRewritten,
 	}))
-  if isValidURL := validateURL(URL, w, r); !isValidURL {
-    return
-  }
+	if isValidURL := validateURL(URL, w, r); !isValidURL {
+		return
+	}
 	result := lookup(URL)
 	if result.ErrCode > 0 {
-		fmt.Println(T("err_from_lcs_cli", TransArgs{
+		fmt.Println(T("err_from_lcs_cli", map[string]interface{}{
 			"Code":    result.ErrCode,
 			"Message": result.ErrMsg,
 		}))
 		// Assuming the reason the response is malformed is because of the formation of the bundle,
 		// so we will request that a new bundle be created.
 		if result.ErrCode == ERR_MALFORMED_LCS_RESPONSE {
-      tryrequestBundle(URL, wasRewritten, w, r)
+			tryRequestBundle(URL, wasRewritten, w, r)
 		} else {
-      handleLCSErrors(Result{ ErrCode: result.ErrCode, ErrMsg: result.ErrMsg }, w, r)
+			handleLCSErrors(Result{ErrCode: result.ErrCode, ErrMsg: result.ErrMsg}, w, r)
 		}
 	} else if result.Complete {
 		if result.Found {
 			w.Write([]byte(result.Bundle))
 		} else {
-      tryRequestBundle(URL, wasRewritten, w, r)
+			tryRequestBundle(URL, wasRewritten, w, r)
 		}
 	} else {
 		execPleaseWait(URL, w, r)
@@ -318,7 +318,7 @@ func main() {
 	// Read an existing configuration file or have the user supply settings
 	conf, err := ReadConfigFile(CONFIG_FILE)
 	if err != nil {
-		fmt.Println(T("no_config_cli", TransArgs{
+		fmt.Println(T("no_config_cli", map[string]interface{}{
 			"Location": CONFIG_FILE,
 		}))
 		Configuration = GetConfigFromUser()
@@ -328,7 +328,7 @@ func main() {
 	// Create an HTTP proxy server
 	http.HandleFunc("/lookup", directHandler)
 	http.HandleFunc("/", proxyHandler)
-	fmt.Println(T("listening_msg_cli", TransArgs{
+	fmt.Println(T("listening_msg_cli", map[string]interface{}{
 		"Port": Configuration.PortNumber,
 	}))
 	if err = http.ListenAndServe(Configuration.PortNumber, nil); err != nil {
