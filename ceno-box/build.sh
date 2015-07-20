@@ -60,7 +60,7 @@ cp -r $FREENET_DIR/{\
 bin,\
 lib,\
 Uninstaller,\
-bcprov-jdk15on-151.jar,\
+bcprov-jdk15on-152.jar,\
 freenet.ico,\
 freenet.jar,\
 freenet-ext.jar,\
