@@ -71,6 +71,13 @@ the default being `3090`.
 Now you can browse the web like you normally would, and all your requests will
 be securely handled by CENO.
 
+You can also directly make requests to the CENO client by base64-encoding the URL of
+the site you want, for example, with CURL, like so (to request https://google.com):
+
+```bash
+curl -XGET http://localhost:3090/lookup?url=aHR0cHM6Ly9nb29nbGUuY29t
+```
+
 ### Configuring the client
 
 The `ceno-client/config/client.json` file contains the configuration settings
