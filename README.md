@@ -47,8 +47,11 @@ commands into your operating system's `terminal` program.
 # <path-to-ceno> must be replaced with the path to where you installed CENO
 cd <path-to-ceno>/ceno-client/
 ./build.sh
-./client
+LANGUAGE=<language> ./client
 ```
+
+Where `language` is one of the supported languages (a `<language code>.json` file in
+`ceno-client/translations`). E.g. `en-us` or `fr-fr`.
 
 Next you must configure your browser or operating system to use CENO client as
 an HTTP proxy.  The address/hostname you will want to use is `localhost` and
