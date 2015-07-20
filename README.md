@@ -30,12 +30,12 @@ have the most recent version of Google's Golang compiler installed on your.
 See the [official site](https://golang.org/doc/install) for instructions.
 
 You will then have to set environment variables that will specify where Go binaries can
-be found and where the Go installation is located.  Assuming you installed Go to `/usr/local/bin`,
+be found and where the Go installation is located.  Assuming you installed Go to `/usr/local/go`,
 run
 
 ```bash
 export GOPATH=$HOME/go
-export GOROOT=/usr/lib/go
+export GOROOT=/usr/local/go
 export PATH=$PATH:$GOROOT/bin
 ```
 
@@ -43,7 +43,7 @@ If you have already configured the client or would like to stick with the
 default configuration, you can run the client by executing the following
 commands into your operating system's `terminal` program.
 
-```
+```bash
 # <path-to-ceno> must be replaced with the path to where you installed CENO
 cd <path-to-ceno>/ceno-client/
 ./build.sh
