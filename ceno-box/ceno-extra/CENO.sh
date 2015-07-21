@@ -12,7 +12,7 @@ fi
 
 # Start CENOClient proxy
 cd ceno-client
-nohup ./client &> ../CENO.log &
+nohup LANGUAGE=en-us ./client &> ../CENO.log &
 
 # Start a Firefox CENO session
 cd ..

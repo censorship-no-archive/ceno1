@@ -85,6 +85,8 @@ cp -rL ceno-{chrome,firefox} CENOBox
 cp -r ceno-{freenet,extra}/* CENOBox
 mkdir CENOBox/ceno-client
 cp -r ceno-client/{client,views,config} CENOBox/ceno-client
+mkdir CENOBox/ceno-client/translations
+cp ceno-client/translations/**.all.json CENOBox/ceno-client/translations
 
 if [[ $DEBUG == 1 ]]; then
   # Build CENO client Freenet plugin
