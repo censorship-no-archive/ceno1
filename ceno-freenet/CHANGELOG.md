@@ -1,15 +1,26 @@
 # Change Log
 
+
 ## Unreleased
-### Added  
+
+
+
+## [v0.3.0-rc2] - 2015-07-20
+### Added
   - LCS will try to fetch the latest version, using -1 as the suggested version in the ULPR request
   - Support for every type of URL
   - Automated the process of releasing the CENOBox
+  - Added interface for getting the current and maximum number of peers the freenet node can connect to
 
 ### Changed
   - USK calculation is using the base64 encoded version of the whole URL, instead of the domain
   - Updated LCS and RS error codes and default messages
   - RR base64 encodes the URL before sending it to BS
+  - Bundle Inserter agent will accept connections only from localhost
+
+### Fixed
+  - Compatibility issues with latest Freenet release (1469)
+
 
 
 ## [v0.3.0-rc1] - 2015-06-15
@@ -91,7 +102,8 @@
 
 
 
-[Unreleased]: https://github.com/equalitie/ceno/compare/v0.3.0-rc1...HEAD
+[Unreleased]: https://github.com/equalitie/ceno/compare/v0.3.0-rc2...HEAD
+[v0.3.0-rc2]: https://github.com/equalitie/ceno/compare/v0.3.0-rc1...v0.3.0-rc2
 [v0.3.0-rc1]: https://github.com/equalitie/ceno/compare/v0.3.0-rc0...v0.3.0-rc1
 [v0.3.0-rc0]: https://github.com/equalitie/ceno/compare/v0.2.1...v0.3.0-rc0
 [v0.2.1]: https://github.com/equalitie/ceno/compare/v0.2.0...v0.2.1
