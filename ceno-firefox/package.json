@@ -1,9 +1,10 @@
 {
-  "name": "ceno-firefox",
-  "title": "ceno-firefox",
-  "id": "jid1-lmGBJUA8iobClA",
-  "description": "a basic add-on",
-  "author": "",
-  "license": "MPL 2.0",
-  "version": "0.1"
+  "name": "CENO Router",
+  "title": "CENO Router",
+  "id": "cenorouter@equalit.ie",
+  "main": "./lib/main.js",
+  "description": "Facilitates interaction with the CENO Client, your gateway to the CENO network.",
+  "author": "Zack Mullaly <redwire@riseup.net>",
+  "license": "GPL-v3.0",
+  "version": "1.0.0"
 }
