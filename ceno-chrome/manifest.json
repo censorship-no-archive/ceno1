@@ -1,9 +1,14 @@
 {
   "manifest_version": 2,
-  "name": "CENO Intercept",
+  "name": "CENO Router",
   "description": "Facilitates interaction with the CENO Client, your gateway to the CENO network.",
   "default_locale": "en",
   "version": "1.0.0",
+  "icons": {
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  },
   "background": {
     "page": "background.html"
   },
