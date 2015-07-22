@@ -3,7 +3,7 @@
   "name": "CENO Intercept",
   "description": "Facilitates interaction with the CENO Client, your gateway to the CENO network.",
   "default_locale": "en",
-  "version": "0.1",
+  "version": "1.0.0",
   "background": {
     "page": "background.html"
   },
