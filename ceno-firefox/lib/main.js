@@ -28,10 +28,6 @@ const CENO_HEADER_VALUE = 'yxorP-oneC-X';
 // was rewritten from a request for https://site.com
 const REWRITTEN_HEADER = 'X-Ceno-Rewritten';
 
-// Paths to the icons used by the plugin
-const REGULAR_ICON = 'icon.png';
-const INVERTED_ICON = 'iconinv.png';
-
 // Firefox preference names of things relevant to how the use of HTTPS is enforced
 const PROXY_HTTP_ADDR = 'network.proxy.http';
 const PROXY_HTTP_PORT = 'network.proxy.http_port';
@@ -125,9 +121,9 @@ let button = ToggleButton({
   id: 'ceno-toggle',
   label: 'CENO Intercept',
   icon: {
-    '16': './icon.png',
-    '32': './icon.png',
-    '64': './icon.png',
+    '16': self.data.url('icon.png'),
+    '32': self.data.url('./icon.png'),
+    '64': self.data.url('./icon.png'),
   },
   onChange: handleChange
 });
