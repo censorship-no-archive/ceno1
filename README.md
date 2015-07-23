@@ -10,23 +10,62 @@ a censored area using an anonymous transport layer. It then uses networks such
 as Freenet to store encrypted documents in such a way that they can be easily
 retrieved securely by individuals in the censored area.
 
-## For Users
+## Disclaimer
 
-The CENO client offers individuals an easy-to-use portal into the CENO
-network. Once configured, it will automatically handle your regular browsing
-activity, retrieving the web pages you want to navigate to from a secure,
-distributed storage medium.
+Please understand that CENO is a work in progress.  Its developers at [eQualit.ie](https://equalit.ie)
+are working hard to ensure that CENO will be able to provide a secure means of circumventing
+censorship and maintain the user's security.  However, it is very possible that bugs exist that
+might potentially leak information about users.  At present, it will be apparent to your Internet
+Service Provider that you are using the Freenet anonymization network.  Before you use CENO,
+you are encouraged to think carefully about the risks that you face.
 
-Occasionally some lookups may take a new time, such as when your request must
-be exfiltrated out of your censored area. The CENO client will present you with
-helpful web pages when this happens or an error occurs that will give you
-simple instructions about what to do. Using CENO should be as easy as using
-the regular web.
+## Running CENO
 
-### Running the client
+INSTRUCTIONS FOR USING CENO BOX GO HERE
 
-The CENO client must currently be built from its source. To do this, you must
-have the most recent version of Google's Golang compiler installed on your.
+KTHX
+
+## Manually building CENO
+
+What follows are instructions for manually building CENO from source.
+The first thing you will need to get started with this is the [git Version Control System](https://www.git-scm.com/)
+software.
+
+Assuming you are using the command-line `git`, you can obtain a copy or `clone` of the CENO source
+by running the following command
+
+```bash
+git clone https://github.com/equalitie/ceno
+```
+
+## Building the client-side components
+
+The client-side components include everything a user needs to use CENO to circumvent censorship.
+The components here provide user interface elements and utilities as well as a disitribution of Freenet
+that will allow access to securely stored content.
+
+The components include
+
+1. [Firefox](https://github.com/equalitie/ceno/tree/master/ceno-firefox) and [Chrome](https://github.com/equalitie/ceno/tree/master/ceno-chrome) browser extensions
+2. A benign [proxy server](https://github.com/equalitie/ceno/tree/master/ceno-client)
+3. A [Freenet plugin](https://github.com/equalitie/ceno/tree/master/ceno-freenet)
+
+### Prerequisites
+
+1. Either the Mozilla Firefox or Google Chrome (or Chromium) web browser
+2. The Google Golang compiler and toolset
+3. Node.js and NPM (For packaging the Firefox extension)
+
+#### Web Browser
+
+To use CENO as it was intended, you will need to be using either
+
+1. [Mozilla Firefox](https://www.mozilla.org/en-US/firefox/new/) or
+2. [Google Chrome](https://www.google.com/chrome/) or [Chromium](https://www.chromium.org/)
+
+#### Golang
+
+First, you must have the most recent version of Google's Golang compiler installed.
 See the [official site](https://golang.org/doc/install) for instructions.
 
 You will then have to set environment variables that will specify where Go binaries can
@@ -39,12 +78,18 @@ export GOROOT=/usr/local/go
 export PATH=$PATH:$GOROOT/bin
 ```
 
+#### Node.js and NPM
+
+You can download Node.js and NPM together directly from the [official site](https://nodejs.org/download/).
+
+### Building the client
+
 If you have already configured the client or would like to stick with the
 default configuration, you can run the client by executing the following
-commands into your operating system's `terminal` program.
+commands into your operating system's terminal program.
 
 ```bash
-# <path-to-ceno> must be replaced with the path to where you installed CENO
+# <path-to-ceno> must be replaced with the path to where you cloned CENO
 cd <path-to-ceno>/ceno-client/
 ./build.sh
 LANGUAGE=<language> ./client
@@ -53,48 +98,66 @@ LANGUAGE=<language> ./client
 Where `language` is one of the supported languages (a `<language code>.json` file in
 `ceno-client/translations`). E.g. `en-us` or `fr-fr`.
 
-Next you must configure your browser or operating system to use CENO client as
-an HTTP proxy.  The address/hostname you will want to use is `localhost` and
-the port number is specified in the `PortNumber` field of `ceno-client/config/client.json`, 
-the default being `3090`.
+### Packaging the browser extensions
 
-[Instructions for Google Chrome](https://support.google.com/chrome/answer/96815?hl=en)
+Once packaged, either browser extension can be installed by opening it in its respective browser.
 
-[Instructions for Firefox](http://www.wikihow.com/Enter-Proxy-Settings-in-Firefox)
+#### Firefox extension
 
-[Instructions for Internet Explorer](http://windows.microsoft.com/en-ca/windows/change-internet-explorer-proxy-server-settings#1TC=windows-7)
-
-[Instructions for Safari](http://www.ehow.com/how_8186045_change-proxy-safari.html)
-
-**Congrats! You're done!**
-
-Now you can browse the web like you normally would, and all your requests will
-be securely handled by CENO.
-
-You can also directly make requests to the CENO client by base64-encoding the URL of
-the site you want, for example, with CURL, like so (to request https://google.com):
+Mozilla Firefox extensions using the addon SDK as CENO does can be easily built using Mozilla's new
+[jpm](https://developer.mozilla.org/en-US/Add-ons/SDK/Tools/jpm) tool. You can install it easily with NPM
+and then package the Firefox extension into an xpi file
 
 ```bash
-curl -XGET http://localhost:3090/lookup?url=aHR0cHM6Ly9nb29nbGUuY29t
+npm install -g jpm
+cd <path-to-ceno>/ceno-firefox/
+jpm xpi
 ```
 
-### Configuring the client
+#### Chrome extension
 
-The `ceno-client/config/client.json` file contains the configuration settings
-for the client. You can change any setting you like by modifying the value
-between quotation marks on the right side of the colon (:) symbol. The fields
-in the configuration file are as follows.
+Complete instructions for all packaging tasks are available in the
+[Chrome developer documentation](https://developer.chrome.com/extensions/packaging)
 
-`PortNumber` is the port the CENO client server should listen on. It must be of the format `:<number>` where `<number>` is an integer value greater than 1024 and less than 65536.
+The five steps relevant to us are as follows:
 
-`CacheServer` is the full address of the Local Cache Server (LCS) responsible for searching for documents in the local and distributed storage mediums. Chances are you may only want to change the port number, after the colon (:).
+1. Bring up the Extensions management page by going to this URL: `chrome://extensions`
+2. Ensure that the "Developer mode" checkbox in the top right-hand corner is checked.
+3. Click the `Pack extension` button. A dialog appears.
+4. In the `Extension root directory` field, specify `<path-to-ceno>/ceno/ceno-chrome`. Ignore the second field.
+5. Click `Package`. The packager creates two files: a .crx file, which is the actual extension that can be installed, and a .pem file, which contains the private key.
 
-`RequestServer` is the full address of the local Request Server (RS) responsible for starting the request exfiltration process that will get the document you want access to into the distributed cache. Like with the cache server, you are likely to only want to change the port number.
+### Freenet plugin
 
-`ErrorMsg` is the error message that will be displayed on the page that the client will serve you in the case that an attempt at exfiltrating your request fails.
+INSTRUCTIONS FOR THE LCS AND FREENET SETUP
 
-`PleaseWaitPage` is the path to the page that will be served to you while CENO looks for the documents you have requested.
+## Building the bridge components
 
-## For Admins
+The bridge components are meant to be run on a server for the benefit of users of the CENO network.
 
-Coming soon!
+The bridge components include
+
+1. A [Freenet plugin](https://github.com/equalitie/ceno/tree/master/ceno-freenet)
+2. A [Node.js server](https://github.com/equalitie/ceno/tree/master/ceno-bridge)
+
+### Prerequisites
+
+1. Node.js and NPM (For packaging the Firefox extension)
+
+#### Node.js and NPM
+
+You can download Node.js and NPM together directly from the [official site](https://nodejs.org/download/).
+
+### Running the bundle server
+
+The bundle server can be run with the following commands
+
+```bash
+cd <path-to-ceno>/ceno-bridge
+npm install
+npm start
+```
+
+### Freenet plugin
+
+INSTRUCTIONS FOR THE RR AND BI SETUP AND EXECUTION
