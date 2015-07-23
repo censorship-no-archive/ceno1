@@ -1,10 +1,10 @@
 # CENO Router
 
 Read this document in
-[English](https://github.com/equalitie/ceno/blob/master/ceno-chrome/README.md) /
-[French](https://github.com/equalitie/ceno/blob/master/ceno-chrome/README-fr.md)
+[English](https://github.com/equalitie/ceno/blob/master/ceno-firefox/README.md) /
+[French](https://github.com/equalitie/ceno/blob/master/ceno-firefox/README-fr.md)
 
-This directory contains an extension for the Google Chrome and Chromium web browsers.
+This directory contains an extension for the Mozilla Firefox web browser.
 It exists to solve the problem of HTTPS being incompatible with CENO.  Below is an
 explanation of this problem.
 
@@ -56,61 +56,14 @@ document received.  This means we still get the integrity guarantee offered by
 SSL/TLS while still making it possible for bundling to occur, for bundles to be
 stored into Freenet, and for users' requests to remain anonymous.
 
-## Testing
-
-To test that the plugin works, follow these instructions:
-
-1. Start the Freenet plugin (instructions provided with CENO Client)
-2. Start CENO Client
-3. Start chromium with `chromium --proxy-server=http://127.0.0.1:3090`
-4. Navigate to `chrome://extensions` in chromium
-5. Check the `Developer Mode` checkbox in the top right corner of the page
-6. Click the `Load unpacked extension...` button
-7. Open this directory in the dialog that appears
-8. Open a new tab and type a URL like `https://google.com` into the omnibox
-9. Click the plugin's icon and click the `Toggle CENO button` to activate CENO
-10. Select the omnibox again and click enter to request the URL you entered
-
-You should observe output in the terminal within which you started CENO Client
-informing you that a request for `http://<URL>` was received.
-
 ## Translating
 
-A tutorial is available explaining how internationalization is handled in Chrome extensions on
-[the official Google extension API site](https://developer.chrome.com/extensions/i18n).  In a
-nutshell, the `ceno-chrome/_locals/` directory contains directories corresponding to each
-language that CENO Chrome has been translated into.  For example, the `ceno-chrome/_locals/en`
-directory contains the English strings.  Each of these directories must contain only a
-`messages.json` file, which contains a single object of the following form:
+Translation files fore the Firefox extension can be found in the `ceno-firefox/locale` directory.
+Each target locale is named like `en-US.properties` or `fr-FR.properties`.  The format for these files
+is more like YAML than the JSON used throughout the rest of the client-side codebase, because Firefox has
+to be a special snowflake.
 
-```js
-{
-  "greeting": {
-    "message": "Hello world!"
-  }
-}
-```
-
-That is, each key is an ID to identify the string, and that ID maps to another object containing
-a `message` key that maps to the translated string.
-
-To create a new translation, for example to Spanish, one would create `ceno-chrome/_locals/es/messages.json`
-with the following content (related to the example above):
-
-```js
-{
-  "greeting": {
-    "message": "Hola mundo!"
-  }
-}
-```
-
-**IMPORTANT**
-
-Chrome extensions do not have a built-in means of dealing with translations for HTML pages, so the popup
-document has to be handled a little differently.
-
-When creating a translation for the popup to, say, Spanish, one should create `ceno-chrome/popup-es.html`
-and replace the English text with the translated text.  Then, in the messages file,
-`ceno-chrome/_locals/es/messages.json` here, change the `message` value for the `browserActionPage` object
-to the appropriate html document name (e.g. `popup-es.html`).
+While the format is different, the content of the Firefox locale files is almost completely the same as
+those of the Chrome extension.  Rather than having both translated, the Chrome extension's content (and
+HTML documents) should be translated, and then the Firefox locale content can be collected from the
+Chrome content translations.
