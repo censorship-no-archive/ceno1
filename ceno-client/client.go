@@ -56,7 +56,6 @@ func pleaseWait(url string) ([]byte, bool) {
 	T, _ := i18n.Tfunc(os.Getenv("LANGUAGE"), "en-us")
 	content, err := ioutil.ReadFile(Configuration.PleaseWaitPage)
 	if err != nil {
-		T, _ := i18n.Tfunc(os.Getenv("LANGUAGE"), "en-us")
 		return []byte(T("please_wait_txt")), false
 	} else {
 		content = bytes.Replace(content, []byte("{{.Paragraph1}}"), []byte(T("please_wait_p1_html")), 1)
@@ -85,7 +84,7 @@ func lookup(lookupURL string) Result {
 		fmt.Println(T("decode_error_cli", map[string]interface{}{
 			"Message": err.Error(),
 		}))
-		reachedLCS := HandleCCError(ERR_MALFORMED_URL, err.Error(), ErrorState{
+		reachedLCS := HandleCCError(ERR_MALFORMED_LCS_RESPONSE, err.Error(), ErrorState{
 			"requestURL": DecodeErrReportURL(Configuration),
 		})
 		if reachedLCS {
