@@ -65,11 +65,13 @@ bridge owners.
   * A client must have created and inserted a WebOfTrust identity in the network, before being
     able to send a Freemail. We are sharing the CENOClient identity in order to eliminate the
     bootstrapping time needed before a CENO client can reach the bridge.
-  * Freemail is not taking full advantage of WebOfTrust features, which makes it vulnerable.
+  * Freemail is not taking full advantage of WebOfTrust features, which makes it vulnerable to spam.
   * Smart insertions with a single Manifest file for every domain has not been implemented yet.
   * In the future, CENOBridge will be a context of the WebOfTrust identities and will include
     required information such as the public SSK key in a special page, similar to the Freemail's
-    mailsite SSK.
+    mailsite SSK. At the moment, If you would like people to use your Insertion Authority you will have
+    to modify the CENOClient and CENOBridge Freemail and WebOfTrust identities constants, the Bridge public
+    SSK key, as well as the accprops file in the CENOClient plugin, and distribute your own builds.
 
 
 ### Logs
@@ -87,7 +89,7 @@ another tool.
   2. Install node.js and npm.
   3. Change directory to `$ceno-repository/ceno-bridge`.
   4. Download bundle-server dependencies by executing `npm install`.
-  5. Start the bundle-server behind torsocks `torsocks node bundle-server.js`.
+  5. Start the bundle-server behind torsocks `LANGUAGE=en torsocks node bundle-server.js`.
 
 
 ## Getting started with the CENOBridge plugin for Freenet

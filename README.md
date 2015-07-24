@@ -149,7 +149,7 @@ The five steps relevant to us are as follows:
 4. In the `Extension root directory` field, specify `<path-to-ceno>/ceno/ceno-chrome`. Ignore the second field.
 5. Click `Package`. The packager creates two files: a .crx file, which is the actual extension that can be installed, and a .pem file, which contains the private key.
 
-### Freenet plugin
+### CENO Freenet plugin
 
 Detailed instructions for building the client can be found [here](https://github.com/equalitie/ceno/blob/master/ceno-freenet/README.building.md).
 
@@ -170,7 +170,7 @@ of the dependencies at your local setup.
 The distributable jar files are located under `ceno-freenet/dist`.
 Installing the CENO.jar client plugin in your Freenet node requires that you
 configure the WebOfTrust and Freemail official plugins. In order to
-do that follow the steps in this (README)[https://github.com/equalitie/ceno/blob/master/ceno-freenet/INSTALL.md#in-short].
+do that follow the steps in this [README](https://github.com/equalitie/ceno/blob/master/ceno-freenet/INSTALL.md#in-short).
 
 ## Building the bridge components
 
@@ -202,7 +202,10 @@ npm install
 npm start
 ```
 
-### Freenet plugin
+### CENOBRidge Freenet plugin
+
+CENOBridge plugin is built the same way as the CENO client plugin (instructions
+  [here](#CENO Freenet plugin)).
 
 CENOBridge plugin can be loaded to your Freenet node like any other plugin,
 by navigating to your node's plugins page (http://127.0.0.1:8888/plugins) and
