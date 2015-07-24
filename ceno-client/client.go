@@ -85,8 +85,7 @@ func lookup(lookupURL string) Result {
 		fmt.Println(T("decode_error_cli", map[string]interface{}{
 			"Message": err.Error(),
 		}))
-		reachedLCS := ErrorHandlers[ERR_MALFORMED_LCS_RESPONSE](ErrorState{
-			"errMsg":     err.Error(),
+		reachedLCS := HandleCCError(ERR_MALFORMED_URL, err.Error(), ErrorState{
 			"requestURL": DecodeErrReportURL(Configuration),
 		})
 		if reachedLCS {
@@ -159,19 +158,19 @@ func directHandler(w http.ResponseWriter, r *http.Request) {
 	URLS, found := qs["url"]
 	T, _ := i18n.Tfunc(os.Getenv("LANGUAGE"), "en-us")
 	if !found {
-		state := ErrorState{
-			"responseWriter": w, "request": r, "errMsg": T("querystring_no_url_cli"),
-		}
-		ErrorHandlers[ERR_MALFORMED_URL](state)
+		HandleCCError(ERR_MALFORMED_URL, T("querystring_no_url_cli"), ErrorState{
+			"responseWriter": w,
+			"request":        r,
+		})
 	} else {
 		// Decode the URL so we can save effort by just passing the modified request to
 		// the proxyHandler function from here.
 		decodedBytes, err := base64.StdEncoding.DecodeString(URLS[0])
 		if err != nil {
-			state := ErrorState{
-				"responseWriter": w, "request": r, "errMsg": T("url_b64_cli"),
-			}
-			ErrorHandlers[ERR_MALFORMED_URL](state)
+			HandleCCError(ERR_MALFORMED_URL, T("url_b64_cli"), ErrorState{
+				"responseWriter": w,
+				"request":        r,
+			})
 		} else {
 			decodedURL := string(decodedBytes)
 			stripped, rewritten := stripHttps(decodedURL)
@@ -180,12 +179,12 @@ func directHandler(w http.ResponseWriter, r *http.Request) {
 			}
 			newURL, parseErr := url.Parse(stripped)
 			if parseErr != nil {
-				state := ErrorState{
-					"responseWriter": w, "request": r, "errMsg": T("malformed_url_cli", map[string]interface{}{
-						"URL": stripped,
-					}),
-				}
-				ErrorHandlers[ERR_MALFORMED_URL](state)
+				HandleCCError(ERR_MALFORMED_URL, T("malformed_url_cli", map[string]interface{}{
+					"URL": stripped,
+				}), ErrorState{
+					"responseWriter": w,
+					"request":        r,
+				})
 			} else {
 				// Finally we can pass the modified request onto the proxy server.
 				r.URL = newURL
@@ -206,12 +205,12 @@ func validateURL(URL string, w http.ResponseWriter, r *http.Request) bool {
 	isValid, err := regexp.MatchString(URL_REGEX, URL)
 	T, _ := i18n.Tfunc(os.Getenv("LANGUAGE"), "en-us")
 	if !isValid || err != nil {
-		state := ErrorState{
-			"responseWriter": w, "request": r, "errMsg": T("malformed_url_cli", map[string]interface{}{
-				"URL": URL,
-			}),
-		}
-		ErrorHandlers[ERR_MALFORMED_URL](state)
+		HandleCCError(ERR_MALFORMED_URL, T("malformed_url_cli", map[string]interface{}{
+			"URL": URL,
+		}), ErrorState{
+			"responseWriter": w,
+			"request":        r,
+		})
 		return false
 	}
 	return true
@@ -232,7 +231,7 @@ func tryRequestBundle(URL string, rewritten bool, w http.ResponseWriter, r *http
 		fmt.Println(T("bundle_err_cli", map[string]interface{}{
 			"Message": err.Error(),
 		}))
-		HandleLCSErrors(Result{ERR_NO_CONNECT_RS, err.Error(), false, false, ""}, ErrorState{
+		HandleLCSError(ERR_NO_CONNECT_RS, err.Error(), ErrorState{
 			"responseWriter": w,
 			"request":        r,
 		})
@@ -271,7 +270,7 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 		if result.ErrCode == ERR_MALFORMED_LCS_RESPONSE {
 			tryRequestBundle(URL, wasRewritten, w, r)
 		} else {
-			HandleLCSErrors(Result{ErrCode: result.ErrCode, ErrMsg: result.ErrMsg}, ErrorState{
+			HandleLCSError(result.ErrCode, result.ErrMsg, ErrorState{
 				"responseWriter": w,
 				"request":        r,
 			})

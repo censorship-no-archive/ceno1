@@ -32,18 +32,16 @@ const ( // LCS errors that can be reported to the CC
 
 const contactInfo = "ceno@equalit.ie"
 
-type ErrorSpec struct {
-	Url    string // Requested URL
-	Error  string // Name of error
-	Advice string // Suggestions for how to handle the bug
-}
-
 type ErrorCode uint32
 type ErrorState map[string]interface{}
 type ErrorHandler func(ErrorState) bool
 
+/******************************************************************************************
+ ************************************ PRIVATE VALUES **************************************
+ ******************************************************************************************/
+
 // Map error codes to the ids of explanations of errors that are localizable
-var ErrorAdvice = map[ErrorCode]string{
+var errorAdvice = map[ErrorCode]string{
 	ERR_NO_CONFIG:              "missing_config_err",
 	ERR_MALFORMED_URL:          "malformed_url_err",
 	ERR_NO_CONNECT_LCS:         "agent_communication_err",
@@ -57,7 +55,7 @@ var ErrorAdvice = map[ErrorCode]string{
 // An error handler for each of the errors that CC is expected to be responsible for.
 // Information about the state of the program during the time the error occurred, required
 // for the error to be handled, should be encoded into the ErrorState map.
-var ErrorHandlers = map[ErrorCode]func(ErrorState) bool{
+var ccErrorHandlers = map[ErrorCode]func(ErrorState) bool{
 	ERR_NO_CONFIG:              downloadConfigAndServeError,
 	ERR_MALFORMED_URL:          serveError,
 	ERR_NO_CONNECT_LCS:         serveError,
@@ -71,7 +69,7 @@ var ErrorHandlers = map[ErrorCode]func(ErrorState) bool{
 // An error handler for each of the error thatthe LCS is expected to send to the
 // CC for handling.  Information about the state of the program during the time
 // the error occurred should be encoded in the ErrorState map.
-var LCSErrorHandlers = map[ErrorCode]func(ErrorState) bool{
+var lcsErrorHandlers = map[ErrorCode]func(ErrorState) bool{
 	ERR_LCS_MALFORMED_URL:  serveError,
 	ERR_LCS_URL_DECODE:     serveError,
 	ERR_LCS_WILL_NOT_SERVE: serveError,
@@ -83,21 +81,6 @@ var LCSErrorHandlers = map[ErrorCode]func(ErrorState) bool{
 /********************
  ** ERROR HANDLERS **
  ********************/
-
-/**
- * Handle errors reported by the LCS.  This function should terminate requests.
- * @param {Result} errInfo - Information (ErrCode and ErrMsg) about the error
- * @param {ErrorState} state - Pieces of state of the program at the time the error was returned
- */
-func HandleLCSErrors(errInfo Result, state ErrorState) {
-	if _, hasErrorCode := state["errCode"]; !hasErrorCode {
-		state["errCode"] = errInfo.ErrCode
-	}
-	if _, hasErrorMsg := state["errMsg"]; !hasErrorMsg {
-		state["errMsg"] = errInfo.ErrMsg
-	}
-	LCSErrorHandlers[ERR_FROM_LCS](state)
-}
 
 /**
  * Prepare and serve the standard error page with relevant information.
@@ -156,6 +139,42 @@ func showPeerMonitorAndServeError(state ErrorState) bool {
 	return serveError(state)
 }
 
+/*****************************************************************************************
+ ************************************ PUBLIC VALUES **************************************
+ *****************************************************************************************/
+
+/**
+ * Handle errors occurring in the CC. This function terminates requests.
+ * @param {ErrorCode} errCode - The error code identifying the error that occurred
+ * @param {string} errMsg - A message to output with the error page, if any
+ * @param {ErrorState} state - State information about the program at the time the error was returned
+ */
+func HandleCCError(errCode ErrorCode, errMsg string, state ErrorState) bool {
+	if _, hasErrorCode := state["errCode"]; !hasErrorCode {
+		state["errCode"] = errCode
+	}
+	if _, hasErrorMsg := state["errMsg"]; !hasErrorMsg {
+		state["errMsg"] = errMsg
+	}
+	return ccErrorHandlers[errCode](state)
+}
+
+/**
+ * Handle errors reported by the LCS.  This function should terminate requests.
+ * @param {ErrorCode} errCode - The error code identifying the error that occurred
+ * @param {string} errMsg - A message to output with the error page, if any
+ * @param {ErrorState} state - State information about the program at the time the error was returned
+ */
+func HandleLCSError(errCode ErrorCode, errMsg string, state ErrorState) bool {
+	if _, hasErrorCode := state["errCode"]; !hasErrorCode {
+		state["errCode"] = errCode
+	}
+	if _, hasErrorMsg := state["errMsg"]; !hasErrorMsg {
+		state["errMsg"] = errMsg
+	}
+	return lcsErrorHandlers[errCode](state)
+}
+
 /**
  * Report that an error occurred trying to decode the response from the LCS.
  * @param {ErrorState} state - Must contain error message to send and the URL to send the request to
@@ -187,7 +206,7 @@ func ReportDecodeError(state ErrorState) bool {
 func ExecuteErrorPage(errorCode ErrorCode, errorMsg string, w http.ResponseWriter, r *http.Request) {
 	T, _ := i18n.Tfunc(os.Getenv("LANGUAGE"), "en-us")
 	t, err := template.ParseFiles(path.Join(".", "views", "error.html"))
-	advice, foundErr := ErrorAdvice[errorCode]
+	advice, foundErr := errorAdvice[errorCode]
 	if !foundErr {
 		ExecuteErrorPage(ERR_INVALID_ERROR,
 			T("unrecognized_error_code", map[string]interface{}{
