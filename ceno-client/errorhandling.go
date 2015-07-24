@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"github.com/nicksnyder/go-i18n/i18n"
 	"html/template"
 	"net/http"
@@ -20,8 +22,12 @@ const ( // CC errors
 )
 
 const ( // LCS errors that can be reported to the CC
-	ERR_LCS_MALFORMED_URL = 2111
-	ERR_LCS_URL_DECODE    = 2112
+	ERR_LCS_MALFORMED_URL  = 2110
+	ERR_LCS_URL_DECODE     = 2112
+	ERR_LCS_WILL_NOT_SERVE = 2120
+	ERR_LCS_LOOKUP_FAILURE = 2130
+	ERR_LCS_WAIT_FREENET   = 2300
+	ERR_LCS_WAIT_PEERS     = 2301
 )
 
 const contactInfo = "ceno@equalit.ie"
@@ -55,17 +61,48 @@ var ErrorHandlers = map[ErrorCode]func(ErrorState) bool{
 	ERR_NO_CONFIG:              downloadConfigAndServeError,
 	ERR_MALFORMED_URL:          serveError,
 	ERR_NO_CONNECT_LCS:         serveError,
-	ERR_MALFORMED_LCS_RESPONSE: reportMalformationAndServeError,
+	ERR_MALFORMED_LCS_RESPONSE: ReportDecodeError,
 	ERR_FROM_LCS:               handleLCSErrorReport,
 	ERR_NO_CONNECT_RS:          serveError,
 	ERR_MISSING_VIEW:           downloadViewsAndServeError,
 	ERR_INVALID_ERROR:          serveError,
 }
 
+// An error handler for each of the error thatthe LCS is expected to send to the
+// CC for handling.  Information about the state of the program during the time
+// the error occurred should be encoded in the ErrorState map.
+var LCSErrorHandlers = map[ErrorCode]func(ErrorState) bool{
+	ERR_LCS_MALFORMED_URL:  serveError,
+	ERR_LCS_URL_DECODE:     serveError,
+	ERR_LCS_WILL_NOT_SERVE: serveError,
+	ERR_LCS_LOOKUP_FAILURE: serveError,
+	ERR_LCS_WAIT_FREENET:   showFreenetMonitorAndServeError,
+	ERR_LCS_WAIT_PEERS:     showPeerMonitorAndServeError,
+}
+
 /********************
  ** ERROR HANDLERS **
  ********************/
 
+/**
+ * Handle errors reported by the LCS.  This function should terminate requests.
+ * @param {Result} errInfo - Information (ErrCode and ErrMsg) about the error
+ * @param {ErrorState} state - Pieces of state of the program at the time the error was returned
+ */
+func HandleLCSErrors(errInfo Result, state ErrorState) {
+	if _, hasErrorCode := state["errCode"]; !hasErrorCode {
+		state["errCode"] = errInfo.ErrCode
+	}
+	if _, hasErrorMsg := state["errMsg"]; !hasErrorMsg {
+		state["errMsg"] = errInfo.ErrMsg
+	}
+	LCSErrorHandlers[ERR_FROM_LCS](state)
+}
+
+/**
+ * Prepare and serve the standard error page with relevant information.
+ * @param {ErrorState} state - Must contain HTTP request and response objects and error message
+ */
 func serveError(state ErrorState) bool {
 	w := state["responseWriter"].(http.ResponseWriter)
 	r := state["request"].(*http.Request)
@@ -74,24 +111,69 @@ func serveError(state ErrorState) bool {
 	return true
 }
 
+/**
+ * Download the default configuration file package, validate, and apply before serving an error page
+ * @param {ErrorState} state - Must contain HTTP request and response objects and error message
+ */
 func downloadConfigAndServeError(state ErrorState) bool {
 	// temporary
 	return serveError(state)
 }
 
-func reportMalformationAndServeError(state ErrorState) bool {
-	// temporary
-	return serveError(state)
-}
-
+/**
+ * Download the default configuration file package, validate, and apply before serving an error page
+ * @param {ErrorState} state - Must contain HTTP request and response objects and error message
+ */
 func handleLCSErrorReport(state ErrorState) bool {
 	// temporary
 	return serveError(state)
 }
 
+/**
+ * Download the default configuration file package, validate, and apply before serving an error page
+ * @param {ErrorState} state - Must contain HTTP request and response objects and error message
+ */
 func downloadViewsAndServeError(state ErrorState) bool {
 	// temporary
 	return serveError(state)
+}
+
+/**
+ * Download the default configuration file package, validate, and apply before serving an error page
+ * @param {ErrorState} state - Must contain HTTP request and response objects and error message
+ */
+func showFreenetMonitorAndServeError(state ErrorState) bool {
+	// temporary
+	return serveError(state)
+}
+
+/**
+ * Download the default configuration file package, validate, and apply before serving an error page
+ * @param {ErrorState} state - Must contain HTTP request and response objects and error message
+ */
+func showPeerMonitorAndServeError(state ErrorState) bool {
+	// temporary
+	return serveError(state)
+}
+
+/**
+ * Report that an error occurred trying to decode the response from the LCS.
+ * @param {ErrorState} state - Must contain error message to send and the URL to send the request to
+ */
+func ReportDecodeError(state ErrorState) bool {
+	mapping := map[string]interface{}{
+		"error": state["errMsg"].(string),
+	}
+	marshalled, _ := json.Marshal(mapping)
+	reader := bytes.NewReader(marshalled)
+	req, err := http.NewRequest("POST", state["reportURL"].(string), reader)
+	if err != nil {
+		return false
+	}
+	req.Header.Set("Content-Type", "application/json")
+	client := &http.Client{}
+	response, err := client.Do(req)
+	return response.StatusCode == 200
 }
 
 /**

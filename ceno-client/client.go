@@ -67,27 +67,6 @@ func pleaseWait(url string) ([]byte, bool) {
 }
 
 /**
- * Report that an error occurred trying to decode the response from the LCS.
- * @param {string} reportURL - The URL to POST to to report the error.
- * @param {string} errMsg - The message to write to the LCS
- */
-func reportDecodeError(reportURL, errMsg string) (bool, error) {
-	mapping := map[string]interface{}{
-		"error": errMsg,
-	}
-	marshalled, _ := json.Marshal(mapping)
-	reader := bytes.NewReader(marshalled)
-	req, err := http.NewRequest("POST", reportURL, reader)
-	if err != nil {
-		return false, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	client := &http.Client{}
-	response, err := client.Do(req)
-	return response.StatusCode == 200, err
-}
-
-/**
  * Request that the LCS start a lookup process for a particular URL.
  * @param {string} lookupURL - The URL to try to find in the distributed cache
  */
@@ -106,9 +85,12 @@ func lookup(lookupURL string) Result {
 		fmt.Println(T("decode_error_cli", map[string]interface{}{
 			"Message": err.Error(),
 		}))
-		reachedLCS, err2 := reportDecodeError(DecodeErrReportURL(Configuration), err.Error())
+		reachedLCS := ErrorHandlers[ERR_MALFORMED_LCS_RESPONSE](ErrorState{
+			"errMsg":     err.Error(),
+			"requestURL": DecodeErrReportURL(Configuration),
+		})
 		if reachedLCS {
-			return Result{ERR_MALFORMED_LCS_RESPONSE, err2.Error(), false, false, ""}
+			return Result{ERR_MALFORMED_LCS_RESPONSE, "Could not send request to LCS", false, false, ""}
 		} else {
 			errMsg := T("no_reach_lcs_cli")
 			return Result{ERR_NO_CONNECT_LCS, errMsg, false, false, ""}
@@ -236,17 +218,6 @@ func validateURL(URL string, w http.ResponseWriter, r *http.Request) bool {
 }
 
 /**
- * Handle errors reported by the LCS.  This function should terminate requests.
- * @param {Result} errInfo - Information (ErrCode and ErrMsg) about the error
- * @param {ResponseWriter} w - The object handling responding to the client
- * @param {*Request} r - Information about the request
- */
-func handleLCSErrors(errInfo Result, w http.ResponseWriter, r *http.Request) {
-	state := ErrorState{"responseWriter": w, "request": r, "errMsg": errInfo.ErrMsg}
-	ErrorHandlers[ERR_FROM_LCS](state)
-}
-
-/**
  * Try to request a new bundle be created and serve the please wait page.
  * This function should terminate requests.
  * @param {string} URL - The URL to POST to to request a new bundle
@@ -261,7 +232,10 @@ func tryRequestBundle(URL string, rewritten bool, w http.ResponseWriter, r *http
 		fmt.Println(T("bundle_err_cli", map[string]interface{}{
 			"Message": err.Error(),
 		}))
-		handleLCSErrors(Result{ERR_NO_CONNECT_RS, err.Error(), false, false, ""}, w, r)
+		HandleLCSErrors(Result{ERR_NO_CONNECT_RS, err.Error(), false, false, ""}, ErrorState{
+			"responseWriter": w,
+			"request":        r,
+		})
 	} else {
 		execPleaseWait(URL, w, r)
 	}
@@ -297,7 +271,10 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 		if result.ErrCode == ERR_MALFORMED_LCS_RESPONSE {
 			tryRequestBundle(URL, wasRewritten, w, r)
 		} else {
-			handleLCSErrors(Result{ErrCode: result.ErrCode, ErrMsg: result.ErrMsg}, w, r)
+			HandleLCSErrors(Result{ErrCode: result.ErrCode, ErrMsg: result.ErrMsg}, ErrorState{
+				"responseWriter": w,
+				"request":        r,
+			})
 		}
 	} else if result.Complete {
 		if result.Found {
