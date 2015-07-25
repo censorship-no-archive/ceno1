@@ -1,8 +1,8 @@
 #! /bin/bash
 
 # This script will create a CENO all-in-one box ready for distribution
-# If the -d (debug) flag is enabled, the bundle will include a CENO.jar build
-# with the latest local modifications.
+# If the -p (plugins) flag is enabled, the bundle will include a build of CENO
+# client, Freemail and WebOfTrust, with the latest local modifications.
 #
 # This bundle includes:
 #  * A Freenet node, preloaded with the WebOfTrust, Freemail and CENO plugins,
@@ -16,11 +16,11 @@
 
 
 # Parse options to check if DEBUG mode is enabled
-while getopts "d" OPTION
+while getopts "p" OPTION
 do
   case $OPTION in
-    d)
-      DEBUG=1
+    p)
+      PLUGINS=1
       ;;
   esac
 done
@@ -51,6 +51,7 @@ cd ceno-client
 if [ -a client ]; then
   rm client
 fi
+export GOPATH=$HOME/go
 sh ./build.sh
 cd ..
 
@@ -88,17 +89,30 @@ cp -r ceno-client/{client,views,config} CENOBox/ceno-client
 mkdir CENOBox/ceno-client/translations
 cp ceno-client/translations/**.all.json CENOBox/ceno-client/translations
 
-if [[ $DEBUG == 1 ]]; then
+if [[ $PLUGINS == 1 ]]; then
   # Build CENO client Freenet plugin
   echo "Building CENO client Freenet plugin"
   cd ../ceno-freenet
   ant dist > /dev/null
   cp dist/CENO.jar ../ceno-box/ceno-debug/
   cd ../ceno-box
+
+  echo "Building WebOfTrust plugin"
+  cd ceno-debug/plugin-WebOfTrust
+  #ant dist > /dev/null
+  cp dist/WebOfTrust.jar "$(cd .. && pwd)"
+  cd ../
+
+  echo "Building Freemail plugin"
+  cd plugin-Freemail
+  ant dist > /dev/null
+  cp dist/Freemail.jar "$(cd .. && pwd)"
+  cd ../../
+
   cp -r ceno-debug/* CENOBox/
 fi
 
-echo "Creating the distribution tar"
-tar -pczf CENOBox.tar.gz CENOBox/
+echo "Creating the distribution zip"
+zip -rq CENOBox.zip CENOBox/
 
-echo "Successfully built CENOBox.tar.gz distribution bundle."
+echo "Successfully built CENOBox.zip distribution bundle."
