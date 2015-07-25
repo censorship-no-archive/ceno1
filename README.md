@@ -2,7 +2,8 @@
 
 **Censorship, no thank you!**
 
-CENO is innovative censorship circumvention technology based on a p2p distributed caching network.
+[CENO](https://censorship.no) is innovative censorship circumvention technology
+based on a p2p distributed caching network.
 
 The goal of CENO is to make access to restricted content in areas facing
 censorship easy and more reliable.  CENO exfiltrates document requests out of
@@ -205,7 +206,7 @@ npm start
 ### CENOBRidge Freenet plugin
 
 CENOBridge plugin is built the same way as the CENO client plugin (instructions
-  [here](#CENO Freenet plugin)).
+  [here](#ceno-freenet-plugin)).
 
 CENOBridge plugin can be loaded to your Freenet node like any other plugin,
 by navigating to your node's plugins page (http://127.0.0.1:8888/plugins) and
