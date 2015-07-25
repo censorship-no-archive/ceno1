@@ -30,8 +30,8 @@ public class HighLevelSimpleClientInterface {
 	private static volatile HighLevelSimpleClientInterface HLSCInterface = null;
 	private static HLSCRequestClient requestClient;
 
-	private HighLevelSimpleClient client;
-	private Node node;
+	private static HighLevelSimpleClient client;
+	private static Node node;
 
 	public class HLSCRequestClient implements RequestClient {
 
@@ -157,7 +157,7 @@ public class HighLevelSimpleClientInterface {
 	public static FreenetURI insertManifestCb(FreenetURI insertURI, HashMap<String, Object> bucketsByName, String defaultName, short priorityClass, byte[] forceCryptoKey, ClientPutCallback insertCb) throws InsertException {
 		DefaultManifestPutter putter;
 		try {
-			putter = new DefaultManifestPutter(insertCb, BaseManifestPutter.bucketsByNameToManifestEntries(bucketsByName), priorityClass, insertURI, defaultName, getInsertContext(true), false, forceCryptoKey, null);
+			putter = new DefaultManifestPutter(insertCb, BaseManifestPutter.bucketsByNameToManifestEntries(bucketsByName), priorityClass, insertURI, defaultName, getInsertContext(true), false, forceCryptoKey, node.clientCore.clientContext);
 		} catch (TooManyFilesInsertException e) {
 			Logger.warning(HighLevelSimpleClientInterface.class, "TooManyFiles in a single directory to fit in a single Manifest file, will not insert URI: " + insertURI.toASCIIString());
 			return null;
