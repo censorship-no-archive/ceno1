@@ -2,8 +2,6 @@ package plugins.CENO.FreenetInterface;
 
 import java.util.HashMap;
 
-import com.db4o.ObjectContainer;
-
 import freenet.client.FetchContext;
 import freenet.client.FetchException;
 import freenet.client.FetchResult;
@@ -39,10 +37,6 @@ public class HighLevelSimpleClientInterface {
 
 		public boolean persistent() {
 			return false;
-		}
-
-		public void removeFrom(ObjectContainer container) {
-			throw new UnsupportedOperationException();
 		}
 
 		public boolean realTimeFlag() {
