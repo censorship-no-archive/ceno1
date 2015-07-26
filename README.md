@@ -30,7 +30,7 @@ We currently distribute CENOBox for Linux and Mac OS X.
 ### CENOBox in Linux
 ```bash
 cd ~
-wget https://github.com/equalitie/ceno/releases/latest/CENOBox_Linux.zip
+wget https://github.com/equalitie/ceno/releases/download/v0.3.0-rc2/CENOBox_Linux.zip
 unzip CENOBox_Linux.tar.gz
 cd CENOBox
 ./CENO.sh
