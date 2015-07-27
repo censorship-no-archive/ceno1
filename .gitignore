@@ -14,9 +14,9 @@ src/bundles/
 bundles/
 
 # CeNo client build
-ceno-node/client
-ceno-node/FreenetCENO.tar.gz
-ceno-node/FreenetCENO
+ceno-client/client
+ceno-client/FreenetCENO.tar.gz
+ceno-client/FreenetCENO
 
 ../fred
 
@@ -27,3 +27,6 @@ ceno-node/FreenetCENO
 ceno-node/src/db/*
 
 ceno-node/test/db/*
+
+# Stupid OSX files
+.DS_Store
