@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"github.com/nicksnyder/go-i18n/i18n"
 	"html/template"
 	"net/http"
@@ -173,7 +172,6 @@ func HandleLCSError(errCode ErrorCode, errMsg string, state ErrorState) bool {
 	if _, hasErrorMsg := state["errMsg"]; !hasErrorMsg {
 		state["errMsg"] = errMsg
 	}
-	fmt.Println(errCode)
 	return lcsErrorHandlers[errCode](state)
 }
 
@@ -206,7 +204,7 @@ func ReportDecodeError(state ErrorState) bool {
  * @param {*Request} r - Information about the request
  */
 func ExecuteErrorPage(errorCode ErrorCode, errorMsg string, w http.ResponseWriter, r *http.Request) {
-	T, _ := i18n.Tfunc(os.Getenv("LANGUAGE"), "en-us")
+	T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
 	t, err := template.ParseFiles(path.Join(".", "views", "error.html"))
 	advice, foundErr := errorAdvice[errorCode]
 	if !foundErr {

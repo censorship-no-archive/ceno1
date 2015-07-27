@@ -51,10 +51,10 @@ func WriteProxyHeader(w http.ResponseWriter) http.ResponseWriter {
  * Serve a page to inform the user that the bundle for the site they requested is being prepared.
  * This function terminates requests.
  * @param {ResponseWriter} w - The object handling writing to the client
- * @param {string} url - The URL that was originally requested
+ * @param {string} URL - The URL that was originally requested
  */
-func pleaseWait(w http.ResponseWriter, url string) {
-	T, _ := i18n.Tfunc(os.Getenv("LANGUAGE"), "en-us")
+func pleaseWait(w http.ResponseWriter, URL string) {
+	T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
 	t, err := template.ParseFiles(path.Join(".", "views", "wait.html"))
 	if err != nil {
 		w.Header().Set("Content-Type", "text/plain")
@@ -67,7 +67,7 @@ func pleaseWait(w http.ResponseWriter, url string) {
 			"Paragraph2":     T("please_wait_p2_html"),
 			"Retry":          T("retry_html"),
 			"Contact":        T("contact_html"),
-			"Redirect":       url,
+			"Redirect":       URL,
 		})
 	}
 }
@@ -78,7 +78,7 @@ func pleaseWait(w http.ResponseWriter, url string) {
  */
 func lookup(lookupURL string) Result {
 	response, err := http.Get(BundleLookupURL(Configuration, lookupURL))
-	T, _ := i18n.Tfunc(os.Getenv("LANGUAGE"), "en-us")
+	T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
 	if err != nil || response.StatusCode != 200 {
 		fmt.Println(T("error_cli", map[string]interface{}{
 			"Message": err.Error(),
@@ -152,7 +152,7 @@ func stripHttps(URL string) (string, bool) {
 func directHandler(w http.ResponseWriter, r *http.Request) {
 	qs := r.URL.Query()
 	URLS, found := qs["url"]
-	T, _ := i18n.Tfunc(os.Getenv("LANGUAGE"), "en-us")
+	T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
 	if !found {
 		HandleCCError(ERR_MALFORMED_URL, T("querystring_no_url_cli"), ErrorState{
 			"responseWriter": w,
@@ -199,7 +199,7 @@ func directHandler(w http.ResponseWriter, r *http.Request) {
  */
 func validateURL(URL string, w http.ResponseWriter, r *http.Request) bool {
 	isValid, err := regexp.MatchString(URL_REGEX, URL)
-	T, _ := i18n.Tfunc(os.Getenv("LANGUAGE"), "en-us")
+	T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
 	if !isValid || err != nil {
 		HandleCCError(ERR_MALFORMED_URL, T("malformed_url_cli", map[string]interface{}{
 			"URL": URL,
@@ -222,7 +222,7 @@ func validateURL(URL string, w http.ResponseWriter, r *http.Request) bool {
  */
 func tryRequestBundle(URL string, rewritten bool, w http.ResponseWriter, r *http.Request) {
 	err := requestNewBundle(URL, rewritten)
-	T, _ := i18n.Tfunc(os.Getenv("LANGUAGE"), "en-us")
+	T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
 	if err != nil {
 		fmt.Println(T("bundle_err_cli", map[string]interface{}{
 			"Message": err.Error(),
@@ -246,7 +246,7 @@ func tryRequestBundle(URL string, rewritten bool, w http.ResponseWriter, r *http
 func proxyHandler(w http.ResponseWriter, r *http.Request) {
 	w = WriteProxyHeader(w)
 	URL := r.URL.String()
-	T, _ := i18n.Tfunc(os.Getenv("LANGUAGE"), "en-us")
+	T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
 	wasRewritten := r.Header.Get(REWRITTEN_HEADER) == "true"
 	fmt.Println(T("got_request_msg_cli", map[string]interface{}{
 		"URL":       URL,
@@ -284,9 +284,10 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	// Configure the i18n library to use the preferred language set in the LANGUAGE environement variable
-	language := os.Getenv("LANGUAGE")
-	i18n.MustLoadTranslationFile(path.Join("translations", language+".all.json"))
-	T, _ := i18n.Tfunc(os.Getenv("LANGUAGE"), "en-us")
+	if os.Getenv("CENOLANG") == "" {
+		os.Setenv("CENOLANG", "en-us")
+	}
+	T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
 	// Read an existing configuration file or have the user supply settings
 	conf, err := ReadConfigFile(CONFIG_FILE)
 	if err != nil {

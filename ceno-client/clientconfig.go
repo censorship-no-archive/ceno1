@@ -142,7 +142,7 @@ func ReadConfigFile(fileName string) (Config, error) {
  */
 func GetConfigFromUser() Config {
 	var configuration Config
-	T, _ := i18n.Tfunc(os.Getenv("LANGUAGE"), "en-us")
+	T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
 	// We will accept an error message once at the end
 	vPort, vCS, vRS, vPWPage := false, false, false, false
 	done := false
