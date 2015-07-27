@@ -109,12 +109,14 @@ The URL could not be decoded from base64.
 
 **Error code: 2120**
 
-An error occurred trying to find or serve some resource or static file.
-Can also occur in the case that the LCS received a request for a resource that it chooses to reject handling.
+LCS received a request for a resource that it chooses to reject handling.
 
 ### Internal error
 
 **Error code: 2140**
+
+LCS cannot generate the response the agent that initiated the request is waiting for, because of an
+internal error.
 
 ### Lookup failure
 
@@ -143,31 +145,30 @@ firewall settings among other things.
 
 **Error code: 3111**
 
-In case the request URL is malformed, RS should not continue with the process of forwarding it to the BS.
+In case the request URL is malformed, RS should not continue with the process of forwarding it to the BS
+and respond with this error code to the agent that initiated the request.
 
 ### Could not decode URL value
 
 **Error code: 3112**
 
 Base64 decoding the URL parameter of the request threw an error. RS should not continue with the process
-of forwarding it to the BS.
+of forwarding it to the BS, and should instead respond with this error code to the agent that
+initiated this request.
 
 ### Will not serve
 
 **Error code: 3115**
 
-RS should ignore intermediate requests for resources ignited by the browser and not the user.
-
-### RS Internal error
-
-**Error code: 3140**
+RS should ignore intermediate requests for resources ignited by the browser and not the user, or
+for requests that point to local network resources.
 
 ### WebOfTrust Freenet plugin error
 
 **Error code: 3310**
 
 General error code for errors of the WebOfTrust plugin or its integration with the CENO plugins.
-Can occur, for example, if the WoT is not loaded or not responding.
+Can occur, for example, if the WebOfTrust is not loaded or not responding.
 
 ### Freemail Freenet plugin error
 
@@ -247,7 +248,7 @@ the RR to accept the completed bundle.
 
 **Error code: 6101**
 
-The bundle inserter is not ready to start handling requests.  An agent-specific way of handling
+The bundle inserter is not ready to start handling requests. An agent-specific way of handling
 postponing requests.
 
 ### Malformed URL

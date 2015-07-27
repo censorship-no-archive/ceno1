@@ -111,6 +111,8 @@ public enum CENOErrCode {
 
 	/**
 	 * Returns the corresponding error code from the errorConditions document
+	 * Use this method when you need to forward an error code to
+	 * another agent.
 	 */
 	public int getDocCode() {
 		return docCode.getCode();
