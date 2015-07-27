@@ -200,8 +200,10 @@ The bundle server can be run with the following commands
 ```bash
 cd <path-to-ceno>/ceno-bridge
 npm install
-npm start
+LANGUAGE=<language> npm start
 ```
+
+where `<language>` is to be replaced with a language identifier such as
 
 ### CENOBRidge Freenet plugin
 

@@ -1,4 +1,18 @@
-# Configuration
+# CENO Client
+
+The CENO Client is a gateway or portal into the greater CENO infrastructure.  It is an HTTP proxy meant to be run
+on one's own machine.  It is responsible for three main functions:
+
+1. Redirecting requests to the locally-running Freenet plugin to search for an existing bundle for the requested URI.
+2. Requesting the Freenet plugin exfiltrate the request information out of the censored region when no bundle is found.
+3. Providing a user interface in the form of web pages detailing errors and the lookup status etc.
+
+## Building
+
+Instructions for building and running the client can be found on the
+[project README](https://github.com/equalitie/ceno#building-the-client).
+
+## Configuration
 
 The `ceno-client/config/client.json` file contains the configuration settings
 for the client. You can change any setting you like by modifying the value
@@ -25,8 +39,7 @@ request fails.
 `PleaseWaitPage` is the path to the page that will be served to you while
 CENO looks for the documents you have requested.
 
-
-# Translating
+## Translating
 
 The CENO Client is using the [go-i18n](https://github.com/nicksnyder/go-i18n) library to handle
 internationalization.  All of the ready-for-translation texts can be found in the

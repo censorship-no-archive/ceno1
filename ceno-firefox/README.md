@@ -1,9 +1,5 @@
 # CENO Router
 
-Read this document in
-[English](https://github.com/equalitie/ceno/blob/master/ceno-firefox/README.md) /
-[French](https://github.com/equalitie/ceno/blob/master/ceno-firefox/README-fr.md)
-
 This directory contains an extension for the Mozilla Firefox web browser.
 It exists to solve the problem of HTTPS being incompatible with CENO.  Below is an
 explanation of this problem.

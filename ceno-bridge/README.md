@@ -1,3 +1,13 @@
+# Bundler Server
+
+The Bundler Server (BS) is the agent responsible for bundling requested pages and their resources into
+a single document and is built on top of [the Bundler Library](https://www.npmjs.com/package/equalitie-bundler).
+
+## Building
+
+Instructions explaining how to run the bundle server can be found in the
+[project README](https://github.com/equalitie/ceno#running-the-bundle-server).
+
 ## Translating
 
 The translation files for the CENO bridge can be found in `ceno-bridge/locales` and are all named with
