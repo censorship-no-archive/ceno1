@@ -169,7 +169,9 @@ function handleChange(state) {
       position: button,
       width: 450
     });
-    panel.port.emit('inform-activity', ss.storage.active || false);
+    var isActive = ss.storage.active || false;
+    var word = (isActive) ? _('activeWord') : _('inactiveWord');
+    panel.port.emit('inform-activity', isActive, word);
   }
 }
 

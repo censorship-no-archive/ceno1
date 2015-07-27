@@ -11,14 +11,13 @@ toggleBtn.addEventListener('click', function (evt) {
  *
  * @param {boolean} isActive - True if the extension is active and false otherwise
  */
-function setActivityStatus(isActive) {
+function setActivityStatus(isActive, word) {
   console.log('Got activity status ' + isActive.toString());
   var statusName = document.getElementById('activeStatus');
+  statusName.textContent = word;
   if (isActive) {
-    statusName.textContent = 'active';
     statusName.setAttribute('class', 'red');
   } else {
-    statusName.textContent = 'inactive';
     statusName.setAttribute('class', '');
   }
 }
