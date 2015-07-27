@@ -7,12 +7,19 @@ then
     exit 1
 fi
 
+# If $LANGUAGE environment variable is not set,
+# use "en-us" by default
+if [[ -z "$LANGUAGE" ]]
+then
+  export LANGUAGE=en-us
+fi
+
 # Start the Freenet node
 ./run.sh start &> CENO.log
 
 # Start CENOClient proxy
 cd ceno-client
-LANGUAGE=en-us nohup ./client &> ../CENO.log &
+nohup ./client &> ../CENO.log &
 
 # Start a Firefox CENO session
 cd ..
