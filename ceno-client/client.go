@@ -51,9 +51,9 @@ func WriteProxyHeader(w http.ResponseWriter) http.ResponseWriter {
  * Serve a page to inform the user that the bundle for the site they requested is being prepared.
  * This function terminates requests.
  * @param {ResponseWriter} w - The object handling writing to the client
- * @param {string} url - The URL that was originally requested
+ * @param {string} URL - The URL that was originally requested
  */
-func pleaseWait(w http.ResponseWriter, url string) {
+func pleaseWait(w http.ResponseWriter, URL string) {
 	T, _ := i18n.Tfunc(os.Getenv("LANGUAGE"), "en-us")
 	t, err := template.ParseFiles(path.Join(".", "views", "wait.html"))
 	if err != nil {
@@ -67,7 +67,7 @@ func pleaseWait(w http.ResponseWriter, url string) {
 			"Paragraph2":     T("please_wait_p2_html"),
 			"Retry":          T("retry_html"),
 			"Contact":        T("contact_html"),
-			"Redirect":       url,
+			"Redirect":       URL,
 		})
 	}
 }
