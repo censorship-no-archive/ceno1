@@ -76,6 +76,10 @@
     "translation": "Please wait patiently and you will be redirected when it is ready."
   },
   {
+    "id": "please_wait_header_html",
+    "translation": "Your bundle is being prepared"
+  },
+  {
     "id": "no_bundle_prepared_html",
     "translation": "We couldn't prepare your bundle!"
   },
@@ -98,6 +102,10 @@
   {
     "id": "report_html",
     "translation": "Report"
+  },
+  {
+    "id": "contact_html",
+    "translation": "Contact"
   },
   {
     "id": "error_cli",

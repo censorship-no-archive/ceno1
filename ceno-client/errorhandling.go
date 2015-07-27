@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/nicksnyder/go-i18n/i18n"
 	"html/template"
 	"net/http"
@@ -172,6 +173,7 @@ func HandleLCSError(errCode ErrorCode, errMsg string, state ErrorState) bool {
 	if _, hasErrorMsg := state["errMsg"]; !hasErrorMsg {
 		state["errMsg"] = errMsg
 	}
+	fmt.Println(errCode)
 	return lcsErrorHandlers[errCode](state)
 }
 
