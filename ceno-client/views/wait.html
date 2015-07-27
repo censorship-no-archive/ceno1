@@ -1,16 +1,111 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Please wait</title>
-  </head>
-  <body>
-    <p>{{.Paragraph1}}<p>
-    <p>{{.Paragraph2}}</p>
-    <script>
-      var url = '{{.Redirect}}';
-      setTimeout(function () {
-        window.location.href = url;
-      }, 5000);
-    </script>
-  </body>
+<head>
+  <title>Please Wait</title>
+  <style type="text/css">
+body {
+  background-color: #EDEDE3;
+  font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
+}
+div.horizontalrule {
+  border: none;
+  height: 1px;
+  background-color: #DDD;
+  width: 760px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  margin-left:-30px;
+}
+div.center {
+  text-align: center;
+}
+div.error {
+  margin-top: 40px;
+  background-color: #FDFDFD;
+  margin-left: auto;
+  margin-right: auto;
+  width: 700px;
+  padding-top: 10px;
+  padding-bottom: 30px;
+  padding-left: 30px;
+  padding-right: 30px;
+  color: #333;
+  box-shadow: 0px 2px 4px 0px #999;
+  border-radius: 2px;
+}
+h1,h2 {
+  font-weight: normal;
+}
+div.error h1 {
+  width: 574px;
+}
+span.bold {
+  font-weight: bold;
+}
+span.italic {
+  font-style: italic;
+}
+span.text {
+  padding-right: 30px;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+span.colored {
+  color: rgba(228, 48, 58, 0.9);
+}
+a {
+  text-decoration: none;
+  color: inherit;
+}
+img#logo {
+  float: right;
+  width: 125px;
+  margin-top: 20px;
+}
+div#stack {
+  background-color: #efefef;
+  padding: 10px;
+  padding-left: 15px;
+  overflow: scroll;
+}
+  </style>
+</head>
+<body>
+  <div class="error">
+    <h1>{{.PrepareMessage}}</h1>
+    <div id="main">
+      <p>{{.Paragraph1}}</p>
+      <p>{{.Paragraph2}}</p>
+    </div>
+    <div class="horizontalrule"></div>
+    <span id="retry" class="text"><a href="#">{{.Retry}}</a></span>
+    <span id="report" class="colored text"><a id="reportAnchor" href="#">{{.Contact}}</a></span>
+  </div>
+  <script type="text/javascript">
+  var url = '{{.Redirect}}';
+  setTimeout(function () {
+      window.location.href = url;
+  }, 5000);
+  document.getElementById('retry').addEventListener('click', function (event) {
+    var url = document.getElementById('url').innerHTML;
+    window.location.href = url;
+  });
+  // Deobfuscate our mailto link.
+  var coded = 'lvWc@v3qXLV6.Vv';
+  var key = 'VByXZlI9sEOnkfuGQbA4Lx1UwgWdRqMrpe8zmoTFK7Y53tNivja0cCHPhJS26D';
+  var shift = coded.length;
+  var link = '';
+  for (var i = 0, len = coded.length; i < len; i++) {
+    var ltr;
+    if (key.indexOf(coded.charAt(i)) === -1) {
+      ltr = coded.charAt(i);
+      link += ltr;
+    } else {
+      ltr = (key.indexOf(coded.charAt(i)) - shift + key.length) % key.length;
+      link += key.charAt(i);
+    }
+  }
+  document.getElementById('reportAnchor').setAttribute('href', 'mailto:"' + link + '"');
+  </script>
+</body>
 </html>

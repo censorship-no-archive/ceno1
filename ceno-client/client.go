@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/nicksnyder/go-i18n/i18n"
-	"io/ioutil"
+	"html/template"
 	"net/http"
 	"net/url"
 	"os"
@@ -49,19 +49,26 @@ func WriteProxyHeader(w http.ResponseWriter) http.ResponseWriter {
 
 /**
  * Serve a page to inform the user that the bundle for the site they requested is being prepared.
- * The second return value is true when the response is HTML and false when text/plain.
+ * This function terminates requests.
+ * @param {ResponseWriter} w - The object handling writing to the client
  * @param {string} url - The URL that was originally requested
  */
-func pleaseWait(url string) ([]byte, bool) {
+func pleaseWait(w http.ResponseWriter, url string) {
 	T, _ := i18n.Tfunc(os.Getenv("LANGUAGE"), "en-us")
-	content, err := ioutil.ReadFile(Configuration.PleaseWaitPage)
+	t, err := template.ParseFiles(path.Join(".", "views", "wait.html"))
 	if err != nil {
-		return []byte(T("please_wait_txt")), false
+		w.Header().Set("Content-Type", "text/plain")
+		w.Write([]byte(T("please_wait_txt")))
 	} else {
-		content = bytes.Replace(content, []byte("{{.Paragraph1}}"), []byte(T("please_wait_p1_html")), 1)
-		content = bytes.Replace(content, []byte("{{.Paragraph2}}"), []byte(T("please_wait_p2_html")), 1)
-		content = bytes.Replace(content, []byte("{{.Redirect}}"), []byte(url), 1)
-		return content, true
+		w.Header().Set("Content-Type", "text/html")
+		t.Execute(w, map[string]string{
+			"PrepareMessage": T("please_wait_header_html"),
+			"Paragraph1":     T("please_wait_p1_html"),
+			"Paragraph2":     T("please_wait_p2_html"),
+			"Retry":          T("retry_html"),
+			"Contact":        T("contact_html"),
+			"Redirect":       url,
+		})
 	}
 }
 
@@ -119,16 +126,6 @@ func requestNewBundle(lookupURL string, wasRewritten bool) error {
 	client := &http.Client{}
 	_, err2 := client.Do(req)
 	return err2
-}
-
-func execPleaseWait(URL string, w http.ResponseWriter, r *http.Request) {
-	body, isHTML := pleaseWait(URL)
-	if isHTML {
-		w.Header().Set("Content-Type", "text/html")
-	} else {
-		w.Header().Set("Content-Type", "text/plain")
-	}
-	w.Write(body)
 }
 
 /**
@@ -235,7 +232,7 @@ func tryRequestBundle(URL string, rewritten bool, w http.ResponseWriter, r *http
 			"request":        r,
 		})
 	} else {
-		execPleaseWait(URL, w, r)
+		pleaseWait(w, URL)
 	}
 }
 
@@ -269,7 +266,7 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 		if result.ErrCode == ERR_MALFORMED_LCS_RESPONSE {
 			tryRequestBundle(URL, wasRewritten, w, r)
 		} else {
-			HandleLCSError(result.ErrCode, result.ErrMsg, ErrorState{
+			HandleCCError(result.ErrCode, result.ErrMsg, ErrorState{
 				"responseWriter": w,
 				"request":        r,
 			})
@@ -281,7 +278,7 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 			tryRequestBundle(URL, wasRewritten, w, r)
 		}
 	} else {
-		execPleaseWait(URL, w, r)
+		pleaseWait(w, URL)
 	}
 }
 
