@@ -284,8 +284,9 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	// Configure the i18n library to use the preferred language set in the LANGUAGE environement variable
-	language := os.Getenv("CENOLANG")
-	i18n.MustLoadTranslationFile(path.Join("translations", language+".all.json"))
+	if os.Getenv("CENOLANG") == "" {
+		os.Setenv("CENOLANG", "en-us")
+	}
 	T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
 	// Read an existing configuration file or have the user supply settings
 	conf, err := ReadConfigFile(CONFIG_FILE)
