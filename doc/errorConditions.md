@@ -112,6 +112,10 @@ The URL could not be decoded from base64.
 An error occurred trying to find or serve some resource or static file.
 Can also occur in the case that the LCS received a request for a resource that it chooses to reject handling.
 
+### Internal error
+
+**Error code: 2140**
+
 ### Lookup failure
 
 **Error code: 2130**
@@ -153,6 +157,10 @@ of forwarding it to the BS.
 **Error code: 3115**
 
 RS should ignore intermediate requests for resources ignited by the browser and not the user.
+
+### RS Internal error
+
+**Error code: 3140**
 
 ### WebOfTrust Freenet plugin error
 

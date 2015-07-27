@@ -6,7 +6,7 @@
   "author": "Zack Mullaly <redwire@riseup.net>",
   "main": "./bundle-server.js",
   "scripts": {
-    "start": "node bundle-server.js",
+    "start": "LANGUAGE=en node bundle-server.js",
     "test": "mocha tests/lookup-failure.js"
   },
   "dependencies": {

@@ -7,9 +7,6 @@ import java.util.concurrent.TimeUnit;
 
 import plugins.CENO.URLtoUSKTools;
 import plugins.CENO.Bridge.BundlerInterface.Bundle;
-
-import com.db4o.ObjectContainer;
-
 import freenet.client.InsertException;
 import freenet.client.async.BaseClientPutter;
 import freenet.client.async.ClientContext;

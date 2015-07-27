@@ -17,9 +17,6 @@ import org.eclipse.jetty.server.Request;
 import plugins.CENO.CENOJettyHandler;
 import plugins.CENO.Bridge.BundleInserter.InsertCallback;
 import plugins.CENO.Bridge.BundlerInterface.Bundle;
-
-import com.db4o.ObjectContainer;
-
 import freenet.client.InsertException;
 import freenet.client.async.BaseClientPutter;
 
