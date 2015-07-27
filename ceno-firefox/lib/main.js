@@ -9,6 +9,7 @@ let self = require('sdk/self');
 let tabs = require('sdk/tabs');
 let base64 = require('sdk/base64');
 let ss = require('sdk/simple-storage');
+var _ = require("sdk/l10n").get;
 
 // CENO configuration settings
 const CENO_PORT = 3090;
@@ -16,8 +17,7 @@ const CENO_ADDR = '127.0.0.1';
 
 // A message to alert to the user if their browser is not configured
 // to use CENO Client as a proxy.
-const NO_PROXY_MSG = 'CENO Client not active. Please configure your browser' +
-' to use ' + CENO_ADDR + ' port ' + CENO_PORT + ' as an HTTP proxy.';
+const NO_PROXY_MSG = _('noProxyMsg');
 
 // The special header and associated value that will be set on
 // all responses served by CENO Client.
@@ -106,7 +106,7 @@ function ensureProxyIsRunning(callback) {
     url: 'http://localhost:3090/',
     onComplete: function (response) {
       let value = response.headers[CENO_HEADER];
-      callback(typeof value !== 'undefined' 
+      callback(typeof value !== 'undefined'
             && value !== null
             && value === CENO_HEADER_VALUE);
     }
