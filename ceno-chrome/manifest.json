@@ -15,7 +15,7 @@
   "browser_action": {
     "default_title": "CENO Intercept",
     "default_icon": "icon.png",
-    "default_popup": "__MSG_browserActionPage__"
+    "default_popup": "popup.html"
   },
   "permissions": [
     "tabs",
@@ -25,5 +25,5 @@
     "proxy",
     "https://*/*",
     "http://*/*"
-  ] 
+  ]
 }

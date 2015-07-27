@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
   <head>
-    <title>CENO Intercept</title>
+    <title>CENO Router</title>
     <style>
       body {
         font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
@@ -58,30 +58,29 @@
     <div id="container">
     <div>
       <p>
-        Current status: <span id='activeStatus'>inactive</span>.
+        <span data-i18n-id="currentStatus">Current status:</span> <span data-i18n-id="activeStatus" id='activeStatus'>inactive</span>.
       </p>
     </div>
-    <button id="useCeno">Toggle CENO</button>
+    <button id="useCeno"><span data-i18n-id="useCeno">Toggle CENO</span></button>
     <div id="logo">
       <img src="logo_ceno.png" />
     </div>
     <div id="status">
       <p>
-        While active,
-        <span class="red">this extension intercepts requests for sites using HTTPS</span>
-        to prevent your browser from encrypting them. You are 
-        secured by CENO. 
+        <span data-i18n-id="whileActive">While active,</span>
+        <span data-i18n-id="intercepts" class="red">this extension intercepts requests for sites using HTTPS</span>
+        <span data-i18n-id="securedByCeno">to prevent your browser from encrypting them. You are
+        secured by CENO.</span>
       </p>
     </div>
     <div id="eq-logo">
       <img src="eq-logo.png" />
       <p>
         <span class="red">eQualit.ie</span>
-        develops open and reusable systems with a focus on privacy, online security,
-        and information management.
+        <span data-i18n-id="aboutEQ">develops open and reusable systems with a focus on privacy, online security,
+        and information management.</span>
       </p>
     </div>
     </div>
   </body>
 </html>
-
