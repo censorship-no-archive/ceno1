@@ -22,19 +22,15 @@ function setActivityStatus(isActive) {
  */
 function applyI18nText() {
   var spans = document.getElementsByTagName('span');
-  console.log('Found', spans.length, 'spans!');
   for (var i = 0, len = spans.length; i < len; i++) {
     var span = spans[i];
     var i18nID = span.getAttribute('data-i18n-id');
     if (i18nID) {
-      console.log('Localizable span with text:', span.textContent);
       var newText = chrome.i18n.getMessage(i18nID);
       if (typeof newText !== undefined && newText !== null) {
-        console.log('Found translation:', newText);
         span.textContent = newText;
       }
     }
-    console.log('');
   }
 }
 
