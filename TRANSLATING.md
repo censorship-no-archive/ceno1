@@ -46,7 +46,7 @@ however the client is an exception.  Transifex expects JSON files to be of the f
 }
 ```
 
-which clearly doesn't match the form goi18n uses. To cope with this, the 
+which clearly doesn't match the form goi18n uses. To cope with this, the
 `ceno-client/tools/json-translation.py` script was created.  This script will read
 `ceno-client/translations/en-us.json` and produce `ceno-client/tools/en-us.json` that will be in the
 format preferred by Transifex.  This first step is accomplished by running
@@ -122,16 +122,6 @@ with the following content (related to the example above):
 }
 ```
 
-**IMPORTANT**
-
-Chrome extensions do not have a built-in means of dealing with translations for HTML pages, so the popup
-document has to be handled a little differently.
-
-When creating a translation for the popup to, say, Spanish, one should create `ceno-chrome/popup-es.html`
-and replace the English text with the translated text.  Then, in the messages file,
-`ceno-chrome/_locals/es/messages.json` here, change the `message` value for the `browserActionPage` object
-to the appropriate html document name (e.g. `popup-es.html`).
-
 ## CENO Firefox
 
 Translation files fore the Firefox extension can be found in the `ceno-firefox/locale` directory.
@@ -168,6 +158,6 @@ The German translation, `ceno-bridge/locales/de.json` would contain
 
 ```js
 {
-  "Good day, %s!", "Guten Tag, %s!" 
+  "Good day, %s!", "Guten Tag, %s!"
 }
 ```
