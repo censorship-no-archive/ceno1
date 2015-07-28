@@ -26,6 +26,7 @@ const ( // LCS errors that can be reported to the CC
 	ERR_LCS_URL_DECODE     = 2112
 	ERR_LCS_WILL_NOT_SERVE = 2120
 	ERR_LCS_LOOKUP_FAILURE = 2130
+	ERR_LCS_INTERNAL       = 2140
 	ERR_LCS_WAIT_FREENET   = 2300
 	ERR_LCS_WAIT_PEERS     = 2301
 )
@@ -74,6 +75,7 @@ var lcsErrorHandlers = map[ErrorCode]func(ErrorState) bool{
 	ERR_LCS_URL_DECODE:     serveError,
 	ERR_LCS_WILL_NOT_SERVE: serveError,
 	ERR_LCS_LOOKUP_FAILURE: serveError,
+	ERR_LCS_INTERNAL:       serveError,
 	ERR_LCS_WAIT_FREENET:   showFreenetMonitorAndServeError,
 	ERR_LCS_WAIT_PEERS:     showPeerMonitorAndServeError,
 }
