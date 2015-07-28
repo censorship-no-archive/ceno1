@@ -10,7 +10,6 @@ public class CENOL10n implements FredPluginBaseL10n {
 	private static PluginL10n l10n;
 
 	public CENOL10n(String envVar) {
-		System.out.println(CENOL10n.class.getClassLoader());
 		CENOL10n.l10n = new PluginL10n(this, getLanguageFromEnvVar(envVar));
 	}
 
