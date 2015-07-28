@@ -23,7 +23,7 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>2403.107</string>
+	<string>2403.125</string>
 	<key>CrAppModeProfileDir</key>
 	<string>Default</string>
 	<key>CrAppModeProfileName</key>
@@ -39,7 +39,7 @@
 	<key>CrBundleIdentifier</key>
 	<string>com.google.Chrome</string>
 	<key>CrBundleVersion</key>
-	<string>44.0.2403.107</string>
+	<string>44.0.2403.125</string>
 	<key>DTSDKBuild</key>
 	<string>10M2518</string>
 	<key>DTSDKName</key>

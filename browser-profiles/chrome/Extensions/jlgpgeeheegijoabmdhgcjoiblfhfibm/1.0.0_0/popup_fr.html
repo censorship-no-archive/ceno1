@@ -1,0 +1,85 @@
+<!doctype html>
+<html>
+  <head>
+    <title>CENO Interception</title>
+    <style>
+      body {
+        font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
+        background-color: #f4f4f3;
+        color: #4c4a4a;
+        font-size: 100%;
+        width: 400px;
+      }
+      #container {
+        width: 350px;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+      }
+      #status {
+        font-size: 14px;
+        padding-left: 15px;
+        padding-right: 15px;
+      }
+      #logo {
+        float: right;
+      }
+      #eq-logo {
+        width: inherit;
+      }
+      #eq-logo img {
+        float: left;
+        width: 32px;
+        height: 32px;
+        margin-left: 5px;
+        margin-bottom: 10px;
+      }
+      #eq-logo p {
+        padding-top: 5px;
+        font-size: 10px;
+      }
+      button {
+        width: 160px;
+        height: 75px;
+        background-color: #e43624;
+        color: #f4f4f3;
+        border: none;
+        border-radius: 1px;
+        font-size: 16px;
+        font-weight: 400;
+      }
+      .red {
+        color: #e43624;
+      }
+    </style>
+    <script src="intercept.js"></script>
+  </head>
+  <body>
+    <div id="container">
+    <div>
+      <p>
+        Statut actuel: <span id='activeStatus'>inactif</span>.
+      </p>
+    </div>
+    <button id="useCeno">Basculer CENO</button>
+    <div id="logo">
+      <img src="logo_ceno.png" />
+    </div>
+    <div id="status">
+      <p>
+        tout actif,
+        <span class="red">cette intercepte les demandes d'extension de sites utilisant le protocole HTTPS</span>
+        pour empêcher votre navigateur d'les cryptant. Vous êtes assuré par CENO.
+      </p>
+    </div>
+    <div id="eq-logo">
+      <img src="eq-logo.png" />
+      <p>
+        <span class="red">eQualit.ie</span>
+        développe des systèmes ouverts et réutilisables avec un accent sur la vie privée, la sécurité en ligne et la gestion de l'information.
+      </p>
+    </div>
+    </div>
+  </body>
+</html>
+
