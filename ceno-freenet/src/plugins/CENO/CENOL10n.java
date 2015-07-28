@@ -10,8 +10,8 @@ public class CENOL10n implements FredPluginBaseL10n {
 	private static PluginL10n l10n;
 
 	public CENOL10n(String envVar) {
-		CENOL10n.l10n = new PluginL10n(this);
-		setLanguageFromEnvVar(envVar);
+		System.out.println(CENOL10n.class.getClassLoader());
+		CENOL10n.l10n = new PluginL10n(this, getLanguageFromEnvVar(envVar));
 	}
 
 	public String getString(String key) {
@@ -26,14 +26,16 @@ public class CENOL10n implements FredPluginBaseL10n {
 		}
 	}
 
-	public void setLanguageFromEnvVar(String envVar) {
-		String lang = System.getenv(envVar);
-		if (lang == null || lang.isEmpty()) {
-			lang = "en";
-		} else {
-			lang = lang.split("-")[0];
+	public LANGUAGE getLanguageFromEnvVar(String envVar) {
+		String envVal = System.getenv(envVar);
+		if (envVal != null && !envVal.isEmpty()) {
+			envVal = envVal.split("-")[0];
 		}
-		setLanguage(LANGUAGE.mapToLanguage(lang));
+		LANGUAGE lang = LANGUAGE.mapToLanguage(envVal);
+		if (lang == null) {
+			lang = LANGUAGE.ENGLISH;
+		}
+		return lang;
 	}
 
 	public String getL10nFilesBasePath() {
