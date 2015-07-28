@@ -88,8 +88,7 @@ func validPortNumber(port string) bool {
 		return false
 	}
 	colonPrefixSupplied := port[0] == ':'
-	number, parseErr := strconv.Atoi(port[1:])
-	if parseErr != nil {
+	if number, parseErr := strconv.Atoi(port[1:]); parseErr != nil {
 		return false
 	}
 	return colonPrefixSupplied && number > 0 && number <= 65535
@@ -124,14 +123,12 @@ func validPleaseWaitPage(location string) bool {
 
 // Try to read a configuration in from a file.
 func ReadConfigFile(fileName string) (Config, error) {
-	file, fopenErr := os.Open(fileName)
-	if fopenErr != nil {
+	if file, fopenErr := os.Open(fileName); fopenErr != nil {
 		return Config{}, fopenErr
 	}
 	var configuration Config
 	decoder := json.NewDecoder(file)
-	err := decoder.Decode(&configuration)
-	if err != nil {
+	if err := decoder.Decode(&configuration); err != nil {
 		return Config{}, err
 	}
 	return configuration, nil

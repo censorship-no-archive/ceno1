@@ -13,8 +13,10 @@ import (
 	"path"
 	"regexp"
 	"strings"
+	"strconv"
 )
 
+// The location of the configuration file to read.
 const CONFIG_FILE string = "./config/client.json"
 
 // A global configuration instance. Must be instantiated properly in main().
@@ -34,7 +36,6 @@ type Result struct {
 	Complete bool
 	Found    bool
 	Bundle   string
-	// Should add a Created field for the date created
 }
 
 /**
@@ -50,10 +51,10 @@ func WriteProxyHeader(w http.ResponseWriter) http.ResponseWriter {
 /**
  * Serve a page to inform the user that the bundle for the site they requested is being prepared.
  * This function terminates requests.
- * @param {ResponseWriter} w - The object handling writing to the client
  * @param {string} URL - The URL that was originally requested
+ * @param {ResponseWriter} w - The object handling writing to the client
  */
-func pleaseWait(w http.ResponseWriter, URL string) {
+func pleaseWait(URL string, w http.ResponseWriter) {
 	T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
 	t, err := template.ParseFiles(path.Join(".", "views", "wait.html"))
 	if err != nil {
@@ -88,14 +89,15 @@ func lookup(lookupURL string) Result {
 	decoder := json.NewDecoder(response.Body)
 	var result Result
 	if err := decoder.Decode(&result); err != nil {
-		fmt.Println(T("decode_error_cli", map[string]interface{}{
+		decodeErrorMessage := T("decode_error_cli", map[string]interface{}{
 			"Message": err.Error(),
-		}))
+		})
+		fmt.Println(decodeErrorMessage)
 		reachedLCS := HandleCCError(ERR_MALFORMED_LCS_RESPONSE, err.Error(), ErrorState{
 			"requestURL": DecodeErrReportURL(Configuration),
 		})
 		if reachedLCS {
-			return Result{ERR_MALFORMED_LCS_RESPONSE, "Could not send request to LCS", false, false, ""}
+			return Result{ERR_MALFORMED_LCS_RESPONSE, decodeErrorMessage, false, false, ""}
 		} else {
 			errMsg := T("no_reach_lcs_cli")
 			return Result{ERR_NO_CONNECT_LCS, errMsg, false, false, ""}
@@ -113,16 +115,11 @@ func requestNewBundle(lookupURL string, wasRewritten bool) error {
 	// We can ignore the content of the response since it is not used.
 	reader := bytes.NewReader([]byte(lookupURL))
 	URL := CreateBundleURL(Configuration, lookupURL)
-	req, err := http.NewRequest("POST", URL, reader)
-	if err != nil {
+	if req, err := http.NewRequest("POST", URL, reader); err != nil {
 		return err
 	}
 	req.Header.Set("Content-Type", "text/plain")
-	if wasRewritten {
-		req.Header.Set(REWRITTEN_HEADER, "true")
-	} else {
-		req.Header.Set(REWRITTEN_HEADER, "false")
-	}
+	req.Header.Set(REWRITTEN_HEADER, strconv.FormatBool(wasRewritten))
 	client := &http.Client{}
 	_, err2 := client.Do(req)
 	return err2
@@ -151,9 +148,8 @@ func stripHttps(URL string) (string, bool) {
  */
 func directHandler(w http.ResponseWriter, r *http.Request) {
 	qs := r.URL.Query()
-	URLS, found := qs["url"]
 	T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
-	if !found {
+	if URLS, found := qs["url"]; !found {
 		HandleCCError(ERR_MALFORMED_URL, T("querystring_no_url_cli"), ErrorState{
 			"responseWriter": w,
 			"request":        r,
@@ -161,26 +157,20 @@ func directHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		// Decode the URL so we can save effort by just passing the modified request to
 		// the proxyHandler function from here.
-		decodedBytes, err := base64.StdEncoding.DecodeString(URLS[0])
-		if err != nil {
+		if decodedBytes, err := base64.StdEncoding.DecodeString(URLS[0]); err != nil {
 			HandleCCError(ERR_MALFORMED_URL, T("url_b64_cli"), ErrorState{
 				"responseWriter": w,
 				"request":        r,
 			})
 		} else {
 			decodedURL := string(decodedBytes)
-			stripped, rewritten := stripHttps(decodedURL)
-			if rewritten {
+			if stripped, rewritten := stripHttps(decodedURL); rewritten {
 				r.Header.Set(REWRITTEN_HEADER, "true")
 			}
-			newURL, parseErr := url.Parse(stripped)
-			if parseErr != nil {
+			if newURL, parseErr := url.Parse(stripped); parseErr != nil {
 				HandleCCError(ERR_MALFORMED_URL, T("malformed_url_cli", map[string]interface{}{
 					"URL": stripped,
-				}), ErrorState{
-					"responseWriter": w,
-					"request":        r,
-				})
+				}), ErrorState{"responseWriter": w, "request": r,})
 			} else {
 				// Finally we can pass the modified request onto the proxy server.
 				r.URL = newURL
@@ -203,10 +193,7 @@ func validateURL(URL string, w http.ResponseWriter, r *http.Request) bool {
 	if !isValid || err != nil {
 		HandleCCError(ERR_MALFORMED_URL, T("malformed_url_cli", map[string]interface{}{
 			"URL": URL,
-		}), ErrorState{
-			"responseWriter": w,
-			"request":        r,
-		})
+		}), ErrorState{"responseWriter": w, "request": r,})
 		return false
 	}
 	return true
@@ -221,9 +208,8 @@ func validateURL(URL string, w http.ResponseWriter, r *http.Request) bool {
  * @param {*Request} r - Information about the request
  */
 func tryRequestBundle(URL string, rewritten bool, w http.ResponseWriter, r *http.Request) {
-	err := requestNewBundle(URL, rewritten)
 	T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
-	if err != nil {
+	if err := requestNewBundle(URL, rewritten); err != nil {
 		fmt.Println(T("bundle_err_cli", map[string]interface{}{
 			"Message": err.Error(),
 		}))
@@ -232,7 +218,7 @@ func tryRequestBundle(URL string, rewritten bool, w http.ResponseWriter, r *http
 			"request":        r,
 		})
 	} else {
-		pleaseWait(w, URL)
+		pleaseWait(URL, w)
 	}
 }
 
@@ -278,7 +264,7 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 			tryRequestBundle(URL, wasRewritten, w, r)
 		}
 	} else {
-		pleaseWait(w, URL)
+		pleaseWait(URL, w)
 	}
 }
 
@@ -289,11 +275,8 @@ func main() {
 	}
 	T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
 	// Read an existing configuration file or have the user supply settings
-	conf, err := ReadConfigFile(CONFIG_FILE)
-	if err != nil {
-		fmt.Println(T("no_config_cli", map[string]interface{}{
-			"Location": CONFIG_FILE,
-		}))
+	if conf, err := ReadConfigFile(CONFIG_FILE); err != nil {
+		fmt.Println(T("no_config_cli", map[string]interface{}{"Location": CONFIG_FILE,}))
 		Configuration = GetConfigFromUser()
 	} else {
 		Configuration = conf
@@ -301,9 +284,7 @@ func main() {
 	// Create an HTTP proxy server
 	http.HandleFunc("/lookup", directHandler)
 	http.HandleFunc("/", proxyHandler)
-	fmt.Println(T("listening_msg_cli", map[string]interface{}{
-		"Port": Configuration.PortNumber,
-	}))
+	fmt.Println(T("listening_msg_cli", map[string]interface{}{"Port": Configuration.PortNumber,}))
 	if err = http.ListenAndServe(Configuration.PortNumber, nil); err != nil {
 		panic(err)
 	}
