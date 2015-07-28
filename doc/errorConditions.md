@@ -111,19 +111,19 @@ The URL could not be decoded from base64.
 
 LCS received a request for a resource that it chooses to reject handling.
 
-### Internal error
-
-**Error code: 2140**
-
-LCS cannot generate the response the agent that initiated the request is waiting for, because of an
-internal error.
-
 ### Lookup failure
 
 **Error code: 2130**
 
 An error occurred during the process of performing a synchronous lookup into the local cache or into the
 distributed cache (e.g. Freenet).
+
+### Internal error
+
+**Error code: 2140**
+
+LCS cannot generate the response the agent that initiated the request is waiting for, because of an
+internal error.
 
 ### Waiting for Freenet node
 
