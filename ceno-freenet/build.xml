@@ -10,7 +10,7 @@
 	<property name="dist" location="dist/"/>
 
 	<property name="freenet-cvs-snapshot.location" location="../fred/dist/freenet.jar"/>
-	<property name="freenet-ext.location" location="../fred/lib/freenet/freenet-ext.jar"/>	
+	<property name="freenet-ext.location" location="../fred/lib/freenet/freenet-ext.jar"/>
 	<property name="junit.location" value="/usr/share/java/junit.jar"/>
 	<property name="jetty-serverlet.location" value="lib/javax.servlet-api-3.1.0.jar"/>
 	<property name="jetty-all.location" value="lib/jetty-all-9.2.6.v20141205.jar"/>
@@ -36,9 +36,10 @@
 	<target name="copyresources" description="Copies the resources to build directory">
 		<copy todir="${build}">
 			<fileset dir="src" includes="**/Resources/**" />
+			<fileset dir="src" includes="**/*.properties" />
 		</copy>
 	</target>
-	
+
 
 	<!-- ================================================== -->
 	<target name="setver">
@@ -131,7 +132,7 @@
 			<zipfileset src="${sun-mail.location}" />
 			<zipfileset src="${apache-commonsvalidator.location}" excludes="META-INF/LICENSE.txt" />
 		</jar>
-		
+
 		<jar jarfile="${dist}/CENOBridge.jar" duplicate="fail">
 			<manifest>
 				<attribute name="Plugin-Main-Class" value="plugins.CENO.Bridge.CENOBridge"/>
