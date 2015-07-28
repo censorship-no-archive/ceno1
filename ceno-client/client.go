@@ -283,7 +283,7 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	// Configure the i18n library to use the preferred language set in the LANGUAGE environement variable
+	// Configure the i18n library to use the preferred language set in the CENOLANG environement variable
 	if os.Getenv("CENOLANG") == "" {
 		os.Setenv("CENOLANG", "en-us")
 	}

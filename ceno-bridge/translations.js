@@ -21,7 +21,7 @@ i18n.configure({
 });
 
 // Set the locale to use by reading its name from an environment variable
-var desiredLocale = process.env.LANGUAGE;
+var desiredLocale = process.env.CENOLANG;
 if (locales.indexOf(desiredLocale) < 0) {
   fmtLocales = locales.join(', ');
   throw new Error(desiredLocale + ' is not a valid locale.  Available locales: ' + fmtLocales);
