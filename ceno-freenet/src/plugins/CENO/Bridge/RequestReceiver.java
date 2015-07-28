@@ -144,6 +144,8 @@ public class RequestReceiver {
 				// Interrupted by another thread, normally by stopLooping()
 				// Exit the loop
 				continueLoop = false;
+			} catch (Exception e) {
+				Logger.error(this, "Freemailbox looper uncaught exception: " + e.getMessage());
 			}
 		}
 	}

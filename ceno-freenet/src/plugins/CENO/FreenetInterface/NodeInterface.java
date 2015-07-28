@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.RandomAccess;
 
 import org.freenetproject.freemail.wot.ConcurrentWoTConnection;
 

@@ -1,5 +1,6 @@
 package plugins.CENO.Client;
 
+import plugins.CENO.CENOL10n;
 import plugins.CENO.Version;
 import plugins.CENO.FreenetInterface.HighLevelSimpleClientInterface;
 import plugins.CENO.FreenetInterface.NodeInterface;
@@ -41,6 +42,7 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 		// Initialize interfaces with fred
 		pluginRespirator = pr;
 		client = new HighLevelSimpleClientInterface(pluginRespirator.getNode());
+		new CENOL10n("CENOLANG");
 		ULPRManager.init();
 		RequestSender.init(new String[]{bridgeFreemail});
 		nodeInterface = new NodeInterface(pluginRespirator.getNode(), pluginRespirator);

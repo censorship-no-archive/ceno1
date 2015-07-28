@@ -5,6 +5,7 @@ import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 
+import plugins.CENO.CENOL10n;
 import plugins.CENO.Configuration;
 import plugins.CENO.Version;
 import plugins.CENO.FreenetInterface.HighLevelSimpleClientInterface;
@@ -51,6 +52,7 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 		pluginRespirator = pr;
 		client = new HighLevelSimpleClientInterface(pluginRespirator.getNode(), pluginRespirator.getHLSimpleClient());
 		nodeInterface = new NodeInterface(pluginRespirator.getNode(), pluginRespirator);
+		new CENOL10n("CENOLANG");
 
 		// Read properties of the configuration file
 		initConfig = new Configuration(configPath);

@@ -13,7 +13,7 @@ public class ClientHandler extends AbstractCENOClientHandler {
 	public String handleHTTPGet(HTTPRequest request) throws PluginHTTPException {
 		String path = request.getPath().replaceFirst(pluginPath, "");
 		if (path.isEmpty() || path.equals("/") || path.equals("/index.html")) {
-			return printStaticHTML("Resources/index.html");
+			return printStaticHTML("resources/index.html");
 		} else if (path.startsWith("/lookup")) {
 			return lookupHandler.handleHTTPGet(request);
 		}

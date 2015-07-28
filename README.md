@@ -47,6 +47,13 @@ cd ~/CENOBox
 ./CENO.sh
 ```
 
+CENO will identify your system's language and show you messages in it, given that a translation exists.
+In order to explicitly set a language, you can set the `CENOLANG` environment variable.
+For example, if you want to use CENO in French, this is the way to execute the CENO.sh script:
+```bash
+CENOLANG=fr-fr ./CENO.sh
+```
+
 ## Manually building CENO
 
 What follows are instructions for manually building CENO from source.
@@ -115,7 +122,7 @@ commands into your operating system's terminal program.
 # <path-to-ceno> must be replaced with the path to where you cloned CENO
 cd <path-to-ceno>/ceno-client/
 ./build.sh
-LANGUAGE=<language> ./client
+CENOLANG=<language> ./client
 ```
 
 Where `language` is one of the supported languages (a `<language code>.json` file in
@@ -200,7 +207,7 @@ The bundle server can be run with the following commands
 ```bash
 cd <path-to-ceno>/ceno-bridge
 npm install
-LANGUAGE=<language> npm start
+CENOLANG=<language> npm start
 ```
 
 where `<language>` is to be replaced with a language identifier such as

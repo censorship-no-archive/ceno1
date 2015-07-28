@@ -66,7 +66,7 @@ public class LookupHandler extends AbstractCENOClientHandler {
 			RequestSender.requestFromBridge(urlParam);
 			if (urlULPRStatus == ULPRStatus.failed) {
 				if (clientIsHtml) {
-					return printStaticHTMLReplace("Resources/requestedFromBridge.html", "[urlRequested]", urlParam);
+					return printStaticHTMLReplace("resources/requestedFromBridge.html", "[urlRequested]", urlParam);
 				} else {
 					JSONObject jsonResponse = new JSONObject();
 					jsonResponse.put("complete", true);
@@ -75,7 +75,7 @@ public class LookupHandler extends AbstractCENOClientHandler {
 				}
 			} else {
 				if (clientIsHtml) {
-					return printStaticHTMLReplace("Resources/sentULPR.html", "[urlRequested]", urlParam);
+					return printStaticHTMLReplace("resources/sentULPR.html", "[urlRequested]", urlParam);
 				} else {
 					JSONObject jsonResponse = new JSONObject();
 					jsonResponse.put("complete", false);
