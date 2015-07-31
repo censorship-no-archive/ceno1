@@ -29,11 +29,10 @@ public class CENOL10n implements FredPluginBaseL10n {
 		String envVal = System.getenv(envVar);
 		if (envVal != null && !envVal.isEmpty()) {
 			envVal = envVal.split("-")[0];
+		} else {
+			envVal = "en";
 		}
 		LANGUAGE lang = LANGUAGE.mapToLanguage(envVal);
-		if (lang == null) {
-			lang = LANGUAGE.ENGLISH;
-		}
 		return lang;
 	}
 
