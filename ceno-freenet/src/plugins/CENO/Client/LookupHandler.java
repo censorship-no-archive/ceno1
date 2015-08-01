@@ -8,6 +8,7 @@ import plugins.CENO.CENOErrCode;
 import plugins.CENO.CENOException;
 import plugins.CENO.URLtoUSKTools;
 import plugins.CENO.Client.ULPRManager.ULPRStatus;
+import plugins.CENO.FreenetInterface.ConnectionOverview.NodeConnections;
 import freenet.client.FetchException;
 import freenet.client.FetchException.FetchExceptionMode;
 import freenet.keys.FreenetURI;
@@ -17,6 +18,9 @@ import freenet.support.IllegalBase64Exception;
 import freenet.support.Logger;
 import freenet.support.api.HTTPRequest;
 
+/**
+ * Handler for requests in the /lookup path
+ */
 public class LookupHandler extends AbstractCENOClientHandler {
 
 	public String handleHTTPGet(HTTPRequest request) throws PluginHTTPException {
@@ -62,7 +66,14 @@ public class LookupHandler extends AbstractCENOClientHandler {
 		String localFetchResult = localCacheLookup(calculatedUSK);
 
 		if (localFetchResult == null) {
+			NodeConnections nodeConnections = CENOClient.nodeInterface.getConnections();
+			if (nodeConnections.getCurrent() == 0) {
+				return returnErrorJSON(new CENOException(CENOErrCode.LCS_NODE_NOT_ENOUGH_PEERS));
+			}
 			ULPRStatus urlULPRStatus = ULPRManager.lookupULPR(urlParam);
+			if (nodeConnections.getCurrent() < 3) {
+				return returnErrorJSON(new CENOException(CENOErrCode.LCS_NODE_INITIALIZING));
+			}
 			RequestSender.requestFromBridge(urlParam);
 			if (urlULPRStatus == ULPRStatus.failed) {
 				if (clientIsHtml) {
