@@ -24,6 +24,8 @@ import freenet.support.api.HTTPRequest;
 public class LookupHandler extends AbstractCENOClientHandler {
 
 	public String handleHTTPGet(HTTPRequest request) throws PluginHTTPException {
+		// If "client" GET parameter is set to "HTML", then LCS will compose an
+		// HTML response instead of the JSON Object
 		boolean clientIsHtml = isClientHtml(request);
 
 		String urlParam = request.getParam("url", "");
@@ -38,7 +40,7 @@ public class LookupHandler extends AbstractCENOClientHandler {
 			try {
 				urlParam = Base64.decodeUTF8(urlParam);
 			} catch (IllegalBase64Exception e) {
-				return returnErrorJSON(new CENOException(CENOErrCode.LCS_HANDLER_URL_INVALID));
+				return returnErrorJSON(new CENOException(CENOErrCode.LCS_HANDLER_URL_DECODE));
 			}
 		}
 
@@ -63,7 +65,12 @@ public class LookupHandler extends AbstractCENOClientHandler {
 			}
 		}
 
-		String localFetchResult = localCacheLookup(calculatedUSK);
+		String localFetchResult = null;
+		try {
+			localFetchResult = localCacheLookup(calculatedUSK);
+		} catch (CENOException e) {
+			return returnErrorJSON(e);
+		}
 
 		if (localFetchResult == null) {
 			NodeConnections nodeConnections = CENOClient.nodeInterface.getConnections();
@@ -106,7 +113,17 @@ public class LookupHandler extends AbstractCENOClientHandler {
 		}
 	}
 
-	private String localCacheLookup(FreenetURI calculatedUSK) {
+	/**
+	 * Perform a synchronous lookup for a USK in the node's local cache.
+	 * As soon as a passive request in the distributed cache gets successfully
+	 * completed, the bundle will also be available in the local cache.
+	 * 
+	 * @param calculatedUSK the Freenet key to lookup for the bundle
+	 * @return the content of the bundle if it is found, <code>null</code>
+	 * otherwise
+	 */
+	private String localCacheLookup(FreenetURI calculatedUSK) throws CENOException {
+		// Local cache lookups do not support "-1" as the edition of a USK
 		if (calculatedUSK.getSuggestedEdition() < 0) {
 			calculatedUSK = calculatedUSK.setSuggestedEdition(0);
 		}
@@ -121,7 +138,7 @@ public class LookupHandler extends AbstractCENOClientHandler {
 				fetchResult = localCacheLookup(e.newURI);
 			} else if (e.isFatal()) {
 				Logger.warning(this, "Fatal fetch exception while looking in the local cache for USK: " + calculatedUSK + " Exception: " + e.getMessage());
-				//TODO Throw custom CENOException
+				throw new CENOException(CENOErrCode.LCS_LOOKUP_LOCAL);
 			} else {
 				Logger.error(this, "Unhandled exception while looking in the local cache for USK: " + calculatedUSK + " Exception: " + e.getMessage());
 			}
@@ -129,8 +146,8 @@ public class LookupHandler extends AbstractCENOClientHandler {
 		return fetchResult;
 	}
 
-	public String handleHTTPPost(HTTPRequest request)
-			throws PluginHTTPException {
+	public String handleHTTPPost(HTTPRequest request) throws PluginHTTPException {
+		// LCS won't handle POST requests
 		return "LookupHandler: POST request received";
 	}
 

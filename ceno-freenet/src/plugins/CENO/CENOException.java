@@ -1,16 +1,14 @@
 package plugins.CENO;
 
 /**
- * CENO Exceptions that include an errorCode
- * and the corresponding action for the methods
- * to handle them
+ * Exception subclass for issues related to the CENO Freenet plugins
  */
 public class CENOException extends Exception {
 	private final CENOErrCode errCode;
 
 	/**
 	 * Constructs a CENO exception with an error code
-	 * from the errorConditions doc file.
+	 * from the CENOErrCode list.
 	 * 
 	 * @param errCode the {@link CENOErrCode} corresponding
 	 * to this exception
@@ -20,6 +18,15 @@ public class CENOException extends Exception {
 		this.errCode = errCode;
 	}
 
+	/**
+	 * Constructs a CENO exception with a custom error message.
+	 * This message cannot be localized.
+	 * 
+	 * @param errCode the {@link CENOErrCode} corresponding
+	 * to this exception
+	 * @param message the custom error message to use
+	 * instead of the error code's default one
+	 */
 	public CENOException(CENOErrCode errCode, String message) {
 		super(message);
 		this.errCode = errCode;
