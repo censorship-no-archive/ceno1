@@ -127,6 +127,7 @@
 			</manifest>
 			<fileset dir="${build}/">
 				<exclude name="plugins/CENO/Bridge/**"/>
+				<exclude name="plugins/CENO/Backbone/**"/>
 			</fileset>
 			<zipfileset src="${json-smart.location}" />
 			<zipfileset src="${sun-mail.location}" />
@@ -139,12 +140,23 @@
 			</manifest>
 			<fileset dir="${build}/">
 				<exclude name="plugins/CENO/Client/**"/>
+				<exclude name="plugins/CENO/Backbone/**"/>
 			</fileset>
 			<zipfileset src="${jetty-all.location}" />
 			<zipfileset src="${jetty-serverlet.location}" />
 			<zipfileset src="${json-smart.location}" />
 			<zipfileset src="${sun-mail.location}" excludes="META-INF/LICENSE.txt" />
 			<zipfileset src="${apache-commonsvalidator.location}" excludes="META-INF/LICENSE.txt" />
+		</jar>
+		
+		<jar jarfile="${dist}/CENOBackbone.jar" duplicate="fail">
+			<manifest>
+				<attribute name="Plugin-Main-Class" value="plugins.CENO.Backbone.CENOBackbone"/>
+			</manifest>
+			<fileset dir="${build}/">
+				<exclude name="plugins/CENO/Client/**"/>
+				<exclude name="plugins/CENO/Bridge/**"/>
+			</fileset>
 		</jar>
 	</target>
 
@@ -170,3 +182,4 @@
 	</target>
 
 </project>
+

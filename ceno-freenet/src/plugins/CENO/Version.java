@@ -5,17 +5,20 @@ import freenet.pluginmanager.FredPluginVersioned;
 
 public class Version implements FredPluginVersioned, FredPluginRealVersioned {
 	
-	// Versions of the plugin, in human-readable and "real" format
+	// Versions of the plugins, in human-readable and "real" format
 	public static final String CLIENT_VERSION = "0.3.0-rc2";
 	public static final int CLIENT_REAL_VERSION = 6;
 	
 	public static final String BRIDGE_VERSION = "0.3.0-rc2";
 	public static final int BRIDGE_REAL_VERSION = 4;
 	
-	/** Revision number of Version.java as read from CVS */
-	public static final String cvsRevision = "v0.2.1";
+	public static final String BACKBONE_VERSION = "0.0.1";
+	public static final int BACKBONE_REAL_VERSION = 1;
 	
-	public enum PluginType { CLIENT, BRIDGE };
+	/** Revision number of Version.java as read from CVS */
+	public static final String cvsRevision = "@custom@";
+	
+	public enum PluginType { CLIENT, BRIDGE, BACKBONE };
 	
 	private PluginType pluginType;
 	
@@ -29,6 +32,8 @@ public class Version implements FredPluginVersioned, FredPluginRealVersioned {
 			return BRIDGE_REAL_VERSION;
 		case CLIENT:
 			return CLIENT_REAL_VERSION;
+		case BACKBONE:
+			return BACKBONE_REAL_VERSION;
 		}
 		return -1;
 	}
@@ -39,6 +44,8 @@ public class Version implements FredPluginVersioned, FredPluginRealVersioned {
 			return BRIDGE_VERSION;
 		case CLIENT:
 			return CLIENT_VERSION;
+		case BACKBONE:
+			return BACKBONE_VERSION;
 		}
 		return "Unknown";
 	}

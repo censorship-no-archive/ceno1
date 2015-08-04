@@ -3,4 +3,4 @@
 /build/
 /build-test/
 antSign.properties
-src/plugins/CENO/Version.java
+.ant-targets-build.xml
