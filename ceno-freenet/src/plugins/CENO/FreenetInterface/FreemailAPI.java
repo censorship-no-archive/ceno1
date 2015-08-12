@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -32,10 +31,9 @@ import javax.mail.search.FlagTerm;
 
 import org.apache.commons.compress.utils.IOUtils;
 
-import com.sun.mail.smtp.SMTPTransport;
-
 import plugins.CENO.Client.CENOClient;
-import freenet.node.NodeStarter;
+
+import com.sun.mail.smtp.SMTPTransport;
 
 public class FreemailAPI {
 	private static final String localHost = "127.0.0.1";
@@ -339,7 +337,7 @@ public class FreemailAPI {
 		}
 
 		// Copy the accprops to the directory created
-		InputStream accpropsIn = FreemailAPI.class.getResourceAsStream("Freemail/Resources/accprops");
+		InputStream accpropsIn = FreemailAPI.class.getResourceAsStream("Freemail/resources/accprops");
 		if (accpropsIn == null) {
 			return false;
 		}

@@ -18,6 +18,7 @@
 	<property name="json-smart.location" location="lib/json-smart-1.2.jar"/>
 	<property name="sun-mail.location" location="lib/mail.jar"/>
 	<property name="apache-commonsvalidator.location" location="lib/commons-validator-1.4.1.jar"/>
+	<property name="apache-commonscompress.location" location="lib/commons-compress-1.9.jar"/>
 
 
 	<available file="src/plugins/CENO/Version.java" property="version.present"/>
@@ -37,7 +38,7 @@
 	<!-- ================================================== -->
 	<target name="copyresources" description="Copies the resources to build directory">
 		<copy todir="${build}">
-			<fileset dir="src" includes="**/Resources/**" />
+			<fileset dir="src" includes="**/resources/**" />
 			<fileset dir="src" includes="**/*.properties" />
 		</copy>
 	</target>
@@ -72,6 +73,7 @@
 				<pathelement location="${json-smart.location}"/>
 				<pathelement location="${sun-mail.location}"/>
 				<pathelement location="${apache-commonsvalidator.location}" />
+				<pathelement location="${apache-commonscompress.location}" />
 			</classpath>
 			<include name="**/*.java"/>
 			<exclude name="**/*Test.java"/>
@@ -83,13 +85,15 @@
 		<!-- Create the time stamp -->
 		<tstamp/>
 
-		<javac srcdir="src/" destdir="${build-gcj}" compiler="gcj" source="${source-version}">
+		<javac srcdir="src/" destdir="${build-gcj}" compiler="gcj" debug="on" optimize="on" source="${source-version}">
 			<classpath>
 				<pathelement location="${freenet-cvs-snapshot.location}"/>
 				<pathelement location="${sun-mail.location}"/>
 			</classpath>
 			<include name="**/*.java"/>
 			<exclude name="**/*Test.java"/>
+			<exclude name="plugins/CENO/Client/**"/>
+			<exclude name="plugins/CENO/Bridge/**"/>
 		</javac>
 	</target>
 
@@ -147,7 +151,8 @@
 			</fileset>
 			<zipfileset src="${json-smart.location}" />
 			<zipfileset src="${sun-mail.location}" />
-			<zipfileset src="${apache-commonsvalidator.location}" excludes="META-INF/LICENSE.txt" />
+			<zipfileset src="${apache-commonsvalidator.location}" excludes="META-INF/" />
+			<zipfileset src="${apache-commonscompress.location}" excludes="META-INF/" />
 		</jar>
 
 		<jar jarfile="${dist}/CENOBridge.jar" duplicate="fail">
@@ -161,8 +166,9 @@
 			<zipfileset src="${jetty-all.location}" />
 			<zipfileset src="${jetty-serverlet.location}" />
 			<zipfileset src="${json-smart.location}" />
-			<zipfileset src="${sun-mail.location}" excludes="META-INF/LICENSE.txt" />
-			<zipfileset src="${apache-commonsvalidator.location}" excludes="META-INF/LICENSE.txt" />
+			<zipfileset src="${sun-mail.location}" excludes="META-INF/" />
+			<zipfileset src="${apache-commonsvalidator.location}" excludes="META-INF/" />
+			<zipfileset src="${apache-commonscompress.location}" excludes="META-INF/" />
 		</jar>
 		
 		<jar jarfile="${dist}/CENOBackbone.jar" duplicate="fail">
@@ -173,6 +179,8 @@
 				<exclude name="plugins/CENO/Client/**"/>
 				<exclude name="plugins/CENO/Bridge/**"/>
 			</fileset>
+			<zipfileset src="${apache-commonscompress.location}" />
+			<zipfileset src="${sun-mail.location}" excludes="META-INF/LICENSE.txt" />
 		</jar>
 	</target>
 	

@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import plugins.CENO.Version;
-import plugins.CENO.Client.CENOClient;
 import plugins.CENO.FreenetInterface.NodeInterface;
 import freenet.clients.http.ConnectionsToadlet.PeerAdditionReturnCodes;
 import freenet.io.comm.PeerParseException;
@@ -54,8 +53,8 @@ public class CENOBackbone implements FredPlugin, FredPluginVersioned, FredPlugin
 	public static final String bridgeIdentityRequestURI = "USK@QfqLw7-BJpGGMnhnJQ3~KkCiciMAsoihBCtSqy6nNbY,-lG83h70XIJ03r4ckdNnsY4zIQ-J8qTqwzSBeIG5q3s,AQACAAE/WebOfTrust/0";
 	public static final String bridgeFreemail = "DEFLECTBridge@ih5ixq57yetjdbrspbtskdp6fjake4rdacziriiefnjkwlvhgw3a.freemail";
 
-	public static final String backboneIdentityInsertURI = "";
-	public static final String backboneFreemail = "";
+	public static final String backboneIdentityInsertURI = "USK@bTrietMqMIxKKS6UwNJKe9KKFCCepEG0InzWbZiTHNA,-Hlg6R1FAN4rzVpwKPsKKqR52Jww9ZVlPCnMRGTKFZM,AQECAAE/WebOfTrust/0";
+	public static final String backboneFreemail = "deflectbackbone@7p5qpbqh3pauuzgyqa643lumn5sl3jcfmvkvdk3wp3vlwpv4ohoa.freemail";
 	
 	public static Node node;
 	private NodeRefHelper nodeRefHelper;
@@ -73,7 +72,7 @@ public class CENOBackbone implements FredPlugin, FredPluginVersioned, FredPlugin
 			terminate();
 		}
 		nodeInterface = new NodeInterface(pr.getNode(), pr);
-		nodeInterface.sendFreemail(CENOClient.clientFreemail, new String[]{bridgeFreemail}, "addFriend", nodeRefHelper.getNodeRef(), "CENO");
+		nodeInterface.sendFreemail(CENOBackbone.backboneFreemail, new String[]{bridgeFreemail}, "addFriend", nodeRefHelper.getNodeRef(), "CENO");
 	}
 	
 	private PeerAdditionReturnCodes addFriendBridge() {
@@ -86,12 +85,8 @@ public class CENOBackbone implements FredPlugin, FredPluginVersioned, FredPlugin
 		}
 		PeerNode pn;
 		try {
-			if(node.isOpennetEnabled()) {
-				pn = node.createNewOpennetNode(bridgeNodeFS);
-			} else {
-				pn = node.createNewDarknetNode(bridgeNodeFS, FRIEND_TRUST.HIGH, FRIEND_VISIBILITY.NO);
-				((DarknetPeerNode)pn).setPrivateDarknetCommentNote("Bridge");
-			}
+			pn = node.createNewDarknetNode(bridgeNodeFS, FRIEND_TRUST.HIGH, FRIEND_VISIBILITY.NO);
+			((DarknetPeerNode)pn).setPrivateDarknetCommentNote("Master Bridge");
 		} catch (FSParseException e1) {
 			return PeerAdditionReturnCodes.CANT_PARSE;
 		} catch (PeerParseException e1) {

@@ -52,6 +52,7 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 		pluginRespirator = pr;
 		client = new HighLevelSimpleClientInterface(pluginRespirator.getNode(), pluginRespirator.getHLSimpleClient());
 		nodeInterface = new NodeInterface(pluginRespirator.getNode(), pluginRespirator);
+		nodeInterface.initFetchContexts();
 		new CENOL10n("CENOLANG");
 
 		// Read properties of the configuration file

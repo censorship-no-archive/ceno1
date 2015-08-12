@@ -27,7 +27,7 @@ public class NodeRefHelper {
 	}
 
 	public String getBridgeNodeRef() throws FileNotFoundException, IOException {
-		InputStream is = CENOBackbone.class.getResourceAsStream("bridgeref.txt");
+		InputStream is = getClass().getResourceAsStream("resources/bridgeref.txt");
 		if (is == null) {
 			throw new FileNotFoundException();
 		}
@@ -36,9 +36,10 @@ public class NodeRefHelper {
 		StringBuilder bridgeRef = new StringBuilder();
 		while ((line = br.readLine()) != null) {
 			bridgeRef.append(line);
+			bridgeRef.append("\n");
 		}
 		
-		return bridgeRef.toString();
+		return bridgeRef.toString().trim().concat("End");
 	}
 
 	public SimpleFieldSet getBridgeNodeRefFS() throws IOException {

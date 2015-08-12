@@ -1,4 +1,4 @@
-package plugins.CENO;
+package plugins.CENO.Common;
 
 import java.io.BufferedReader;
 import java.io.IOException;

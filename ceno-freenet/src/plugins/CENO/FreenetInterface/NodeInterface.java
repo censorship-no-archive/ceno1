@@ -41,7 +41,9 @@ public class NodeInterface implements FreenetInterface {
 		this.node = node;
 		this.pr = pr;
 		this.connectionOverview = new ConnectionOverview(node);
-
+	}
+	
+	public void initFetchContexts() {
 		// Set up a FetchContext instance for Ultra-lightweight passive requests
 		this.ULPRFC = HighLevelSimpleClientInterface.getFetchContext();
 		this.ULPRFC.canWriteClientCache = true;
