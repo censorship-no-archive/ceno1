@@ -2,6 +2,7 @@ package plugins.CENO.Backbone;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 import plugins.CENO.Version;
 import plugins.CENO.FreenetInterface.NodeInterface;
@@ -19,7 +20,6 @@ import freenet.pluginmanager.FredPluginRealVersioned;
 import freenet.pluginmanager.FredPluginThreadless;
 import freenet.pluginmanager.FredPluginVersioned;
 import freenet.pluginmanager.PluginRespirator;
-import freenet.support.Fields;
 import freenet.support.Logger;
 import freenet.support.SimpleFieldSet;
 
@@ -45,6 +45,8 @@ import freenet.support.SimpleFieldSet;
  * This plugin has a strong dependency on the WebOfTrust
  * and Freemail official Freenet plugins.
  *
+ * The plugin is built in such a way that it will stay loaded
+ * only 
  */
 public class CENOBackbone implements FredPlugin, FredPluginVersioned, FredPluginRealVersioned, FredPluginThreadless {
 
@@ -55,26 +57,41 @@ public class CENOBackbone implements FredPlugin, FredPluginVersioned, FredPlugin
 
 	public static final String backboneIdentityInsertURI = "USK@bTrietMqMIxKKS6UwNJKe9KKFCCepEG0InzWbZiTHNA,-Hlg6R1FAN4rzVpwKPsKKqR52Jww9ZVlPCnMRGTKFZM,AQECAAE/WebOfTrust/0";
 	public static final String backboneFreemail = "deflectbackbone@7p5qpbqh3pauuzgyqa643lumn5sl3jcfmvkvdk3wp3vlwpv4ohoa.freemail";
-	
+
 	public static Node node;
 	private NodeRefHelper nodeRefHelper;
 	public static NodeInterface nodeInterface;
-	
+
 	@Override
 	public void runPlugin(PluginRespirator pr) {
 		node = pr.getNode();
 		nodeRefHelper = new NodeRefHelper(node);
+
+		// Add the bridge node reference in the resources as a friend
 		PeerAdditionReturnCodes addBridgeResult = addFriendBridge();
 		if (addBridgeResult == PeerAdditionReturnCodes.ALREADY_IN_REFERENCE || addBridgeResult == PeerAdditionReturnCodes.OK) {
 			Logger.normal(this, "Successfully added the node in bridgeref.txt resource file as friend.");
 		} else {
+			// Bridge node could not be added as a friend, the plugin will terminate and unload
 			Logger.error(this, "Error while adding Bridge node as a friend, will terminate Backbone plugin...");
 			terminate();
 		}
+
 		nodeInterface = new NodeInterface(pr.getNode(), pr);
-		nodeInterface.sendFreemail(CENOBackbone.backboneFreemail, new String[]{bridgeFreemail}, "addFriend", nodeRefHelper.getNodeRef(), "CENO");
+		// Send a Freemail to the bridge node with the own node reference
+		if (!nodeInterface.sendFreemail(CENOBackbone.backboneFreemail, new String[]{bridgeFreemail}, "addFriend", nodeRefHelper.getNodeRef(), "CENO")) {
+			Logger.error(this, "Failed to send an email with the own node reference to the bridge. The plugin will terminate and unload");
+		}
 	}
-	
+
+	/**
+	 * Adds the node reference in the resources
+	 * as a friend to the node this plugin is loaded.
+	 * 
+	 * @return the corresponding PeerAdditionReturnCode
+	 * indicating whether the bridge was added successfully
+	 * as a friend
+	 */
 	private PeerAdditionReturnCodes addFriendBridge() {
 		SimpleFieldSet bridgeNodeFS;
 		try {
@@ -94,14 +111,14 @@ public class CENOBackbone implements FredPlugin, FredPluginVersioned, FredPlugin
 		} catch (ReferenceSignatureVerificationException e1){
 			return PeerAdditionReturnCodes.INVALID_SIGNATURE;
 		} catch (Throwable t) {
-            Logger.error(this, "Internal error adding reference :" + t.getMessage(), t);
+			Logger.error(this, "Internal error adding reference :" + t.getMessage(), t);
 			return PeerAdditionReturnCodes.INTERNAL_ERROR;
 		}
 		if(Arrays.equals(pn.getPubKeyHash(), node.getDarknetPubKeyHash())) {
 			Logger.warning(this, "The bridge  node reference file belongs to this node.");
 			return PeerAdditionReturnCodes.TRY_TO_ADD_SELF;
 		}
-		if(!this.node.addPeerConnection(pn)) {
+		if(!node.addPeerConnection(pn)) {
 			return PeerAdditionReturnCodes.ALREADY_IN_REFERENCE;
 		}
 		return PeerAdditionReturnCodes.OK;
