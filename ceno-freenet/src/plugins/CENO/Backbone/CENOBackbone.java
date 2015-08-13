@@ -2,6 +2,9 @@ package plugins.CENO.Backbone;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import plugins.CENO.Version;
@@ -44,9 +47,6 @@ import freenet.support.SimpleFieldSet;
  * a backbone router is to use the CENOBackboneBox.
  * This plugin has a strong dependency on the WebOfTrust
  * and Freemail official Freenet plugins.
- *
- * The plugin is built in such a way that it will stay loaded
- * only 
  */
 public class CENOBackbone implements FredPlugin, FredPluginVersioned, FredPluginRealVersioned, FredPluginThreadless {
 
@@ -59,8 +59,12 @@ public class CENOBackbone implements FredPlugin, FredPluginVersioned, FredPlugin
 	public static final String backboneFreemail = "deflectbackbone@7p5qpbqh3pauuzgyqa643lumn5sl3jcfmvkvdk3wp3vlwpv4ohoa.freemail";
 
 	public static Node node;
-	private NodeRefHelper nodeRefHelper;
 	public static NodeInterface nodeInterface;
+
+	private NodeRefHelper nodeRefHelper;
+
+	ScheduledExecutorService scheduledExecutorService;
+	ScheduledFuture<?> scheduleSend;
 
 	@Override
 	public void runPlugin(PluginRespirator pr) {
@@ -79,9 +83,8 @@ public class CENOBackbone implements FredPlugin, FredPluginVersioned, FredPlugin
 
 		nodeInterface = new NodeInterface(pr.getNode(), pr);
 		// Send a Freemail to the bridge node with the own node reference
-		if (!nodeInterface.sendFreemail(CENOBackbone.backboneFreemail, new String[]{bridgeFreemail}, "addFriend", nodeRefHelper.getNodeRef(), "CENO")) {
-			Logger.error(this, "Failed to send an email with the own node reference to the bridge. The plugin will terminate and unload");
-		}
+		scheduledExecutorService = Executors.newScheduledThreadPool(1);
+		scheduleSend = scheduledExecutorService.scheduleWithFixedDelay(new RefSender(), 3, 2, TimeUnit.MINUTES);
 	}
 
 	/**
@@ -134,7 +137,23 @@ public class CENOBackbone implements FredPlugin, FredPluginVersioned, FredPlugin
 
 	@Override
 	public void terminate() {
-		// TODO Auto-generated method stub
+		if (scheduledExecutorService != null) {
+			scheduledExecutorService.shutdownNow();
+		}
+	}
+
+	private class RefSender implements Runnable {
+
+		@Override
+		public void run() {
+			if (nodeInterface.sendFreemail(CENOBackbone.backboneFreemail, new String[]{bridgeFreemail}, "addFriend", nodeRefHelper.getNodeRef(), "CENO")) {
+				scheduleSend.isDone();
+				scheduledExecutorService.shutdown();
+				Logger.normal(this, "Sent Freemail to the bridge with own node reference");
+			} else {
+				Logger.error(this, "Failed to send an email with the own node reference to the bridge");
+			}
+		}
 
 	}
 
