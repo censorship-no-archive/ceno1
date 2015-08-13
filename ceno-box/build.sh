@@ -52,7 +52,8 @@ if [ ! -d "$FREENET_DIR" ]; then
   read -e FREENET_DIR
 fi
 
-FREENET_DIR=${$FREENET_DIR%/}
+# Make sure the path is not ending with a slash (/)
+FREENET_DIR=${FREENET_DIR%/}
 
 # Make a directory to keep CENObox files
 mkdir CENOBox
@@ -92,7 +93,7 @@ wrapper_Darwin.zip.sha1,\
 wrapper_Linux.zip,\
 wrapper_Linux.zip.sha1\
 } $1
-  cp $FREENET_DIR/README $1/README.FREENET
+  cp $FREENET_DIR/README $1/README.Freenet
 }
 
 echo "Copying necessary files from the existing Freenet installation"
