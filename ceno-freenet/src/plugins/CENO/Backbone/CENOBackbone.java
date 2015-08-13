@@ -39,7 +39,7 @@ import freenet.support.SimpleFieldSet;
  * so that the bridge can add it back as a friend.
  * Trust is set to HIGH and other friends of the Backbone
  * node won't be able to see either the name or the node
- * refernece of the Bridge node.
+ * reference of the Bridge node.
  * 
  * It is recommended that the Backbone nodes stay connected
  * for as long as possible and are given a high
@@ -55,8 +55,8 @@ public class CENOBackbone implements FredPlugin, FredPluginVersioned, FredPlugin
 	public static final String bridgeIdentityRequestURI = "USK@QfqLw7-BJpGGMnhnJQ3~KkCiciMAsoihBCtSqy6nNbY,-lG83h70XIJ03r4ckdNnsY4zIQ-J8qTqwzSBeIG5q3s,AQACAAE/WebOfTrust/0";
 	public static final String bridgeFreemail = "DEFLECTBridge@ih5ixq57yetjdbrspbtskdp6fjake4rdacziriiefnjkwlvhgw3a.freemail";
 
-	public static final String backboneIdentityInsertURI = "USK@bTrietMqMIxKKS6UwNJKe9KKFCCepEG0InzWbZiTHNA,-Hlg6R1FAN4rzVpwKPsKKqR52Jww9ZVlPCnMRGTKFZM,AQECAAE/WebOfTrust/0";
-	public static final String backboneFreemail = "deflectbackbone@7p5qpbqh3pauuzgyqa643lumn5sl3jcfmvkvdk3wp3vlwpv4ohoa.freemail";
+	public static final String backboneIdentityInsertURI = "";
+	public static final String backboneFreemail = "deflectbackbone@gpksc2qu27zvrp3md3g7fomwyghewkfbb56plifb5qgszwilgjua.freemail";
 
 	public static Node node;
 	public static NodeInterface nodeInterface;
@@ -82,9 +82,21 @@ public class CENOBackbone implements FredPlugin, FredPluginVersioned, FredPlugin
 		}
 
 		nodeInterface = new NodeInterface(pr.getNode(), pr);
-		// Send a Freemail to the bridge node with the own node reference
+
+		/* Set a random next message number in order to avoid dropping freemails at the bridge,
+		 * because of their message number being processed before. This is obligatory since
+		 * we are using the same Freemail address with multiple backbone nodes, for reaching
+		 * the bridge.
+		 */
+		nodeInterface.setRandomNextMsgNumber(backboneFreemail, bridgeFreemail);
+
+		/* Schedule a thread in order to Send a Freemail to the bridge node with the own node reference.
+		 * First attempt will be in a minute from plugin initialization, and if it fails, there will be
+		 * other attempts every 2 minutes till the Freemail is sent. For every failed attempt, we keep
+		 * an error-level entry in the log.
+		 */
 		scheduledExecutorService = Executors.newScheduledThreadPool(1);
-		scheduleSend = scheduledExecutorService.scheduleWithFixedDelay(new RefSender(), 3, 2, TimeUnit.MINUTES);
+		scheduleSend = scheduledExecutorService.scheduleWithFixedDelay(new RefSender(), 2, 1, TimeUnit.MINUTES);
 	}
 
 	/**
@@ -142,6 +154,7 @@ public class CENOBackbone implements FredPlugin, FredPluginVersioned, FredPlugin
 		}
 	}
 
+
 	private class RefSender implements Runnable {
 
 		@Override
@@ -149,9 +162,9 @@ public class CENOBackbone implements FredPlugin, FredPluginVersioned, FredPlugin
 			if (nodeInterface.sendFreemail(CENOBackbone.backboneFreemail, new String[]{bridgeFreemail}, "addFriend", nodeRefHelper.getNodeRef(), "CENO")) {
 				scheduleSend.isDone();
 				scheduledExecutorService.shutdown();
-				Logger.normal(this, "Sent Freemail to the bridge with own node reference");
+				Logger.normal(RefSender.class, "Sent Freemail to the bridge with own node reference");
 			} else {
-				Logger.error(this, "Failed to send an email with the own node reference to the bridge");
+				Logger.error(RefSender.class, "Failed to send an email with the own node reference to the bridge");
 			}
 		}
 
