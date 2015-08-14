@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import plugins.CENO.URLtoUSKTools;
+import plugins.CENO.Common.URLtoUSKTools;
 import freenet.client.InsertException;
 import freenet.support.Logger;
 

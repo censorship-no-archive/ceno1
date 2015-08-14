@@ -12,7 +12,7 @@ public class Version implements FredPluginVersioned, FredPluginRealVersioned {
 	public static final String BRIDGE_VERSION = "0.3.0-rc2";
 	public static final int BRIDGE_REAL_VERSION = 4;
 	
-	public static final String BACKBONE_VERSION = "0.0.1";
+	public static final String BACKBONE_VERSION = "0.1.0";
 	public static final int BACKBONE_REAL_VERSION = 1;
 	
 	/** Revision number of Version.java as read from CVS */

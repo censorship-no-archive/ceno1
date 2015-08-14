@@ -2,5 +2,6 @@
 /dist/
 /build/
 /build-test/
+/build-gcj/
 antSign.properties
 .ant-targets-build.xml

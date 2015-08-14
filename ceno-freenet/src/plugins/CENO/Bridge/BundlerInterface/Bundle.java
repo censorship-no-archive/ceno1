@@ -10,8 +10,8 @@ import freenet.support.Base64;
 import net.minidev.json.JSONObject;
 import net.minidev.json.JSONValue;
 import net.minidev.json.parser.ParseException;
-import plugins.CENO.URLtoUSKTools;
 import plugins.CENO.Bridge.CENOBridge;
+import plugins.CENO.Common.URLtoUSKTools;
 
 public class Bundle {
 	private String uri;

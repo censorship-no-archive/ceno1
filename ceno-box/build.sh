@@ -25,13 +25,23 @@ do
   esac
 done
 
+CENOBOXPATH="$(pwd)"
+
 # Clean files and directories from previous builds
 if [ -d CENOBox ]; then
   rm -r CENOBox
 fi
 
-if [ -a CENOBox.tar.gz ]; then
-  rm CENOBox.tar.gz
+if [ -a CENOBox.zip ]; then
+  rm CENOBox.zip
+fi
+
+if [ -d CENOBackbone ]; then
+  rm -r CENOBackbone
+fi
+
+if [ -a CENOBackbone.zip ]; then
+  rm -r CENOBackbone.zip
 fi
 
 # Locate a Freenet installation directory
@@ -42,8 +52,12 @@ if [ ! -d "$FREENET_DIR" ]; then
   read -e FREENET_DIR
 fi
 
+# Make sure the path is not ending with a slash (/)
+FREENET_DIR=${FREENET_DIR%/}
+
 # Make a directory to keep CENObox files
 mkdir CENOBox
+mkdir CENOBackbone
 
 # Build CENO Client
 echo "Building CENO client with latest updates"
@@ -53,11 +67,11 @@ if [ -a client ]; then
 fi
 export GOPATH=$HOME/go
 sh ./build.sh
-cd ..
+cd $CENOBOXPATH
 
-# Copy necessary files from the Freenet installation
-echo "Copying necessary files from the existing Freenet installation"
-cp -r $FREENET_DIR/{\
+function copyFreenetFilesTo {
+  # Copy necessary files from the Freenet installation
+  cp -r $FREENET_DIR/{\
 bin,\
 lib,\
 Uninstaller,\
@@ -78,10 +92,15 @@ wrapper_Darwin.zip,\
 wrapper_Darwin.zip.sha1,\
 wrapper_Linux.zip,\
 wrapper_Linux.zip.sha1\
-}  CENOBox
-cp $FREENET_DIR/README CENOBox/README.FREENET
+} $1
+  cp $FREENET_DIR/README $1/README.Freenet
+}
 
-echo "Copying extra CENO specific directories"
+echo "Copying necessary files from the existing Freenet installation"
+copyFreenetFilesTo CENOBox
+copyFreenetFilesTo CENOBackbone
+
+echo "Copying extra CENO client specific directories"
 cp -rL ceno-{chrome,firefox} CENOBox
 cp -r ceno-{freenet,extra}/* CENOBox
 mkdir CENOBox/ceno-client
@@ -89,30 +108,37 @@ cp -r ceno-client/{client,views,config} CENOBox/ceno-client
 mkdir CENOBox/ceno-client/translations
 cp ceno-client/translations/**.all.json CENOBox/ceno-client/translations
 
+cp -r ceno-backbone/* CENOBackbone
+
 if [[ $PLUGINS == 1 ]]; then
-  # Build CENO client Freenet plugin
-  echo "Building CENO client Freenet plugin"
+  # Build CENO client and Backbone Freenet plugins
+  echo "Building CENO client and Backbone Freenet plugins"
   cd ../ceno-freenet
   ant dist > /dev/null
-  cp dist/CENO.jar ../ceno-box/ceno-debug/
-  cd ../ceno-box
+  cp dist/CENO.jar $CENOBOXPATH/ceno-debug/
+  cp dist/CENOBackbone.jar $CENOBOXPATH/ceno-debug/
+  cd $CENOBOXPATH
 
   echo "Building WebOfTrust plugin"
   cd ceno-debug/plugin-WebOfTrust
-  #ant dist > /dev/null
-  cp dist/WebOfTrust.jar "$(cd .. && pwd)"
-  cd ../
+  ant dist > /dev/null
+  cp dist/WebOfTrust.jar $CENOBOXPATH/ceno-debug
+  cd $CENOBOXPATH
 
   echo "Building Freemail plugin"
-  cd plugin-Freemail
+  cd ceno-debug/plugin-Freemail
   ant dist > /dev/null
-  cp dist/Freemail.jar "$(cd .. && pwd)"
-  cd ../../
+  cp dist/Freemail.jar $CENOBOXPATH/ceno-debug
+  cd $CENOBOXPATH
 
-  cp -r ceno-debug/* CENOBox/
+  cp -r ceno-debug/{CENO.jar,WebOfTrust.jar,Freemail.jar} CENOBox/
+  cp ceno-debug/freenet-client.ini CENOBox/freenet.ini
+  cp -r ceno-debug/{CENOBackbone.jar,WebOfTrust.jar,Freemail.jar} CENOBackbone/
+  cp ceno-debug/freenet-backbone.ini CENOBackbone/freenet.ini
 fi
 
-echo "Creating the distribution zip"
+echo "Creating the distribution zips"
 zip -rq CENOBox.zip CENOBox/
+zip -rq CENOBackbone.zip CENOBackbone/
 
-echo "Successfully built CENOBox.zip distribution bundle."
+echo "Successfully built CENOBox.zip and CENOBackbone.zip distribution bundles."

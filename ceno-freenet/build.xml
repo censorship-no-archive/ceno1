@@ -7,6 +7,7 @@
 
 	<property name="build" location="build/"/>
 	<property name="build-test" location="build-test/"/>
+	<property name="build-gcj" location="build-gcj/"/>
 	<property name="dist" location="dist/"/>
 
 	<property name="freenet-cvs-snapshot.location" location="../fred/dist/freenet.jar"/>
@@ -17,6 +18,7 @@
 	<property name="json-smart.location" location="lib/json-smart-1.2.jar"/>
 	<property name="sun-mail.location" location="lib/mail.jar"/>
 	<property name="apache-commonsvalidator.location" location="lib/commons-validator-1.4.1.jar"/>
+	<property name="apache-commonscompress.location" location="lib/commons-compress-1.9.jar"/>
 
 
 	<available file="src/plugins/CENO/Version.java" property="version.present"/>
@@ -27,6 +29,7 @@
 	<target name="mkdir" description="Create the build directory structure used by compile">
 		<mkdir dir="${build}"/>
 		<mkdir dir="${build-test}"/>
+		<mkdir dir="${build-gcj}"/>
 		<mkdir dir="${dist}"/>
 		<echo message="Using ${freenet-cvs-snapshot.location} as freenet-cvs-snapshot.jar"/>
 	</target>
@@ -35,7 +38,7 @@
 	<!-- ================================================== -->
 	<target name="copyresources" description="Copies the resources to build directory">
 		<copy todir="${build}">
-			<fileset dir="src" includes="**/Resources/**" />
+			<fileset dir="src" includes="**/resources/**" />
 			<fileset dir="src" includes="**/*.properties" />
 		</copy>
 	</target>
@@ -65,15 +68,32 @@
 		<javac srcdir="src/" destdir="${build}" debug="on" optimize="on" source="${source-version}">
 			<classpath>
 				<pathelement location="${freenet-cvs-snapshot.location}"/>
-				<pathelement location="${freenet-ext.location}"/>
 				<pathelement location="${jetty-all.location}"/>
 				<pathelement location="${jetty-serverlet.location}"/>
 				<pathelement location="${json-smart.location}"/>
 				<pathelement location="${sun-mail.location}"/>
 				<pathelement location="${apache-commonsvalidator.location}" />
+				<pathelement location="${apache-commonscompress.location}" />
 			</classpath>
 			<include name="**/*.java"/>
 			<exclude name="**/*Test.java"/>
+		</javac>
+	</target>
+
+	<!-- ================================================== -->
+	<target name="compile-gcj" depends="mkdir,setver" >
+		<!-- Create the time stamp -->
+		<tstamp/>
+
+		<javac srcdir="src/" destdir="${build-gcj}" compiler="gcj" debug="on" optimize="on" source="${source-version}">
+			<classpath>
+				<pathelement location="${freenet-cvs-snapshot.location}"/>
+				<pathelement location="${sun-mail.location}"/>
+			</classpath>
+			<include name="**/*.java"/>
+			<exclude name="**/*Test.java"/>
+			<exclude name="plugins/CENO/Client/**"/>
+			<exclude name="plugins/CENO/Bridge/**"/>
 		</javac>
 	</target>
 
@@ -131,7 +151,8 @@
 			</fileset>
 			<zipfileset src="${json-smart.location}" />
 			<zipfileset src="${sun-mail.location}" />
-			<zipfileset src="${apache-commonsvalidator.location}" excludes="META-INF/LICENSE.txt" />
+			<zipfileset src="${apache-commonsvalidator.location}" excludes="META-INF/" />
+			<zipfileset src="${apache-commonscompress.location}" excludes="META-INF/" />
 		</jar>
 
 		<jar jarfile="${dist}/CENOBridge.jar" duplicate="fail">
@@ -145,8 +166,9 @@
 			<zipfileset src="${jetty-all.location}" />
 			<zipfileset src="${jetty-serverlet.location}" />
 			<zipfileset src="${json-smart.location}" />
-			<zipfileset src="${sun-mail.location}" excludes="META-INF/LICENSE.txt" />
-			<zipfileset src="${apache-commonsvalidator.location}" excludes="META-INF/LICENSE.txt" />
+			<zipfileset src="${sun-mail.location}" excludes="META-INF/" />
+			<zipfileset src="${apache-commonsvalidator.location}" excludes="META-INF/" />
+			<zipfileset src="${apache-commonscompress.location}" excludes="META-INF/" />
 		</jar>
 		
 		<jar jarfile="${dist}/CENOBackbone.jar" duplicate="fail">
@@ -157,8 +179,26 @@
 				<exclude name="plugins/CENO/Client/**"/>
 				<exclude name="plugins/CENO/Bridge/**"/>
 			</fileset>
+			<zipfileset src="${apache-commonscompress.location}" />
+			<zipfileset src="${sun-mail.location}" excludes="META-INF/LICENSE.txt" />
 		</jar>
 	</target>
+	
+	<!-- ================================================== -->
+	<target name="dist-gcj" depends="clean,compile-gcj,copyresources,junit"
+		description="generate the distribution" >
+
+		<jar jarfile="${dist}/CENOBackboneGCJ" duplicate="fail">
+			<manifest>
+				<attribute name="Plugin-Main-Class" value="plugins.CENO.Backbone.CENOBackbone"/>
+			</manifest>
+			<fileset dir="${build-gcj}/">
+				<exclude name="plugins/CENO/Client/**"/>
+				<exclude name="plugins/CENO/Bridge/**"/>
+			</fileset>
+		</jar>
+	</target>
+
 
 
 	<!-- ================================================== -->

@@ -2,7 +2,7 @@ package plugins.CENO.Client;
 
 import java.util.Hashtable;
 
-import plugins.CENO.URLtoUSKTools;
+import plugins.CENO.Common.URLtoUSKTools;
 import freenet.client.FetchException;
 import freenet.client.FetchException.FetchExceptionMode;
 import freenet.client.FetchResult;

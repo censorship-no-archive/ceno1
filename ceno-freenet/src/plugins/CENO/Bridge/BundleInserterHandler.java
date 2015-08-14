@@ -14,9 +14,9 @@ import org.eclipse.jetty.continuation.Continuation;
 import org.eclipse.jetty.continuation.ContinuationSupport;
 import org.eclipse.jetty.server.Request;
 
-import plugins.CENO.CENOJettyHandler;
 import plugins.CENO.Bridge.BundleInserter.InsertCallback;
 import plugins.CENO.Bridge.BundlerInterface.Bundle;
+import plugins.CENO.Common.CENOJettyHandler;
 import freenet.client.InsertException;
 import freenet.client.async.BaseClientPutter;
 

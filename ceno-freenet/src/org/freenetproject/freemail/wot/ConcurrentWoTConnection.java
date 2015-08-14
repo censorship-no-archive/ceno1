@@ -33,43 +33,36 @@ public class ConcurrentWoTConnection implements WoTConnection {
 		this.pluginRespirator = pluginRespirator;
 	}
 
-	@Override
 	public List<OwnIdentity> getAllOwnIdentities() throws PluginNotFoundException {
 		WoTConnectionImpl wotConnection = new WoTConnectionImpl(pluginRespirator);
 		return wotConnection.getAllOwnIdentities();
 	}
 
-	@Override
 	public Set<Identity> getAllTrustedIdentities(String trusterId) throws PluginNotFoundException {
 		WoTConnectionImpl wotConnection = new WoTConnectionImpl(pluginRespirator);
 		return wotConnection.getAllTrustedIdentities(trusterId);
 	}
 
-	@Override
 	public Set<Identity> getAllUntrustedIdentities(String trusterId) throws PluginNotFoundException {
 		WoTConnectionImpl wotConnection = new WoTConnectionImpl(pluginRespirator);
 		return wotConnection.getAllUntrustedIdentities(trusterId);
 	}
 
-	@Override
 	public Identity getIdentity(String identity, String truster) throws PluginNotFoundException {
 		WoTConnectionImpl wotConnection = new WoTConnectionImpl(pluginRespirator);
 		return wotConnection.getIdentity(identity, truster);
 	}
 
-	@Override
 	public boolean setProperty(String identity, String key, String value) throws PluginNotFoundException {
 		WoTConnectionImpl wotConnection = new WoTConnectionImpl(pluginRespirator);
 		return wotConnection.setProperty(identity, key, value);
 	}
 
-	@Override
 	public String getProperty(String identity, String key) throws PluginNotFoundException {
 		WoTConnectionImpl wotConnection = new WoTConnectionImpl(pluginRespirator);
 		return wotConnection.getProperty(identity, key);
 	}
 
-	@Override
 	public boolean setContext(String identity, String context) throws PluginNotFoundException {
 		WoTConnectionImpl wotConnection = new WoTConnectionImpl(pluginRespirator);
 		return wotConnection.setContext(identity, context);
