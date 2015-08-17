@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
+import javax.mail.Message;
+
 import org.freenetproject.freemail.wot.ConcurrentWoTConnection;
 
 import plugins.CENO.FreenetInterface.ConnectionOverview.NodeConnections;
@@ -42,7 +44,7 @@ public class NodeInterface implements FreenetInterface {
 		this.pr = pr;
 		this.connectionOverview = new ConnectionOverview(node);
 	}
-	
+
 	public void initFetchContexts() {
 		// Set up a FetchContext instance for Ultra-lightweight passive requests
 		this.ULPRFC = HighLevelSimpleClientInterface.getFetchContext();
@@ -65,14 +67,17 @@ public class NodeInterface implements FreenetInterface {
 		wotConnection = new ConcurrentWoTConnection(pr);
 	}
 
+	@Override
 	public FetchResult fetchURI(FreenetURI uri) throws FetchException {
 		return HighLevelSimpleClientInterface.fetchURI(uri);
 	}
 
+	@Override
 	public ClientGetter localFetchURI(FreenetURI uri, ClientGetCallback callback) throws FetchException {
 		return HighLevelSimpleClientInterface.fetchURI(uri, Long.MAX_VALUE, callback, localFC);
 	}
 
+	@Override
 	public ClientGetter fetchULPR(FreenetURI uri, ClientGetCallback callback) throws FetchException {
 		return HighLevelSimpleClientInterface.fetchURI(uri, Long.MAX_VALUE, callback, ULPRFC);
 	}
@@ -82,21 +87,25 @@ public class NodeInterface implements FreenetInterface {
 	 * 
 	 * @return FreenetURI array where first element is the insertURI and second element is the requestURI
 	 */
+	@Override
 	public FreenetURI[] generateKeyPair() {
 		InsertableClientSSK key = InsertableClientSSK.createRandom(node.random, "");
 		FreenetURI insertURI = key.getInsertURI();
 		FreenetURI requestURI = key.getURI();
 		return new FreenetURI[]{insertURI, requestURI};
 	}
-	
+
+	@Override
 	public RequestClient getRequestClient() {
 		return HighLevelSimpleClientInterface.getRequestClient();
 	}
 
+	@Override
 	public Bucket makeBucket(int length) throws IOException {
 		return node.clientCore.persistentTempBucketFactory.makeBucket(length);
 	}
 
+	@Override
 	public FreenetURI insertBundleManifest(FreenetURI insertURI, String content, String defaultName, ClientPutCallback insertCb) throws IOException, InsertException {
 		String defName;
 		if (defaultName == null || defaultName.isEmpty()) {
@@ -115,6 +124,7 @@ public class NodeInterface implements FreenetInterface {
 		return requestURI;
 	}
 
+	@Override
 	public boolean insertFreesite(FreenetURI insertURI, String docName, String content, ClientPutCallback insertCallback) throws IOException, InsertException {
 		String mimeType = DefaultMIMETypes.guessMIMEType(docName, true);
 		if(mimeType == null) {
@@ -130,52 +140,53 @@ public class NodeInterface implements FreenetInterface {
 		return true;
 	}
 
+	@Override
 	public FreenetURI insertBlock(InsertBlock insert, boolean getCHKOnly, String filenameHint) throws InsertException {
 		return HighLevelSimpleClientInterface.insert(insert, getCHKOnly, filenameHint);
 	}
 
-	public FreenetURI insertManifest(FreenetURI insertURI, HashMap<String, Object> bucketsByName, String defaultName) throws InsertException {
-		return HighLevelSimpleClientInterface.insertManifest(insertURI, bucketsByName, defaultName);
-	}
-
+	@Override
 	public FreenetURI insertManifest(FreenetURI insertURI, HashMap<String, Object> bucketsByName, String defaultName, short priorityClass) throws InsertException {
 		return HighLevelSimpleClientInterface.insertManifest(insertURI, bucketsByName, defaultName, priorityClass);
 	}
 
-	public boolean insertManifestCb(FreenetURI insertURI, HashMap<String, Object> bucketsByName, String defaultName, short priorityClass) throws InsertException {
-		return true;	
-	}
-	
+	@Override
 	public NodeConnections getConnections() {
 		return connectionOverview.getConnections();
 	}
 
+	@Override
 	public boolean sendFreemail(String freemailFrom, String freemailTo[], String subject, String content, String password) {
 		return FreemailAPI.sendFreemail(freemailFrom, freemailTo, subject, content, password);
 	}
 
-	public boolean startIMAPMonitor(String freemail, String password, String idleFolder) {
-		return FreemailAPI.startIMAPMonitor(freemail, password, idleFolder);
-	}
-
+	@Override
 	public String[] getUnreadMailsSubject(String freemail, String password, String inboxFolder, boolean shouldDelete) {
 		return FreemailAPI.getUnreadMailsSubject(freemail, password, inboxFolder, shouldDelete);
 	}
 
+	@Override
+	public String[] getMailsContentFrom(String freemail, String freemailFrom, String password, String mailFolder) {
+		return FreemailAPI.getMailsContentFrom(freemail, freemailFrom, password, mailFolder);
+	}
+
+	@Override
 	public boolean copyAccprops(String freemailAccount) {
 		return FreemailAPI.copyAccprops(freemailAccount);
 	}
 
+	@Override
 	public boolean setRandomNextMsgNumber(String freemailAccount, String freemailTo) {
 		return FreemailAPI.setRandomNextMsgNumber(freemailAccount, freemailTo);
 	}
 
+	@Override
 	public boolean clearOutboxLog(String freemailAccount, String identityFrom) {
 		return FreemailAPI.clearOutboxLog(freemailAccount, identityFrom);
 	}
 
+	@Override
 	public boolean clearOutboxMessages(String freemailAccount, String freemailTo) {
 		return FreemailAPI.clearOutboxMessages(freemailAccount, freemailTo);
 	}
-
 }

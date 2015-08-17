@@ -1,5 +1,6 @@
 package plugins.CENO.FreenetInterface;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -10,6 +11,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Properties;
 
 import javax.mail.Authenticator;
@@ -23,15 +25,11 @@ import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.Transport;
-import javax.mail.event.MessageCountAdapter;
-import javax.mail.event.MessageCountEvent;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.mail.search.FlagTerm;
 
 import org.apache.commons.compress.utils.IOUtils;
-
-import plugins.CENO.Client.CENOClient;
 
 import com.sun.mail.smtp.SMTPTransport;
 
@@ -184,8 +182,8 @@ public class FreemailAPI {
 	 * @return a Message array of the unread freemails, an empty array if there are no unread 
 	 * freemails and {@code null} if there was an error
 	 */
-	public static synchronized String[] getUnreadMailsSubject(String freemail, String password, String inboxFolder, boolean shouldDelete) {
-		Message[] unreadMessages = getMessages(freemail, password, inboxFolder, shouldDelete, Flags.Flag.SEEN, false);
+	public static synchronized String[] getUnreadMailsSubject(String freemail, String password, String mailFolder, boolean shouldDelete) {
+		Message[] unreadMessages = getMessages(freemail, password, mailFolder, shouldDelete, Flags.Flag.SEEN, false);
 		if (unreadMessages == null) {
 			return null;
 		}
@@ -200,7 +198,41 @@ public class FreemailAPI {
 		return mailsSubject;
 	}
 
-	private static Message[] getMessages(String freemail, String password, String inboxFolder, boolean shouldDelete, Flag flag, boolean flagBool) {
+	public static synchronized String[] getMailsContentFrom(String freemail, String freemailFrom, String password, String mailFolder) {
+		Message[] messages = getMailsFrom(freemail, freemailFrom, password, mailFolder);
+		ArrayList<String> mailsBody = new ArrayList<String>();
+		ByteArrayOutputStream contentStr = new ByteArrayOutputStream();
+
+		for (Message message : messages) {
+			try {
+				if (!message.getContentType().startsWith("text/plain")) {
+					continue;
+				}
+				message.writeTo(contentStr);
+				mailsBody.add(contentStr.toString());
+			} catch (MessagingException | IOException e) {
+				continue;
+			}
+		}
+		return (String[]) mailsBody.toArray();
+	}
+
+	public static synchronized Message[] getMailsFrom(String freemail, String freemailFrom, String password, String mailFolder) {
+		Message[] allMessages = getMessages(freemail, password, mailFolder, false, null, false);
+		ArrayList<Message> mailsFrom = new ArrayList<>();
+		for (Message message : allMessages) {
+			try {
+				if (message.getFrom()[0].equals(freemailFrom)) {
+					mailsFrom.add(message);
+				}
+			} catch (MessagingException e) {
+				continue;
+			}
+		}
+		return (Message[]) mailsFrom.toArray();
+	}
+
+	private static Message[] getMessages(String freemail, String password, String mailFolder, boolean shouldDelete, Flag flag, boolean flagBool) {
 		Store store = null;
 		Folder folder = null;
 		try {
@@ -211,37 +243,34 @@ public class FreemailAPI {
 			store = session.getStore("imap");
 			store.connect(localHost, freemail, password);
 
-			folder = store.getFolder(inboxFolder);
+			folder = store.getFolder(mailFolder);
 			if (folder == null || !folder.exists()) {
 				return null;
 			}
 			folder.open(Folder.READ_WRITE);
 
-			Message[] unreadMessages;
+			Message[] messages;
 			if (flag != null) {
-				unreadMessages = folder.search(new FlagTerm(new Flags(flag), flagBool));
+				messages = folder.search(new FlagTerm(new Flags(flag), flagBool));
 			} else {
-				unreadMessages = folder.getMessages();
+				messages = folder.getMessages();
 			}
 
 			if (shouldDelete) {
-				for (Message message : unreadMessages) {
+				for (Message message : messages) {
 					message.setFlag(Flag.DELETED, true);
 				}
 			}
 
 			// Once the folder is closed, messages cannot be read. Therefore we need to
-			// return a copy of them in a new array.
-			Message[] unreadMessagesCopy = new Message[unreadMessages.length];
-			for (int i=0; i<unreadMessages.length; i++) {
-				unreadMessagesCopy[i] = new MimeMessage((MimeMessage) unreadMessages[i]);
-			}
+			// return a clone of them in a new array.
+			Message[] messagesCopy = messages.clone();
 
 			// Close the folder and expunge (remove) all mails with the DELETED flag
 			folder.close(true);
 			store.close();
 
-			return unreadMessagesCopy;
+			return messagesCopy;
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			try {
@@ -257,51 +286,6 @@ public class FreemailAPI {
 			}
 			return null;
 		}
-
-	}
-
-	public static boolean startIMAPMonitor(String freemail, String password, String idleFolder) {
-		Store store = null;
-		try {
-			Session session = prepareIMAPSession(freemail, password);
-			store = session.getStore("imap");
-			store.connect(localHost, freemail, password);
-
-			Folder folder = store.getFolder(idleFolder);
-			if (folder == null || !folder.exists()) {
-				return false;
-			}
-			folder.open(Folder.READ_ONLY);
-
-			folder.addMessageCountListener(new MessageCountAdapter() {
-				public void messagesAdded(MessageCountEvent ev) {
-					// Get new freemails
-					Message[] msgs = ev.getMessages();
-					for (Message message : msgs) {
-						try {
-							if (message.getFrom().equals(CENOClient.bridgeFreemail)) {
-								System.out.println("Bundle requested for URL: " + message.getSubject());
-							}
-						} catch (MessagingException mex) {
-							mex.printStackTrace();
-						} catch (Exception ex) {
-							ex.printStackTrace();
-						}
-					}
-				}
-			});
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			if (store!=null && store.isConnected()) {
-				try {
-					store.close();
-				} catch (MessagingException e) {
-					e.printStackTrace();
-				}
-			}
-			return false;
-		}
-		return true;
 	}
 
 	private static String getShortFreemailAddr(String freemailAddress) {

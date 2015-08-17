@@ -29,9 +29,8 @@ public interface FreenetInterface {
 	FreenetURI insertManifest(FreenetURI insertURI, HashMap<String, Object> bucketsByName, String defaultName, short priorityClass) throws InsertException;
 	NodeConnections getConnections();
 	boolean sendFreemail(String freemailFrom, String freemailTo[], String subject, String content, String password);
-	boolean startIMAPMonitor(String freemail, String password, String idleFolder);
 	public String[] getUnreadMailsSubject(String freemail, String password, String inboxFolder, boolean shouldDelete);
-	public boolean copyAccprops(String freemailAccount);
+	public String[] getMailsContentFrom(String freemail, String freemailFrom, String password, String mailFolder);	public boolean copyAccprops(String freemailAccount);
 	public boolean setRandomNextMsgNumber(String freemailAccount, String freemailTo);
 	public boolean clearOutboxLog(String freemailAccount, String identityFrom);
 	public boolean clearOutboxMessages(String freemailAccount, String freemailTo);
