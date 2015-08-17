@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
-import javax.mail.Message;
-
 import org.freenetproject.freemail.wot.ConcurrentWoTConnection;
 
 import plugins.CENO.FreenetInterface.ConnectionOverview.NodeConnections;

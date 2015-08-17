@@ -50,14 +50,19 @@ firefox -profile <path-to-ceno>/browser-profiles/firefox
 
 ### Chrome/Chromium
 
-Google Chrome can be started with its respective CENO profile with the command
+To start, for example, google-chrome with the CENO profile, you must first copy the profile
+to the correct directory. Again, follow the [official
+instructions](https://support.google.com/chrome/answer/142059?hl=en) for managing profiles
+to find the correct directory for your operating system.  On Linux, this is `$HOME/.config/google-chrome`,
+so you should have a directory `$HOME/.config/google-chrome/ceno`.
+
+On Linux, run
 
 ```bash
-chrome --user-data-dir=<path-to-ceno>/browser-profiles/chrome
+google-chrome --profile-directory=ceno
 ```
 
-Likewise chromium can be started with the Chrome profile with
+On OS X, run
 
 ```bash
-chrome --user-data-dir=<path-to-ceno>/browser-profiles/chrome
-```
+open -a "Google Chrome" --args --profile-directory=ceno

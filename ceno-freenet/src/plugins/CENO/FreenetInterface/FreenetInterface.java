@@ -28,10 +28,11 @@ public interface FreenetInterface {
 	Bucket makeBucket(int length) throws IOException;
 	FreenetURI insertManifest(FreenetURI insertURI, HashMap<String, Object> bucketsByName, String defaultName, short priorityClass) throws InsertException;
 	NodeConnections getConnections();
+	boolean copyAccprops(String freemailAccount);
 	boolean sendFreemail(String freemailFrom, String freemailTo[], String subject, String content, String password);
-	public String[] getUnreadMailsSubject(String freemail, String password, String inboxFolder, boolean shouldDelete);
-	public String[] getMailsContentFrom(String freemail, String freemailFrom, String password, String mailFolder);	public boolean copyAccprops(String freemailAccount);
-	public boolean setRandomNextMsgNumber(String freemailAccount, String freemailTo);
-	public boolean clearOutboxLog(String freemailAccount, String identityFrom);
-	public boolean clearOutboxMessages(String freemailAccount, String freemailTo);
+	String[] getUnreadMailsSubject(String freemail, String password, String inboxFolder, boolean shouldDelete);
+	String[] getMailsContentFrom(String freemail, String freemailFrom, String password, String mailFolder);
+	boolean setRandomNextMsgNumber(String freemailAccount, String freemailTo);
+	boolean clearOutboxLog(String freemailAccount, String identityFrom);
+	boolean clearOutboxMessages(String freemailAccount, String freemailTo);
 }
