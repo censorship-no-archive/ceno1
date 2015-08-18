@@ -21,6 +21,7 @@ type Config struct {
 // Default confifuration values that can be provided as options to the user.
 var DefaultConfiguration Config = Config{
   ":3096",
+  "http://127.0.0.1:3094",
   "http://127.0.0.1:3095",
   "templates/feed.html",
   "data/feeds.dat"

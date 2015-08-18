@@ -1,0 +1,22 @@
+[
+  {
+    "id": "listening_msg_rdr",
+    "translation": "The reader server is listening on localhost:{{.Port}}."
+  },
+  {
+    "id": "method_not_impl_rdr",
+    "translation": "This endpoint does not handle requests with the method you specified."
+  },
+  {
+    "id": "invalid_follow_req_rdr",
+    "translation": "The data you supplied describing the feed you want to follow is not appropriate."
+  },
+  {
+    "id": "req_handle_success_rdr",
+    "translation": "Your request to follow a new feed has been handled successfully."
+  },
+  {
+    "id": "not_recognized_charset_chr",
+    "translation": "Expected charset {{.Expect}}, but got {{.Actual}}."
+  }
+]

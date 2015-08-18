@@ -5,21 +5,10 @@ import (
 	"fmt"
 	rss "github.com/jteeuwen/go-pkg-rss"
 	"github.com/jteeuwen/go-pkg-xmlx"
+  "github.com/nicksnyder/go-i18n/i18n"
 	"net/http"
 	"time"
 )
-
-// An error message informing a client that the method they are using to invoke
-// a particular endpoint is not supported.
-const METHOD_NOT_IMPLEMENTED = "This endpoint is not implemented for the method you specified."
-
-// An error message informing a client that the JSON they sent in their
-// request to /follow is invalid/not properly formatted.
-const INVALID_FOLLOW_REQUEST = "The data you supplied describing the feed to follow in invalid."
-
-// A success message informing a client that their request to have a new
-// feed followed has been handled successfully.
-const REQUEST_HANDLE_SUCCESS = "Your request to follow a new feed has been handled successfully."
 
 // Map expected charsets provided by a client to the function that handles
 // incoming items/channels from a feed, checking that it matches the expected charset
@@ -103,7 +92,7 @@ func followHandler(requests chan FeedInfo) func(http.ResponseWriter, *http.Reque
 	return func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Got request")
 		if r.Method != "POST" {
-			w.Write([]byte(METHOD_NOT_IMPLEMENTED))
+			w.Write([]byte(T("method_not_impl_rdr")))
 			return
 		}
 		feedInfo := FeedInfo{}
@@ -111,20 +100,25 @@ func followHandler(requests chan FeedInfo) func(http.ResponseWriter, *http.Reque
 		if err := decoder.Decode(&feedInfo); err != nil {
 			fmt.Println("Error decoding JSON")
 			fmt.Println(err)
-			w.Write([]byte(INVALID_FOLLOW_REQUEST))
+			w.Write([]byte(T("minvalid_follow_req_rdr")))
 		} else {
 			fmt.Println("JSON decoded")
 			requests <- feedInfo
-			w.Write([]byte(REQUEST_HANDLE_SUCCESS))
+			w.Write([]byte(T("req_handle_success_rdr")))
 		}
 	}
 }
 
 func main() {
+  // Configure the i18n library to use the preferred language set in the CENOLANG environment variable
+  if os.Getenv("CENOLANG") == "" {
+    os.Setenv("CENOLANG", "en-us")
+  }
+  T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
 	requestNewFollow := make(chan FeedInfo)
 	go followFeeds(requestNewFollow)
 	http.HandleFunc("/follow", followHandler(requestNewFollow))
-	fmt.Println("Listening on port 3095")
+	fmt.Println(T("listening_msg_rdr", map[string]interface{}{"Port": Configuration.PortNumber,}))
 	if err := http.ListenAndServe(":3095", nil); err != nil {
 		panic(err)
 	}
