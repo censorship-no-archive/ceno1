@@ -14,4 +14,4 @@ go get github.com/jteeuwen/go-pkg-rss
 #$GOPATH/bin/goi18n *.json
 #cd ..
 
-go build reader.go && echo "Compiled reader successfully."
+go build reader.go charsetreaders.go && echo "Compiled reader successfully."
