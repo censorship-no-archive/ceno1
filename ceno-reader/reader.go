@@ -10,6 +10,12 @@ import (
 	"time"
 )
 
+// The path to the configuration file to use
+const CONFIG_FILE string = "./config/config.json"
+
+// A global configuration instance. Must be instantiated properly in main().
+var Configuration Config
+
 // Map expected charsets provided by a client to the function that handles
 // incoming items/channels from a feed, checking that it matches the expected charset
 // And/or doing any extra handling
@@ -115,6 +121,15 @@ func main() {
     os.Setenv("CENOLANG", "en-us")
   }
   T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
+  // Check that the configuration supplied has valid fields, or panic
+  if conf, err := ReadConfigFile(CONFIG_FILE); err != nil {
+    panic(T("no_config_rdr", map[string]interface{}{"Location": CONFIG_FILE,}))
+  } else if !ValidConfiguration(conf) {
+    panic(T("invalid_config_rdr"))
+  } else {
+    Configuration = conf
+  }
+  // Set up the HTTP server to listen for requests for new feeds to read
 	requestNewFollow := make(chan FeedInfo)
 	go followFeeds(requestNewFollow)
 	http.HandleFunc("/follow", followHandler(requestNewFollow))

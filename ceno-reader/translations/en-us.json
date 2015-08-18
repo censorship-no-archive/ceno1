@@ -16,6 +16,14 @@
     "translation": "Your request to follow a new feed has been handled successfully."
   },
   {
+    "id": "no_config_rdr",
+    "translation": "No well-formatted configuration file could be read from the location {{.Location}}."
+  },
+  {
+    "id": "invalid_config_rdr",
+    "translation": "The configuration file provided contains invalid data or formatting."
+  },
+  {
     "id": "not_recognized_charset_chr",
     "translation": "Expected charset {{.Expect}}, but got {{.Actual}}."
   }

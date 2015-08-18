@@ -113,3 +113,11 @@ func ReadConfigFile(location string) (Config, error) {
   }
   return configuration, nil
 }
+
+func ValidConfiguration(configuration Config) bool {
+  return validPortNumber(configuration.PortNumber) &&\
+         validBundleServer(configuration.BundleServer) &&\
+         validBundleInserter(configuration.BundleInserter) &&\
+         validFeedTemplate(configuration.FeedTemplate) &&\
+         validFeedList(configuration.FeedListFile)
+}
