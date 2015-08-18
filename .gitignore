@@ -18,6 +18,9 @@ ceno-client/client
 ceno-client/FreenetCENO.tar.gz
 ceno-client/FreenetCENO
 
+# Compiled CENO reader service
+ceno-reader/reader
+
 ../fred
 
 # Vim temporary files
