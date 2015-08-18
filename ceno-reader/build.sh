@@ -6,7 +6,8 @@ for file in `ls *.go`; do
 done
 
 echo "Installing dependencies."
-go get github.com/axgle/mahonia
+go get github.com/jteeuwen/go-pkg-xmlx
+go get github.com/jteeuwen/go-pkg-rss
 
 #echo "Merging localizaton files."
 #cd translations
