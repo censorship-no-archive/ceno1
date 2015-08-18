@@ -8,6 +8,7 @@ feeds for sites which it populates a template with.
 1. Dependencies
   * Go
 2. Building
+3. Configuration
 
 ## Dependencies
 
@@ -38,3 +39,38 @@ Once you've installed all of the dependencies, you can build CENO Reader by runn
 
 This will format the go files, install all dependency libraries, and compile the
 reader executable to a file called `reader`.
+
+## Configuration
+
+Configuration settings for the CENO Reader are provided in a JSON file.  A default configuration
+exists at `ceno-reader/config/default.json`.
+
+Note that all configuration values are strings (surrounded by double-quotes `"`), unless
+specified otherwise.
+
+### PortNumber
+
+The port number that the CENO Reader HTTP server should listen for requests on.  This must be
+prefixed by a colon `:`.
+
+### BundleServer
+
+The URI of the bundle server to request new bundles for RSS items from.
+
+### BundleInserter
+
+The URI of the bundle inserter to post requests to have bundles stored in.
+
+### FeedTemplate
+
+The path to the template HTML file that will be filled with short descriptions of RSS items.
+For more information about these templates, see the
+[Golang documentation](https://golang.org/pkg/html/template/#ParseFiles)
+
+This file must exist by the time you run `reader`.
+
+### FeedListFile
+
+The path to a file within which information about feeds being followed will be stored.
+
+This file must exist by the time you run `reader`.
