@@ -410,4 +410,50 @@ public class FreemailAPI {
 		return true;
 	}
 
+	public static abstract class Freemail {
+		private String freemailFrom;
+		private String[] freemailTo;
+		private String subject;
+		private String body;
+		
+		public Freemail(String freemailFrom, String[] freemailTo, String subject, String body) {
+			this.setFreemailFrom(freemailFrom);
+			this.setFreemailTo(freemailTo);
+			this.setSubject(subject);
+			this.setBody(body);
+		}
+
+		public String getFreemailFrom() {
+			return freemailFrom;
+		}
+
+		public void setFreemailFrom(String freemailFrom) {
+			this.freemailFrom = freemailFrom;
+		}
+
+		public String[] getFreemailTo() {
+			return freemailTo;
+		}
+
+		public void setFreemailTo(String[] freemailTo) {
+			this.freemailTo = freemailTo;
+		}
+
+		public String getSubject() {
+			return subject;
+		}
+
+		public void setSubject(String subject) {
+			this.subject = subject;
+		}
+
+		public String getBody() {
+			return body;
+		}
+
+		public void setBody(String body) {
+			this.body = body;
+		}
+	}
+
 }
