@@ -88,7 +88,10 @@ public class CENOBackbone implements FredPlugin, FredPluginVersioned, FredPlugin
 		 * we are using the same Freemail address with multiple backbone nodes, for reaching
 		 * the bridge.
 		 */
-		nodeInterface.setRandomNextMsgNumber(backboneFreemail, bridgeFreemail);
+		if (!nodeInterface.setRandomNextMsgNumber(backboneFreemail, bridgeFreemail)) {
+			Logger.error(this, "Could not set a random nextMessageNumber. Freemails will most probably be dropped at the bridge");
+			terminate();
+		}
 
 		/* Schedule a thread in order to Send a Freemail to the bridge node with the own node reference.
 		 * First attempt will be in a minute from plugin initialization, and if it fails, there will be
@@ -119,11 +122,9 @@ public class CENOBackbone implements FredPlugin, FredPluginVersioned, FredPlugin
 		try {
 			pn = node.createNewDarknetNode(bridgeNodeFS, FRIEND_TRUST.HIGH, FRIEND_VISIBILITY.NO);
 			((DarknetPeerNode)pn).setPrivateDarknetCommentNote("Master Bridge");
-		} catch (FSParseException e1) {
+		} catch (FSParseException | PeerParseException e) {
 			return PeerAdditionReturnCodes.CANT_PARSE;
-		} catch (PeerParseException e1) {
-			return PeerAdditionReturnCodes.CANT_PARSE;
-		} catch (ReferenceSignatureVerificationException e1){
+		} catch (ReferenceSignatureVerificationException e){
 			return PeerAdditionReturnCodes.INVALID_SIGNATURE;
 		} catch (Throwable t) {
 			Logger.error(this, "Internal error adding reference :" + t.getMessage(), t);
