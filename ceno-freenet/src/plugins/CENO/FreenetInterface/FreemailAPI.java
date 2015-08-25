@@ -210,7 +210,9 @@ public class FreemailAPI {
 				}
 				message.writeTo(contentStr);
 				mailsBody.add(contentStr.toString());
-			} catch (MessagingException | IOException e) {
+			} catch (IOException e) {
+				continue;
+			} catch (MessagingException e) {
 				continue;
 			}
 		}
@@ -219,7 +221,7 @@ public class FreemailAPI {
 
 	public static synchronized Message[] getMailsFrom(String freemail, String freemailFrom, String password, String mailFolder) {
 		Message[] allMessages = getMessages(freemail, password, mailFolder, false, null, false);
-		ArrayList<Message> mailsFrom = new ArrayList<>();
+		ArrayList<Message> mailsFrom = new ArrayList<Message>();
 		for (Message message : allMessages) {
 			try {
 				if (message.getFrom()[0].equals(freemailFrom)) {

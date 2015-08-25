@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 
 import plugins.CENO.Version;
 import plugins.CENO.FreenetInterface.NodeInterface;
+
 import freenet.clients.http.ConnectionsToadlet.PeerAdditionReturnCodes;
 import freenet.io.comm.PeerParseException;
 import freenet.io.comm.ReferenceSignatureVerificationException;
@@ -66,7 +67,6 @@ public class CENOBackbone implements FredPlugin, FredPluginVersioned, FredPlugin
 	ScheduledExecutorService scheduledExecutorService;
 	ScheduledFuture<?> scheduleSend;
 
-	@Override
 	public void runPlugin(PluginRespirator pr) {
 		node = pr.getNode();
 		nodeRefHelper = new NodeRefHelper(node);
@@ -122,7 +122,9 @@ public class CENOBackbone implements FredPlugin, FredPluginVersioned, FredPlugin
 		try {
 			pn = node.createNewDarknetNode(bridgeNodeFS, FRIEND_TRUST.HIGH, FRIEND_VISIBILITY.NO);
 			((DarknetPeerNode)pn).setPrivateDarknetCommentNote("Master Bridge");
-		} catch (FSParseException | PeerParseException e) {
+		} catch (FSParseException e) {
+			return PeerAdditionReturnCodes.CANT_PARSE;
+		} catch (PeerParseException e) {
 			return PeerAdditionReturnCodes.CANT_PARSE;
 		} catch (ReferenceSignatureVerificationException e){
 			return PeerAdditionReturnCodes.INVALID_SIGNATURE;
@@ -148,7 +150,6 @@ public class CENOBackbone implements FredPlugin, FredPluginVersioned, FredPlugin
 		return version.getRealVersion();
 	}
 
-	@Override
 	public void terminate() {
 		if (scheduledExecutorService != null) {
 			scheduledExecutorService.shutdownNow();
@@ -158,7 +159,6 @@ public class CENOBackbone implements FredPlugin, FredPluginVersioned, FredPlugin
 
 	private class RefSender implements Runnable {
 
-		@Override
 		public void run() {
 			if (nodeInterface.sendFreemail(CENOBackbone.backboneFreemail, new String[]{bridgeFreemail}, "addFriend", nodeRefHelper.getNodeRef(), "CENO")) {
 				scheduleSend.isDone();
