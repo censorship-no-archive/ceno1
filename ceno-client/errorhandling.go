@@ -187,7 +187,8 @@ func ReportDecodeError(state ErrorState) bool {
 	}
 	marshalled, _ := json.Marshal(mapping)
 	reader := bytes.NewReader(marshalled)
-	if req, err := http.NewRequest("POST", state["reportURL"].(string), reader); err != nil {
+	req, err := http.NewRequest("POST", state["reportURL"].(string), reader)
+	if err != nil {
 		return false
 	}
 	req.Header.Set("Content-Type", "application/json")
@@ -208,11 +209,11 @@ func ExecuteErrorPage(errorCode ErrorCode, errorMsg string, w http.ResponseWrite
 	T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
 	t, err := template.ParseFiles(path.Join(".", "views", "error.html"))
 	if advice, foundErr := errorAdvice[errorCode]; !foundErr {
-		errMsg := T("unrecognized_error_code", map[string]interface{}{"ErrCode": errorCode,})
+		errMsg := T("unrecognized_error_code", map[string]interface{}{"ErrCode": errorCode})
 		ExecuteErrorPage(ERR_INVALID_ERROR, errMsg, w, r)
 	} else if err != nil {
 		w.Header().Set("Content-Type", "text/plain")
-		w.Write([]byte(T("missing_view", map[string]interface{}{"View": "error.html",})))
+		w.Write([]byte(T("missing_view", map[string]interface{}{"View": "error.html"})))
 	} else {
 		t.Execute(w, map[string]string{
 			"Url":              r.URL.String(),
