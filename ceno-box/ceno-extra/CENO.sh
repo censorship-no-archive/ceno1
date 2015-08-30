@@ -16,6 +16,7 @@ then
   then
     CENOLANG=$LANG
   elif [[ -n "$LANGUAGE" ]]
+  then
     CENOLANG=$LANGUAGE
   else
     CENOLANG=en-us
@@ -27,20 +28,42 @@ export CENOLANG
 # Start the Freenet node
 ./run.sh start &> CENO.log
 
-# Start CENOClient proxy
-cd ceno-client
-nohup ./client &> ../CENO.log &
-cd ..
+function browserExists {
+  if command -v $1 >/dev/null 2>&1
+  then
+      return 0;
+  else
+      return 1;
+  fi
+}
 
 # Open a browser window with the CENO profiles, including the plugin
-if command -v firefox >/dev/null 2>&1
-  then
+if browserExists chrome
+then
+  chrome --profile-directory=ceno-chrome --incognito &
+elif browserExists chromium-browser
+then
+  chromium-browser --profile-directory=ceno-chrome --incognito &
+elif browserExists chromium
+then
+  chromium --profile-directory=ceno-chrome --incognito &
+elif browserExists google-chrome
+then
+  google-chrome --profile-directory=ceno-chrome --incognito &
+elif browserExists firefox
+then
     firefox -no-remote -private-window -profile "ceno-firefox" &> /dev/null &
-  else
+else
     echo "None of the supported browsers is installed in your machine."
     echo "Please install Chrome or Firefox and execute this script again."
+    ./run.sh stop
     exit 0
 fi
+
+# Start CENOClient proxy
+cd ceno-client
+nohup ./CENOClient &> ../CENO.log &
+cd ..
 
 echo "You are ready to use CENO."
 echo "Remember that you are covered by CENO only when the CENO Router plugin is loaded in your browser."
