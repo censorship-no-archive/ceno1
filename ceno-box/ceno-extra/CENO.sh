@@ -37,19 +37,23 @@ function browserExists {
   fi
 }
 
+function startChromeProfile {
+  $1 --profile-directory=ceno-chrome --incognito &
+}
+
 # Open a browser window with the CENO profiles, including the plugin
 if browserExists chrome
 then
-  chrome --profile-directory=ceno-chrome --incognito &
+  startChromeProfile chrome
 elif browserExists chromium-browser
 then
-  chromium-browser --profile-directory=ceno-chrome --incognito &
+  startChromeProfile chromium-browser
 elif browserExists chromium
 then
-  chromium --profile-directory=ceno-chrome --incognito &
+  startChromeProfile chromium
 elif browserExists google-chrome
 then
-  google-chrome --profile-directory=ceno-chrome --incognito &
+  startChromeProfile google-chrome
 elif browserExists firefox
 then
     firefox -no-remote -private-window -profile "ceno-firefox" &> /dev/null &
