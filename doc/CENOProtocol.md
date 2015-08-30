@@ -6,37 +6,36 @@ This document describes, at a high level, the protocol that should be adhered to
 
 ### Agents on the client's side
 
-`Ceno Client (CC)` is the client-side HTTP proxy application that receives requests for documents and communicates with
+`CENO Client (CC)` is the client-side HTTP proxy application that receives requests for documents and communicates with
 other agents to find or create bundles for those documents. Runs on port 3090.
 
 `Local Cache Server (LCS)` is responsible for retrieving and serving bundles from the underlying storage medium. This is
-a separate agent so that multiple storage mediums can be used interchangably or together. Runs on port 3091.
+a separate agent so that multiple storage mediums can be used interchangeably or together. Runs on port 3091.
 
-`Request Sender (RS)` is responsible for forwarding requests to have bundles created to the bridge.  It will communicate
-with nodes in the network outside of the censored zone. Runs on port 3092.
+`Request Sender (RS)` is responsible for forwarding requests to have bundles created to the bridge. Runs on port 3092.
 
 ### Agents on the bridge side
 
 `Request Receiver (RR)` receives requests from the Request Senders of clients and queues them to have the pages
-requested bundled. Runs on port 3093.
+requested bundled and inserted in the storage mediums. Runs on port 3093.
 
 `Bundle Server (BS)` creates bundles for requested pages. Runs on port 3094.
 
 `Bundle Inserter (BI)` stores bundles in the storage mediums accessible to clients. Runs on port 3095.
 
-Any of the underlying technologies might provide the functionality of multiple agents. For example, in the case of freenet, the client-side plugin might server as BRS and RS at the same time.
-Also, agents are responsible for keeping their own state and act accordingly to interactions with other agents. As an example, RS should only send a single freemail for a URL no matter how many "send request to the bridge" messages receives from the CC.
+Any of the underlying technologies might provide the functionality of multiple agents. For example, in the case of Freenet, the client-side plugin might serve as LCS and RS at the same time.
+Also, agents are responsible for keeping their own state and act accordingly to interactions with other agents. As an example, RS should only send a single request for a URL no matter how many "send request to the bridge" messages receives from the CC.
 
 ## Syntax
 
 `<url>` will always refer to the URL to be fetched, bundled, and cached. The URL will always be base64-encoded after
 leaving the CC except during processing.
 
-`<now>` will always refer to a datetime value corresponding to whatever the current time is.
+`<now>` will always refer to a datetime value (POSIX time) corresponding to whatever the current time is.
 
 `<bundle>` will always refer to the bundled document corresponding to `<url>`.
 
-`<[agent]>` refers to the address of a given agent.
+`<[agent]>` refers to the network address of a given agent.
 
 `[<METHOD> <value>]` is the notation that will be used to describe an HTTP request, where `METHOD` will be one of the standard
 HTTP methods (GET, POST, PUT, ...) or `write` in the case of a response.
@@ -44,18 +43,18 @@ HTTP methods (GET, POST, PUT, ...) or `write` in the case of a response.
 
 1. The URL in the case of a GET request
 2. The URL and POST body (as JSON) in the case of a POST/PUT request. E.g. `[POST website.com/path {"hello": "world"}]`
-3. The literal response to a request-maker in the case of a `write` (respond) mesage.
+3. The literal response to a request-maker in the case of a `write` (respond) message.
 
 ## Special Notes
 
 ### Special Headers
 
-Every response written by CENO client should have a `X-CENO-Proxy` header set with the value `yxorP-oNeC-X`.
+Every response written by CENO client (CC) should have a `X-CENO-Proxy` header set with the value `yxorP-oNeC-X`.
 
 ## Protocol
 
 The cases described here do not account for interaction with the User
-requesting a page. We assume that CENO client will continue to serve a
+requesting a page. We assume that CENO Client will continue to serve a
 "please wait" page until it has received a bundle, and that it serves the
 bundle once it has been received and a request for it arrives.
 
@@ -72,8 +71,8 @@ Step | Description                                        | Message
 3    | CC makes a new request for `<url>` after some time | `[GET <LCS>/lookup?url=<url>`
 4    | LCS reports that no bundle exists for `<url>` yet  | `[write {"complete": true, "found": false}]`
 5    | CC requests that a new bundle be created by bridge | `[POST <RS>/create?url=<url>`
-6    | RS signals RR on bridge to create new bundle       | Send freemail to RR
-7    | RR requests `<url>` read from Freemail             | `[GET <BS>/lookup?url=<url>]`
+6    | RS signals RR on bridge to create new bundle       | Depends on the implementation of the signaling channel
+7    | RR requests `<url>` read from Freemail             | `[GET <BS>/?url=<url>]`
 8    | BS creates a bundle and returns it to the RR       | `[write {"created": <now>, "url": <url>,  "bundle": <bundle>}]`
 9    | RR requests the BI insert the bundle into Freenet  | `[POST <BI>/insert?created=<created>&url=<url>&bundle=<bundle>]`
 10   | BI acknowledges the request for insertion          | `[write "okay"]`
@@ -85,7 +84,7 @@ In step 2, the LCS has only searched the local cache. It must start a process to
 
 Steps 3 and 4 can repeat (in order) any number of times until the search is complete.
 
-The format and content of the Freemail sent by RS is not specified.
+The format and content of requests sent by RS to RR is not specified.
 
 ### Lookup Success (Local Cache)
 
@@ -120,18 +119,6 @@ required for regular use cases.
 
 Error conditions that CENO components can encounter are described in `doc/errorConditions.md`
 and specify error codes that classify them.
-
-### CC reports decode error to LCS
-
-The CC should be able to signal decoding issues to the LCS after a lookup.
-The client should be able to decide the LCS' response into a
-[Result structure](https://github.com/equalitie/ceno/blob/master/ceno-client/client.go).
-The report is sent in the case that it cannot.
-
-Step | Description              | Message
------|--------------------------|-------------------
-1    | CC reports error to LCS  | `[POST <LCS>/error/decode {"errCode": <code>, "errMsg": <message>}]`
-2    | LCS acknowledges report  | `[write "okay"]`
 
 ### BS prompts RR to accept bundle
 
