@@ -276,10 +276,13 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	// Configure the i18n library to use the preferred language set in the CENOLANG environement variable
-	if os.Getenv("CENOLANG") == "" {
+	setLanguage := os.Getenv("CENOLANG")
+	if setLanguage == "" {
 		os.Setenv("CENOLANG", "en-us")
+		setLanguage = "en-us"
 	}
-	T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
+	i18n.MustLoadTranslationFile("./translations/" + setLanguage + ".all.json")
+	T, _ := i18n.Tfunc(setLanguage, "en-us")
 	// Read an existing configuration file or have the user supply settings
 	if conf, err := ReadConfigFile(CONFIG_FILE); err != nil {
 		fmt.Println(T("no_config_cli", map[string]interface{}{"Location": CONFIG_FILE}))

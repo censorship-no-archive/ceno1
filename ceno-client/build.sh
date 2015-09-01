@@ -10,7 +10,7 @@ go get -u github.com/nicksnyder/go-i18n/goi18n
 
 echo "Merging localization files."
 cd translations
-$GOPATH/bin/goi18n *.json
+$GOPATH/bin/goi18n *.all.json *.untranslated.json
 cd ..
 
 go build client.go errorhandling.go clientconfig.go && echo "Compiled client successfully."
