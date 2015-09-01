@@ -64,9 +64,35 @@ e.g.
 Note that the `"id"` fields should not be changed.
 Also, the text inside (and including) `{{}}` should be left alone as it is used by the software.
 
-To create a translation, simply create a new file such as `ceno-client/translations/fr-fr.json` with
+To create a translation, simply create a new file such as `ceno-client/translations/fr-fr.all.json` with
 the same structure- objects mapping the same IDs to the French (in this case) translations of the
-text.
+text. Such a new file should, at the bare minimum, contain an empty array
+
+`fr-fr.all.json`
+
+```js
+[]
+```
+
+If you can translate any of the original strings into this new language, you can write them into the
+new file now. For example, you might write `fr-fr.all.json` to contain
+
+```js
+[
+  {
+    "id": "greeting",
+    "translation": "Bonjour le monde!"
+  }
+]
+```
+
+Next, you can create a file containing all of the untranslated strings using `goi18n`:
+
+```bash
+$GOPATH/bin/goi18n translations/*.all.json
+```
+
+This will create files `translations/en-us.untranslated.json`, `fr-fr.untranslated.json`, etc...
 
 ## Translating with Transifex
 
@@ -81,24 +107,25 @@ however the client is an exception.  Transifex expects JSON files to be of the f
 ```
 
 which clearly doesn't match the form goi18n uses. To cope with this, the
-`ceno-client/tools/json-translation.py` script was created.  This script will read
-`ceno-client/translations/en-us.json` and produce `ceno-client/tools/en-us.json` that will be in the
-format preferred by Transifex.  This first step is accomplished by running
+`ceno-client/tools/json-translation.py` script was created.  This script will read all the
+`ceno-client/translations/*.untranslated.json` files and produce a corresponding 
+`ceno-client/translations/*.transifex.json` file for each.
 
 ```
 cd ceno-client/tools
 python json-translation.py to
 ```
 
-Once we have obtained a translation for `en-us.json`, we can convert the new file back to the format
-used by goi18n with the following command, assuming as an example that we have obtained `de-de.json`,
+Once we have obtained translations for the generated `*.transifex.json` files, we can convert them
+back to the format used by goi18n with the following command
 
 ```
-python json-translation.py from de-de de-de.json
+python json-translation.py from
 ```
 
-This will create `ceno-client/translations/de-de.json` in the format that can be merged with our other
-supported locales with goi18n.
+This will overwrite the `ceno-client/translations/*.untranslated.json` files to contain the newly
+translated strings.  Merging these files back into the `*.all.json` files used by the CENO client
+is explained in the following section.
 
 ## goi18n
 
@@ -122,5 +149,5 @@ The translations can then be merged with the `go18n` tool:
 
 ```bash
 cd ceno-client/translations
-$GOPATH/bin/go18n *.json
+$GOPATH/bin/go18n *.all.json *.untranslated.json
 ```
