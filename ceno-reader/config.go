@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"net/url"
 	"os"
 	"strconv"
@@ -111,6 +112,7 @@ func ReadConfigFile(location string) (Config, error) {
 	var configuration Config
 	decoder := json.NewDecoder(file)
 	if err := decoder.Decode(&configuration); err != nil {
+		fmt.Println(err)
 		return Config{}, err
 	}
 	return configuration, nil
