@@ -140,7 +140,7 @@ func main() {
 	go followFeeds(requestNewFollow)
 	http.HandleFunc("/follow", followHandler(requestNewFollow))
 	fmt.Println(T("listening_msg_rdr", map[string]interface{}{"Port": Configuration.PortNumber}))
-	if err := http.ListenAndServe(conf.PortNumber, nil); err != nil {
+	if err := http.ListenAndServe(Configurationt.PortNumber, nil); err != nil {
 		panic(err)
 	}
 }
