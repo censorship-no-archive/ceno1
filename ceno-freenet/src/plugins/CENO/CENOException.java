@@ -4,6 +4,7 @@ package plugins.CENO;
  * Exception subclass for issues related to the CENO Freenet plugins
  */
 public class CENOException extends Exception {
+	private static final long serialVersionUID = 1L;
 	private final CENOErrCode errCode;
 
 	/**

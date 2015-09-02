@@ -138,7 +138,7 @@ public class RequestReceiver {
 						}
 					}
 					// Pause the looping thread
-					Thread.currentThread().sleep(FREEMAILBOX_POLLING_PAUSE);
+					Thread.sleep(FREEMAILBOX_POLLING_PAUSE);
 				}
 			} catch (InterruptedException e) {
 				// Interrupted by another thread, normally by stopLooping()

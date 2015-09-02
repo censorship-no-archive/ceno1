@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 
 import plugins.CENO.Version;
 import plugins.CENO.FreenetInterface.NodeInterface;
+
 import freenet.clients.http.ConnectionsToadlet.PeerAdditionReturnCodes;
 import freenet.io.comm.PeerParseException;
 import freenet.io.comm.ReferenceSignatureVerificationException;
@@ -66,7 +67,6 @@ public class CENOBackbone implements FredPlugin, FredPluginVersioned, FredPlugin
 	ScheduledExecutorService scheduledExecutorService;
 	ScheduledFuture<?> scheduleSend;
 
-	@Override
 	public void runPlugin(PluginRespirator pr) {
 		node = pr.getNode();
 		nodeRefHelper = new NodeRefHelper(node);
@@ -88,7 +88,10 @@ public class CENOBackbone implements FredPlugin, FredPluginVersioned, FredPlugin
 		 * we are using the same Freemail address with multiple backbone nodes, for reaching
 		 * the bridge.
 		 */
-		nodeInterface.setRandomNextMsgNumber(backboneFreemail, bridgeFreemail);
+		if (!nodeInterface.setRandomNextMsgNumber(backboneFreemail, bridgeFreemail)) {
+			Logger.error(this, "Could not set a random nextMessageNumber. Freemails will most probably be dropped at the bridge");
+			terminate();
+		}
 
 		/* Schedule a thread in order to Send a Freemail to the bridge node with the own node reference.
 		 * First attempt will be in a minute from plugin initialization, and if it fails, there will be
@@ -119,11 +122,11 @@ public class CENOBackbone implements FredPlugin, FredPluginVersioned, FredPlugin
 		try {
 			pn = node.createNewDarknetNode(bridgeNodeFS, FRIEND_TRUST.HIGH, FRIEND_VISIBILITY.NO);
 			((DarknetPeerNode)pn).setPrivateDarknetCommentNote("Master Bridge");
-		} catch (FSParseException e1) {
+		} catch (FSParseException e) {
 			return PeerAdditionReturnCodes.CANT_PARSE;
-		} catch (PeerParseException e1) {
+		} catch (PeerParseException e) {
 			return PeerAdditionReturnCodes.CANT_PARSE;
-		} catch (ReferenceSignatureVerificationException e1){
+		} catch (ReferenceSignatureVerificationException e){
 			return PeerAdditionReturnCodes.INVALID_SIGNATURE;
 		} catch (Throwable t) {
 			Logger.error(this, "Internal error adding reference :" + t.getMessage(), t);
@@ -147,7 +150,6 @@ public class CENOBackbone implements FredPlugin, FredPluginVersioned, FredPlugin
 		return version.getRealVersion();
 	}
 
-	@Override
 	public void terminate() {
 		if (scheduledExecutorService != null) {
 			scheduledExecutorService.shutdownNow();
@@ -157,7 +159,6 @@ public class CENOBackbone implements FredPlugin, FredPluginVersioned, FredPlugin
 
 	private class RefSender implements Runnable {
 
-		@Override
 		public void run() {
 			if (nodeInterface.sendFreemail(CENOBackbone.backboneFreemail, new String[]{bridgeFreemail}, "addFriend", nodeRefHelper.getNodeRef(), "CENO")) {
 				scheduleSend.isDone();

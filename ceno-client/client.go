@@ -12,8 +12,8 @@ import (
 	"os"
 	"path"
 	"regexp"
-	"strings"
 	"strconv"
+	"strings"
 )
 
 // The location of the configuration file to read.
@@ -88,7 +88,8 @@ func lookup(lookupURL string) Result {
 	}
 	decoder := json.NewDecoder(response.Body)
 	var result Result
-	if err := decoder.Decode(&result); err != nil {
+	err = decoder.Decode(&result)
+	if err != nil {
 		decodeErrorMessage := T("decode_error_cli", map[string]interface{}{
 			"Message": err.Error(),
 		})
@@ -115,7 +116,8 @@ func requestNewBundle(lookupURL string, wasRewritten bool) error {
 	// We can ignore the content of the response since it is not used.
 	reader := bytes.NewReader([]byte(lookupURL))
 	URL := CreateBundleURL(Configuration, lookupURL)
-	if req, err := http.NewRequest("POST", URL, reader); err != nil {
+	req, err := http.NewRequest("POST", URL, reader)
+	if err != nil {
 		return err
 	}
 	req.Header.Set("Content-Type", "text/plain")
@@ -149,7 +151,8 @@ func stripHttps(URL string) (string, bool) {
 func directHandler(w http.ResponseWriter, r *http.Request) {
 	qs := r.URL.Query()
 	T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
-	if URLS, found := qs["url"]; !found {
+	URLS, found := qs["url"]
+	if !found {
 		HandleCCError(ERR_MALFORMED_URL, T("querystring_no_url_cli"), ErrorState{
 			"responseWriter": w,
 			"request":        r,
@@ -157,20 +160,23 @@ func directHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		// Decode the URL so we can save effort by just passing the modified request to
 		// the proxyHandler function from here.
-		if decodedBytes, err := base64.StdEncoding.DecodeString(URLS[0]); err != nil {
+		decodedBytes, err := base64.StdEncoding.DecodeString(URLS[0])
+		if err != nil {
 			HandleCCError(ERR_MALFORMED_URL, T("url_b64_cli"), ErrorState{
 				"responseWriter": w,
 				"request":        r,
 			})
 		} else {
 			decodedURL := string(decodedBytes)
-			if stripped, rewritten := stripHttps(decodedURL); rewritten {
+			stripped, rewritten := stripHttps(decodedURL)
+			if rewritten {
 				r.Header.Set(REWRITTEN_HEADER, "true")
 			}
-			if newURL, parseErr := url.Parse(stripped); parseErr != nil {
+			newURL, parseErr := url.Parse(stripped)
+			if parseErr != nil {
 				HandleCCError(ERR_MALFORMED_URL, T("malformed_url_cli", map[string]interface{}{
 					"URL": stripped,
-				}), ErrorState{"responseWriter": w, "request": r,})
+				}), ErrorState{"responseWriter": w, "request": r})
 			} else {
 				// Finally we can pass the modified request onto the proxy server.
 				r.URL = newURL
@@ -193,7 +199,7 @@ func validateURL(URL string, w http.ResponseWriter, r *http.Request) bool {
 	if !isValid || err != nil {
 		HandleCCError(ERR_MALFORMED_URL, T("malformed_url_cli", map[string]interface{}{
 			"URL": URL,
-		}), ErrorState{"responseWriter": w, "request": r,})
+		}), ErrorState{"responseWriter": w, "request": r})
 		return false
 	}
 	return true
@@ -270,13 +276,16 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	// Configure the i18n library to use the preferred language set in the CENOLANG environement variable
-	if os.Getenv("CENOLANG") == "" {
+	setLanguage := os.Getenv("CENOLANG")
+	if setLanguage == "" {
 		os.Setenv("CENOLANG", "en-us")
+		setLanguage = "en-us"
 	}
-	T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
+	i18n.MustLoadTranslationFile("./translations/" + setLanguage + ".all.json")
+	T, _ := i18n.Tfunc(setLanguage, "en-us")
 	// Read an existing configuration file or have the user supply settings
 	if conf, err := ReadConfigFile(CONFIG_FILE); err != nil {
-		fmt.Println(T("no_config_cli", map[string]interface{}{"Location": CONFIG_FILE,}))
+		fmt.Println(T("no_config_cli", map[string]interface{}{"Location": CONFIG_FILE}))
 		Configuration = GetConfigFromUser()
 	} else {
 		Configuration = conf
@@ -284,8 +293,9 @@ func main() {
 	// Create an HTTP proxy server
 	http.HandleFunc("/lookup", directHandler)
 	http.HandleFunc("/", proxyHandler)
-	fmt.Println(T("listening_msg_cli", map[string]interface{}{"Port": Configuration.PortNumber,}))
-	if err = http.ListenAndServe(Configuration.PortNumber, nil); err != nil {
+	fmt.Println(T("listening_msg_cli", map[string]interface{}{"Port": Configuration.PortNumber}))
+	err := http.ListenAndServe(Configuration.PortNumber, nil)
+	if err != nil {
 		panic(err)
 	}
 }
