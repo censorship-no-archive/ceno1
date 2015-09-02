@@ -5,8 +5,9 @@ import (
 	"fmt"
 	rss "github.com/jteeuwen/go-pkg-rss"
 	"github.com/jteeuwen/go-pkg-xmlx"
-  "github.com/nicksnyder/go-i18n/i18n"
+	"github.com/nicksnyder/go-i18n/i18n"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -95,6 +96,7 @@ func followFeeds(requests chan FeedInfo) {
  * @param {chan FeedInfo} requests - A channel through which descriptions of feeds to be followed are received
  */
 func followHandler(requests chan FeedInfo) func(http.ResponseWriter, *http.Request) {
+	T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
 	return func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Got request")
 		if r.Method != "POST" {
@@ -116,24 +118,27 @@ func followHandler(requests chan FeedInfo) func(http.ResponseWriter, *http.Reque
 }
 
 func main() {
-  // Configure the i18n library to use the preferred language set in the CENOLANG environment variable
-  if os.Getenv("CENOLANG") == "" {
-    os.Setenv("CENOLANG", "en-us")
-  }
-  T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
-  // Check that the configuration supplied has valid fields, or panic
-  if conf, err := ReadConfigFile(CONFIG_FILE); err != nil {
-    panic(T("no_config_rdr", map[string]interface{}{"Location": CONFIG_FILE,}))
-  } else if !ValidConfiguration(conf) {
-    panic(T("invalid_config_rdr"))
-  } else {
-    Configuration = conf
-  }
-  // Set up the HTTP server to listen for requests for new feeds to read
+	// Configure the i18n library to use the preferred language set in the CENOLANG environment variable
+	setLanguage := os.Getenv("CENOLANG")
+	if setLanguage == "" {
+		os.Setenv("CENOLANG", "en-us")
+		setLanguage = "en-us"
+	}
+	i18n.MustLoadTranslationFile("./translations/" + setLanguage + ".all.json")
+	T, _ := i18n.Tfunc(setLanguage, "en-us")
+	// Check that the configuration supplied has valid fields, or panic
+	if conf, err := ReadConfigFile(CONFIG_FILE); err != nil {
+		panic(T("no_config_rdr", map[string]interface{}{"Location": CONFIG_FILE}))
+	} else if !ValidConfiguration(conf) {
+		panic(T("invalid_config_rdr"))
+	} else {
+		Configuration = conf
+	}
+	// Set up the HTTP server to listen for requests for new feeds to read
 	requestNewFollow := make(chan FeedInfo)
 	go followFeeds(requestNewFollow)
 	http.HandleFunc("/follow", followHandler(requestNewFollow))
-	fmt.Println(T("listening_msg_rdr", map[string]interface{}{"Port": Configuration.PortNumber,}))
+	fmt.Println(T("listening_msg_rdr", map[string]interface{}{"Port": Configuration.PortNumber}))
 	if err := http.ListenAndServe(":3095", nil); err != nil {
 		panic(err)
 	}
