@@ -1,7 +1,7 @@
 [
   {
     "id": "listening_msg_rdr",
-    "translation": "The reader server is listening on localhost:{{.Port}}."
+    "translation": "The reader server is listening on localhost{{.Port}}."
   },
   {
     "id": "method_not_impl_rdr",

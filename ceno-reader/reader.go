@@ -127,7 +127,8 @@ func main() {
 	i18n.MustLoadTranslationFile("./translations/" + setLanguage + ".all.json")
 	T, _ := i18n.Tfunc(setLanguage, "en-us")
 	// Check that the configuration supplied has valid fields, or panic
-	if conf, err := ReadConfigFile(CONFIG_FILE); err != nil {
+	conf, err := ReadConfigFile(CONFIG_FILE)
+	if err != nil {
 		panic(T("no_config_rdr", map[string]interface{}{"Location": CONFIG_FILE}))
 	} else if !ValidConfiguration(conf) {
 		panic(T("invalid_config_rdr"))
@@ -139,7 +140,7 @@ func main() {
 	go followFeeds(requestNewFollow)
 	http.HandleFunc("/follow", followHandler(requestNewFollow))
 	fmt.Println(T("listening_msg_rdr", map[string]interface{}{"Port": Configuration.PortNumber}))
-	if err := http.ListenAndServe(":3095", nil); err != nil {
+	if err := http.ListenAndServe(conf.PortNumber, nil); err != nil {
 		panic(err)
 	}
 }
