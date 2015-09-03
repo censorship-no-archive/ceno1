@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CENO Router Installation</title>
+  <style type="text/css">
+body {
+  background-color: #EDEDE3;
+  font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
+}
+div.horizontalrule {
+  border: none;
+  height: 1px;
+  background-color: #DDD;
+  width: 760px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  margin-left:-30px;
+}
+div.center {
+  text-align: center;
+}
+div.error {
+  margin-top: 40px;
+  background-color: #FDFDFD;
+  margin-left: auto;
+  margin-right: auto;
+  width: 700px;
+  padding-top: 10px;
+  padding-bottom: 30px;
+  padding-left: 30px;
+  padding-right: 30px;
+  color: #333;
+  box-shadow: 0px 2px 4px 0px #999;
+  border-radius: 2px;
+}
+h1,h2 {
+  font-weight: normal;
+}
+div.error h1 {
+  width: 574px;
+}
+span.bold {
+  font-weight: bold;
+}
+span.italic {
+  font-style: italic;
+}
+span.text {
+  padding-right: 30px;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+span.colored {
+  color: rgba(228, 48, 58, 0.9);
+}
+a {
+  text-decoration: none;
+  color: inherit;
+}
+img#logo {
+  float: right;
+  width: 125px;
+  margin-top: 20px;
+}
+div#stack {
+  background-color: #efefef;
+  padding: 10px;
+  padding-left: 15px;
+  overflow: scroll;
+}
+/*** Styles specific to the extension installation instructions ***/
+div#downloaders {
+}
+div#downloaders button.downloader {
+  width: 200px;
+  height: 64px;
+  background-color: #E43624;
+  color: #F4F4F3;
+  border: medium none;
+  border-radius: 1px;
+  font-size: 14px;
+  font-weight: 400;
+}
+button#firefoxExt {
+}
+button#chromeExt {
+}
+div.explanation {
+  background-color: #F4F4F3;
+  color: #4C4A4A;
+}
+  </style>
+</head>
+<body>
+  <div class="error">
+    <h1>Choose the downloader for your browser</h1>
+    <div id="main">
+      <div class="explanation">
+        <p>
+          Please note that <span class="colored">you are not protected yet!</span>
+          You must install the CENO Router extension and activate it before you proceed to
+          browse the web.
+        </p>
+        <p>
+          Currently, the CENO Router browser extension can run in Firefox or Chrome/Chromium.
+          Please click the button corresponding to the browser you are using to view this page.
+        </p>
+      </div>
+      <div id="downloaders">
+        <button id="firefoxExt" class="downloader">
+          <a href="../../ceno-firefox">Install in Firefox</a>
+        </button>
+        <button id="chromeExt" class="downloader">
+          <a href="../../ceno-chrome">Install in Chrome</a>
+        </button>
+      </div>
+      <h2>What is the CENO Router</h2>
+      <div class="explanation">
+        <p>
+          The CENO Router is a browser extension that, when activated, makes sure that all of
+          your browsing activity happens through CENO.  This guarantees that no information
+          about the pages you are looking at leaks to censors.
+        </p>
+      </div>
+      <h2>Browser profiles</h2>
+      <div class="explanation">
+        <p>
+          To avoid interfering with your regular browsing activity, we have created a new
+          browser profile for you to install CENO Router in.  You'll notice that this
+          browser window is in a default state.  When you start your browser again normally,
+          it will not be the CENO version running, but your usual browser.
+        </p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
