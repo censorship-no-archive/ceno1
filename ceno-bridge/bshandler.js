@@ -63,6 +63,12 @@ module.exports = function (config) {
   // Bundle as many resources in requested pages as possible, without any
   // request manipulation
   var bundler = new b.Bundler(requestedURL);
+
+  if (config.useProxy) {
+    bundler.on('originalRequest', b.proxyTo(config.proxyAddress));
+    bundler.on('resourceRequest', b.proxyTo(config.proxyAddress));
+  }
+
   bundler.on('originalReceived', b.replaceImages);
   bundler.on('originalReceived', b.replaceCSSFiles);
   bundler.on('originalReceived', b.replaceJSFiles);

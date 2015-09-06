@@ -1,4 +1,6 @@
 {
 	"port": 3094,
-  "requestReceiver": "http://localhost:3093"
+	"requestReceiver": "http://localhost:3093",
+	"useProxy": false,
+	"proxyAddress": "http://localhost:8118"
 }
