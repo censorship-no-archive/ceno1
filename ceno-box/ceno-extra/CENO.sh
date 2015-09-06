@@ -25,9 +25,6 @@ fi
 echo "CENO language set to" $CENOLANG
 export CENOLANG
 
-# Start the Freenet node
-./run.sh start &> CENO.log
-
 function browserExists {
   if command -v $1 >/dev/null 2>&1
   then
@@ -60,13 +57,15 @@ then
 else
     echo "None of the supported browsers is installed in your machine."
     echo "Please install Chrome or Firefox and execute this script again."
-    ./run.sh stop
     exit 0
 fi
 
+# Start the Freenet node
+./run.sh start &> CENO.log
+
 # Start CENOClient proxy
 cd ceno-client
-nohup ./CENOClient &> ../CENO.log &
+CENOLANG=en-us nohup ./CENOClient &> ../CENO.log &
 cd ..
 
 echo "You are ready to use CENO."
