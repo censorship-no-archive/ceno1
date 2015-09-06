@@ -45,11 +45,11 @@ bridge owners.
 ## Things to consider before running a CENO Bridge node
   * Remember to always configure the Bundle Server agent to proxy its traffic over an
     anonymizing network. Tor and i2p are ideal candidates. This is very important. If
-    you do not,  your network traffic will expose that you are hosting a bridge, putting
-    yourself and your trusting users in danger. In the worst case, you might be accused of
+    you do not, your network traffic will expose that you are hosting a bridge, putting
+    yourself and the users who trust you in danger. In the worst case, you might be accused of
     accessing illegal content CENO clients have requested.
-  * Do not share either the private key of the USK you are using for publishing bundles,
-    or the insertion URI of your WoT identity.
+  * Do not share neither the private key of the USK you are using for publishing bundles,
+    nor the insertion URI of your WoT identity.
   * If you decide to run a CENO Bridge node, you should make sure your node is continuously
     running and connected to enough peers. Being connected with Friend Nodes well distributed
     in the Freenet network will radically increase the speed of your bridge
@@ -58,7 +58,7 @@ bridge owners.
     them as friends will expose your IP address to them.
   * Do not use your personal WoT identity for CENO Bridge purposes. You are advised to create a new one.
   * The Bundle Server will bind to port 3094, and the CENOBridge plugin to ports 3093 and 3095.
-    Both agents will listen only to local requests.
+    Both agents will accept only local requests.
 
 
 ### Current implementation (v0.3.0) limitations
@@ -69,9 +69,9 @@ bridge owners.
   * Smart insertions with a single Manifest file for every domain has not been implemented yet.
   * In the future, CENOBridge will be a context of the WebOfTrust identities and will include
     required information such as the public SSK key in a special page, similar to the Freemail's
-    mailsite SSK. At the moment, If you would like people to use your Insertion Authority you will have
+    mailsite SSK. At the moment, if you would like people to use your Insertion Authority, you will have
     to modify the CENOClient and CENOBridge Freemail and WebOfTrust identities constants, the Bridge public
-    SSK key, as well as the accprops file in the CENOClient plugin, and distribute your own builds.
+    SSK key, as well as the accprops file in the CENOClient plugin, and distribute your own CENO builds.
 
 
 ### Logs
@@ -84,12 +84,14 @@ another tool.
 
 
 ## Getting started with the Bundle Server
-  1. Install tor and torsocks. Start tor.
-   (Official documentation [here](https://www.torproject.org/docs/documentation.html.en)).
-  2. Install node.js and npm.
-  3. Change directory to `$ceno-repository/ceno-bridge`.
-  4. Download bundle-server dependencies by executing `npm install`.
-  5. Start the bundle-server behind torsocks `LANGUAGE=en torsocks node bundle-server.js`.
+  1. Install [tor](https://www.torproject.org/) and make sure it can successfully open a circuit ([official installation guide](https://www.torproject.org/docs/installguide.html.en)).
+  2. Install [privoxy](http://www.privoxy.org/) and configure it to use tor as a socks5 proxy ([privoxy documentation](http://www.privoxy.org/faq/misc.html#TOR)). Then restart the privoxy service.
+  3. You may want to test that privoxy and tor are chained correctly. In order to do so, visit a tor hidden service with a browser configured to use "http://localhost:8118" as HTTP and HTTPS proxy (8118 being the default privoxy port).
+  4. Install node.js and npm.
+  5. Change directory to `$ceno-repository/ceno-bridge`.
+  6. Download bundle-server dependencies by executing `npm install`.
+  7. Configure bundle-server appropriately by modifying the ceno-bridge/config/node.json file.
+  8. Start the bundle-server `CENOLANG=en-us node bundle-server.js`, where CENOLANG can be set to your preferred language that a translation exists for.
 
 
 ## Getting started with the CENOBridge plugin for Freenet
@@ -109,7 +111,9 @@ another tool.
    the CENOClient Identity request URI
    (`USK@7ymlO2uUoGAt9SwDDnDWLCkIkSzaJr5G6etn~vmJxrU,WMeRYMzx2tQHM~O8UWglUmBnjIhp~bh8xue-6g2pmps,AQACAAE/WebOfTrust/0`),
    set a positive trust score for it (e.g. 75). Optionally, set a 0 trust score to the seed identities, if you are
-   not intending to use this node in any other way.
+   not intending to use this node in any other way; this will stop your node from downloading recursively WoT
+   identities and making score calculations, which demand resources and may slow down the discovery of requests
+   and bundle insertions.
   7. Visit Freemail and login with the new identity and using as password `CENO`.
   8. Build CENOBridge plugins following the
    [building instructions](https://github.com/equalitie/ceno/blob/master/ceno-freenet/README.building.md).
@@ -119,8 +123,16 @@ another tool.
    Insert the location of the CENOBridge plugin you have compiled.
   10. CENOBridge will generate a SSK key pair during the first time it gets loaded and store it in the configuration file
    in `~.CENO/bridge.properties`. This file is read during CENOBridge plugin load, so if you would like to modify it,
-   unload the plugin and load it again. Keep this file safe. You can use it for inserting bundles with the same Insertion
-   Authority public key from another node. If someone gets access to it, users won't be able to tell the difference from
-   you and might be exposed to dangerous content.
+   unload the plugin, change the file, and then load it again. Keep this file safe! You can use it for inserting bundles
+   with the same Insertion Authority public key from another node. If someone gets access to it, users won't be able to
+   tell the difference from you and might be exposed to dangerous content.
   11. Make sure CENOBridge has been successfully loaded, by finding the corresponding row in the
    `Plugins currently loaded` list.
+  12. You might want to make sure that all of the agents are up and running, and their processes are not children of
+  your current shell. Now you are ready to serve requests for bundles from clients. Start by publishing your public
+  SSK key, your WebOfTrust identity request URI and your Freemail. Building a CENOBox that will use your Insertion
+  Authority by default is also an option.
+  13. Finally, in order to increase the speed of insertions and of discovery of requests from clients, you can spin
+  various CENOBackbone nodes, add them as friends with a HIGH trust and NO visibility, and give them high storage
+  and bandwidth allowance.
+  14. Remember to keep your Freenet node and CENO bridge agents up-to-date with the latest updates.
