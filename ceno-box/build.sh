@@ -2,17 +2,19 @@
 
 # This script will create a CENO all-in-one box ready for distribution
 # If the -p (plugins) flag is enabled, the bundle will include a build of CENO
-# client, Freemail and WebOfTrust, with the latest local modifications.
+# client, Freemail and WebOfTrust plugins with the latest local modifications.
 #
-# This bundle includes:
+# This CENOBOx bundle includes:
 #  * A Freenet node, preloaded with the WebOfTrust, Freemail and CENO plugins,
-#    as well as preconfigured with the CENO Client identity. Opennet is
+#    as well as preconfigured with the CENO Client identity. Unless -p flag
+#    was enabled, the plguins will be downloaded from Freenet. Opennet is
 #    enabled by default, meaning that your node will try to connect to seed
 #    nodes once it gets started.
 #  * The CENO Client proxy that will forward your browser's traffic via
 #    the CENO Freenet plugin.
 #  * A Firefox profile that forwards all traffic to the CENOClient proxy.
-#  * A plugin for chrome that will rewrite HTTPS requests to HTTP ones.
+#  * A plugin for chrome (CENO Router) that will rewrite HTTPS requests
+#    to HTTP ones.
 
 
 # Parse options to check if DEBUG mode is enabled
@@ -101,8 +103,7 @@ copyFreenetFilesTo CENOBox
 copyFreenetFilesTo CENOBackbone
 
 echo "Copying extra CENO client specific directories"
-cp -rL ceno-firefox CENOBox
-cp -rL browser-profiles/chrome CENOBox/ceno-chrome
+cp -rL {ceno-firefox,ceno-chrome} CENOBox
 cp -r ceno-{freenet,extra}/* CENOBox
 mkdir CENOBox/ceno-client
 cp -r ceno-client/{views,config} CENOBox/ceno-client

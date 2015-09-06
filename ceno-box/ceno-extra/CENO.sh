@@ -38,7 +38,7 @@ function browserExists {
 }
 
 function startChromeProfile {
-  $1 --profile-directory=ceno-chrome --incognito &
+  $1 --profile-directory=ceno-chrome --incognito ./ceno-client/views/extension-en-us.html &> /dev/null &
 }
 
 # Open a browser window with the CENO profiles, including the plugin
@@ -56,7 +56,7 @@ then
   startChromeProfile google-chrome
 elif browserExists firefox
 then
-    firefox -no-remote -private-window -profile "ceno-firefox" &> /dev/null &
+    firefox -no-remote -private-window -profile "ceno-firefox" ./ceno-client/views/extension-en-us.html &> /dev/null &
 else
     echo "None of the supported browsers is installed in your machine."
     echo "Please install Chrome or Firefox and execute this script again."
