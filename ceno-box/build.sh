@@ -104,6 +104,7 @@ copyFreenetFilesTo CENOBackbone
 
 echo "Copying extra CENO client specific directories"
 cp -rL {ceno-firefox,ceno-chrome} CENOBox
+cp -r browser-extensions-builds/ CENOBox/browser-extensions
 cp -r ceno-{freenet,extra}/* CENOBox
 mkdir CENOBox/ceno-client
 cp -r ceno-client/{views,config} CENOBox/ceno-client
