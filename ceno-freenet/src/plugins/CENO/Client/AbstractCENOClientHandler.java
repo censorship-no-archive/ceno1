@@ -87,11 +87,19 @@ public abstract class AbstractCENOClientHandler implements FredPluginHTTP {
 	 *   "errMsg": [localized informative error message]
 	 * }
 	 */
-	protected String returnErrorJSON(CENOException cenoEx) {
+	private String returnErrorJSON(CENOException cenoEx) {
 		JSONObject jsonResponse = new JSONObject();
 		jsonResponse.put("errCode", cenoEx.getErrCode().getDocCode());
 		jsonResponse.put("errMsg", cenoEx.getMessage());
 		return jsonResponse.toJSONString();
+	}
+	
+	protected String returnError(CENOException cenoEx, boolean clientIsHtml) {
+		if (clientIsHtml) {
+			return cenoEx.getMessage();
+		} else {
+			return returnErrorJSON(cenoEx);
+		}
 	}
 
 }

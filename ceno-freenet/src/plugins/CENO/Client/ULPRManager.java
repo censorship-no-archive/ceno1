@@ -2,6 +2,8 @@ package plugins.CENO.Client;
 
 import java.util.Hashtable;
 
+import plugins.CENO.CENOErrCode;
+import plugins.CENO.CENOException;
 import plugins.CENO.Common.URLtoUSKTools;
 import freenet.client.FetchException;
 import freenet.client.FetchException.FetchExceptionMode;
@@ -42,7 +44,12 @@ public class ULPRManager {
 		public void onFailure(FetchException e, ClientGetter state) {
 			//TODO Handle not fatal errors (like permanent redirections)
 			if (e.getMode() == FetchExceptionMode.PERMANENT_REDIRECT) {
-				initULPR(url, e.newURI.getEdition());
+				try {
+					initULPR(url, e.newURI.getEdition());
+				} catch (CENOException e1) {
+					// Unlikely to happen
+					e1.printStackTrace();
+				}
 			} else {
 				updateULPRStatus(url, ULPRStatus.failed);
 				Logger.error(this, "ULPR failed for url: " + url + " Exception: " + e.getMessage());
@@ -73,7 +80,7 @@ public class ULPRManager {
 		}
 	}
 
-	public static ULPRStatus lookupULPR(String url) {
+	public static ULPRStatus lookupULPR(String url) throws CENOException {
 		if (!urlExistsInTable(url)) {
 			ulprManager.initULPR(url);
 		}
@@ -92,26 +99,28 @@ public class ULPRManager {
 		ulprManager.ulprTable.put(url, status);
 	}
 
-	private void initULPR(String url) {
+	private void initULPR(String url) throws CENOException {
+		//TODO Experiment with "-1" as Suggested Edition for the USK
 		initULPR(url, 0);
 	}
 
-	private void initULPR(String url, long newEdition) {
+	private void initULPR(String url, long newEdition) throws CENOException {
 		updateULPRStatus(url, ULPRStatus.starting);
 		FreenetURI calculatedUSK = null;
 		try {
 			calculatedUSK = URLtoUSKTools.computeUSKfromURL(url, CENOClient.bridgeKey);
 		} catch (Exception e) {
+			Logger.error(this, "Could not calculate USK for URL: " + url);
 			updateULPRStatus(url, ULPRStatus.couldNotStart);
-			Logger.error(this, "Could not start ULPR for URL: " + url);
+			throw new CENOException(CENOErrCode.LCS_HANDLER_URL_TO_USK);
 		}
 		calculatedUSK = calculatedUSK.setSuggestedEdition(newEdition);
 		try {
 			CENOClient.nodeInterface.fetchULPR(calculatedUSK, new ULPRGetCallback(url));
 		} catch (FetchException e) {
-			e.printStackTrace();
+			Logger.error(this, "Could not start ULPR for URL: " + url);
 			updateULPRStatus(url, ULPRStatus.couldNotStart);
-			return;
+			throw new CENOException(CENOErrCode.LCS_LOOKUP_ULPR_INIT);
 		}
 		updateULPRStatus(url, ULPRStatus.inProgress);
 	}
