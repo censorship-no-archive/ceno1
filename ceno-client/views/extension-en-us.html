@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CENO Router Installation</title>
+  <style type="text/css">
+body {
+  background-color: #EDEDE3;
+  font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
+}
+div.horizontalrule {
+  border: none;
+  height: 1px;
+  background-color: #DDD;
+  width: 760px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  margin-left:-30px;
+}
+div.center {
+  text-align: center;
+}
+div.error {
+  margin-top: 40px;
+  background-color: #FDFDFD;
+  margin-left: auto;
+  margin-right: auto;
+  width: 700px;
+  padding-top: 10px;
+  padding-bottom: 30px;
+  padding-left: 30px;
+  padding-right: 30px;
+  color: #333;
+  box-shadow: 0px 2px 4px 0px #999;
+  border-radius: 2px;
+}
+h1,h2 {
+  font-weight: normal;
+}
+div.error h1 {
+  width: 574px;
+}
+span.bold {
+  font-weight: bold;
+}
+span.italic {
+  font-style: italic;
+}
+span.text {
+  padding-right: 30px;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+span.colored {
+  color: rgba(228, 48, 58, 0.9);
+}
+a {
+  text-decoration: none;
+  color: inherit;
+}
+img#logo {
+  float: right;
+  width: 125px;
+  margin-top: 20px;
+}
+img{
+  cursor: -moz-zoom-in; 
+  cursor: -webkit-zoom-in; 
+  cursor: zoom-in;
+}
+div#stack {
+  background-color: #efefef;
+  padding: 10px;
+  padding-left: 15px;
+  overflow: scroll;
+}
+/*** Styles specific to the extension installation instructions ***/
+div#downloaders {
+  padding-top: 20px;
+  padding-bottom: 20px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 450px;
+}
+div#downloaders button.downloader {
+  width: 200px;
+  height: 64px;
+  background-color: #E43624;
+  color: #F4F4F3;
+  border: medium none;
+  border-radius: 1px;
+  font-size: 14px;
+  font-weight: 400;
+  margin-right: 20px;
+}
+button#firefoxExt {
+}
+button#chromeExt {
+}
+div.explanation {
+  color: #4C4A4A;
+}
+  </style>
+</head>
+<body>
+  <div class="error">
+    <h1>Choose browser</h1>
+    <div id="main">
+      <div class="explanation">
+        <p>
+          Please note that <span class="colored">you are not protected yet!</span>
+          You must install the CENO Router extension and activate it before you proceed to
+          browse the web.
+        </p>
+        <p>
+          Currently, the CENO Router browser extension can run in Firefox or Chrome/Chromium.
+          Please click the button corresponding to the browser you are using to view this page.
+        </p>
+      </div>
+      <div id="downloaders">
+        <a href="#installfirefox">
+          <button id="firefoxExt" class="downloader">
+            Install in Firefox
+          </button>
+        </a>
+        <a href="#installchrome">
+          <button id="chromeExt" class="downloader">
+            Install in Chrome
+          </button>
+        </a>
+      </div>
+      <h2>CENO Router</h2>
+      <div class="explanation">
+        <p>
+          The CENO Router is a browser extension that, when activated, makes sure that all of
+          your browsing activity happens through CENO.  This guarantees that no information
+          about the pages you are looking at leaks to censors.
+        </p>
+      </div>
+      <h2>Browser profiles</h2>
+      <div class="explanation">
+        <p>
+          To avoid interfering with your regular browsing activity, we have created a new
+          browser profile for you to install CENO Router in.  You'll notice that this
+          browser window is in a default state.  When you start your browser again normally,
+          it will not be the CENO version running, but your usual browser.
+        </p>
+      </div>
+    </div>
+    <div class="horizontalrule"></div>
+    <a name="installfirefox"></a>
+    <h1>Firefox instructions</h1>
+    <div class="explanation">
+      <a href="cenofirefoxinstruct1.png">
+        <img style="width: 700px;" src="cenofirefoxinstruct1.png" />
+      </a>
+    </div>
+    <h2>Step 1</h2>
+    <div class="explanation">
+      <p>
+        The first step is to open a new tab, enter <span class="colored">about:addons</span>
+        into the address bar and press enter/return.
+      </p>
+    </div>
+    <h2>Step 2</h2>
+    <div class="explanation">
+      <p>
+        Click the gear/settings icon and then click <span class="colored">
+        Install Add-on From File...</span> and select <span class="colored">
+        ceno/builds/cenorouter@equalit.ie-X.Y.Z.xpi</span>.
+      </p>
+    </div>
+    <div class="explanation">
+      <div>
+        <a href="cenofirefoxinstruct2.png">
+          <img style="width: 250px;" src="cenofirefoxinstruct2.png" />
+        </a>
+      </div>
+    </div>
+    <h2>Step 3</h2>
+    <div class="explanation">
+      <p>
+        In the popup dialog that appears, click <span class="colored">install</span>.
+      </p>
+    </div>
+    <div>
+      <a href="#finishingup"><span class="colored">&#8595; Finishing up</span></a>
+    </div>
+    <div class="horizontalrule"></div>
+    <a name="installchrome"></a>
+    <h1>Chrome instructions</h1>
+    <div class="explanation">
+      <a href="cenochromeinstruct1.png">
+        <img style="width: 700px; height: 144px;" src="cenochromeinstruct1.png" />
+      </a>
+    </div>
+    <h2>Step 1</h2>
+    <div class="explanation">
+      <p>
+        In a new tab, enter <span class="colored">chrome://extensions</span> into
+        the address bar and press enter/return.
+      </p>
+    </div>
+    <h2>Step 2</h2>
+    <div class="explanation">
+      <p>
+        Check the <span class="colored">Developer mode</span> checkbox.
+      </p>
+    </div>
+    <h2>Step 3</h2>
+    <div class="explanation">
+      <p>
+        Click the now-available <span class="colored">Load unpacked extension...</span>
+        button and then open the <span class="colored">ceno/ceno-chrome</span>
+        directory in the file browser that appears.
+      </p>
+    </div>
+    <div>
+      <a href="#finishingup"><span class="colored">&#8595; Finishing up</span></a>
+    </div>
+    <div class="horizontalrule"></div>
+    <a name="finishingup"></a>
+    <h1>You're done!</h1>
+    <div class="explanation">
+      <div>
+        <a href="cenopopup.png">
+          <img style="width: 450px;" src="cenopopup.png" />
+        </a>
+      </div>
+      <p>
+        You should now have an icon in your toolbar for the CENO Router extension.
+        Clicking on it reveals a popup with some information and a <span class="colored">
+        Toggle CENO</span> button that, when clicked, will activate CENO if it is
+        inactive and deactivate it otherwise.  You must have the CENO Client running
+        to be able to activate CENO.
+      </p>
+    </div>
+  </div>
+</body>
+</html>
