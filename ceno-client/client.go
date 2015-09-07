@@ -88,7 +88,7 @@ func lookup(lookupURL string) Result {
 	} else if response == nil || response.StatusCode != 200 {
 		errMsg := T("lcs_not_ready_cli")
 		fmt.Println(errMsg)
-		return Result{ERR_NO_CONNECT_LCS, errMsg, false, false, ""}
+		return Result{ERR_LCS_NOT_READY, errMsg, false, false, ""}
 	}
 	decoder := json.NewDecoder(response.Body)
 	var result Result

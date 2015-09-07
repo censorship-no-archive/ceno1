@@ -60,6 +60,10 @@
     "translation": "The LCS is not ready to handle requests just yet. Please wait a moment and try again."
   },
   {
+    "id": "lcs_not_ready_err",
+    "translation": "Wait a minute or two before making your request again."
+  },
+  {
     "id": "listening_msg_cli",
     "translation": "CENO proxy server listening for HTTP requests at http://127.0.0.1{{.Port}}"
   },

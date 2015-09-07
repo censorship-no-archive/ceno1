@@ -17,6 +17,7 @@ const ( // CC errors
 	ERR_MALFORMED_LCS_RESPONSE = 1201
 	ERR_FROM_LCS               = 1202
 	ERR_NO_CONNECT_RS          = 1203
+	ERR_LCS_NOT_READY          = 1204
 	ERR_MISSING_VIEW           = 1102
 	ERR_INVALID_ERROR          = 100
 )
@@ -51,6 +52,7 @@ var errorAdvice = map[ErrorCode]string{
 	ERR_NO_CONNECT_RS:          "agent_communication_err",
 	ERR_MISSING_VIEW:           "download_package_err",
 	ERR_INVALID_ERROR:          "contact_devs_err",
+	ERR_LCS_NOT_READY:          "lcs_not_ready_err",
 }
 
 // An error handler for each of the errors that CC is expected to be responsible for.
@@ -65,6 +67,7 @@ var ccErrorHandlers = map[ErrorCode]func(ErrorState) bool{
 	ERR_NO_CONNECT_RS:          serveError,
 	ERR_MISSING_VIEW:           downloadViewsAndServeError,
 	ERR_INVALID_ERROR:          serveError,
+	ERR_LCS_NOT_READY:          serveError,
 }
 
 // An error handler for each of the error thatthe LCS is expected to send to the
@@ -92,7 +95,8 @@ func serveError(state ErrorState) bool {
 	w := state["responseWriter"].(http.ResponseWriter)
 	r := state["request"].(*http.Request)
 	errMsg := state["errMsg"].(string)
-	ExecuteErrorPage(ERR_MALFORMED_URL, errMsg, w, r)
+	errCode := state["errCode"].(ErrorCode)
+	ExecuteErrorPage(errCode, errMsg, w, r)
 	return true
 }
 
