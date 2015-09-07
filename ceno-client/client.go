@@ -80,11 +80,15 @@ func pleaseWait(URL string, w http.ResponseWriter) {
 func lookup(lookupURL string) Result {
 	response, err := http.Get(BundleLookupURL(Configuration, lookupURL))
 	T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
-	if err != nil || response == nil || response.StatusCode != 200 {
+	if err != nil {
 		fmt.Println(T("error_cli", map[string]interface{}{
 			"Message": err.Error(),
 		}))
 		return Result{ERR_NO_CONNECT_LCS, err.Error(), false, false, ""}
+	} else if response == nil || response.StatusCode != 200 {
+		errMsg := T("lcs_not_ready_cli")
+		fmt.Println(errMsg)
+		return Result{ERR_NO_CONNECT_LCS, errMsg, false, false, ""}
 	}
 	decoder := json.NewDecoder(response.Body)
 	var result Result
