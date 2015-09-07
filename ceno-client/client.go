@@ -80,7 +80,7 @@ func pleaseWait(URL string, w http.ResponseWriter) {
 func lookup(lookupURL string) Result {
 	response, err := http.Get(BundleLookupURL(Configuration, lookupURL))
 	T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
-	if err != nil || response.StatusCode != 200 {
+	if err != nil || response == nil || response.StatusCode != 200 {
 		fmt.Println(T("error_cli", map[string]interface{}{
 			"Message": err.Error(),
 		}))
