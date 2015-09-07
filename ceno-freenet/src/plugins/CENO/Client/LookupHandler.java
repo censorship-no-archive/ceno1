@@ -19,88 +19,61 @@ import freenet.support.Logger;
 import freenet.support.api.HTTPRequest;
 
 /**
- * Handler for requests in the /lookup path
+ * Handler for requests to the /lookup path. Responsible for determining whether
+ * a bundle for a URL exists in the local or the distributed cache, as well as
+ * for its retrieval.
  */
 public class LookupHandler extends AbstractCENOClientHandler {
 
+	@Override
 	public String handleHTTPGet(HTTPRequest request) throws PluginHTTPException {
 		// If "client" GET parameter is set to "HTML", then LCS will compose an
 		// HTML response instead of the JSON Object
 		boolean clientIsHtml = isClientHtml(request);
 
+		// Check if URL parameter of the GET request is Empty
 		String urlParam = request.getParam("url", "");
 		if (urlParam.isEmpty()) {
-			if (clientIsHtml) {
-				return new CENOException(CENOErrCode.LCS_HANDLER_URL_INVALID).getMessage();
-			}
-			return returnErrorJSON(new CENOException(CENOErrCode.LCS_HANDLER_URL_INVALID));
+			return returnError(new CENOException(CENOErrCode.LCS_HANDLER_URL_INVALID), clientIsHtml);
 		}
 
-		if (!clientIsHtml) {
-			try {
-				urlParam = Base64.decodeUTF8(urlParam);
-			} catch (IllegalBase64Exception e) {
-				return returnErrorJSON(new CENOException(CENOErrCode.LCS_HANDLER_URL_DECODE));
-			}
+		// Base64 Decode the URL parameter
+		try {
+			urlParam = Base64.decodeUTF8(urlParam);
+		} catch (IllegalBase64Exception e) {
+			return returnError(new CENOException(CENOErrCode.LCS_HANDLER_URL_DECODE), clientIsHtml);
 		}
 
+		// Validate the URL requested
 		try {
 			urlParam = URLtoUSKTools.validateURL(urlParam);
 		} catch (MalformedURLException e) {
-			if (clientIsHtml) {
-				return new CENOException(CENOErrCode.LCS_HANDLER_URL_INVALID).getMessage();
-			} else {
-				return returnErrorJSON(new CENOException(CENOErrCode.LCS_HANDLER_URL_INVALID));
-			}
+			return returnError(new CENOException(CENOErrCode.LCS_HANDLER_URL_INVALID), clientIsHtml);
 		}
 
+		// Calculate the retrieval address of the inserted bundle for this URL
 		FreenetURI calculatedUSK = null;
 		try {
 			calculatedUSK = URLtoUSKTools.computeUSKfromURL(urlParam, CENOClient.bridgeKey);
 		} catch (Exception e) {
-			if (clientIsHtml) {
-				return new CENOException(CENOErrCode.LCS_HANDLER_URL_INVALID).getMessage();
-			} else {
-				return returnErrorJSON(new CENOException(CENOErrCode.LCS_HANDLER_URL_INVALID));
-			}
+			return returnError(new CENOException(CENOErrCode.LCS_HANDLER_URL_INVALID), clientIsHtml);
 		}
 
+		// Make a synchronous lookup in the local cache for the bundled version of the URL
 		String localFetchResult = null;
 		try {
 			localFetchResult = localCacheLookup(calculatedUSK);
 		} catch (CENOException e) {
-			return returnErrorJSON(e);
+			return returnError(e, clientIsHtml);
 		}
 
-		if (localFetchResult == null) {
-			NodeConnections nodeConnections = CENOClient.nodeInterface.getConnections();
-			if (nodeConnections.getCurrent() == 0) {
-				return returnErrorJSON(new CENOException(CENOErrCode.LCS_NODE_NOT_ENOUGH_PEERS));
-			}
-			ULPRStatus urlULPRStatus = ULPRManager.lookupULPR(urlParam);
-			if (nodeConnections.getCurrent() < 3) {
-				return returnErrorJSON(new CENOException(CENOErrCode.LCS_NODE_INITIALIZING));
-			}
-			RequestSender.requestFromBridge(urlParam);
-			if (urlULPRStatus == ULPRStatus.failed) {
-				if (clientIsHtml) {
-					return printStaticHTMLReplace("resources/requestedFromBridge.html", "[urlRequested]", urlParam);
-				} else {
-					JSONObject jsonResponse = new JSONObject();
-					jsonResponse.put("complete", true);
-					jsonResponse.put("found", false);
-					return jsonResponse.toJSONString();
-				}
-			} else {
-				if (clientIsHtml) {
-					return printStaticHTMLReplace("resources/sentULPR.html", "[urlRequested]", urlParam);
-				} else {
-					JSONObject jsonResponse = new JSONObject();
-					jsonResponse.put("complete", false);
-					return jsonResponse.toJSONString();
-				}
-			}
-		} else {
+		/*
+		 * If the bundle was found and retrieved from the the local cache, return it
+		 * to the agent that made the request.
+		 * Resources of Ultra Light Passive Requests (ULPRs) in the distributed cache, once
+		 * successfully retrieved, are also available in the local cache.
+		 */
+		if (localFetchResult != null) {
 			if (clientIsHtml) {
 				return localFetchResult;
 			} else {
@@ -110,6 +83,57 @@ public class LookupHandler extends AbstractCENOClientHandler {
 				jsonResponse.put("bundle", localFetchResult);
 				return jsonResponse.toJSONString();
 			}
+		}
+
+		// If the bundle was not found in the local cache:
+		NodeConnections nodeConnections = CENOClient.nodeInterface.getConnections();
+		if (nodeConnections.getCurrent() == 0) {
+			// The node is not connected to any peers yet. Could it be a firewall/connectivity issue?
+			return returnError(new CENOException(CENOErrCode.LCS_NODE_NOT_ENOUGH_PEERS), clientIsHtml);
+		}
+
+		// The node is in state of performing ULPRs and one is initiated for the calculated SSK
+		ULPRStatus urlULPRStatus;
+		try {
+			urlULPRStatus = ULPRManager.lookupULPR(urlParam);
+		} catch (CENOException e) {
+			return returnError(e, clientIsHtml);
+		}
+
+		if (urlULPRStatus == ULPRStatus.failed) {
+			// Unlikely to happen
+			return returnError(new CENOException(CENOErrCode.LCS_LOOKUP_ULPR_FAILED), clientIsHtml);
+		}
+
+		// If the Freenet node is connected to less than 5 peers, the process will be slow
+		// and we inform the users appropriately
+		if (nodeConnections.getCurrent() < 5) {
+			return returnError(new CENOException(CENOErrCode.LCS_NODE_INITIALIZING), clientIsHtml);
+		}
+
+		// Check whether the request timeout has expired
+		if (RequestSender.shouldSendFreemail(urlParam)) {
+			if (clientIsHtml) {
+				// HTML client cannot signal RS to make requests for bundles to the bridge, so LookupHandler
+				// initiates such a request
+				//boolean isX_CENO_Rewrite = (request.getHeader("X-Ceno-Rewritten") != null) ? true : false;
+				RequestSender.requestFromBridge(urlParam);
+				return printStaticHTMLReplace("resources/requestedFromBridge.html", "[urlRequested]", urlParam);
+			} else {
+				JSONObject jsonResponse = new JSONObject();
+				jsonResponse.put("complete", true);
+				jsonResponse.put("found", false);
+				return jsonResponse.toJSONString();
+			}
+		}
+
+		// Request to the bridge for the requested URL has not timed out and a ULPR is in progress.
+		if (clientIsHtml) {
+			return printStaticHTMLReplace("resources/sentULPR.html", "[urlRequested]", urlParam);
+		} else {
+			JSONObject jsonResponse = new JSONObject();
+			jsonResponse.put("complete", false);
+			return jsonResponse.toJSONString();
 		}
 	}
 
@@ -146,9 +170,10 @@ public class LookupHandler extends AbstractCENOClientHandler {
 		return fetchResult;
 	}
 
+	@Override
 	public String handleHTTPPost(HTTPRequest request) throws PluginHTTPException {
 		// LCS won't handle POST requests
-		return "LookupHandler: POST request received";
+		return "LookupHandler: POST request received on /lookup path";
 	}
 
 }

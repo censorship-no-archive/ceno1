@@ -46,8 +46,7 @@ public class ClientGetSyncCallback implements ClientGetCallback {
 	}
 
 	public void onResume(ClientContext context) throws ResumeFailedException {
-		// TODO Auto-generated method stub
-		
+		// Synchronous requests to local cache are unlikely to get paused
 	}
 
 	public RequestClient getRequestClient() {

@@ -9,7 +9,8 @@ const configFile = path.join('config', 'node.json');
 
 var defaultConfig = {
   port: 3094,
-  requestReceiver: 'http://localhost:3093'
+  requestReceiver: 'http://localhost:3093',
+  useProxy: false
 };
 
 var config = defaultConfig;
