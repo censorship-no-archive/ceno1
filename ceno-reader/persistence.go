@@ -9,7 +9,7 @@ package main
 import (
 	"database/sql"
 	rss "github.com/jteeuwen/go-pkg-rss"
-	"github.com/jteeuwen/go-pkg-xmlx"
+	//"github.com/jteeuwen/go-pkg-xmlx"
 	_ "github.com/mattn/go-sqlite3"
 	"time"
 )
@@ -75,9 +75,9 @@ const createItemsTable = `create table if not exists items(
     foreign key(feed_id) references feeds(id)
 );`
 
-const tableInitializers = []string{
+var tableInitializers = []string{
 	createFeedsTable,
-	createStatisticstable,
+	createStatisticsTable,
 	createItemsTable,
 	createLinksTable,
 }
@@ -93,9 +93,9 @@ type transaction struct {
 }
 
 type txwrapper struct {
-	Tx    *sql.Tx
-	Query string
-	Err   error
+	Tx       *sql.Tx
+	QueryStr string
+	Err      error
 }
 
 type stmtwrapper struct {
@@ -115,7 +115,6 @@ type stmtwrapper struct {
 func (t transaction) Prepare(query string) txwrapper {
 	tx, err := t.Db.Begin()
 	if err != nil {
-		tx.Close()
 		return txwrapper{nil, "", err}
 	}
 	return txwrapper{tx, query, nil}
@@ -131,9 +130,8 @@ func (t txwrapper) Query(args ...interface{}) stmtwrapper {
 		emptyArray := make([]interface{}, 0)
 		return stmtwrapper{nil, nil, emptyArray, true, t.Err}
 	}
-	stmt, err := t.Tx.Prepare(t.Query)
+	stmt, err := t.Tx.Prepare(t.QueryStr)
 	if err != nil {
-		t.Tx.Close()
 		emptyArray := make([]interface{}, 0)
 		return stmtwrapper{nil, nil, emptyArray, true, err}
 	}
@@ -157,26 +155,24 @@ func (t txwrapper) Exec(args ...interface{}) stmtwrapper {
  * if the statement is successful before clearing the transaction and statement.
  * @return The Rows pointer and error (or nil) produced by the Query/Exec call
  */
-func (s stmtwrapper) Run() (*Rows, error) {
+func (s stmtwrapper) Run() (*sql.Rows, error) {
 	if s.Err != nil {
 		if s.Tx != nil {
-			s.Tx.Close()
 		}
 		if s.Stmt != nil {
 			s.Stmt.Close()
 		}
 		return nil, s.Err
 	}
-	var rows *Rows
+	var rows *sql.Rows
 	var err error
 	if s.IsQuery {
 		rows, err = s.Stmt.Query(s.Args...)
 	} else {
-		rows, err = s.Stmt.Exec(s.Args...)
-		s.Tx.Commit()
+		_, err = s.Stmt.Exec(s.Args...)
+		rows = nil
 	}
 	s.Stmt.Close()
-	s.Tx.Close()
 	return rows, err
 }
 
