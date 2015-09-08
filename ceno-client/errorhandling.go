@@ -232,3 +232,21 @@ func ExecuteErrorPage(errorCode ErrorCode, errorMsg string, w http.ResponseWrite
 		})
 	}
 }
+
+/**
+ * Determine whether an error code is one internal to the CC.
+ * This is the case when it is of the form 1XXX.
+ * @param {ErrorCode} errorCode - The code number identifying the error.
+ */
+func IsClientError(errorCode ErrorCode) bool {
+	return errorCode/1000 == 1
+}
+
+/**
+ * Determine whether an error code is one sent from the LCS.
+ * This is the case when it is of the form 2YYYY.
+ * @param {ErrorCode} errorCode - The code number identifying the error.
+ */
+func IsCacheServerError(errorCode ErrorCode) bool {
+	return errorCode/1000 == 2
+}

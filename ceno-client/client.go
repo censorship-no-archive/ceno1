@@ -261,6 +261,11 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 		// so we will request that a new bundle be created.
 		if result.ErrCode == ERR_MALFORMED_LCS_RESPONSE {
 			tryRequestBundle(URL, wasRewritten, w, r)
+		} else if IsCacheServerError(result.ErrCode) {
+			HandleLCSError(result.ErrCode, result.ErrMsg, ErrorState{
+				"responseWriter": w,
+				"request":        r,
+			})
 		} else {
 			HandleCCError(result.ErrCode, result.ErrMsg, ErrorState{
 				"responseWriter": w,
