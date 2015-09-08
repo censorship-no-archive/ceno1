@@ -36,26 +36,29 @@ public class RequestSender {
 	}
 
 	public static void requestFromBridge(String url) {
-		if (url != null && !url.isEmpty()) {
-			if (!requestSender.requestTable.containsKey(url)) {
-				requestSender.requestTable.put(url, new Date());
+		if (url == null || url.isEmpty()) {
+			return;
+		}
+
+		if (shouldSendFreemail(url)) {
+			synchronized (requestSender.bridgeFreemails) {
+				CENOClient.nodeInterface.sendFreemail(CENOClient.clientFreemail, requestSender.bridgeFreemails, url, "", "CENO");	
+				Logger.normal(RequestSender.class, "Sent request to the bridge for URL: " + url);
 			}
-			if (shouldSendFreemail(url)) {
-				synchronized (requestSender.bridgeFreemails) {
-					CENOClient.nodeInterface.sendFreemail(CENOClient.clientFreemail, requestSender.bridgeFreemails, url, "", "CENO");	
-					Logger.normal(RequestSender.class, "Sent request to the bridge for URL: " + url);
-				}
-			}
+			requestSender.requestTable.put(url, new Date(new Date().getTime() + REQUEST_TIMEOUT - SHOULD_SEND_FREEMAIL));
 		}
 	}
 
-	private static boolean shouldSendFreemail(String url) {
-		if (new Date().getTime() - requestSender.requestTable.get(url).getTime() > SHOULD_SEND_FREEMAIL) {
-			requestSender.requestTable.put(url, new Date(new Date().getTime() + REQUEST_TIMEOUT - SHOULD_SEND_FREEMAIL));
-			return true;
-		} else {
+	public static boolean shouldSendFreemail(String url) {
+		if (url == null || url.isEmpty()) {
 			return false;
 		}
+
+		if (!requestSender.requestTable.containsKey(url)) {
+			requestSender.requestTable.put(url, new Date());
+		}
+
+		return (new Date().getTime() - requestSender.requestTable.get(url).getTime() > SHOULD_SEND_FREEMAIL);
 	}
 
 }

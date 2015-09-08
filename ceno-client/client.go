@@ -80,11 +80,15 @@ func pleaseWait(URL string, w http.ResponseWriter) {
 func lookup(lookupURL string) Result {
 	response, err := http.Get(BundleLookupURL(Configuration, lookupURL))
 	T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
-	if err != nil || response.StatusCode != 200 {
+	if err != nil {
 		fmt.Println(T("error_cli", map[string]interface{}{
 			"Message": err.Error(),
 		}))
 		return Result{ERR_NO_CONNECT_LCS, err.Error(), false, false, ""}
+	} else if response == nil || response.StatusCode != 200 {
+		errMsg := T("lcs_not_ready_cli")
+		fmt.Println(errMsg)
+		return Result{ERR_LCS_NOT_READY, errMsg, false, false, ""}
 	}
 	decoder := json.NewDecoder(response.Body)
 	var result Result
@@ -110,7 +114,7 @@ func lookup(lookupURL string) Result {
 /**
  * Request that the RS issue a request to create a new bundle.
  * @param {string} lookupURL - The URL of the site to create a bundle for
- * @param {bool} wasRewritten - True of the requested URL was rewritten from HTTPS to HTTP
+ * @param {bool} wasRewritten - True if the requested URL was rewritten from HTTPS to HTTP
  */
 func requestNewBundle(lookupURL string, wasRewritten bool) error {
 	// We can ignore the content of the response since it is not used.
@@ -257,6 +261,11 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 		// so we will request that a new bundle be created.
 		if result.ErrCode == ERR_MALFORMED_LCS_RESPONSE {
 			tryRequestBundle(URL, wasRewritten, w, r)
+		} else if IsCacheServerError(result.ErrCode) {
+			HandleLCSError(result.ErrCode, result.ErrMsg, ErrorState{
+				"responseWriter": w,
+				"request":        r,
+			})
 		} else {
 			HandleCCError(result.ErrCode, result.ErrMsg, ErrorState{
 				"responseWriter": w,

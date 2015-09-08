@@ -64,18 +64,18 @@ The following describes the interactions followed by each component to report
 that a bundle for a requested URL does not exist, have a bundle created, and
 then have that bundle cached.
 
-Step | Description                                        | Message
------|----------------------------------------------------|-------------------
-1    | CC requests a bundle from LCS                      | `[GET <LCS>/lookup?url=<url>`
-2    | LCS reports incomplete search; search dist. cache  | `[write {"complete": false}]`
-3    | CC makes a new request for `<url>` after some time | `[GET <LCS>/lookup?url=<url>`
-4    | LCS reports that no bundle exists for `<url>` yet  | `[write {"complete": true, "found": false}]`
-5    | CC requests that a new bundle be created by bridge | `[POST <RS>/create?url=<url>`
-6    | RS signals RR on bridge to create new bundle       | Depends on the implementation of the signaling channel
-7    | RR requests `<url>` read from Freemail             | `[GET <BS>/?url=<url>]`
-8    | BS creates a bundle and returns it to the RR       | `[write {"created": <now>, "url": <url>,  "bundle": <bundle>}]`
-9    | RR requests the BI insert the bundle into Freenet  | `[POST <BI>/insert?created=<created>&url=<url>&bundle=<bundle>]`
-10   | BI acknowledges the request for insertion          | `[write "okay"]`
+Step | Description                                          | Message
+-----|------------------------------------------------------|-------------------
+1    | CC requests a bundle from LCS                        | `[GET <LCS>/lookup?url=<url>`
+2    | LCS reports incomplete search; search dist. cache    | `[write {"complete": false}]`
+3    | CC makes a new request for `<url>` after some time   | `[GET <LCS>/lookup?url=<url>`
+4    | LCS reports that no bundle exists for `<url>` yet    | `[write {"complete": true, "found": false}]`
+5    | CC requests that a new bundle be created by bridge   | `[POST <RS>/create?url=<url>`
+6    | RS signals RR on bridge to create new bundle         | Depends on the implementation of the signaling channel
+7    | RR requests a bundle for the `<url>` in the request  | `[GET <BS>/?url=<url>]`
+8    | BS creates a bundle and returns it to the RR         | `[write {"created": <now>, "url": <url>,  "bundle": <bundle>}]`
+9    | RR requests the BI insert the bundle into Freenet    | `[POST <BI>/insert?created=<created>&url=<url>&bundle=<bundle>]`
+10   | BI acknowledges the request for insertion            | `[write "okay"]`
 
 
 #### Notes

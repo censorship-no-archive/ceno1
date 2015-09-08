@@ -9,6 +9,7 @@ public class ClientHandler extends AbstractCENOClientHandler {
 
 	private static final String pluginPath = "/plugins/" + CENOClient.class.getName();
 	private static final LookupHandler lookupHandler = new LookupHandler();
+	private static final RequestCreateHandler createHandler = new RequestCreateHandler();
 
 	public String handleHTTPGet(HTTPRequest request) throws PluginHTTPException {
 		String path = request.getPath().replaceFirst(pluginPath, "");
@@ -18,19 +19,18 @@ public class ClientHandler extends AbstractCENOClientHandler {
 			return lookupHandler.handleHTTPGet(request);
 		}
 		if (isClientHtml(request)) {
-			return "404: Requested path is invalid.";
+			return "404: Requested path is invalid or does not accept GET requests.";
 		} else {
-			return returnErrorJSON(new CENOException(CENOErrCode.LCS_HANDLER_URL_INVALID));
+			return returnError(new CENOException(CENOErrCode.LCS_HANDLER_URL_INVALID), isClientHtml(request));
 		}
 	}
 
 	public String handleHTTPPost(HTTPRequest request) throws PluginHTTPException {
 		String path = request.getPath().replaceFirst(pluginPath, "");
-		if (!path.isEmpty() && path.startsWith("/fetch")) {
-			RequestSender.requestFromBridge(request.getParam("url", ""));
-			return "Sent passive request";
+		if (path.startsWith("/create")) {
+			createHandler.handleHTTPPost(request);
 		}
-		return "404: Requested path is invalid.";
+		return "404: Requested path is invalid or does not accept POST requests.";
 	}
 
 }

@@ -15,12 +15,16 @@ import freenet.support.Logger;
 import freenet.support.api.HTTPRequest;
 
 
+/**
+ * CENO Client plugin
+ * 
+ * Implements the Local Cache Server (LCS) and Request Sender (RS)
+ * CENO agents.
+ */
 public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRealVersioned, FredPluginHTTP, FredPluginThreadless {
 
-	private PluginRespirator pluginRespirator;
-
 	// Interface objects with fred
-	private HighLevelSimpleClientInterface client;
+	private static HighLevelSimpleClientInterface client;
 	public static NodeInterface nodeInterface;
 	private static final ClientHandler clientHandler = new ClientHandler();
 
@@ -28,33 +32,48 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 	public static final String pluginUri = "/plugins/plugins.CENO.CENO";
 	public static final String pluginName = "CENO";
 	private static final Version version = new Version(Version.PluginType.CLIENT);
+	private static final CENOL10n l10n = new CENOL10n("CENOLANG");
 
 	// Bridge and freemail-specific constants
 	public static final String bridgeKey = "SSK@Rx6x6Ik1y93wGk8OtTvZaMQ~Ni6uqxFMclGP8BHrk5g,aBMErm8fkZ7xuFnSzSLnBKgHmjk6PR1Ng4V8ITxXzk8,AQACAAE/";
 	public static final String bridgeIdentityRequestURI = "USK@QfqLw7-BJpGGMnhnJQ3~KkCiciMAsoihBCtSqy6nNbY,-lG83h70XIJ03r4ckdNnsY4zIQ-J8qTqwzSBeIG5q3s,AQACAAE/WebOfTrust/0";
 	public static final String bridgeFreemail = "DEFLECTBridge@ih5ixq57yetjdbrspbtskdp6fjake4rdacziriiefnjkwlvhgw3a.freemail";
-	
+
 	public static final String clientIdentityInsertURI = "USK@SNS-BKGDFS4ciG3HV6o5MQjvIdCDn9G8DfIeIK~7kBQ,WMeRYMzx2tQHM~O8UWglUmBnjIhp~bh8xue-6g2pmps,AQECAAE/WebOfTrust/0";
 	public static final String clientFreemail = "CENO@54u2ko3lssqgalpvfqbq44gwfquqrejm3itl4rxj5nt7v6mjy22q.freemail";
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public void runPlugin(PluginRespirator pr)
 	{
-		// Initialize interfaces with fred
-		pluginRespirator = pr;
-		client = new HighLevelSimpleClientInterface(pluginRespirator.getNode());
-		new CENOL10n("CENOLANG");
-		ULPRManager.init();
-		RequestSender.init(new String[]{bridgeFreemail});
-		nodeInterface = new NodeInterface(pluginRespirator.getNode(), pluginRespirator);
+		// Initialize interfaces with Freenet node
+		client = new HighLevelSimpleClientInterface(pr.getNode());
+		nodeInterface = new NodeInterface(pr.getNode(), pr);
+
+		// Initialize LCS
 		nodeInterface.initFetchContexts();
+		ULPRManager.init();
+
+		// Initialize RS
+		RequestSender.init(new String[]{bridgeFreemail});
 		nodeInterface.copyAccprops(clientFreemail);
 		nodeInterface.setRandomNextMsgNumber(clientFreemail, bridgeFreemail);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public String getVersion() {
 		return version.getVersion();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public long getRealVersion() {
 		return version.getRealVersion();
 	}
@@ -62,17 +81,21 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 	/**
 	 * Method called before termination of the CENO plugin
 	 */
+	@Override
 	public void terminate()
 	{
 		// Clear the CENO client freemail outbox directory
 		nodeInterface.clearOutboxMessages(clientFreemail, bridgeFreemail);
+		//TODO Release ULPRs' resources
 		Logger.normal(this, pluginName + " terminated.");
 	}
 
+	@Override
 	public String handleHTTPGet(HTTPRequest request) throws PluginHTTPException {
 		return clientHandler.handleHTTPGet(request);
 	}
 
+	@Override
 	public String handleHTTPPost(HTTPRequest request) throws PluginHTTPException {
 		return clientHandler.handleHTTPPost(request);
 	}

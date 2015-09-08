@@ -56,6 +56,18 @@
     "translation": "Address of local cache server (LCS) [{{.Default}}]: "
   },
   {
+    "id": "lcs_lookup_failure_err",
+    "translation": "Check that the LCS and CENO Freenet plugin are running correctly and that peers are connected."
+  },
+  {
+    "id": "lcs_not_ready_cli",
+    "translation": "The LCS is not ready to handle requests just yet. Please wait a moment and try again."
+  },
+  {
+    "id": "lcs_not_ready_err",
+    "translation": "Wait a minute or two before making your request again."
+  },
+  {
     "id": "listening_msg_cli",
     "translation": "CENO proxy server listening for HTTP requests at http://127.0.0.1{{.Port}}"
   },
