@@ -52,6 +52,7 @@ class WoTConnectionImpl implements WoTConnection {
 		pluginTalker = pr.getPluginTalker(new WoTConnectionTalker(), WOT_PLUGIN_NAME, CONNECTION_IDENTIFIER);
 	}
 
+	@Override
 	public List<OwnIdentity> getAllOwnIdentities() {
 		Message response = sendBlocking(
 				new Message(
@@ -87,10 +88,12 @@ class WoTConnectionImpl implements WoTConnection {
 		return ownIdentities;
 	}
 
+	@Override
 	public Set<Identity> getAllTrustedIdentities(String trusterId) {
 		return getAllIdentities(trusterId, TrustSelection.TRUSTED);
 	}
 
+	@Override
 	public Set<Identity> getAllUntrustedIdentities(String trusterId) {
 		return getAllIdentities(trusterId, TrustSelection.UNTRUSTED);
 	}
@@ -143,6 +146,7 @@ class WoTConnectionImpl implements WoTConnection {
 		return identities;
 	}
 
+	@Override
 	public Identity getIdentity(String identity, String trusterId) {
 		if(identity == null) {
 			throw new NullPointerException("Parameter identity must not be null");
@@ -172,6 +176,7 @@ class WoTConnectionImpl implements WoTConnection {
 		return new Identity(identity, requestURI, nickname);
 	}
 
+	@Override
 	public boolean setProperty(String identity, String key, String value) {
 		if(identity == null) {
 			throw new NullPointerException("Parameter identity must not be null");
@@ -196,6 +201,7 @@ class WoTConnectionImpl implements WoTConnection {
 		return "PropertyAdded".equals(response.sfs.get("Message"));
 	}
 
+	@Override
 	public String getProperty(String identity, String key) {
 		if(identity == null) {
 			throw new NullPointerException("Parameter identity must not be null");
@@ -228,6 +234,7 @@ class WoTConnectionImpl implements WoTConnection {
 		}
 	}
 
+	@Override
 	public boolean setContext(String identity, String context) {
 		if(identity == null) {
 			throw new NullPointerException("Parameter identity must not be null");

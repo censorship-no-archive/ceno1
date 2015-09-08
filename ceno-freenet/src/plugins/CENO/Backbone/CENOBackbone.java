@@ -46,6 +46,10 @@ import freenet.support.SimpleFieldSet;
  * for as long as possible and are given a high
  * bandwidth limit. The most straightforward way to spin
  * a backbone router is to use the CENOBackboneBox.
+ * Also, you are encouraged to allocate enough space for the
+ * client cache, because it will contribute to the longevity
+ * and faster access of the bundles inserted by the CENOBridge.
+ * 
  * This plugin has a strong dependency on the WebOfTrust
  * and Freemail official Freenet plugins.
  */
