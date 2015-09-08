@@ -36,7 +36,7 @@ public class RequestSender {
 	}
 
 	public static void requestFromBridge(String url) {
-		if (url == null || !url.isEmpty()) {
+		if (url == null || url.isEmpty()) {
 			return;
 		}
 

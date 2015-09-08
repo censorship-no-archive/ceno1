@@ -114,7 +114,7 @@ func lookup(lookupURL string) Result {
 /**
  * Request that the RS issue a request to create a new bundle.
  * @param {string} lookupURL - The URL of the site to create a bundle for
- * @param {bool} wasRewritten - True of the requested URL was rewritten from HTTPS to HTTP
+ * @param {bool} wasRewritten - True if the requested URL was rewritten from HTTPS to HTTP
  */
 func requestNewBundle(lookupURL string, wasRewritten bool) error {
 	// We can ignore the content of the response since it is not used.

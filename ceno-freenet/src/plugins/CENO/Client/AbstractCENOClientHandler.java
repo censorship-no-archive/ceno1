@@ -93,7 +93,22 @@ public abstract class AbstractCENOClientHandler implements FredPluginHTTP {
 		jsonResponse.put("errMsg", cenoEx.getMessage());
 		return jsonResponse.toJSONString();
 	}
-	
+
+	/**
+	 * Compose a String response including a CENOException,
+	 * to be returned to another CENO agent.
+	 * 
+	 * @param cenoEx the CENOException to include in the response
+	 * @param clientIsHtml whether the client supports HTML only
+	 * @return
+	 * If the client is HTML, the response will be an HTML message.
+	 * Otherwise, if the client supports JSON, the format of the
+	 * String adheres to the CENO Protocol specification:<br>
+	 * {
+	 *   "errorCode": [corresponding code from the errorConditions doc],
+	 *   "errMsg": [localized informative error message]
+	 * }
+	 */
 	protected String returnError(CENOException cenoEx, boolean clientIsHtml) {
 		if (clientIsHtml) {
 			return cenoEx.getMessage();
