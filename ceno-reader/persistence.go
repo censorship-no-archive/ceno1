@@ -157,8 +157,6 @@ func (t txwrapper) Exec(args ...interface{}) stmtwrapper {
  */
 func (s stmtwrapper) Run() (*sql.Rows, error) {
 	if s.Err != nil {
-		if s.Tx != nil {
-		}
 		if s.Stmt != nil {
 			s.Stmt.Close()
 		}
