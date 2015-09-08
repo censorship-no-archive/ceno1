@@ -56,6 +56,10 @@
     "translation": "Address of local cache server (LCS) [{{.Default}}]: "
   },
   {
+    "id": "lcs_lookup_failure_err",
+    "translation": "Check that the LCS and CENO Freenet plugin are running correctly and that peers are connected."
+  },
+  {
     "id": "lcs_not_ready_cli",
     "translation": "The LCS is not ready to handle requests just yet. Please wait a moment and try again."
   },
