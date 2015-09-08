@@ -56,19 +56,23 @@ fi
 
 # Make sure the path is not ending with a slash (/)
 FREENET_DIR=${FREENET_DIR%/}
+echo "Updating Freenet installation to the latest version"
+sh $FREENET_DIR/update.sh &> /dev/null
+echo
 
 # Make a directory to keep CENObox files
 mkdir CENOBox
 mkdir CENOBackbone
 
 # Build CENO Client
-echo "Building CENO client with latest updates"
+echo "Building CENO client with latest updates:"
 cd ceno-client
 if [ -a client ]; then
   rm client
 fi
 export GOPATH=$HOME/go
 sh ./build.sh
+echo
 cd $CENOBOXPATH
 
 function copyFreenetFilesTo {
