@@ -223,7 +223,7 @@ func AllFeeds(db *sql.DB) ([]FeedInfo, error) {
         Prepare("select id, url, type, charset from feeds").
         Query().
         Run()
-    if err != nil {
+    if err != nil || rows == nil {
         return feeds, err
     }
     for rows.Next() {

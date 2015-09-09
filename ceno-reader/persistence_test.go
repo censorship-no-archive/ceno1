@@ -3,16 +3,19 @@ package main
 import (
     "testing"
     "os"
+    "fmt"
     "database/sql"
     _ "github.com/mattn/go-sqlite3"
 )
 
-// Database file to craete/use that will not interfere with the one
-// created during the normal operation on the RSS Reader
-const TEST_DB_FILE = "testing_db.db"
-
-// A URI for Hacker News' RSS feed
+// Hacker News' RSS feed.
 const TEST_FEED_URL = "https://news.ycombinator.com/rss"
+
+func closeDB(db *sql.DB, dbFile string) {
+    fmt.Println("Closing and deleting DB " + dbFile)
+    db.Close()
+    os.Remove(dbFile)
+}
 
 /**
  * Test that the database has been intialized properly and that we
@@ -20,22 +23,26 @@ const TEST_FEED_URL = "https://news.ycombinator.com/rss"
  * retrieve it successfully.
  */
 func TestDBInitialization(t *testing.T) {
-    t.Log("Testing database initialization")
+    const TEST_DB_FILE string = "testdb1.db"
+    fmt.Println("\n\nTesting database initialization")
     var db *sql.DB
     var err error
     db, err = InitDBConnection(TEST_DB_FILE)
-    defer db.Close()
+    defer closeDB(db, TEST_DB_FILE)
     if err != nil {
         t.Error(err)
     }
     tx, _ := db.Begin()
     stmt, _ := tx.Prepare("insert into feeds(url, type, charset) values(?, ?, ?)")
+    defer stmt.Close()
     _, err = stmt.Exec(TEST_FEED_URL, "RSS", "")
+    fmt.Println("Executed insertion statement")
     if err != nil {
         t.Error(err)
     }
     tx.Commit()
     rows, err2 := db.Query("select url, type, charset from feeds")
+    fmt.Println("Ran retrieval query")
     if err2 != nil {
         t.Error(err2)
     }
@@ -59,18 +66,21 @@ func TestDBInitialization(t *testing.T) {
  * well enough for an operation to save new feed data to work.
  */
 func TestSaveNewFeed(t *testing.T) {
-    t.Log("Testing SaveNewFeed")
+    const TEST_DB_FILE string = "testdb2.db"
+    fmt.Println("\n\nTesting SaveNewFeed")
     db, err := InitDBConnection(TEST_DB_FILE)
     if err != nil {
         t.Error(err)
     }
-    defer db.Close()
+    defer closeDB(db, TEST_DB_FILE)
     feed := FeedInfo{0, TEST_FEED_URL, "RSS", "test-charset"}
     err = SaveNewFeed(db, feed)
+    fmt.Println("Saved test feed")
     if err != nil {
         t.Error(err)
     }
     rows, err2 := db.Query("select url, type, charset from feeds")
+    fmt.Println("Ran query to retrieve test feed")
     if err2 != nil {
         t.Error(err2)
     }
@@ -95,6 +105,8 @@ func TestSaveNewFeed(t *testing.T) {
  * Test that we can create a handful of feeds and then retrieve them all.
  */
 func TestAllFeeds(t *testing.T) {
+    const TEST_DB_FILE string = "testdb3.db"
+    fmt.Println("\n\nTesting AllFeeds")
     testFeeds := []FeedInfo{
         {0, "URL1", "RSS", "chs1"},
         {1, "URL2", "Atom", "chs2"},
@@ -107,21 +119,27 @@ func TestAllFeeds(t *testing.T) {
     if err != nil {
         t.Error(err)
     }
-    defer db.Close()
-    tx, _ := db.Begin()
+    defer closeDB(db, TEST_DB_FILE)
+    tx, err1 := db.Begin()
+    if err1 != nil {
+        t.Error(err1)
+    }
     // Insert all the test feeds into the database
-    for _, feed := range testFeeds {
+    for i, feed := range testFeeds {
+        fmt.Printf("Inserting test feed #%d\n", i)
         stmt, err2 := tx.Prepare("insert into feeds (url, type, charset) values (?, ?, ?)")
         if err2 != nil {
             t.Error(err2)
         }
-        defer stmt.Close()
         stmt.Exec(feed.URL, feed.Type, feed.Charset)
+        stmt.Close()
     }
+    fmt.Println("Ran insertion queries")
     tx.Commit()
     // Retrieve all the test feeds from the database and make sure
     // we got everything we put in
     feeds, err3 := AllFeeds(db)
+    fmt.Println("Ran request to fetch feeds")
     if err3 != nil {
         t.Error(err3)
     }
@@ -134,11 +152,13 @@ func TestAllFeeds(t *testing.T) {
             if feed.URL == testCase.URL &&
                 feed.Type == testCase.Type &&
                 feed.Charset == testCase.Charset {
+                fmt.Printf("Found match #%d\n", i)
                 testsMatched[i] = true
                 break
             }
         }
     }
+    fmt.Println("Finished checking for matches")
     for i, match := range testsMatched {
         if !match {
             t.Logf("Did not retrieve test feed #%d.", i)
@@ -148,11 +168,6 @@ func TestAllFeeds(t *testing.T) {
 }
 
 func TestMain(m *testing.M) {
-    // Create the DB ahead of time.
-    db, _ := InitDBConnection(TEST_DB_FILE)
-    db.Close()
     result := m.Run()
-    // Quite effectively deletes the entire SQLite database.
-    os.Remove(TEST_DB_FILE)
     os.Exit(result)
 }
