@@ -168,6 +168,7 @@ func (s stmtwrapper) Run() (*sql.Rows, error) {
 		rows, err = s.Stmt.Query(s.Args...)
 	} else {
 		_, err = s.Stmt.Exec(s.Args...)
+        s.Tx.Commit()
 		rows = nil
 	}
 	s.Stmt.Close()
