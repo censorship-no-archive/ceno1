@@ -217,8 +217,23 @@ func SaveNewFeed(db *sql.DB, feed FeedInfo) error {
  * Get a collection of all the feeds subscribed to.
  * @param {*sql.DB} db - The database connection to use
  */
-//func AllFeeds(db *sql.DB) []FeedInfo {
-//}
+func AllFeeds(db *sql.DB) ([]FeedInfo, error) {
+    var feeds []FeedInfo
+    rows, err := transaction{db}.
+        Prepare("select id, url, type, charset from feeds").
+        Query().
+        Run()
+    if err != nil {
+        return feeds, err
+    }
+    for rows.Next() {
+        var url, _type, charset string
+        var id int
+        rows.Scan(&id, &url, &_type, &charset)
+        feeds = append(feeds, FeedInfo{id, url, _type, charset})
+    }
+    return feeds, nil
+}
 
 /**
  * Get the basic information about a persisted feed from its URL.
