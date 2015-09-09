@@ -91,6 +91,62 @@ func TestSaveNewFeed(t *testing.T) {
     }
 }
 
+/**
+ * Test that we can create a handful of feeds and then retrieve them all.
+ */
+func TestAllFeeds(t *testing.T) {
+    testFeeds := []FeedInfo{
+        {0, "URL1", "RSS", "chs1"},
+        {1, "URL2", "Atom", "chs2"},
+        {2, "URL3", "RSS", "chs3"},
+    }
+    // A parallel array signalling which testFeeds have been retrieved.
+    // Note that the values each default to `false` so they don't need to be set manually.
+    var testsMatched []bool = make([]bool, len(testFeeds))
+    db, err := InitDBConnection(TEST_DB_FILE)
+    if err != nil {
+        t.Error(err)
+    }
+    defer db.Close()
+    tx, _ := db.Begin()
+    // Insert all the test feeds into the database
+    for _, feed := range testFeeds {
+        stmt, err2 := tx.Prepare("insert into feeds (url, type, charset) values (?, ?, ?)")
+        if err2 != nil {
+            t.Error(err2)
+        }
+        defer stmt.Close()
+        stmt.Exec(feed.URL, feed.Type, feed.Charset)
+    }
+    tx.Commit()
+    // Retrieve all the test feeds from the database and make sure
+    // we got everything we put in
+    feeds, err3 := AllFeeds(db)
+    if err3 != nil {
+        t.Error(err3)
+    }
+    if len(feeds) < len(testFeeds) {
+        t.Log("Did not retrieve as many feeds as were inserted for testing.")
+        t.Fail()
+    }
+    for _, feed := range feeds {
+        for i, testCase := range testFeeds {
+            if feed.URL == testCase.URL &&
+                feed.Type == testCase.Type &&
+                feed.Charset == testCase.Charset {
+                testsMatched[i] = true
+                break
+            }
+        }
+    }
+    for i, match := range testsMatched {
+        if !match {
+            t.Logf("Did not retrieve test feed #%d.", i)
+            t.Fail()
+        }
+    }
+}
+
 func TestMain(m *testing.M) {
     // Create the DB ahead of time.
     db, _ := InitDBConnection(TEST_DB_FILE)
