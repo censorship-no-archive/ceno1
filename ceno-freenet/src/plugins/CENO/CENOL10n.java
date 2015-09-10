@@ -33,6 +33,9 @@ public class CENOL10n implements FredPluginBaseL10n {
 			envVal = "en";
 		}
 		LANGUAGE lang = LANGUAGE.mapToLanguage(envVal);
+		if (lang == null) {
+			lang = LANGUAGE.ENGLISH;
+		}
 		return lang;
 	}
 

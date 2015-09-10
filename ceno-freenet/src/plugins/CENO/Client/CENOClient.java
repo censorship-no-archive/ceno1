@@ -32,10 +32,9 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 	public static final String pluginUri = "/plugins/plugins.CENO.CENO";
 	public static final String pluginName = "CENO";
 	private static final Version version = new Version(Version.PluginType.CLIENT);
-	private static final CENOL10n l10n = new CENOL10n("CENOLANG");
 
 	// Bridge and freemail-specific constants
-	public static final String bridgeKey = "SSK@Rx6x6Ik1y93wGk8OtTvZaMQ~Ni6uqxFMclGP8BHrk5g,aBMErm8fkZ7xuFnSzSLnBKgHmjk6PR1Ng4V8ITxXzk8,AQACAAE/";
+	public static final String bridgeKey = "SSK@mlfLfkZmWIYVpKbsGSzOU~-XuPp~ItUhD8GlESxv8l4,tcB-IHa9c4wpFudoSm0k-iTaiE~INdeQXvcYP2M1Nec,AQACAAE/";
 	public static final String bridgeIdentityRequestURI = "USK@QfqLw7-BJpGGMnhnJQ3~KkCiciMAsoihBCtSqy6nNbY,-lG83h70XIJ03r4ckdNnsY4zIQ-J8qTqwzSBeIG5q3s,AQACAAE/WebOfTrust/0";
 	public static final String bridgeFreemail = "DEFLECTBridge@ih5ixq57yetjdbrspbtskdp6fjake4rdacziriiefnjkwlvhgw3a.freemail";
 
@@ -51,6 +50,7 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 		// Initialize interfaces with Freenet node
 		client = new HighLevelSimpleClientInterface(pr.getNode());
 		nodeInterface = new NodeInterface(pr.getNode(), pr);
+		new CENOL10n("CENOLANG");
 
 		// Initialize LCS
 		nodeInterface.initFetchContexts();
