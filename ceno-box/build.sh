@@ -31,6 +31,7 @@ CENOBOXPATH="$(pwd)"
 
 # Clean files and directories from previous builds
 if [ -d CENOBox ]; then
+  echo "Previous CENOBox build exists; will try to stop"
   cd CENOBox
   ./CENO.sh stop
   cd ..

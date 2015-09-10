@@ -38,8 +38,8 @@ function browserExists {
 function startChromeProfile {
   #Experimental: Load the CENO Router extension while invoking chrome
   tempProfile=$(mktemp -d browser-profiles/chrome/google-chrome.XXXXXXX)
-  $1 --profile-directory=$tempProfile --load-extension=$(pwd)/browser-extensions/ceno-chrome --no-first-run &> /dev/null &
-  rm $tempProfile
+  $1 --profile-directory=$tempProfile --load-extension=$(pwd)/browser-extensions/ceno-chrome --no-first-run $2 &> /dev/null &
+  rm -r $tempProfile
 }
 
 function startBrowser {
@@ -96,7 +96,7 @@ function startCENO {
 case "$1" in
   'stop')
     ./run.sh stop
-    if [ -d ceno-client/CENOClient.pid ]
+    if [ -f ceno-client/CENOClient.pid ]
     then
       kill $(cat ceno-client/CENOClient.pid)
       echo "Stopped CENO Client proxy"
