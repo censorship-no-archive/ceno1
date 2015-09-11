@@ -27,17 +27,15 @@ preconfigured version of all the client-side components. You can download the
 latest release for your operating system from [here](https://github.com/equalitie/ceno/releases/latest).
 We currently distribute CENOBox for Linux and Mac OS X.
 
-### CENOBox in Linux
+### CENOBox in Linux and Mac OS X
 ```bash
 cd ~
-wget https://github.com/equalitie/ceno/releases/download/v0.3.0/CENOBox_Linux.zip
-unzip CENOBox_Linux.tar.gz
-cd CENOBox
-./CENO.sh
+wget -q https://raw.githubusercontent.com/equalitie/ceno/master/ceno-box/installCENO.sh && sh installCENO.sh
 ```
 
 CENOBox will open a new Chrome or Firefox window. Remember that you are protected
-by CENO only when you are using that browser window to visit websites.
+by CENO only when you are using that browser window to visit websites, and only when CENO Router
+plugin status is active.
 
 Once you have installed CENOBox in your system, you can re-open a protected
 browser window by navigating to the CENOBox directory and using the CENO.sh
