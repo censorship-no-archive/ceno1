@@ -42,8 +42,12 @@ public class RequestSender {
 
 		if (shouldSendFreemail(url)) {
 			synchronized (requestSender.bridgeFreemails) {
-				CENOClient.nodeInterface.sendFreemail(CENOClient.clientFreemail, requestSender.bridgeFreemails, url, "", "CENO");	
-				Logger.normal(RequestSender.class, "Sent request to the bridge for URL: " + url);
+				if (CENOClient.nodeInterface.sendFreemail(CENOClient.clientFreemail, requestSender.bridgeFreemails, url, "", "CENO")) {	
+					Logger.normal(RequestSender.class, "Sent request to the bridge for URL: " + url);
+				} else {
+					Logger.error(RequestSender.class, "Excpetion while trying to signal Bridge for URL: " + url);
+					return;
+				}
 			}
 			requestSender.requestTable.put(url, new Date(new Date().getTime() + REQUEST_TIMEOUT - SHOULD_SEND_FREEMAIL));
 		}
