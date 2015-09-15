@@ -7,7 +7,7 @@ then
     exit 1
 fi
 
-function getEnvLang {
+function getEnvLang() {
   # If $CENOLANG environment variable is not set,
   # use the $LANG or $LANGUAGE ones, or if neither
   # of the them is set, default to en-us
@@ -26,7 +26,7 @@ function getEnvLang {
   echo $CENOLANG
 }
 
-function browserExists {
+function browserExists() {
   if command -v $1 >/dev/null 2>&1
   then
       return 0;
@@ -35,14 +35,14 @@ function browserExists {
   fi
 }
 
-function startChromeProfile {
+function startChromeProfile() {
   #Experimental: Load the CENO Router extension while invoking chrome
   tempProfile=$(mktemp -d browser-profiles/chrome/google-chrome.XXXXXXX)
   $1 --profile-directory=$tempProfile --load-extension=$(pwd)/browser-extensions/ceno-chrome --no-first-run $2 &> /dev/null &
   rm -r $tempProfile
 }
 
-function startBrowser {
+function startBrowser() {
   extIntaller=./ceno-client/views/extension-en-us.html
   # Open a browser window with the CENO profiles, including the plugin
   if browserExists chrome
@@ -70,7 +70,7 @@ function startBrowser {
   fi
 }
 
-function startCENO {
+function startCENO() {
   # Start the Freenet node
   ./run.sh start &> CENO.log
 

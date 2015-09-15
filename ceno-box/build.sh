@@ -80,7 +80,7 @@ sh ./build.sh
 echo
 cd $CENOBOXPATH
 
-function copyFreenetFilesTo {
+function copyFreenetFilesTo() {
   # Copy necessary files from the Freenet installation
   cp -r $FREENET_DIR/{\
 bin,\

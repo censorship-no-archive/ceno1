@@ -32,4 +32,6 @@ wget -q --show-progress https://github.com/equalitie/ceno/releases/download/v0.3
 unzip CENOBox_$(echo $CENO_OS).zip
 
 # Start CENOBox
-sh ./CENOBox/CENO.sh
+cd CENOBox
+sh ./CENO.sh
+cd ..
