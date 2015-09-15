@@ -5,6 +5,19 @@
 
 
 
+## [v0.3.1] - 2015-09-15
+### Added
+  - Installation script for CENOBox that will download the latest release of CENO for the detected Operating System of the user
+
+### Changed
+  - Freenet agents won't forward/serve requests for favicons
+
+### Fixed
+  - Bug with parsing Freemails
+  - Making of directory for temporary Chrome profiles in CENOBox
+
+
+
 ## [v0.3.0] - 2015-09-10
 ### Added
   - Localization of agents and documentation
@@ -28,6 +41,7 @@
 
 ### Removed
   - Support for IMAP monitoring in Freemail APIs
+
 
 
 ## [v0.3.0-rc2] - 2015-07-20
@@ -127,7 +141,8 @@
 
 
 
-[Unreleased]: https://github.com/equalitie/ceno/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/equalitie/ceno/compare/v0.3.1...HEAD
+[v0.3.1]: https://github.com/equalitie/ceno/compare/v0.3.0...v0.3.1
 [v0.3.0]: https://github.com/equalitie/ceno/compare/v0.3.0-rc2...v0.3.0
 [v0.3.0-rc2]: https://github.com/equalitie/ceno/compare/v0.3.0-rc1...v0.3.0-rc2
 [v0.3.0-rc1]: https://github.com/equalitie/ceno/compare/v0.3.0-rc0...v0.3.0-rc1
