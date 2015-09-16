@@ -107,12 +107,16 @@ public class ChannelMaker {
 
 					if (kskContent != null && kskContent.getMimeType() == "text/html") {
 						Logger.normal(ChannelMakerListener.class, "A client has posted information for establishing a signaling channel");
+						SimpleFieldSet sfs = new SimpleFieldSet(kskContent.toString(), false, true, true);
+						ChannelManager.addChannel(sfs);
 					}
 					// Pause the looping thread
 					Thread.sleep(KSK_POLLING_PAUSE);
 				}
 			} catch (InterruptedException e) {
 				continueLoop = false;
+			} catch (IOException e) {
+				// TODO Log this
 			}
 		}
 
