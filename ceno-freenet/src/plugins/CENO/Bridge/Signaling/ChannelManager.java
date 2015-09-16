@@ -7,29 +7,40 @@ import freenet.node.FSParseException;
 import freenet.support.SimpleFieldSet;
 
 public class ChannelManager {
-	List<Channel> channelList;
-	private static volatile ChannelManager channelManager;
-	
-	public ChannelManager() {
-		if (ChannelManager.channelManager == null) {
-			ChannelManager.channelManager = new ChannelManager(new ArrayList<Channel>());
-		}
+	private List<Channel> channelList;
+	private static volatile ChannelManager instance;
+
+	private ChannelManager() {
+		channelList = new ArrayList<Channel>();
 	}
 
-	private ChannelManager(List<Channel> channelList) {
-		this.channelList = channelList;
+	public static ChannelManager getInstance() {
+		if (instance == null) {
+			synchronized(ChannelManager.class) {
+				instance = new ChannelManager();
+			}
+		}
+		return instance;
 	}
-	
-	public static void addChannel(Channel channel) {
+
+	public void addChannel(Channel channel) {
 		if (channel != null) {
-			if (!ChannelManager.channelManager.channelList.contains(channel)) {
-				ChannelManager.channelManager.channelList.add(channel);
+			if (!channelList.contains(channel)) {
+				channelList.add(channel);
 				subscribeToChannel(channel);
 			}
 		}
 	}
-	
-	public static void addChannel(SimpleFieldSet sfs) {
+
+	public void addChannels(List<Channel> extraChannelsList) {
+		if (extraChannelsList != null) {
+			for (Channel channel : extraChannelsList) {
+				extraChannelsList.add(channel);
+			}
+		}
+	}
+
+	public void addChannel(SimpleFieldSet sfs) {
 		Channel channel = null;
 		try {
 			channel = new Channel(sfs.getString("insertURI"));
@@ -40,16 +51,16 @@ public class ChannelManager {
 		}
 		addChannel(channel);
 	}
-	
-	public static boolean removeChannel(Channel channel) {
-		if (channel != null && ChannelManager.channelManager.channelList.contains(channel)) {
-			ChannelManager.channelManager.channelList.remove(channel);
+
+	public boolean removeChannel(Channel channel) {
+		if (channel != null && channelList.contains(channel)) {
+			channelList.remove(channel);
 			return true;
 		}
 		return false;
 	}
-	
-	private static void subscribeToChannel(Channel channel) {
+
+	private void subscribeToChannel(Channel channel) {
 		//TODO Subscribe to channel's USK
 	}
 
