@@ -49,6 +49,8 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 	public static final String backboneIdentityRequestURI = "USK@M9UhahTX81i-bB7N8rmWwY5LKKEPfPWgoewNLNkLMmg,IqlCA047XPFoBhxb4gU7YbHWEUV-9iz9mJblXO~w9Zk,AQACAAE/WebOfTrust/0";
 	public static final String backboneFreemail = "deflectbackbone@gpksc2qu27zvrp3md3g7fomwyghewkfbb56plifb5qgszwilgjua.freemail";
 
+	public static final String announcerPath = "CENO-signaler";
+
 	public void runPlugin(PluginRespirator pr)
 	{
 		// Initialize interfaces with fred
