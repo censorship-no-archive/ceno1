@@ -19,8 +19,10 @@ import freenet.client.InsertException;
 import freenet.client.async.ClientGetCallback;
 import freenet.client.async.ClientGetter;
 import freenet.client.async.ClientPutCallback;
+import freenet.client.async.USKCallback;
 import freenet.keys.FreenetURI;
 import freenet.keys.InsertableClientSSK;
+import freenet.keys.USK;
 import freenet.node.Node;
 import freenet.node.RequestClient;
 import freenet.node.RequestStarter;
@@ -78,6 +80,12 @@ public class NodeInterface implements FreenetInterface {
 	@Override
 	public ClientGetter fetchULPR(FreenetURI uri, ClientGetCallback callback) throws FetchException {
 		return HighLevelSimpleClientInterface.fetchURI(uri, Long.MAX_VALUE, callback, ULPRFC);
+	}
+
+	@Override
+	public boolean subscribeToUSK(USK origUSK, USKCallback cb) {
+		node.clientCore.uskManager.subscribe(origUSK, cb, false, getRequestClient());
+		return true;
 	}
 
 	/**
