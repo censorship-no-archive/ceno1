@@ -50,7 +50,7 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 		// Initialize interfaces with Freenet node
 		client = new HighLevelSimpleClientInterface(pr.getNode());
 		nodeInterface = new NodeInterface(pr.getNode(), pr);
-		new CENOL10n("CENOLANG");
+		CENOL10n.getInstance().setLanguageFromEnvVar("CENOLANG");
 
 		// Initialize LCS
 		nodeInterface.initFetchContexts();
