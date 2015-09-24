@@ -192,7 +192,7 @@ public class FreemailAPI {
 			try {
 				mailsSubject[i] = unreadMessages[i].getSubject();
 			} catch (MessagingException e) {
-				mailsSubject[i] = "Invalid";
+				mailsSubject[i] = "Invalid freemail subject";
 			}
 		}
 		return mailsSubject;
@@ -265,8 +265,11 @@ public class FreemailAPI {
 			}
 
 			// Once the folder is closed, messages cannot be read. Therefore we need to
-			// return a clone of them in a new array.
-			Message[] messagesCopy = messages.clone();
+			// return a copy of them in a new array.
+			Message[] messagesCopy = new Message[messages.length];
+			for (int i=0; i<messages.length; i++) {
+				messagesCopy[i] = new MimeMessage((MimeMessage) messages[i]);
+			}
 
 			// Close the folder and expunge (remove) all mails with the DELETED flag
 			folder.close(true);

@@ -105,9 +105,9 @@ public class LookupHandler extends AbstractCENOClientHandler {
 			return returnError(new CENOException(CENOErrCode.LCS_LOOKUP_ULPR_FAILED), clientIsHtml);
 		}
 
-		// If the Freenet node is connected to less than 5 peers, the process will be slow
+		// If the Freenet node is connected to less than 3 peers, the process will be slow
 		// and we inform the users appropriately
-		if (nodeConnections.getCurrent() < 5) {
+		if (nodeConnections.getCurrent() < 3) {
 			return returnError(new CENOException(CENOErrCode.LCS_NODE_INITIALIZING), clientIsHtml);
 		}
 

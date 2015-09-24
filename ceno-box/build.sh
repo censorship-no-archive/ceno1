@@ -31,7 +31,12 @@ CENOBOXPATH="$(pwd)"
 
 # Clean files and directories from previous builds
 if [ -d CENOBox ]; then
+  echo "Previous CENOBox build exists; will try to stop if running"
+  cd CENOBox
+  ./CENO.sh stop
+  cd ..
   rm -r CENOBox
+  echo
 fi
 
 if [ -a CENOBox.zip ]; then
@@ -75,7 +80,7 @@ sh ./build.sh
 echo
 cd $CENOBOXPATH
 
-function copyFreenetFilesTo {
+function copyFreenetFilesTo() {
   # Copy necessary files from the Freenet installation
   cp -r $FREENET_DIR/{\
 bin,\
@@ -107,8 +112,10 @@ copyFreenetFilesTo CENOBox
 copyFreenetFilesTo CENOBackbone
 
 echo "Copying extra CENO client specific directories"
-cp -rL {ceno-firefox,ceno-chrome} CENOBox
-cp -r browser-extensions-builds/ CENOBox/browser-extensions
+mkdir CENOBox/browser-extensions
+cp -rL {browser-extensions-builds,ceno-firefox,ceno-chrome} CENOBox/browser-extensions
+cp -rL browser-profiles CENOBox
+rm CENOBox/browser-profiles/chrome/.gitkeep
 cp -r ceno-{freenet,extra}/* CENOBox
 mkdir CENOBox/ceno-client
 cp -r ceno-client/{views,config} CENOBox/ceno-client

@@ -5,6 +5,45 @@
 
 
 
+## [v0.3.1] - 2015-09-15
+### Added
+  - Installation script for CENOBox that will download the latest release of CENO for the detected Operating System of the user
+
+### Changed
+  - Freenet agents won't forward/serve requests for favicons
+
+### Fixed
+  - Bug with parsing Freemails
+  - Making of directory for temporary Chrome profiles in CENOBox
+
+
+
+## [v0.3.0] - 2015-09-10
+### Added
+  - Localization of agents and documentation
+  - CENO Router browser extensions for Chrome and Firefox, that rewrite requests and proxy them to CC
+  - CENOBackbone plugin v0.1.0, that adds the bridge as a friend and sends its own node reference via Freemail
+  - CENOBackbone release script, similar to the CENOBox's one
+  - Improved Freemail APIs
+  - Include builds of CENO Router extensions in CENOBox
+  - CENOBox User Experience improvements
+  - Bundle Server has an option for proxying requests (via an HTTP proxy)
+
+### Changed
+  - CENOBox is released with our own builds of WebOfTrust and Freemail plugins
+  - Updated errorConditions that CENO agents exchange with each other
+  - Downgrade to Java 1.5 and upgrade to go 1.5
+  - LCS will signal RS to send a freemail to the bridge only when clients do not support JSON
+
+### Fixed
+  - Compatibility issues with latest Freenet releases (up to build 1470)
+  - Issue with Manifest Insertions and Null client context
+
+### Removed
+  - Support for IMAP monitoring in Freemail APIs
+
+
+
 ## [v0.3.0-rc2] - 2015-07-20
 ### Added
   - LCS will try to fetch the latest version, using -1 as the suggested version in the ULPR request
@@ -102,7 +141,9 @@
 
 
 
-[Unreleased]: https://github.com/equalitie/ceno/compare/v0.3.0-rc2...HEAD
+[Unreleased]: https://github.com/equalitie/ceno/compare/v0.3.1...HEAD
+[v0.3.1]: https://github.com/equalitie/ceno/compare/v0.3.0...v0.3.1
+[v0.3.0]: https://github.com/equalitie/ceno/compare/v0.3.0-rc2...v0.3.0
 [v0.3.0-rc2]: https://github.com/equalitie/ceno/compare/v0.3.0-rc1...v0.3.0-rc2
 [v0.3.0-rc1]: https://github.com/equalitie/ceno/compare/v0.3.0-rc0...v0.3.0-rc1
 [v0.3.0-rc0]: https://github.com/equalitie/ceno/compare/v0.2.1...v0.3.0-rc0

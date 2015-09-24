@@ -7,7 +7,7 @@ then
     exit 1
 fi
 
-function getEnvLang {
+function getEnvLang() {
   # If $CENOLANG environment variable is not set,
   # use the $LANG or $LANGUAGE ones, or if neither
   # of the them is set, default to en-us
@@ -23,11 +23,10 @@ function getEnvLang {
       CENOLANG=en-us
     fi
   fi
-  echo "CENO language set to" $CENOLANG
-  export CENOLANG
+  echo $CENOLANG
 }
 
-function browserExists {
+function browserExists() {
   if command -v $1 >/dev/null 2>&1
   then
       return 0;
@@ -36,27 +35,34 @@ function browserExists {
   fi
 }
 
-function startChromeProfile {
-  $1 --profile-directory=ceno-chrome --incognito ./ceno-client/views/extension-en-us.html &> /dev/null &
+function startChromeProfile() {
+  #Experimental: Load the CENO Router extension while invoking chrome
+  tempProfile=$(mktemp -d browser-profiles/chrome/google-chrome.XXXXXXX)
+  $1 --profile-directory=$tempProfile --load-extension=$(pwd)/browser-extensions/ceno-chrome --no-first-run $2 &> /dev/null &
+  rm -r $tempProfile
 }
 
-function startBrowser {
+function startBrowser() {
+  extIntaller=./ceno-client/views/extension-en-us.html
   # Open a browser window with the CENO profiles, including the plugin
   if browserExists chrome
   then
-    startChromeProfile chrome
+    startChromeProfile chrome $extIntaller
   elif browserExists chromium-browser
   then
-    startChromeProfile chromium-browser
+    startChromeProfile chromium-browser $extIntaller
   elif browserExists chromium
   then
-    startChromeProfile chromium
+    startChromeProfile chromium $extIntaller
+  elif browserExists Chromium
+  then
+    startChromeProfile Chromium $extIntaller
   elif browserExists google-chrome
   then
-    startChromeProfile google-chrome
+    startChromeProfile google-chrome $extIntaller
   elif browserExists firefox
   then
-      firefox -no-remote -private-window -profile "ceno-firefox" ./ceno-client/views/extension-en-us.html &> /dev/null &
+      firefox -no-remote -private-window -profile "browser-profiles/firefox" $extIntaller &> /dev/null &
   else
       echo "None of the supported browsers is installed in your machine."
       echo "Please install Chrome or Firefox and execute this script again."
@@ -64,18 +70,23 @@ function startBrowser {
   fi
 }
 
-function startCENO {
+function startCENO() {
   # Start the Freenet node
   ./run.sh start &> CENO.log
 
   # Start CENOClient proxy
-  cd ceno-client
-  CENOLANG=en-us ./CENOClient &> ../CENO.log &
-  CENOClientPID=$!
-  echo $CENOClientPID > CENOClient.pid
-  kill -20 $CENOClientPID
-  kill -18 $CENOClientPID
-  cd ..
+  if ps ax | grep -v grep | grep CENOClient > /dev/null
+  then
+    echo "CENOClient is already running"
+  else
+    cd ceno-client
+    CENOLANG=en-us ./CENOClient &> ../CENO.log &
+    CENOClientPID=$!
+    echo $CENOClientPID > CENOClient.pid
+    kill -18 $CENOClientPID
+    cd ..
+    echo "Started CENOClient proxy"
+  fi
 
   echo "You are ready to use CENO."
   echo "Remember that you are covered by CENO only when the CENO Router plugin is loaded in your browser."
@@ -85,11 +96,17 @@ function startCENO {
 case "$1" in
   'stop')
     ./run.sh stop
-    kill $(cat ceno-client/CENOClient.pid)
+    if [ -f ceno-client/CENOClient.pid ]
+    then
+      kill $(cat ceno-client/CENOClient.pid)
+      echo "Stopped CENO Client proxy"
+    fi
     ;;
 
   *)
-    getEnvLang
+    CENOLANG=$(getEnvLang)
+    export CENOLANG
+    echo "CENO language set to" $CENOLANG
     startBrowser
     startCENO
     ;;
