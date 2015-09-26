@@ -19,6 +19,7 @@ import (
 type FeedItem struct {
 	rss.Item
 	Id int
+    FeedId int
 }
 
 // Stores information about a feed in the context of the reader service
@@ -51,7 +52,6 @@ const createStatisticsTable = `create table if not exists statistics(
     last_published date,
     foreign key(feed_id) references feeds(id)
 );`
-
 const createLinksTable = `create table if not exists links(
     id integer primary key,
     item_id integer,
@@ -75,11 +75,22 @@ const createItemsTable = `create table if not exists items(
     foreign key(feed_id) references feeds(id)
 );`
 
+
 var tableInitializers = []string{
 	createFeedsTable,
 	createStatisticsTable,
 	createItemsTable,
 	createLinksTable,
+}
+
+/**
+ * Parse a pubDate field from an RSS item into a time.Time struct
+ * @param {string} date - The date string to parse
+ * @return the parsed date as a time.Time instance
+ */
+func parseRSSDate(date string) time.Time {
+    // TODO - Actually parse dates
+    return time.Now()
 }
 
 /**
@@ -240,16 +251,39 @@ func AllFeeds(db *sql.DB) ([]FeedInfo, error) {
  * @param {*sql.DB} db - The database connection to use
  * @param {string} url - The URL to search for
  */
-//func GetFeedByUrl(db *sql.DB, url string) FeedInfo {
-//}
+func GetFeedByUrl(db *sql.DB, url string) (FeedInfo, error) {
+    var feed FeedInfo
+    rows, err := transaction{db}.
+        Prepare("select id, url, type, charset from feeds where url=?").
+        Query(url).
+        Run()
+    if err != nil || rows == nil {
+        return feed, err
+    }
+    var id int
+    var _type, charset string
+    rows.Scan(&id, &url, &_type &charset)
+    return FeedInfo{id, url, _type, charset}, nil
+}
 
 /**
  * Get the basic information about a persisted feed from its ID.
  * @param {*sql.DB} db - The database connection to use
  * @param {int} id - The identifier of the feed
  */
-//func GetFeedById(db *sql.DB, id int) FeedInfo {
-//}
+func GetFeedById(db *sql.DB, id int) FeedInfo {
+    var feed FeedInfo
+    rows, err := transaction{db}.
+        Prepare("select id, url, type, charset from feeds where id=?").
+        Query(id).
+        Run()
+    if err != nil || rows == nil {
+        return feed, err
+    }
+    var url, _type, charset string
+    rows.Scan(&id, &url, &_type, &charset)
+    return FeedInfo{id, url, _type, charset}, nil
+}
 
 /**
  * Update the info about a feed.
@@ -257,24 +291,37 @@ func AllFeeds(db *sql.DB) ([]FeedInfo, error) {
  * @param {int} id - The ID of the feed to be updated
  * @param {FeedInfo} feed - The new feed data
  */
-//func UpdateFeed(db *sql.DB, id int, feed FeedInfo) {
-//}
+func UpdateFeed(db *sql.DB, id int, feed FeedInfo) error {
+    return transaction{db}.
+        Prepare("update from feeds set url=?, type=?, charset=? where id=?").
+        Exec(feed.Url, feed.Type, feed.Charset, id).
+        Run()
+}
+
 
 /**
  * Delete a feed by referencing its URL.
  * @param {*sql.DB} db - The database connection to use
  * @param {string} url - The URL of the feed
  */
-//func DeleteFeedByUrl(db *sql.DB, url string) {
-//}
+func DeleteFeedByUrl(db *sql.DB, url string) error {
+    return transaction{db}.
+        Prepare("delete from feeds where url=?").
+        Exec(url).
+        Run()
+}
 
 /**
  * Delete a feed by referencing its ID.
  * @param {*sql.DB} db - The database connection to use
  * @param {int} id - The identifier for the feed
  */
-//func DeleteFeedById(db *sql.DB, id int) {
-//}
+func DeleteFeedById(db *sql.DB, id int) {
+    return transaction{db}.
+        Prepare("delete from feeds where id=?").
+        Exec(id).
+        Run()
+}
 
 /***********************************************************
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -287,16 +334,46 @@ func AllFeeds(db *sql.DB) ([]FeedInfo, error) {
  * @param {*sql.DB} db - The database connection to use
  * @param {string} url - The URL of the feed to get stats for
  */
-//func GetStatsByFeedUrl(db *sql.DB, url string) FeedStats {
-//}
+func GetStatsByFeedUrl(db *sql.DB, url string) (FeedStats, error) {
+    var stat FeedStats
+    feed, err := GetFeedByUrl(url)
+    if err != nil {
+        return stat, err
+    }
+    rows, err := transaction{db}.
+        Prepare(`select id, items_received, request_count, last_published, subscribed_on
+                 from statistics where feed_id=?`).
+        Query(feed.Id).
+        Run()
+    if err != nil || rows == nil {
+        return stat, err
+    }
+    var id, itemsRecv, reqCount int
+    var lastPub, sub time.Time
+    rows.Scan(&id, &itemsRecv, &reqCount, &lastPub, &sub)
+    return FeedStats{id, itemsRecv, reqCount, lastPub, sub}, nil
+}
 
 /**
  * Get statistics about a feed by referencing the feed's ID.
  * @param {*sql.DB} db - The database connection to use
  * @param {int} id - The identifier of the feed to get stats for
  */
-//func GetStatsByFeedId(db *sql.DB, id int) FeedStats {
-//}
+func GetStatsByFeedId(db *sql.DB, id int) (FeedStats, error) {
+    var stat FeedStats
+    rows, err := transaction{db}.
+        Prepare(`select id, items_received, request_count, last_published, subscribed_on
+                 from statistics where feed_id=?`).
+        Query(id).
+        Run()
+    if err != nil || rows == nil {
+        return stat, err
+    }
+    var id, itemsRecv, reqCount int
+    var lastPub, sub time.Time
+    rows.Scan(&id, &itemsRecv, &reqCount, &lastPub, &sub)
+    return FeedStats{id, itemsRecv, reqCount, lastPub, sub}, nil
+}
 
 /**
  * Update the statistics about a feed based on the corresponding feed's ID.
@@ -304,8 +381,14 @@ func AllFeeds(db *sql.DB) ([]FeedInfo, error) {
  * @param {int} feedId - The identifier of the FeedInfo to reference
  * @param {FeedStats} stats - The new set of statistics to store
  */
-//func UpdateStatsByFeedId(db *sql.DB, feedId int, stats Feedstats) {
-//}
+func UpdateStatsByFeedId(db *sql.DB, feedId int, stats Feedstats) error {
+    return transaction{db}.
+        Prepare(`update statistics set
+                 items_received=?, request_count=?, last_published=?, subscribed_on=?
+                 where feed_id=?`).
+        Exec(stats.ItemsReceived, stats.RequestCount, stats.LastPublished, stats.SubscribedOn, feedId).
+        Run()
+}
 
 /***********************************************************
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -313,6 +396,16 @@ func AllFeeds(db *sql.DB) ([]FeedInfo, error) {
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 ***********************************************************/
 
+    id integer primary key,
+    feed_id integer,
+    title varchar(255),
+    authors varchar(255),
+    description text,
+    content text,
+    comments text,
+    published date,
+    updated date,
+    foreign key(feed_id) references feeds(id)
 /**
  * Store information about an item in a channel from a particular feed
  * @param {*sql.DB} db - the database connection to use
@@ -320,29 +413,97 @@ func AllFeeds(db *sql.DB) ([]FeedInfo, error) {
  * @param {*rss.Channel} channel - The channel containing the item
  * @param {*rss.Item} item - The item to store the content of
  */
-//func SaveNewItem(db *sql.DB, feedId int, channel *rss.Channel, item *rss.Item) {
-//}
+func SaveNewItem(db *sql.DB, feedId int, channel *rss.Channel, item *rss.Item) error {
+    // TODO - Implement parseRSSDate and try to get it in go-pkg-rss
+    pub := parseRSSDate(item.Published)
+    upd := parseRSSDate(item.Updated)
+    return transaction{db}.
+        Prepare(`insert into items(feed_id, title, authors, description, content, comments, published, updated)
+                 values(?, ?, ?, ?, ?, ?, ?, ?)`).
+        Exec(feedId, item.Title, item.Author, item.Description, item.Content, item.Comments, pub, upd).
+        Run()
+}
 
 /**
  * Get the items stored for a particular feed in reference to its URL.
  * @param {*sql.DB} db - the database connection to use
  * @param {string} url - The URL of the feed to get items from
  */
-//func GetItemsByFeedId(db *sql.DB, url string) []FeedItem {
-//}
+func GetItemsByFeedUrl(db *sql.DB, url string) ([]FeedItem, error) {
+    items := make([]FeedItem)
+    feed, err := GetFeedByUrl(url)
+    if err != nil {
+        return item, err
+    }
+    rows, err := transaction{db}.
+        Prepare(`select feed_id, title, authors, description, content, comments, published, updated
+                 from feeds where feed_id=?`).
+        Query(feed.Id).
+        Run()
+    if err != nil || rows == nil {
+        return items, err
+    }
+    for rows.Next() {
+        var feed_id int
+        var title, authors, description, content, comments string
+        var published, updated time.Time
+        var item FeedItem
+        rows.Scan(&feed_id, &title, &authors, &description, &content, &comments, &published, &updated)
+        item.FeedId = feed_id
+        item.Title = title
+        item.Author = authors
+        item.Description = description
+        item.Content = content
+        item.Comments = comments
+        item.PubDate = published.String()
+        item.Updated = updated.String()
+        items = append(items, item)
+    }
+    return items, nil
+}
 
 /**
  * Get the items stored for a particular feed in reference to its Id.
  * @param {*sql.DB} db - The database connection to use
  * @param {int} feedId - The identifier of the feed to get items from
  */
-//func GetItemsByFeedId(db *sql.DB, feedId int) []FeedItem {
-//}
+func GetItemsByFeedId(db *sql.DB, feedId int) ([]FeedItem, error) {
+    items := make([]FeedItem)
+    rows, err := transaction{db}.
+        Prepare(`select feed_id, title, authors, description, content, comments, published, updated
+                 from feeds where feed_id=?`).
+        Query(feedId).
+        Run()
+    if err != nil || rows == nil {
+        return items, err
+    }
+    for rows.Next() {
+        var feed_id int
+        var title, authors, description, content, comments string
+        var published, updated time.Time
+        var item FeedItem
+        rows.Scan(&feed_id, &title, &authors, &description, &content, &comments, &published, &updated)
+        item.FeedId = feed_id
+        item.Title = title
+        item.Author = authors
+        item.Description = description
+        item.Content = content
+        item.Comments = comments
+        item.PubDate = published.String()
+        item.Updated = updated.String()
+        items = append(items, item)
+    }
+    return items, nil
+}
 
 /**
  * Delete a particular item.
  * @param {*sql.DB} db - The database connection to use
  * @param {int} id - The identifier of the item to delete
  */
-//func DeleteItem(db *sql.DB, id int) {
-//}
+func DeleteItem(db *sql.DB, id int) error {
+    return transaction{db}.
+        Prepare("delete from items where id=?").
+        Exec(id).
+        Run()
+}
