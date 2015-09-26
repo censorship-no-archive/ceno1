@@ -3,6 +3,7 @@
 echo "Formatting go files."
 for file in `ls *.go`; do
   go fmt $file;
+  echo $file;
 done
 
 echo ""
