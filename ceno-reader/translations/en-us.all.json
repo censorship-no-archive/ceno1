@@ -24,6 +24,26 @@
     "translation": "The configuration file provided contains invalid data or formatting."
   },
   {
+    "id": "database_init_error_rdr",
+    "translation": "Could not establish a connection to the database. Error: {{.Error}}"
+  },
+  {
+    "id": "feed_exists_rdr",
+    "translation": "Requested feed at {{.URL}} is already being followed."
+  },
+  {
+    "id": "db_lookup_error_rdr",
+    "translation": "Could not perform lookup. Error: {{.Error}}"
+  },
+  {
+    "id": "db_store_error_rdr",
+    "translation": "Could not save or update the database. Error: {{.Error}}"
+  },
+  {
+    "id": "not_followed_feed_err",
+    "translation": "Got items from a feed {{.URL}} that is not being followed."
+  },
+  {
     "id": "not_recognized_charset_chr",
     "translation": "Expected charset {{.Expect}}, but got {{.Actual}}."
   }
