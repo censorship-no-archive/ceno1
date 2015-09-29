@@ -14,101 +14,33 @@ import (
 	"time"
 )
 
-// For information about RSS items, reference the go-pkg-rss repository
-// https://github.com/jteeuwen/go-pkg-rss/blob/066500420ea3ad0509d656c4b0fcbd351223d48e/item.go
-type FeedItem struct {
-	rss.Item
-	Id     int
-	FeedId int
+type Item struct {
+	Id          int
+	FeedId      int
+	Guid        string
+	WasInserted bool
+	InsertedOn  time.Time
 }
-
-// Stores information about a feed in the context of the reader service
-type FeedStats struct {
-	Id            int
-	ItemsReceived int       // The number of items received from the feed
-	RequestCount  int       // The number of times users have requested the feed
-	LastPublished time.Time // The date of the feed's last known publication
-	SubscribedOn  time.Time // The date that the reader subscribed to the feed
-}
-
-/***********************************************************
-* * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * * * * * * * * * * Helper  functions * * * * * * * * * *
-* * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-***********************************************************/
 
 const createFeedsTable = `create table if not exists feeds(
     id integer primary key,
-    url varchar(255),
+    url unique varchar(255),
     type varchar(8),
     charset varchar(64)
-);`
-
-const createStatisticsTable = `create table if not exists statistics(
-    id integer primary key,
-    feed_id integer,
-    items_received integer,
-    request_count integer,
-    subscribed_on date,
-    last_published date,
-    foreign key(feed_id) references feeds(id)
-);`
-const createLinksTable = `create table if not exists links(
-    id integer primary key,
-    item_id integer,
-    href varchar(255),
-    rel varchar(64),
-    type varchar(64),
-    href_language varchar(128),
-    foreign key(item_id) references items(id)
 );`
 
 const createItemsTable = `create table if not exists items(
     id integer primary key,
     feed_id integer,
-    title varchar(255),
-    authors varchar(255),
-    description text,
-    content text,
-    comments text,
-    published date,
-    updated date,
+    guid varchar(255),
+    was_inserted boolean,
+    inserted_on date,
     foreign key(feed_id) references feeds(id)
 );`
 
 var tableInitializers = []string{
 	createFeedsTable,
-	createStatisticsTable,
 	createItemsTable,
-	createLinksTable,
-}
-
-/**
- * Get the feed item's author as a string that we can print in HTML
- * @param {rss.Author} author - The author of the FeedItem or rss.Item
- * @return a nicely formatted string that can be displayed on pages
- */
-func AuthorString(author rss.Author) string {
-	return author.Name + " &lt;" + author.Email + "&gt; site: " + author.Uri
-}
-
-/**
- * Get the feed item's content as a string we can print in HTML
- * @param {*rss.Content} content - The rss.Content reference of the FeedItem or rss.Item
- * @return a simple string containing the item's text content
- */
-func ContentString(content *rss.Content) string {
-	return content.Text
-}
-
-/**
- * Parse a pubDate field from an RSS item into a time.Time struct
- * @param {string} date - The date string to parse
- * @return the parsed date as a time.Time instance
- */
-func parseRSSDate(date string) time.Time {
-	// TODO - Actually parse dates
-	return time.Now()
 }
 
 /**
@@ -223,21 +155,15 @@ func InitDBConnection(dbFileName string) (*sql.DB, error) {
 	return db, err
 }
 
-/***********************************************************
-* * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * * * * * * * * * FeedInfo management * * * * * * * * * *
-* * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-***********************************************************/
-
 /**
  * Persist information about a feed to the storage medium.
  * @param {*sql.DB} db - The database connection to use
- * @param {FeedInfo} feed - Information describing the new feed to save
+ * @param {Feed} feed - Information describing the new feed to save
  */
-func SaveNewFeed(db *sql.DB, feed FeedInfo) error {
+func SaveNewFeed(db *sql.DB, feed Feed) error {
 	_, err := transaction{db}.
 		Prepare("insert into feeds(url, type, charset) values(?,?,?)").
-		Exec(feed.URL, feed.Type, feed.Charset).
+		Exec(feed.Url, feed.Type, feed.Charset).
 		Run()
 	return err
 }
@@ -246,8 +172,8 @@ func SaveNewFeed(db *sql.DB, feed FeedInfo) error {
  * Get a collection of all the feeds subscribed to.
  * @param {*sql.DB} db - The database connection to use
  */
-func AllFeeds(db *sql.DB) ([]FeedInfo, error) {
-	var feeds []FeedInfo
+func AllFeeds(db *sql.DB) ([]Feed, error) {
+	var feeds []Feed
 	rows, err := transaction{db}.
 		Prepare("select id, url, type, charset from feeds").
 		Query().
@@ -259,7 +185,7 @@ func AllFeeds(db *sql.DB) ([]FeedInfo, error) {
 		var url, _type, charset string
 		var id int
 		rows.Scan(&id, &url, &_type, &charset)
-		feeds = append(feeds, FeedInfo{id, url, _type, charset})
+		feeds = append(feeds, Feed{id, url, _type, charset})
 	}
 	return feeds, nil
 }
@@ -269,8 +195,8 @@ func AllFeeds(db *sql.DB) ([]FeedInfo, error) {
  * @param {*sql.DB} db - The database connection to use
  * @param {string} url - The URL to search for
  */
-func GetFeedByUrl(db *sql.DB, url string) (FeedInfo, error) {
-	var feed FeedInfo
+func GetFeedByUrl(db *sql.DB, url string) (Feed, error) {
+	var feed Feed
 	feed.Id = -1
 	rows, err := transaction{db}.
 		Prepare("select id, url, type, charset from feeds where url=?").
@@ -282,7 +208,7 @@ func GetFeedByUrl(db *sql.DB, url string) (FeedInfo, error) {
 	var id int = -1
 	var _type, charset string
 	rows.Scan(&id, &url, &_type, &charset)
-	return FeedInfo{id, url, _type, charset}, nil
+	return Feed{id, url, _type, charset}, nil
 }
 
 /**
@@ -290,8 +216,8 @@ func GetFeedByUrl(db *sql.DB, url string) (FeedInfo, error) {
  * @param {*sql.DB} db - The database connection to use
  * @param {int} id - The identifier of the feed
  */
-func GetFeedById(db *sql.DB, id int) (FeedInfo, error) {
-	var feed FeedInfo
+func GetFeedById(db *sql.DB, id int) (Feed, error) {
+	var feed Feed
 	rows, err := transaction{db}.
 		Prepare("select id, url, type, charset from feeds where id=?").
 		Query(id).
@@ -302,21 +228,7 @@ func GetFeedById(db *sql.DB, id int) (FeedInfo, error) {
 	}
 	var url, _type, charset string
 	rows.Scan(&id, &url, &_type, &charset)
-	return FeedInfo{id, url, _type, charset}, nil
-}
-
-/**
- * Update the info about a feed.
- * @param {*sql.DB} db - The database connection to use
- * @param {int} id - The ID of the feed to be updated
- * @param {FeedInfo} feed - The new feed data
- */
-func UpdateFeed(db *sql.DB, id int, feed FeedInfo) error {
-	_, err := transaction{db}.
-		Prepare("update from feeds set url=?, type=?, charset=? where id=?").
-		Exec(feed.URL, feed.Type, feed.Charset, id).
-		Run()
-	return err
+	return Feed{id, url, _type, charset}, nil
 }
 
 /**
@@ -345,102 +257,21 @@ func DeleteFeedById(db *sql.DB, id int) error {
 	return err
 }
 
-/***********************************************************
-* * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * * * * * * * * FeedStats  management * * * * * * * * * *
-* * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-***********************************************************/
-
-/**
- * Get statistics about a feed by the feed's URL.
- * @param {*sql.DB} db - The database connection to use
- * @param {string} url - The URL of the feed to get stats for
- */
-func GetStatsByFeedUrl(db *sql.DB, url string) (FeedStats, error) {
-	var stat FeedStats
-	stat.Id = -1
-	feed, err := GetFeedByUrl(db, url)
-	if err != nil {
-		return stat, err
-	}
-	rows, err := transaction{db}.
-		Prepare(`select id, items_received, request_count, last_published, subscribed_on
-                 from statistics where feed_id=?`).
-		Query(feed.Id).
-		Run()
-	if err != nil || rows == nil {
-		return stat, err
-	}
-	var id, itemsRecv, reqCount int
-	var lastPub, sub time.Time
-	rows.Scan(&id, &itemsRecv, &reqCount, &lastPub, &sub)
-	return FeedStats{id, itemsRecv, reqCount, lastPub, sub}, nil
-}
-
-/**
- * Get statistics about a feed by referencing the feed's ID.
- * @param {*sql.DB} db - The database connection to use
- * @param {int} id - The identifier of the feed to get stats for
- */
-func GetStatsByFeedId(db *sql.DB, id int) (FeedStats, error) {
-	var stat FeedStats
-	rows, err := transaction{db}.
-		Prepare(`select id, items_received, request_count, last_published, subscribed_on
-                 from statistics where feed_id=?`).
-		Query(id).
-		Run()
-	if err != nil || rows == nil {
-		stat.Id = -1
-		return stat, err
-	}
-	var itemsRecv, reqCount int
-	var lastPub, sub time.Time
-	rows.Scan(&id, &itemsRecv, &reqCount, &lastPub, &sub)
-	return FeedStats{id, itemsRecv, reqCount, lastPub, sub}, nil
-}
-
-/**
- * Update the statistics about a feed based on the corresponding feed's ID.
- * @param {*sql.DB} db - The database connection to use
- * @param {int} feedId - The identifier of the FeedInfo to reference
- * @param {FeedStats} stats - The new set of statistics to store
- */
-func UpdateStatsByFeedId(db *sql.DB, feedId int, stats FeedStats) error {
-	_, err := transaction{db}.
-		Prepare(`update statistics set
-                 items_received=?, request_count=?, last_published=?, subscribed_on=?
-                 where feed_id=?`).
-		Exec(stats.ItemsReceived, stats.RequestCount, stats.LastPublished, stats.SubscribedOn, feedId).
-		Run()
-	return err
-}
-
-/***********************************************************
-* * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * * * * * * * * RSS Items  management * * * * * * * * * *
-* * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-***********************************************************/
-
 /**
  * Store information about an item in a channel from a particular feed
  * @param {*sql.DB} db - the database connection to use
- * @param {int} feedId - The identifier for the feed the item comes from
- * @param {*rss.Channel} channel - The channel containing the item
+ * @param {string} feedUrl - The URL of the RSS/Atom feed
  * @param {*rss.Item} item - The item to store the content of
  */
-func SaveNewItem(db *sql.DB, feedId int, channel *rss.Channel, item *rss.Item) error {
-	// TODO - Implement parseRSSDate and try to get it in go-pkg-rss
-	pub := parseRSSDate(item.PubDate)
-	upd := parseRSSDate(item.Updated)
-	author := AuthorString(item.Author)
-	content := ""
-	if item.Content != nil {
-		content = ContentString(item.Content)
+func SaveNewItem(db *sql.DB, feedUrl string, item *rss.Item) error {
+	feed, _ := GetFeedByUrl(db, feedUrl)
+	if feed.Id == -1 {
+		SaveNewFeed(db, Feed{0, feedUrl, "", ""})
 	}
 	_, err := transaction{db}.
-		Prepare(`insert into items(feed_id, title, authors, description, content, comments, published, updated)
-                 values(?, ?, ?, ?, ?, ?, ?, ?)`).
-		Exec(feedId, item.Title, author, item.Description, content, item.Comments, pub, upd).
+		Prepare(`insert into items(feed_id, guid, inserted)
+                 values((select id from feeds where url=?), ?, ?)`).
+		Exec(feedUrl, item.Guid, false).
 		Run()
 	return err
 }
@@ -450,39 +281,23 @@ func SaveNewItem(db *sql.DB, feedId int, channel *rss.Channel, item *rss.Item) e
  * @param {*sql.DB} db - the database connection to use
  * @param {string} url - The URL of the feed to get items from
  */
-func GetItemsByFeedUrl(db *sql.DB, url string) ([]FeedItem, error) {
-	items := make([]FeedItem, 1)
-	feed, err := GetFeedByUrl(db, url)
-	if err != nil {
-		return items, err
-	}
+func GetItemsByFeedUrl(db *sql.DB, url string) ([]Item, error) {
+	items := make([]Item, 1)
 	rows, err := transaction{db}.
-		Prepare(`select feed_id, title, authors, description, content, comments, published, updated
-                 from feeds where feed_id=?`).
-		Query(feed.Id).
+		Prepare(`select id, feed_id, guid, was_inserted, inserted_on
+                 from items where feed_id=(select id from feeds where url=?)`).
+		Query(url).
 		Run()
 	if err != nil || rows == nil {
 		return items, err
 	}
 	for rows.Next() {
-		var feed_id int
-		var title, authors, description, content, comments string
-		var published, updated time.Time
-		var item FeedItem
-		rows.Scan(&feed_id, &title, &authors, &description, &content, &comments, &published, &updated)
-		item.FeedId = feed_id
-		item.Title = title
-		// TODO - We should probably maintain more information about Authors
-		// Author contains: Name, Uri, Email
-		item.Author = rss.Author{authors, "", ""}
-		item.Description = description
-		// TODO - Do we need any more information about content?
-		// Content contains: Type, Lang, Base, Text
-		item.Content = &rss.Content{"", "", "", content}
-		item.Comments = comments
-		item.PubDate = published.String()
-		item.Updated = updated.String()
-		items = append(items, item)
+		var id, feedId int
+		var guid string
+		var wasInserted bool
+		var insertedOn time.Time
+		rows.Scan(&id, &feedId, &guid, &wasInserted, &insertedOn)
+		items = append(items, Item{id, feedId, guid, wasInserted, insertedOn})
 	}
 	return items, nil
 }
@@ -492,35 +307,23 @@ func GetItemsByFeedUrl(db *sql.DB, url string) ([]FeedItem, error) {
  * @param {*sql.DB} db - The database connection to use
  * @param {int} feedId - The identifier of the feed to get items from
  */
-func GetItemsByFeedId(db *sql.DB, feedId int) ([]FeedItem, error) {
-	items := make([]FeedItem, 1)
+func GetItemsByFeedId(db *sql.DB, feedId int) ([]Item, error) {
+	items := make([]Item, 1)
 	rows, err := transaction{db}.
-		Prepare(`select feed_id, title, authors, description, content, comments, published, updated
-                 from feeds where feed_id=?`).
+		Prepare(`select id, feed_id, guid, was_inserted, inserted_on
+                 from items where feed_id=?`).
 		Query(feedId).
 		Run()
 	if err != nil || rows == nil {
 		return items, err
 	}
 	for rows.Next() {
-		var feed_id int
-		var title, authors, description, content, comments string
-		var published, updated time.Time
-		var item FeedItem
-		rows.Scan(&feed_id, &title, &authors, &description, &content, &comments, &published, &updated)
-		item.FeedId = feed_id
-		item.Title = title
-		// TODO - We should probably maintain more information about Authors
-		// Author contains: Name, Uri, Email
-		item.Author = rss.Author{authors, "", ""}
-		item.Description = description
-		// TODO - Do we need any more information about content?
-		// Content contains: Type, Lang, Base, Text
-		item.Content = &rss.Content{"", "", "", content}
-		item.Comments = comments
-		item.PubDate = published.String()
-		item.Updated = updated.String()
-		items = append(items, item)
+		var id, feedId int
+		var guid string
+		var wasInserted bool
+		var insertedOn time.Time
+		rows.Scan(&id, &feedId, &guid, &wasInserted, &insertedOn)
+		items = append(items, Item{id, feedId, guid, wasInserted, insertedOn})
 	}
 	return items, nil
 }
