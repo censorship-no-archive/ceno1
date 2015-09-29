@@ -271,15 +271,15 @@ func AllFeeds(db *sql.DB) ([]FeedInfo, error) {
  */
 func GetFeedByUrl(db *sql.DB, url string) (FeedInfo, error) {
 	var feed FeedInfo
+	feed.Id = -1
 	rows, err := transaction{db}.
 		Prepare("select id, url, type, charset from feeds where url=?").
 		Query(url).
 		Run()
-	if err != nil || rows == nil {
-		feed.Id = -1
+	if err != nil {
 		return feed, err
 	}
-	var id int
+	var id int = -1
 	var _type, charset string
 	rows.Scan(&id, &url, &_type, &charset)
 	return FeedInfo{id, url, _type, charset}, nil
@@ -433,7 +433,10 @@ func SaveNewItem(db *sql.DB, feedId int, channel *rss.Channel, item *rss.Item) e
 	pub := parseRSSDate(item.PubDate)
 	upd := parseRSSDate(item.Updated)
 	author := AuthorString(item.Author)
-	content := ContentString(item.Content)
+	content := ""
+	if item.Content != nil {
+		content = ContentString(item.Content)
+	}
 	_, err := transaction{db}.
 		Prepare(`insert into items(feed_id, title, authors, description, content, comments, published, updated)
                  values(?, ?, ?, ?, ?, ?, ?, ?)`).
