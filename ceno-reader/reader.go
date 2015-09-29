@@ -153,7 +153,7 @@ func followHandler(db *sql.DB, requests chan FeedInfo) func(http.ResponseWriter,
 			foundFeed, lookupErr := GetFeedByUrl(db, feedInfo.URL)
 			if lookupErr != nil {
 				w.Write([]byte(T("db_lookup_error_rdr", map[string]interface{}{"Error": lookupErr.Error()})))
-			} else if foundFeed.URL != "" {
+			} else if foundFeed.Id == -1 {
 				w.Write([]byte(T("feed_exists_rdr", map[string]interface{}{"URL": feedInfo.URL})))
 			} else {
 				saveErr := SaveNewFeed(db, feedInfo)

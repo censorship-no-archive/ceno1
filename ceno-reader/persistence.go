@@ -84,6 +84,24 @@ var tableInitializers = []string{
 }
 
 /**
+ * Get the feed item's author as a string that we can print in HTML
+ * @param {rss.Author} author - The author of the FeedItem or rss.Item
+ * @return a nicely formatted string that can be displayed on pages
+ */
+func AuthorString(author rss.Author) string {
+	return author.Name + " &lt;" + author.Email + "&gt; site: " + author.Uri
+}
+
+/**
+ * Get the feed item's content as a string we can print in HTML
+ * @param {*rss.Content} content - The rss.Content reference of the FeedItem or rss.Item
+ * @return a simple string containing the item's text content
+ */
+func ContentString(content *rss.Content) string {
+	return content.Text
+}
+
+/**
  * Parse a pubDate field from an RSS item into a time.Time struct
  * @param {string} date - The date string to parse
  * @return the parsed date as a time.Time instance
@@ -258,7 +276,7 @@ func GetFeedByUrl(db *sql.DB, url string) (FeedInfo, error) {
 		Query(url).
 		Run()
 	if err != nil || rows == nil {
-        feed.Id = -1
+		feed.Id = -1
 		return feed, err
 	}
 	var id int
@@ -279,7 +297,7 @@ func GetFeedById(db *sql.DB, id int) (FeedInfo, error) {
 		Query(id).
 		Run()
 	if err != nil || rows == nil {
-        feed.Id = -1
+		feed.Id = -1
 		return feed, err
 	}
 	var url, _type, charset string
@@ -340,7 +358,7 @@ func DeleteFeedById(db *sql.DB, id int) error {
  */
 func GetStatsByFeedUrl(db *sql.DB, url string) (FeedStats, error) {
 	var stat FeedStats
-    stat.Id = -1
+	stat.Id = -1
 	feed, err := GetFeedByUrl(db, url)
 	if err != nil {
 		return stat, err
@@ -372,7 +390,7 @@ func GetStatsByFeedId(db *sql.DB, id int) (FeedStats, error) {
 		Query(id).
 		Run()
 	if err != nil || rows == nil {
-        stat.Id = -1
+		stat.Id = -1
 		return stat, err
 	}
 	var itemsRecv, reqCount int
@@ -414,10 +432,12 @@ func SaveNewItem(db *sql.DB, feedId int, channel *rss.Channel, item *rss.Item) e
 	// TODO - Implement parseRSSDate and try to get it in go-pkg-rss
 	pub := parseRSSDate(item.PubDate)
 	upd := parseRSSDate(item.Updated)
+	author := AuthorString(item.Author)
+	content := ContentString(item.Content)
 	_, err := transaction{db}.
 		Prepare(`insert into items(feed_id, title, authors, description, content, comments, published, updated)
                  values(?, ?, ?, ?, ?, ?, ?, ?)`).
-		Exec(feedId, item.Title, item.Author, item.Description, item.Content, item.Comments, pub, upd).
+		Exec(feedId, item.Title, author, item.Description, content, item.Comments, pub, upd).
 		Run()
 	return err
 }
