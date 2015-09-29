@@ -258,6 +258,7 @@ func GetFeedByUrl(db *sql.DB, url string) (FeedInfo, error) {
 		Query(url).
 		Run()
 	if err != nil || rows == nil {
+        feed.Id = -1
 		return feed, err
 	}
 	var id int
@@ -278,6 +279,7 @@ func GetFeedById(db *sql.DB, id int) (FeedInfo, error) {
 		Query(id).
 		Run()
 	if err != nil || rows == nil {
+        feed.Id = -1
 		return feed, err
 	}
 	var url, _type, charset string
@@ -338,6 +340,7 @@ func DeleteFeedById(db *sql.DB, id int) error {
  */
 func GetStatsByFeedUrl(db *sql.DB, url string) (FeedStats, error) {
 	var stat FeedStats
+    stat.Id = -1
 	feed, err := GetFeedByUrl(db, url)
 	if err != nil {
 		return stat, err
@@ -369,6 +372,7 @@ func GetStatsByFeedId(db *sql.DB, id int) (FeedStats, error) {
 		Query(id).
 		Run()
 	if err != nil || rows == nil {
+        stat.Id = -1
 		return stat, err
 	}
 	var itemsRecv, reqCount int

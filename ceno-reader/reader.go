@@ -75,7 +75,6 @@ func itemFeedHandler(db *sql.DB) func(*rss.Feed, *rss.Channel, []*rss.Item) {
 			fmt.Println(T("db_lookup_error_rdr", map[string]interface{}{"Error": lookupErr.Error()}))
 			return
 		} else if feedInfo.Id == -1 {
-			// TODO - Make sure to set values to some identifiably invalid value on failure
 			fmt.Println(T("db_lookup_error_rdr", map[string]interface{}{
 				"Error": T("not_followed_feed_err", map[string]interface{}{"URL": feed.Url}),
 			}))
