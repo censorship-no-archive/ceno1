@@ -26,6 +26,8 @@ const createFeedsTable = `create table if not exists feeds(
     id integer primary key,
     url varchar(255) unique,
     type varchar(8),
+    identifier text,
+    encryptionKey text,
     charset varchar(64)
 );`
 
@@ -35,6 +37,8 @@ const createItemsTable = `create table if not exists items(
     title varchar(255),
     was_inserted boolean,
     inserted_on date,
+    identifier text,
+    encytption_key text,
     foreign key(feed_id) references feeds(id)
 );`
 
@@ -162,8 +166,8 @@ func InitDBConnection(dbFileName string) (*sql.DB, error) {
  */
 func SaveNewFeed(db *sql.DB, feed Feed) error {
 	_, err := transaction{db}.
-		Prepare("insert into feeds(url, type, charset) values(?,?,?)").
-		Exec(feed.Url, feed.Type, feed.Charset).
+		Prepare("insert into feeds(url, type, charset, identifier, encryptionKey) values(?,?,?,?,?)").
+		Exec(feed.Url, feed.Type, feed.Charset, feed.Identifier, feed.EncKey).
 		Run()
 	return err
 }
@@ -175,17 +179,17 @@ func SaveNewFeed(db *sql.DB, feed Feed) error {
 func AllFeeds(db *sql.DB) ([]Feed, error) {
 	var feeds []Feed
 	rows, err := transaction{db}.
-		Prepare("select id, url, type, charset from feeds").
+		Prepare("select id, url, type, charset, identifier, encryptionKey from feeds").
 		Query().
 		Run()
 	if err != nil || rows == nil {
 		return feeds, err
 	}
 	for rows.Next() {
-		var url, _type, charset string
+		var url, _type, charset, identifier, key string
 		var id int
-		rows.Scan(&id, &url, &_type, &charset)
-		feeds = append(feeds, Feed{id, url, _type, charset})
+		rows.Scan(&id, &url, &_type, &charset, &identifier, &key)
+		feeds = append(feeds, Feed{id, url, _type, charset, identifier, key})
 	}
 	return feeds, nil
 }
@@ -199,16 +203,16 @@ func GetFeedByUrl(db *sql.DB, url string) (Feed, error) {
 	var feed Feed
 	feed.Id = -1
 	rows, err := transaction{db}.
-		Prepare("select id, url, type, charset from feeds where url=?").
+		Prepare("select id, url, type, charset, identifier, encryptionKey, from feeds where url=?").
 		Query(url).
 		Run()
 	if err != nil {
 		return feed, err
 	}
 	var id int = -1
-	var _type, charset string
-	rows.Scan(&id, &url, &_type, &charset)
-	return Feed{id, url, _type, charset}, nil
+	var _type, charset, identifier, key string
+	rows.Scan(&id, &url, &_type, &charset, &identifier, &key)
+	return Feed{id, url, _type, charset, identifier, key}, nil
 }
 
 /**
@@ -219,16 +223,16 @@ func GetFeedByUrl(db *sql.DB, url string) (Feed, error) {
 func GetFeedById(db *sql.DB, id int) (Feed, error) {
 	var feed Feed
 	rows, err := transaction{db}.
-		Prepare("select id, url, type, charset from feeds where id=?").
+		Prepare("select id, url, type, charset, identifier, encryptionKey, from feeds where id=?").
 		Query(id).
 		Run()
 	if err != nil || rows == nil {
 		feed.Id = -1
 		return feed, err
 	}
-	var url, _type, charset string
-	rows.Scan(&id, &url, &_type, &charset)
-	return Feed{id, url, _type, charset}, nil
+	var _type, charset, identifier, key string
+	rows.Scan(&id, &url, &_type, &charset, &identifier, &key)
+	return Feed{id, url, _type, charset, identifier, key}, nil
 }
 
 /**

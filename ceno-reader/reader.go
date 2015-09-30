@@ -39,11 +39,17 @@ var CharsetReaders map[string]xmlx.CharsetFunc = map[string]xmlx.CharsetFunc{
  * the appropriate functionality can be invoked.
  */
 type Feed struct {
-	Id      int
-	Url     string `json:"url"`
-	Type    string `json:"type"`
-	Charset string `json:"charset"`
+	Id         int
+	Url        string `json:"url"`
+	Type       string `json:"type"`
+	Charset    string `json:"charset"`
+    Identifier string
+    EncKey     string
 }
+
+/**
+ * Get information about feeds to be injected into the portal page.
+ * @return an array of Feeds
 
 /**
  * Handle the receipt of a new channel.
@@ -62,6 +68,8 @@ func channelFeedHandler(feed *rss.Feed, newChannels []*rss.Channel) {
  */
 func itemFeedHandler(feed *rss.Feed, channel *rss.Channel, newItems []*rss.Item) {
 	T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
+    // TODO - Before inserting items into the database, try to insert them into
+    // Freenet and get the key and identifier we will use.
 	for _, item := range newItems {
 		saveErr := SaveNewItem(DBConnection, feed.Url, item)
 		if saveErr != nil {
@@ -159,9 +167,8 @@ func createPortalPage(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Something went wrong!"))
 	} else {
 		languages := [...]string{"english", "french"}
-		moduleData := map[string]interface{}{
-			"Languages": languages,
-		}
+        moduleData := popularFeeds()
+		moduleData["Languages"] = languages
 		moduleDataMarshalled, err := json.Marshal(moduleData)
 		var module string
 		// TODO - Serve an error
