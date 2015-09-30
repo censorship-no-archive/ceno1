@@ -17,7 +17,7 @@ import (
 const CONFIG_FILE string = "./config/config.json"
 
 // The name of the file to store our SQLite database in
-const DB_FILENAME string = "reader.db"
+const DB_FILENAME string = "feeds.db"
 
 // A global configuration instance. Must be instantiated properly in main().
 var Configuration Config

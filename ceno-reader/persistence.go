@@ -17,14 +17,14 @@ import (
 type Item struct {
 	Id          int
 	FeedId      int
-	Guid        string
+	Title       string
 	WasInserted bool
 	InsertedOn  time.Time
 }
 
 const createFeedsTable = `create table if not exists feeds(
     id integer primary key,
-    url unique varchar(255),
+    url varchar(255) unique,
     type varchar(8),
     charset varchar(64)
 );`
@@ -32,7 +32,7 @@ const createFeedsTable = `create table if not exists feeds(
 const createItemsTable = `create table if not exists items(
     id integer primary key,
     feed_id integer,
-    guid varchar(255),
+    title varchar(255),
     was_inserted boolean,
     inserted_on date,
     foreign key(feed_id) references feeds(id)
@@ -269,9 +269,9 @@ func SaveNewItem(db *sql.DB, feedUrl string, item *rss.Item) error {
 		SaveNewFeed(db, Feed{0, feedUrl, "", ""})
 	}
 	_, err := transaction{db}.
-		Prepare(`insert into items(feed_id, guid, inserted)
+		Prepare(`insert into items(feed_id, title, was_inserted)
                  values((select id from feeds where url=?), ?, ?)`).
-		Exec(feedUrl, item.Guid, false).
+		Exec(feedUrl, item.Title, false).
 		Run()
 	return err
 }
@@ -284,7 +284,7 @@ func SaveNewItem(db *sql.DB, feedUrl string, item *rss.Item) error {
 func GetItemsByFeedUrl(db *sql.DB, url string) ([]Item, error) {
 	items := make([]Item, 1)
 	rows, err := transaction{db}.
-		Prepare(`select id, feed_id, guid, was_inserted, inserted_on
+		Prepare(`select id, feed_id, was_inserted, inserted_on
                  from items where feed_id=(select id from feeds where url=?)`).
 		Query(url).
 		Run()
@@ -293,11 +293,11 @@ func GetItemsByFeedUrl(db *sql.DB, url string) ([]Item, error) {
 	}
 	for rows.Next() {
 		var id, feedId int
-		var guid string
+		var title string
 		var wasInserted bool
 		var insertedOn time.Time
-		rows.Scan(&id, &feedId, &guid, &wasInserted, &insertedOn)
-		items = append(items, Item{id, feedId, guid, wasInserted, insertedOn})
+		rows.Scan(&id, &feedId, &title, &wasInserted, &insertedOn)
+		items = append(items, Item{id, feedId, title, wasInserted, insertedOn})
 	}
 	return items, nil
 }
@@ -310,7 +310,7 @@ func GetItemsByFeedUrl(db *sql.DB, url string) ([]Item, error) {
 func GetItemsByFeedId(db *sql.DB, feedId int) ([]Item, error) {
 	items := make([]Item, 1)
 	rows, err := transaction{db}.
-		Prepare(`select id, feed_id, guid, was_inserted, inserted_on
+		Prepare(`select id, feed_id, title, was_inserted, inserted_on
                  from items where feed_id=?`).
 		Query(feedId).
 		Run()
@@ -319,11 +319,11 @@ func GetItemsByFeedId(db *sql.DB, feedId int) ([]Item, error) {
 	}
 	for rows.Next() {
 		var id, feedId int
-		var guid string
+		var title string
 		var wasInserted bool
 		var insertedOn time.Time
-		rows.Scan(&id, &feedId, &guid, &wasInserted, &insertedOn)
-		items = append(items, Item{id, feedId, guid, wasInserted, insertedOn})
+		rows.Scan(&id, &feedId, &title, &wasInserted, &insertedOn)
+		items = append(items, Item{id, feedId, title, wasInserted, insertedOn})
 	}
 	return items, nil
 }
