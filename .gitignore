@@ -21,6 +21,9 @@ ceno-client/FreenetCENO
 # Compiled CENO reader service
 ceno-reader/reader
 
+# SQLite database used by ceno-reader
+ceno-reader/feeds.db
+
 ../fred
 
 # Vim temporary files
