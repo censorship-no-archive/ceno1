@@ -159,14 +159,20 @@ func createPortalPage(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Something went wrong!"))
 	} else {
 		languages := [...]string{"english", "french"}
-		moduleData := struct {
-			Languages [len(languages)]string
-		}{
-			languages,
+		moduleData := map[string]interface{}{
+			"Languages": languages,
+		}
+		moduleDataMarshalled, err := json.Marshal(moduleData)
+		var module string
+		// TODO - Serve an error
+		if err != nil {
+			module = ""
+		} else {
+			module = string(moduleDataMarshalled[:])
 		}
 		t.Execute(w, map[string]interface{}{
-			"Languages":        moduleData.Languages,
-			"CenoPortalModule": moduleData,
+			"Languages":        languages,
+			"CenoPortalModule": module,
 		})
 	}
 }
