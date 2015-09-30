@@ -8,8 +8,10 @@ import (
 	"github.com/jteeuwen/go-pkg-xmlx"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/nicksnyder/go-i18n/i18n"
+	"html/template"
 	"net/http"
 	"os"
+	"path"
 	"time"
 )
 
@@ -150,8 +152,23 @@ func followHandler(requests chan Feed) func(http.ResponseWriter, *http.Request) 
  */
 func createPortalPage(w http.ResponseWriter, r *http.Request) {
 	//T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
-	// TODO - Populate the template
-	w.Write([]byte("Welcome to the CENO Portal"))
+	t, err := template.ParseFiles(path.Join(".", "templates", "feed.html"))
+	if err != nil {
+		// Serve some kind of error message
+		w.Header().Set("Content-Type", "text/plain")
+		w.Write([]byte("Something went wrong!"))
+	} else {
+		languages := [...]string{"english", "french"}
+		moduleData := struct {
+			Languages [len(languages)]string
+		}{
+			languages,
+		}
+		t.Execute(w, map[string]interface{}{
+			"Languages":        moduleData.Languages,
+			"CenoPortalModule": moduleData,
+		})
+	}
 }
 
 func main() {
