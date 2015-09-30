@@ -1,11 +1,27 @@
 <!doctype html>
 <html>
-  <head>
-    <title>CENO RSS Portal</title>
-  </head>
-  <body>
-    <p>
-      Under construction
-    </p>
-  </body>
+<head>
+    <title>CENO Portal</title>
+    <meta charset='utf-8' />
+    <link rel="stylesheet" href="stylesheets/pure-min.css" />
+    <link rel="stylesheet" href="stylesheets/ceno.css" />
+    <link rel="stylesheet" href="stylesheets/portal.css" />
+</head>
+<body>
+
+    <!-- Will have content inserted as JSON by the backend code.
+         The frontend code will then be able to use that data. -->
+    <script type="text/javascript" id="jsonPlaceholder">
+    // This global variable can be accessed by all the scripts to follow
+    // but should be treated as *data* and NOT mutated.
+    var cenoPortalModule = CenoPortal({"languages": ["english", "français", "日本語", "عربي", "Ελληνική"]});
+    </script>
+    <div class="content">
+        <ul id="languageSelect">
+            <!-- Filled by JS -->
+        </ul>
+    </div>
+
+    <script src="javascripts/languages.js"></script>
+</body>
 </html>
