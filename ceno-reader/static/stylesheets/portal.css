@@ -15,8 +15,29 @@ ul#languageSelect li:before {
     padding-right: 5px;
 }
 
+div#articleSection {
+    padding-top: 20px;
+    padding-left: 30px;
+    padding-right: 30px;
+    padding-bottom: 20px;
+}
+
+div#articleSection div.content {
+    margin-left: auto;
+    margin-right: auto;
+}
+
 div.content {
     width: 80%;
     margin-left: auto;
     margin-right: auto;
+}
+
+div.sitePanel {
+    background-color: white;
+    height: 300px;
+    width: 40%;
+    margin-bottom: 40px;
+    margin-left: 50px;
+    margin-right: 50px;
 }
