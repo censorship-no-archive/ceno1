@@ -145,6 +145,15 @@ func followHandler(requests chan Feed) func(http.ResponseWriter, *http.Request) 
 	}
 }
 
+/**
+ * Build the portal page with information about articles already inserted into Freenet
+ */
+func createPortalPage(w http.ResponseWriter, r *http.Request) {
+	//T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
+	// TODO - Populate the template
+	w.Write([]byte("Welcome to the CENO Portal"))
+}
+
 func main() {
 	// Configure the i18n library to use the preferred language set in the CENOLANG environment variable
 	setLanguage := os.Getenv("CENOLANG")
@@ -172,7 +181,9 @@ func main() {
 	// Set up the HTTP server to listen for requests for new feeds to read
 	requestNewFollow := make(chan Feed)
 	go followFeeds(requestNewFollow)
+	http.Handle("/", http.FileServer(http.Dir("./static")))
 	http.HandleFunc("/follow", followHandler(requestNewFollow))
+	http.HandleFunc("/portal", createPortalPage)
 	fmt.Println(T("listening_msg_rdr", map[string]interface{}{"Port": Configuration.PortNumber}))
 	if err := http.ListenAndServe(Configuration.PortNumber, nil); err != nil {
 		panic(err)
