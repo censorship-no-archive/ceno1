@@ -8,10 +8,8 @@ import (
 	"github.com/jteeuwen/go-pkg-xmlx"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/nicksnyder/go-i18n/i18n"
-	"html/template"
 	"net/http"
 	"os"
-	"path"
 	"time"
 )
 
@@ -64,29 +62,6 @@ type Feed struct {
 type SaveFeedRequest struct {
 	FeedInfo Feed
 	W        http.ResponseWriter
-}
-
-/**
- * Get information about feeds to be injected into the portal page.
- * @return a map with a "feeds" key and corresponding array of Feed structs and an optional error
- */
-func initModuleWithFeeds() (map[string]interface{}, error) {
-	feeds, err := AllFeeds(DBConnection)
-	mapping := make(map[string]interface{})
-	mapping["feeds"] = feeds
-	return mapping, err
-}
-
-/**
- * Get information about articles from a given feed to be injected into the portal page.
- * @param {string} feedUrl - The URL of the feed to fetch articles from
- * @return a map with a "feeds" key and corresponding array of Feed structs and an optional error
- */
-func initModuleWithArticles(feedUrl string) (map[string]interface{}, error) {
-    items, err := GetItemsByFeedUrl(DBConnection, feedUrl)
-    mapping := make(map[string]interface{})
-    mapping["articles"] = items
-    return mapping, err
 }
 
 /**
@@ -199,67 +174,6 @@ func followHandler(requests chan SaveFeedRequest) func(http.ResponseWriter, *htt
 	}
 }
 
-/**
- * Build the portal page with information about articles already inserted into Freenet
- */
-func createPortalPage(w http.ResponseWriter, r *http.Request) {
-	//T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
-	t, err := template.ParseFiles(path.Join(".", "templates", "feeds.html"))
-	if err != nil {
-		// Serve some kind of error message
-		w.Header().Set("Content-Type", "text/plain")
-		w.Write([]byte("Something went wrong!"))
-        return
-	}
-		languages := [...]string{"english", "french"}
-		moduleData, feedsErr := initModuleWithFeeds()
-		moduleData["Languages"] = languages
-        moduleData["Page"] = "portal"
-		moduleDataMarshalled, err := json.Marshal(moduleData)
-		var module string
-		// TODO - Serve an error
-		if feedsErr != nil {
-			module = ""
-		} else if err != nil {
-			module = ""
-		} else {
-			module = string(moduleDataMarshalled[:])
-		}
-		t.Execute(w, map[string]interface{}{
-			"Languages":        languages,
-			"CenoPortalModule": module,
-		})
-}
-
-func createArticlePage(w http.ResponseWriter, r *http.Request) {
-    t, err := template.ParseFiles(path.Join(".", "templates", "articles.html"))
-    if err != nil {
-        // TODO - Create a more useful error page to use
-        w.Header().Set("Content-Type", "text/plain")
-        w.Write()[]byte("Something went wrong!"))
-        return
-    }
-    // TODO - Grab language data dynamically
-    languages := [...]string{"english", "french"}
-    moduleData, articlesErr := initModuleWithArticles(feedUrl)
-    moduleData["Languages"] = languages
-    moduleData["Page"] = "articles"
-    marshalled, err := json.Marshal(moduleData)
-    var module string
-    // TODO - Serve an error
-    if articlesErr != nil {
-        module = ""
-    } else if err != nil {
-        module = ""
-    } else {
-        module = string(marshalled[:])
-    }
-    t.Execute(e, map[string]interface{}{
-        "Languages":        languages,
-        "CenoPortalModule": module,
-    })
-}
-
 func main() {
 	// Configure the i18n library to use the preferred language set in the CENOLANG environment variable
 	setLanguage := os.Getenv("CENOLANG")
@@ -289,8 +203,8 @@ func main() {
 	go followFeeds(requestNewFollow)
 	http.Handle("/", http.FileServer(http.Dir("./static")))
 	http.HandleFunc("/follow", followHandler(requestNewFollow))
-	http.HandleFunc("/portal", createPortalPage)
-    http.HandleFunc("/articles", createArticlePage)
+	http.HandleFunc("/portal", CreatePortalPage)
+	http.HandleFunc("/articles", CreateArticlePage)
 	fmt.Println(T("listening_msg_rdr", map[string]interface{}{"Port": Configuration.PortNumber}))
 	if err := http.ListenAndServe(Configuration.PortNumber, nil); err != nil {
 		panic(err)

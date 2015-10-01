@@ -3,7 +3,6 @@
 echo "Formatting go files."
 for file in `ls *.go`; do
   go fmt $file;
-  echo $file;
 done
 
 echo ""
@@ -23,4 +22,6 @@ echo ""
 #$GOPATH/bin/goi18n *.json
 #cd ..
 
-go build reader.go charsetreaders.go config.go persistence.go && echo "Compiled reader successfully."
+SOURCE_FILES="reader.go charsetreaders.go config.go persistence.go portal.go articles.go"
+
+go build $SOURCE_FILES && echo "Compiled reader successfully."

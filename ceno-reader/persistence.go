@@ -10,10 +10,7 @@ import (
 	"database/sql"
 	rss "github.com/jteeuwen/go-pkg-rss"
 	//"github.com/jteeuwen/go-pkg-xmlx"
-	"errors"
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/nicksnyder/go-i18n/i18n"
-	"os"
 	"time"
 )
 
