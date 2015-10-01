@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CENO Portal</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="stylesheets/bootstrap.min.css" />
+    <link rel="stylesheet" href="stylesheets/ceno.css" />
+    <link rel="stylesheet" href="stylesheets/portal.css" />
+    <script type="text/javascript" id="jsonPlaceholder">
+          var cenoPortalModule = JSON.parse("{{.CenoPortalModule}}");
+    </script>
+</head>
+<body>
+   
+    <!-- Will have content inserted as JSON by the backend code.
+         The frontend code will then be able to use that data. -->
+    <div class="content">
+        <ul id="languageSelect">
+            {{range $i, $language := .Languages}}
+            <li>{{$language}}</li>{{end}}
+        </ul>
+    </div>
+    
+    <div class="content row">
+        <div class="col-md-3">
+            <img id="cenoLogo" class="pure-img" src="images/logo_ceno.png" /> 
+        </div>
+        <div class="col-md-9">
+            <p>
+                CENO Portal CENO Portal CENO Portal CENO Portal CENO Portal CENO Portal CENO Portal 
+                CENO Portal CENO Portal CENO Portal CENO Portal CENO Portal CENO Portal CENO Portal 
+                CENO Portal CENO Portal CENO Portal CENO Portal CENO Portal CENO Portal CENO Portal 
+            </p>
+        </div>
+    </div>
+
+    <div class="bgbeige">
+        <div id="articleList" class="content">
+            <!-- Filled by JS -->    
+        </div>
+    </div>
+
+    <hr />
+
+    <div class="content row">
+        <div class="col-md-9">
+            <p>
+                eQualitie is awesome eQualitie is awesome eQualitie is awesome eQualitie is awesome 
+                eQualitie is awesome eQualitie is awesome eQualitie is awesome eQualitie is awesome 
+                eQualitie is awesome eQualitie is awesome eQualitie is awesome eQualitie is awesome 
+                eQualitie is awesome eQualitie is awesome eQualitie is awesome eQualitie is awesome 
+            </p>
+        </div>
+        <div class="col-md-3">
+            <img id="eqLogo" src="images/logo_eq.png" />
+        </div>
+    </div>
+
+    <script src="javascript/languages.js"></script>
+</body>
+</html>

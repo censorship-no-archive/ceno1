@@ -28,6 +28,10 @@ const CONFIG_FILE string = "./config/config.json"
 // The name of the file to store our SQLite database in
 const DB_FILENAME string = "feeds.db"
 
+// The rate at which to check that a newly followed feed has been
+// inserted into the database before handling items.
+const CONSISTENCY_CHECK_RATE time.Duration = 500 * time.Millisecond
+
 // A global configuration instance. Must be instantiated properly in main().
 var Configuration Config
 
@@ -160,6 +164,11 @@ func followHandler(requests chan Feed) func(http.ResponseWriter, *http.Request) 
 			if saveErr != nil {
 				w.Write([]byte(T("db_store_error_rdr", map[string]interface{}{"Error": saveErr.Error()})))
 			} else {
+				// Don't start polling for items until the database contains the new feed
+				<-WaitUntilPass(func() bool {
+					found, errFind := GetFeedByUrl(DBConnection, feedInfo.Url)
+					return errFind == nil && found.Id >= 0
+				}, CONSISTENCY_CHECK_RATE)
 				requests <- feedInfo
 				w.Write([]byte(T("req_handle_success_rdr")))
 			}

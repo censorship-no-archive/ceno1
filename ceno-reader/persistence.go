@@ -71,6 +71,28 @@ type stmtwrapper struct {
 }
 
 /**
+ * Repeatedly test a condition until it passes, allowing a thread to block
+ * on the condition.
+ * @param {func() bool} condition - A closure that will test the condition
+ * @param {time.Duration} testRate - The frequency at which to invoke the condition function
+ * @return A channel from which the number of calls to the condition were made when it passes
+ */
+func WaitUntilPass(condition func() bool, testRate time.Duration) chan int {
+	reportAttempts := make(chan int, 1)
+	go func() {
+		attempts := 0
+		passed := false
+		for !passed {
+			attempts++
+			passed = condition()
+			<-time.After(testRate)
+		}
+		reportAttempts <- attempts
+	}()
+	return reportAttempts
+}
+
+/**
  * INTERAL (transaction not public)
  * Opens a transaction (*sql.Tx) up in preparation for the creation of a
  * statement with a given query.
