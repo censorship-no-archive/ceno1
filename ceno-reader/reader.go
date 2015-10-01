@@ -46,12 +46,10 @@ var CharsetReaders map[string]xmlx.CharsetFunc = map[string]xmlx.CharsetFunc{
  * the appropriate functionality can be invoked.
  */
 type Feed struct {
-	Id         int
-	Url        string `json:"url"`
-	Type       string `json:"type"`
-	Charset    string `json:"charset"`
-	Identifier string
-	EncKey     string
+	Id      int
+	Url     string `json:"url"`
+	Type    string `json:"type"`
+	Charset string `json:"charset"`
 }
 
 /**
