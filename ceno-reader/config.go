@@ -15,8 +15,6 @@ type Config struct {
 	PortNumber     string // The port to run on, e.g. ":3095"
 	BundleServer   string // The location of the Bundle Server
 	BundleInserter string // The location of the Bundle Inserter // TODO ask Marios if we send to BI, not RR
-	FeedTemplate   string // The path to the template for RSS items
-	FeedListFile   string // The path to a file to list feeds we read from
 }
 
 // Default confifuration values that can be provided as options to the user.
@@ -24,8 +22,6 @@ var DefaultConfiguration Config = Config{
 	":3096",
 	"http://127.0.0.1:3094",
 	"http://127.0.0.1:3095",
-	"templates/feed.html",
-	"data/feeds.dat",
 }
 
 /**
@@ -81,26 +77,6 @@ func validBundleInserter(biaddr string) bool {
 }
 
 /**
- * Determines whether the location of a template points to an existing file.
- * @param {string} location - The location of the template file
- */
-func validFeedTemplate(location string) bool {
-	f, err := os.Open(location)
-	defer f.Close()
-	return err == nil
-}
-
-/**
- * Determines whether the location of a feed list points to an existing file.
- * @param {string} location - The location of the feed list file
- */
-func validFeedList(location string) bool {
-	f, err := os.Open(location)
-	defer f.Close()
-	return err == nil
-}
-
-/**
  * Read a configuration for the reader from a file.
  * @param {string} location - The location of the configuration file
  */
@@ -121,7 +97,5 @@ func ReadConfigFile(location string) (Config, error) {
 func ValidConfiguration(configuration Config) bool {
 	return validPortNumber(configuration.PortNumber) &&
 		validBundleServer(configuration.BundleServer) &&
-		validBundleInserter(configuration.BundleInserter) &&
-		validFeedTemplate(configuration.FeedTemplate) &&
-		validFeedList(configuration.FeedListFile)
+		validBundleInserter(configuration.BundleInserter)
 }
