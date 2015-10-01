@@ -57,6 +57,16 @@ type Feed struct {
 }
 
 /**
+ * Pair a Feed with a ResponseWriter to be sent accross a channel
+ * So that a separate goroutine can try to handle DB operations and
+ * write back to the client.
+ */
+type SaveFeedRequest struct {
+	FeedInfo Feed
+	W        http.ResponseWriter
+}
+
+/**
  * Get information about feeds to be injected into the portal page.
  * @return a map with a "feeds" key and corresponding array of Feed structs and an optional error
  */
@@ -86,6 +96,7 @@ func itemFeedHandler(feed *rss.Feed, channel *rss.Channel, newItems []*rss.Item)
 	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
 	// TODO - Before inserting items into the database, try to insert them into
 	// Freenet and get the key and identifier we will use.
+	fmt.Println("Feed URL is", feed.Url)
 	for _, item := range newItems {
 		saveErr := SaveNewItem(DBConnection, feed.Url, item)
 		if saveErr != nil {
@@ -104,7 +115,7 @@ func pollFeed(URL string, charsetReader xmlx.CharsetFunc) {
 	feed := rss.New(5, true, channelFeedHandler, itemFeedHandler)
 	for {
 		if err := feed.Fetch(URL, charsetReader); err != nil {
-			// Handle error condition
+			// TODO - Handle error condition
 		}
 		<-time.After(time.Duration(feed.SecondsTillUpdate() * 1e9))
 	}
@@ -114,19 +125,30 @@ func pollFeed(URL string, charsetReader xmlx.CharsetFunc) {
  * Handle the following of a feed in a separate goroutine.
  * @param {chan Feed} requests - A channel through which descriptions of feeds to be followed are received
  */
-func followFeeds(requests chan Feed) {
+func followFeeds(requests chan SaveFeedRequest) {
+	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
 	for {
 		request := <-requests
+		feedInfo := request.FeedInfo
 		fmt.Println("Got a request to handle a feed.")
-		fmt.Println(request)
-		if request.Charset == "" {
-			go pollFeed(request.Url, nil)
+		fmt.Println(feedInfo)
+		saveErr := SaveNewFeed(DBConnection, feedInfo)
+		if saveErr != nil {
+			fmt.Println("Could not save")
+			request.W.Write([]byte(T("db_store_error_rdr", map[string]interface{}{"Error": saveErr.Error()})))
+			return
 		} else {
-			charsetFn, found := CharsetReaders[request.Charset]
+			fmt.Println("Saved")
+			request.W.Write([]byte(T("req_handle_success_rdr")))
+		}
+		if feedInfo.Charset == "" {
+			go pollFeed(feedInfo.Url, nil)
+		} else {
+			charsetFn, found := CharsetReaders[feedInfo.Charset]
 			if found {
-				go pollFeed(request.Url, charsetFn)
+				go pollFeed(feedInfo.Url, charsetFn)
 			} else {
-				go pollFeed(request.Url, nil)
+				go pollFeed(feedInfo.Url, nil)
 			}
 		}
 	}
@@ -136,7 +158,7 @@ func followFeeds(requests chan Feed) {
  * Handle requests to have a new RSS or Atom feed followed.
  * @param {chan Feed} requests - A channel through which descriptions of feeds to be followed are received
  */
-func followHandler(requests chan Feed) func(http.ResponseWriter, *http.Request) {
+func followHandler(requests chan SaveFeedRequest) func(http.ResponseWriter, *http.Request) {
 	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
 	return func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Got request")
@@ -159,19 +181,8 @@ func followHandler(requests chan Feed) func(http.ResponseWriter, *http.Request) 
 		} else if foundFeed.Id != -1 {
 			w.Write([]byte(T("feed_exists_rdr", map[string]interface{}{"URL": feedInfo.Url})))
 		} else {
-			fmt.Println("Feed doesn't exist")
-			saveErr := SaveNewFeed(DBConnection, feedInfo)
-			if saveErr != nil {
-				w.Write([]byte(T("db_store_error_rdr", map[string]interface{}{"Error": saveErr.Error()})))
-			} else {
-				// Don't start polling for items until the database contains the new feed
-				<-WaitUntilPass(func() bool {
-					found, errFind := GetFeedByUrl(DBConnection, feedInfo.Url)
-					return errFind == nil && found.Id >= 0
-				}, CONSISTENCY_CHECK_RATE)
-				requests <- feedInfo
-				w.Write([]byte(T("req_handle_success_rdr")))
-			}
+			fmt.Println("Feed doesn't exist yet")
+			requests <- SaveFeedRequest{feedInfo, w}
 		}
 	}
 }
@@ -181,7 +192,7 @@ func followHandler(requests chan Feed) func(http.ResponseWriter, *http.Request) 
  */
 func createPortalPage(w http.ResponseWriter, r *http.Request) {
 	//T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
-	t, err := template.ParseFiles(path.Join(".", "templates", "feed.html"))
+	t, err := template.ParseFiles(path.Join(".", "templates", "feeds.html"))
 	if err != nil {
 		// Serve some kind of error message
 		w.Header().Set("Content-Type", "text/plain")
@@ -232,7 +243,7 @@ func main() {
 		panic(T("database_init_error_rdr", map[string]interface{}{"Error": dbErr.Error()}))
 	}
 	// Set up the HTTP server to listen for requests for new feeds to read
-	requestNewFollow := make(chan Feed)
+	requestNewFollow := make(chan SaveFeedRequest)
 	go followFeeds(requestNewFollow)
 	http.Handle("/", http.FileServer(http.Dir("./static")))
 	http.HandleFunc("/follow", followHandler(requestNewFollow))
