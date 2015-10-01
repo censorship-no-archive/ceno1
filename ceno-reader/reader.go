@@ -15,6 +15,13 @@ import (
 	"time"
 )
 
+// The name of the environment variable we expect the user to specify
+// the language they want to use in
+const LANG_ENVVAR string = "CENOLANG"
+
+// The language to fall back on if no language is set in ${LANG_ENVVAR}
+const DEFAULT_LANG string = "en-us"
+
 // The path to the configuration file to use
 const CONFIG_FILE string = "./config/config.json"
 
@@ -43,13 +50,20 @@ type Feed struct {
 	Url        string `json:"url"`
 	Type       string `json:"type"`
 	Charset    string `json:"charset"`
-    Identifier string
-    EncKey     string
+	Identifier string
+	EncKey     string
 }
 
 /**
  * Get information about feeds to be injected into the portal page.
- * @return an array of Feeds
+ * @return a map with a "feeds" key and corresponding array of Feed structs and an optional error
+ */
+func feedList() (map[string]interface{}, error) {
+	feeds, err := AllFeeds(DBConnection)
+	mapping := make(map[string]interface{})
+	mapping["feeds"] = feeds
+	return mapping, err
+}
 
 /**
  * Handle the receipt of a new channel.
@@ -67,9 +81,9 @@ func channelFeedHandler(feed *rss.Feed, newChannels []*rss.Channel) {
  * @param {[]*rss.Item} newItems - An array of pointers to items received from the channel
  */
 func itemFeedHandler(feed *rss.Feed, channel *rss.Channel, newItems []*rss.Item) {
-	T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
-    // TODO - Before inserting items into the database, try to insert them into
-    // Freenet and get the key and identifier we will use.
+	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
+	// TODO - Before inserting items into the database, try to insert them into
+	// Freenet and get the key and identifier we will use.
 	for _, item := range newItems {
 		saveErr := SaveNewItem(DBConnection, feed.Url, item)
 		if saveErr != nil {
@@ -121,7 +135,7 @@ func followFeeds(requests chan Feed) {
  * @param {chan Feed} requests - A channel through which descriptions of feeds to be followed are received
  */
 func followHandler(requests chan Feed) func(http.ResponseWriter, *http.Request) {
-	T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
+	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
 	return func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Got request")
 		if r.Method != "POST" {
@@ -167,12 +181,14 @@ func createPortalPage(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Something went wrong!"))
 	} else {
 		languages := [...]string{"english", "french"}
-        moduleData := popularFeeds()
+		moduleData, feedsErr := feedList()
 		moduleData["Languages"] = languages
 		moduleDataMarshalled, err := json.Marshal(moduleData)
 		var module string
 		// TODO - Serve an error
-		if err != nil {
+		if feedsErr != nil {
+			module = ""
+		} else if err != nil {
 			module = ""
 		} else {
 			module = string(moduleDataMarshalled[:])
