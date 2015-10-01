@@ -187,7 +187,7 @@ func InitDBConnection(dbFileName string) (*sql.DB, error) {
  */
 func SaveNewFeed(db *sql.DB, feed Feed) error {
 	_, err := transaction{db}.
-		Prepare("insert into feeds(url, type, charset) values(?,?,?,?,?)").
+		Prepare("insert into feeds(url, type, charset) values(?,?,?)").
 		Exec(feed.Url, feed.Type, feed.Charset).
 		Run()
 	return err
@@ -289,15 +289,6 @@ func DeleteFeedById(db *sql.DB, id int) error {
  * @param {*rss.Item} item - The item to store the content of
  */
 func SaveNewItem(db *sql.DB, feedUrl string, item *rss.Item) error {
-	feed, _ := GetFeedByUrl(db, feedUrl)
-	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
-	// TODO - If we get an RSS item for a feed we don't have in the database yet,
-	//        do we insert the feed into the database
-	if feed.Id == -1 {
-		return errors.New(T("not_followed_feed_err", map[string]interface{}{
-			"URL": feedUrl,
-		}))
-	}
 	_, err := transaction{db}.
 		Prepare(`insert into items(feed_id, title, was_inserted)
                  values((select id from feeds where url=?), ?, ?)`).

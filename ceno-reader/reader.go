@@ -70,11 +70,23 @@ type SaveFeedRequest struct {
  * Get information about feeds to be injected into the portal page.
  * @return a map with a "feeds" key and corresponding array of Feed structs and an optional error
  */
-func feedList() (map[string]interface{}, error) {
+func initModuleWithFeeds() (map[string]interface{}, error) {
 	feeds, err := AllFeeds(DBConnection)
 	mapping := make(map[string]interface{})
 	mapping["feeds"] = feeds
 	return mapping, err
+}
+
+/**
+ * Get information about articles from a given feed to be injected into the portal page.
+ * @param {string} feedUrl - The URL of the feed to fetch articles from
+ * @return a map with a "feeds" key and corresponding array of Feed structs and an optional error
+ */
+func initModuleWithArticles(feedUrl string) (map[string]interface{}, error) {
+    items, err := GetItemsByFeedUrl(DBConnection, feedUrl)
+    mapping := make(map[string]interface{})
+    mapping["articles"] = items
+    return mapping, err
 }
 
 /**
@@ -197,10 +209,12 @@ func createPortalPage(w http.ResponseWriter, r *http.Request) {
 		// Serve some kind of error message
 		w.Header().Set("Content-Type", "text/plain")
 		w.Write([]byte("Something went wrong!"))
-	} else {
+        return
+	}
 		languages := [...]string{"english", "french"}
-		moduleData, feedsErr := feedList()
+		moduleData, feedsErr := initModuleWithFeeds()
 		moduleData["Languages"] = languages
+        moduleData["Page"] = "portal"
 		moduleDataMarshalled, err := json.Marshal(moduleData)
 		var module string
 		// TODO - Serve an error
@@ -215,7 +229,35 @@ func createPortalPage(w http.ResponseWriter, r *http.Request) {
 			"Languages":        languages,
 			"CenoPortalModule": module,
 		})
-	}
+}
+
+func createArticlePage(w http.ResponseWriter, r *http.Request) {
+    t, err := template.ParseFiles(path.Join(".", "templates", "articles.html"))
+    if err != nil {
+        // TODO - Create a more useful error page to use
+        w.Header().Set("Content-Type", "text/plain")
+        w.Write()[]byte("Something went wrong!"))
+        return
+    }
+    // TODO - Grab language data dynamically
+    languages := [...]string{"english", "french"}
+    moduleData, articlesErr := initModuleWithArticles(feedUrl)
+    moduleData["Languages"] = languages
+    moduleData["Page"] = "articles"
+    marshalled, err := json.Marshal(moduleData)
+    var module string
+    // TODO - Serve an error
+    if articlesErr != nil {
+        module = ""
+    } else if err != nil {
+        module = ""
+    } else {
+        module = string(marshalled[:])
+    }
+    t.Execute(e, map[string]interface{}{
+        "Languages":        languages,
+        "CenoPortalModule": module,
+    })
 }
 
 func main() {
@@ -248,6 +290,7 @@ func main() {
 	http.Handle("/", http.FileServer(http.Dir("./static")))
 	http.HandleFunc("/follow", followHandler(requestNewFollow))
 	http.HandleFunc("/portal", createPortalPage)
+    http.HandleFunc("/articles", createArticlePage)
 	fmt.Println(T("listening_msg_rdr", map[string]interface{}{"Port": Configuration.PortNumber}))
 	if err := http.ListenAndServe(Configuration.PortNumber, nil); err != nil {
 		panic(err)
