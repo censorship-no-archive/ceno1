@@ -10,11 +10,7 @@ import (
 	"database/sql"
 	rss "github.com/jteeuwen/go-pkg-rss"
 	//"github.com/jteeuwen/go-pkg-xmlx"
-	"errors"
-	"fmt"
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/nicksnyder/go-i18n/i18n"
-	"os"
 	"time"
 )
 
@@ -35,11 +31,10 @@ const createFeedsTable = `create table if not exists feeds(
 
 const createItemsTable = `create table if not exists items(
     id integer primary key,
-    feed_id integer,
+    feed_url varchar(255),
     title varchar(255),
     was_inserted boolean,
-    inserted_on date,
-    foreign key(feed_id) references feeds(id)
+    inserted_on date
 );`
 
 var tableInitializers = []string{
@@ -93,7 +88,7 @@ func InitDBConnection(dbFileName string) (*sql.DB, error) {
  * @param {*sql.DB} db - The database connection to use
  * @param {Feed} feed - Information describing the new feed to save
  */
-func SaveNewFeed(db *sql.DB, feed Feed) error {
+func SaveFeed(db *sql.DB, feed Feed) error {
 	tx, err1 := db.Begin()
 	if err1 != nil {
 		return err1
@@ -140,7 +135,7 @@ func AllFeeds(db *sql.DB) ([]Feed, error) {
  * @param {*sql.DB} db - The database connection to use
  * @param {string} url - The URL to search for
  */
-func GetFeedByUrl(db *sql.DB, url string) (Feed, error) {
+func GetFeed(db *sql.DB, url string) (Feed, error) {
 	var feed Feed
 	tx, err1 := db.Begin()
 	if err1 != nil {
@@ -158,10 +153,6 @@ func GetFeedByUrl(db *sql.DB, url string) (Feed, error) {
 	var id int
 	var _type, charset string
 	rows.Scan(&id, &url, &_type, &charset)
-	if url == "" {
-		id = -1
-	}
-	fmt.Printf("Feed URL %s has ID %d\n", url, id)
 	rows.Close()
 	return Feed{id, url, _type, charset}, nil
 }
@@ -171,7 +162,7 @@ func GetFeedByUrl(db *sql.DB, url string) (Feed, error) {
  * @param {*sql.DB} db - The database connection to use
  * @param {string} url - The URL of the feed
  */
-func DeleteFeedByUrl(db *sql.DB, url string) error {
+func DeleteFeed(db *sql.DB, url string) error {
 	tx, err1 := db.Begin()
 	if err1 != nil {
 		return err1
@@ -195,25 +186,18 @@ func DeleteFeedByUrl(db *sql.DB, url string) error {
  * @param {string} feedUrl - The URL of the RSS/Atom feed
  * @param {*rss.Item} item - The item to store the content of
  */
-func SaveNewItem(db *sql.DB, feedUrl string, item *rss.Item) error {
-	feed, err := GetFeedByUrl(db, feedUrl)
-	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
-	if err != nil || feed.Url == "" {
-		return errors.New(T("not_followed_feed_err", map[string]interface{}{
-			"URL": feedUrl,
-		}))
-	}
+func SaveItem(db *sql.DB, feedUrl string, item *rss.Item) error {
 	tx, err1 := db.Begin()
 	if err1 != nil {
 		return err1
 	}
-	stmt, err2 := tx.Prepare(`insert into items(feed_id, title, was_inserted)
+	stmt, err2 := tx.Prepare(`insert into items(feed_url, title, was_inserted)
                               values(?, ?, ?)`)
 	if err2 != nil {
 		return err2
 	}
 	defer stmt.Close()
-	_, err3 := stmt.Exec(feed.Id, item.Title, false)
+	_, err3 := stmt.Exec(feedUrl, item.Title, false)
 	if err3 != nil {
 		return err3
 	}
@@ -226,7 +210,7 @@ func SaveNewItem(db *sql.DB, feedUrl string, item *rss.Item) error {
  * @param {*sql.DB} db - the database connection to use
  * @param {string} url - The URL of the feed to get items from
  */
-func GetItemsByFeedUrl(db *sql.DB, url string) ([]Item, error) {
+func GetItems(db *sql.DB, feedUrl string) ([]Item, error) {
 	var items []Item
 	tx, err1 := db.Begin()
 	if err1 != nil {
@@ -238,7 +222,7 @@ func GetItemsByFeedUrl(db *sql.DB, url string) ([]Item, error) {
 		return items, err2
 	}
 	defer stmt.Close()
-	rows, err3 := stmt.Query(url)
+	rows, err3 := stmt.Query(feedUrl)
 	if err3 != nil {
 		return items, err3
 	}

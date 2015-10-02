@@ -85,7 +85,7 @@ func itemFeedHandler(feed *rss.Feed, channel *rss.Channel, newItems []*rss.Item)
 	// Freenet and get the key and identifier we will use.
 	fmt.Println("Feed URL is", feed.Url)
 	for _, item := range newItems {
-		saveErr := SaveNewItem(DBConnection, feed.Url, item)
+		saveErr := SaveItem(DBConnection, feed.Url, item)
 		if saveErr != nil {
 			fmt.Println(T("db_store_error_rdr", map[string]interface{}{"Error": saveErr.Error()}))
 		}
@@ -119,7 +119,7 @@ func followFeeds(requests chan SaveFeedRequest) {
 		feedInfo := request.FeedInfo
 		fmt.Println("Got a request to handle a feed.")
 		fmt.Println(feedInfo)
-		saveErr := SaveNewFeed(DBConnection, feedInfo)
+		saveErr := SaveFeed(DBConnection, feedInfo)
 		if saveErr != nil {
 			fmt.Println("Could not save")
 			request.W.Write([]byte(T("db_store_error_rdr", map[string]interface{}{"Error": saveErr.Error()})))
@@ -162,15 +162,8 @@ func followHandler(requests chan SaveFeedRequest) func(http.ResponseWriter, *htt
 			return
 		}
 		fmt.Println("JSON decoded")
-		foundFeed, lookupErr := GetFeedByUrl(DBConnection, feedInfo.Url)
-		if lookupErr != nil {
-			w.Write([]byte(T("db_lookup_error_rdr", map[string]interface{}{"Error": lookupErr.Error()})))
-		} else if foundFeed.Id != -1 {
-			w.Write([]byte(T("feed_exists_rdr", map[string]interface{}{"URL": feedInfo.Url})))
-		} else {
-			fmt.Println("Feed doesn't exist yet")
-			requests <- SaveFeedRequest{feedInfo, w}
-		}
+		fmt.Println("Feed doesn't exist yet")
+		requests <- SaveFeedRequest{feedInfo, w}
 	}
 }
 

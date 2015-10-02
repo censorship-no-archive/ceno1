@@ -13,7 +13,7 @@ import (
  * @return a map with a "feeds" key and corresponding array of Feed structs and an optional error
  */
 func initModuleWithArticles(feedUrl string) (map[string]interface{}, error) {
-	items, err := GetItemsByFeedUrl(DBConnection, feedUrl)
+	items, err := GetItems(DBConnection, feedUrl)
 	mapping := make(map[string]interface{})
 	mapping["articles"] = items
 	return mapping, err
