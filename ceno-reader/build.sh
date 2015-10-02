@@ -1,6 +1,7 @@
 #! /usr/bin/env sh
 
 SOURCE_FILES="src/reader.go \
+    src/data.go \
     src/charsetreaders.go \
     src/config.go \
     src/persistence.go \
