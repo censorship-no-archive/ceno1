@@ -10,7 +10,11 @@ import (
 	"database/sql"
 	rss "github.com/jteeuwen/go-pkg-rss"
 	//"github.com/jteeuwen/go-pkg-xmlx"
+	"errors"
+	"fmt"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/nicksnyder/go-i18n/i18n"
+	"os"
 	"time"
 )
 
@@ -90,21 +94,21 @@ func InitDBConnection(dbFileName string) (*sql.DB, error) {
  * @param {Feed} feed - Information describing the new feed to save
  */
 func SaveNewFeed(db *sql.DB, feed Feed) error {
-    tx, err1 := db.Begin()
-    if err1 != nil {
-        return err1
-    }
-    stmt, err2 := tx.Prepare("insert into feeds(url, type, charset) values(?,?,?)")
-    if err2 != nil {
-        return err2
-    }
-    defer stmt.Close()
-    _, err3 := stmt.Exec(feed.Url, feed.Type, feed.Charset)
-    if err3 != nil {
-        return err3
-    }
-    tx.Commit()
-    return nil
+	tx, err1 := db.Begin()
+	if err1 != nil {
+		return err1
+	}
+	stmt, err2 := tx.Prepare("insert into feeds(url, type, charset) values(?,?,?)")
+	if err2 != nil {
+		return err2
+	}
+	defer stmt.Close()
+	_, err3 := stmt.Exec(feed.Url, feed.Type, feed.Charset)
+	if err3 != nil {
+		return err3
+	}
+	tx.Commit()
+	return nil
 }
 
 /**
@@ -113,22 +117,22 @@ func SaveNewFeed(db *sql.DB, feed Feed) error {
  */
 func AllFeeds(db *sql.DB) ([]Feed, error) {
 	var feeds []Feed
-    tx, err1 := db.Begin()
-    if err1 != nil {
-        return feeds, err1
-    }
-    rows, err2 := tx.Query("select id, url, type, charset from feeds")
-    if err2 != nil {
-        return feeds, err2
-    }
-    for rows.Next() {
-        var url, _type, charset string
-        var id int
-        rows.Scan(&id, &url, &_type, &charset)
-        feeds = append(feeds, Feed{id, url, _type, charset})
-    }
-    rows.Close()
-    return feeds, nil
+	tx, err1 := db.Begin()
+	if err1 != nil {
+		return feeds, err1
+	}
+	rows, err2 := tx.Query("select id, url, type, charset from feeds")
+	if err2 != nil {
+		return feeds, err2
+	}
+	for rows.Next() {
+		var url, _type, charset string
+		var id int
+		rows.Scan(&id, &url, &_type, &charset)
+		feeds = append(feeds, Feed{id, url, _type, charset})
+	}
+	rows.Close()
+	return feeds, nil
 }
 
 /**
@@ -138,22 +142,26 @@ func AllFeeds(db *sql.DB) ([]Feed, error) {
  */
 func GetFeedByUrl(db *sql.DB, url string) (Feed, error) {
 	var feed Feed
-    tx, err1 := db.Begin()
-    if err1 != nil {
-        return feed, err1
-    }
-    stmt, err2 := tx.Prepare("select id, url, type, charset from feeds where url=?")
-    if err2 != nil {
-        return feed, err2
-    }
-    defer stmt.Close()
-    rows, err3 := stmt.Query(url)
-    if err3 != nil {
-        return feed, err3
-    }
+	tx, err1 := db.Begin()
+	if err1 != nil {
+		return feed, err1
+	}
+	stmt, err2 := tx.Prepare("select id, url, type, charset from feeds where url=?")
+	if err2 != nil {
+		return feed, err2
+	}
+	defer stmt.Close()
+	rows, err3 := stmt.Query(url)
+	if err3 != nil {
+		return feed, err3
+	}
 	var id int
 	var _type, charset string
 	rows.Scan(&id, &url, &_type, &charset)
+	if url == "" {
+		id = -1
+	}
+	fmt.Printf("Feed URL %s has ID %d\n", url, id)
 	rows.Close()
 	return Feed{id, url, _type, charset}, nil
 }
@@ -164,21 +172,21 @@ func GetFeedByUrl(db *sql.DB, url string) (Feed, error) {
  * @param {string} url - The URL of the feed
  */
 func DeleteFeedByUrl(db *sql.DB, url string) error {
-    tx, err1 := db.Begin()
-    if err1 != nil {
-        return err1
-    }
-    stmt, err2 := tx.Prepare("delete from feeds where url=?")
-    if err2 != nil {
-        return err2
-    }
-    defer stmt.Close()
-    _, err3 := stmt.Exec(url)
-    if err3 != nil {
-        return err3
-    }
-    tx.Commit()
-    return nil
+	tx, err1 := db.Begin()
+	if err1 != nil {
+		return err1
+	}
+	stmt, err2 := tx.Prepare("delete from feeds where url=?")
+	if err2 != nil {
+		return err2
+	}
+	defer stmt.Close()
+	_, err3 := stmt.Exec(url)
+	if err3 != nil {
+		return err3
+	}
+	tx.Commit()
+	return nil
 }
 
 /**
@@ -188,22 +196,29 @@ func DeleteFeedByUrl(db *sql.DB, url string) error {
  * @param {*rss.Item} item - The item to store the content of
  */
 func SaveNewItem(db *sql.DB, feedUrl string, item *rss.Item) error {
-    tx, err1 := db.Begin()
-    if err1 != nil {
-        return err1
-    }
-    stmt, err2 := tx.Prepare(`insert into items(feed_id, title, was_inserted)
-                              values((select id from feeds where url=?), ?, ?)`)
-    if err2 != nil {
-        return err2
-    }
-    defer stmt.Close()
-    _, err3 := stmt.Exec(feedUrl, item.Title, false)
-    if err3 != nil {
-        return err3
-    }
-    tx.Commit()
-    return nil
+	feed, err := GetFeedByUrl(db, feedUrl)
+	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
+	if err != nil || feed.Url == "" {
+		return errors.New(T("not_followed_feed_err", map[string]interface{}{
+			"URL": feedUrl,
+		}))
+	}
+	tx, err1 := db.Begin()
+	if err1 != nil {
+		return err1
+	}
+	stmt, err2 := tx.Prepare(`insert into items(feed_id, title, was_inserted)
+                              values(?, ?, ?)`)
+	if err2 != nil {
+		return err2
+	}
+	defer stmt.Close()
+	_, err3 := stmt.Exec(feed.Id, item.Title, false)
+	if err3 != nil {
+		return err3
+	}
+	tx.Commit()
+	return nil
 }
 
 /**
@@ -212,21 +227,21 @@ func SaveNewItem(db *sql.DB, feedUrl string, item *rss.Item) error {
  * @param {string} url - The URL of the feed to get items from
  */
 func GetItemsByFeedUrl(db *sql.DB, url string) ([]Item, error) {
-    var items []Item
-    tx, err1 := db.Begin()
-    if err1 != nil {
-        return items, err1
-    }
-    stmt, err2 := tx.Prepare(`select id, feed_id, was_inserted, inserted_on
+	var items []Item
+	tx, err1 := db.Begin()
+	if err1 != nil {
+		return items, err1
+	}
+	stmt, err2 := tx.Prepare(`select id, feed_id, was_inserted, inserted_on
                               from items where feed_id=(select id from feeds where url=?)`)
-    if err2 != nil {
-        return items, err2
-    }
-    defer stmt.Close()
-    rows, err3 := stmt.Query(url)
-    if err3 != nil {
-        return items, err3
-    }
+	if err2 != nil {
+		return items, err2
+	}
+	defer stmt.Close()
+	rows, err3 := stmt.Query(url)
+	if err3 != nil {
+		return items, err3
+	}
 	for rows.Next() {
 		var id, feedId int
 		var title string
@@ -245,19 +260,19 @@ func GetItemsByFeedUrl(db *sql.DB, url string) ([]Item, error) {
  * @param {int} id - The identifier of the item to delete
  */
 func DeleteItem(db *sql.DB, id int) error {
-    tx, err1 := db.Begin()
-    if err1 != nil {
-        return err1
-    }
-    stmt, err2 := tx.Prepare("delete from items where id=?")
-    if err2 != nil {
-        return err2
-    }
-    defer stmt.Close()
-    _, err3 := stmt.Exec(id)
-    if err3 != nil {
-        return err3
-    }
-    tx.Commit()
-    return nil
+	tx, err1 := db.Begin()
+	if err1 != nil {
+		return err1
+	}
+	stmt, err2 := tx.Prepare("delete from items where id=?")
+	if err2 != nil {
+		return err2
+	}
+	defer stmt.Close()
+	_, err3 := stmt.Exec(id)
+	if err3 != nil {
+		return err3
+	}
+	tx.Commit()
+	return nil
 }
