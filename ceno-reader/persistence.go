@@ -44,30 +44,6 @@ var tableInitializers = []string{
 }
 
 /**
- * Types and methods for handling the mechanics of executing statements/queries
- * that manages the propagation of errors as well as internal state such as
- * transactions (Tx) and statements (Stmt).
- */
-
-type transaction struct {
-	Db *sql.DB
-}
-
-type txwrapper struct {
-	Tx       *sql.Tx
-	QueryStr string
-	Err      error
-}
-
-type stmtwrapper struct {
-	Tx      *sql.Tx
-	Stmt    *sql.Stmt
-	Args    []interface{}
-	IsQuery bool
-	Err     error
-}
-
-/**
  * Repeatedly test a condition until it passes, allowing a thread to block
  * on the condition.
  * @param {func() bool} condition - A closure that will test the condition
@@ -87,75 +63,6 @@ func WaitUntilPass(condition func() bool, testRate time.Duration) chan int {
 		reportAttempts <- attempts
 	}()
 	return reportAttempts
-}
-
-/**
- * INTERAL (transaction not public)
- * Opens a transaction (*sql.Tx) up in preparation for the creation of a
- * statement with a given query.
- * @param {string} query - The SQL query or statement to run
- */
-func (t transaction) Prepare(query string) txwrapper {
-	tx, err := t.Db.Begin()
-	if err != nil {
-		return txwrapper{nil, "", err}
-	}
-	return txwrapper{tx, query, nil}
-}
-
-/**
- * INTERNAL (txwrapper not public)
- * Prepares a query to be run into a *sql.Stmt.
- * @param {...interface{}} args - The arguments to pass as parameters to the query
- */
-func (t txwrapper) Query(args ...interface{}) stmtwrapper {
-	if t.Err != nil {
-		emptyArray := make([]interface{}, 0)
-		return stmtwrapper{nil, nil, emptyArray, true, t.Err}
-	}
-	stmt, err := t.Tx.Prepare(t.QueryStr)
-	if err != nil {
-		emptyArray := make([]interface{}, 0)
-		return stmtwrapper{nil, nil, emptyArray, true, err}
-	}
-	return stmtwrapper{t.Tx, stmt, args, true, nil}
-}
-
-/**
- * INTERNAL (txwrapper not pubic)
- * Prepares a statement to be run into a *sql.Stmt.
- * @param {...interface{}} args - The arguments to pass as parameters to the statement
- */
-func (t txwrapper) Exec(args ...interface{}) stmtwrapper {
-	s := t.Query(args...)
-	s.IsQuery = false
-	return s
-}
-
-/**
- * INTERNAL (stmtwrapper not public)
- * Executes the created statement or query and commits the transaction
- * if the statement is successful before clearing the transaction and statement.
- * @return The Rows pointer and error (or nil) produced by the Query/Exec call
- */
-func (s stmtwrapper) Run() (*sql.Rows, error) {
-	if s.Err != nil {
-		if s.Stmt != nil {
-			s.Stmt.Close()
-		}
-		return nil, s.Err
-	}
-	var rows *sql.Rows
-	var err error
-	if s.IsQuery {
-		rows, err = s.Stmt.Query(s.Args...)
-	} else {
-		_, err = s.Stmt.Exec(s.Args...)
-		s.Tx.Commit()
-		rows = nil
-	}
-	s.Stmt.Close()
-	return rows, err
 }
 
 /**
@@ -183,11 +90,21 @@ func InitDBConnection(dbFileName string) (*sql.DB, error) {
  * @param {Feed} feed - Information describing the new feed to save
  */
 func SaveNewFeed(db *sql.DB, feed Feed) error {
-	_, err := transaction{db}.
-		Prepare("insert into feeds(url, type, charset) values(?,?,?)").
-		Exec(feed.Url, feed.Type, feed.Charset).
-		Run()
-	return err
+    tx, err1 := db.Begin()
+    if err1 != nil {
+        return err1
+    }
+    stmt, err2 := tx.Prepare("insert into feeds(url, type, charset) values(?,?,?)")
+    if err2 != nil {
+        return err2
+    }
+    defer stmt.Close()
+    _, err3 := stmt.Exec(feed.Url, feed.Type, feed.Charset)
+    if err3 != nil {
+        return err3
+    }
+    tx.Commit()
+    return nil
 }
 
 /**
@@ -196,20 +113,22 @@ func SaveNewFeed(db *sql.DB, feed Feed) error {
  */
 func AllFeeds(db *sql.DB) ([]Feed, error) {
 	var feeds []Feed
-	rows, err := transaction{db}.
-		Prepare("select id, url, type, charset from feeds").
-		Query().
-		Run()
-	if err != nil || rows == nil {
-		return feeds, err
-	}
-	for rows.Next() {
-		var url, _type, charset string
-		var id int
-		rows.Scan(&id, &url, &_type, &charset)
-		feeds = append(feeds, Feed{id, url, _type, charset})
-	}
-	return feeds, nil
+    tx, err1 := db.Begin()
+    if err1 != nil {
+        return feeds, err1
+    }
+    rows, err2 := tx.Query("select id, url, type, charset from feeds")
+    if err2 != nil {
+        return feeds, err2
+    }
+    for rows.Next() {
+        var url, _type, charset string
+        var id int
+        rows.Scan(&id, &url, &_type, &charset)
+        feeds = append(feeds, Feed{id, url, _type, charset})
+    }
+    rows.Close()
+    return feeds, nil
 }
 
 /**
@@ -219,37 +138,23 @@ func AllFeeds(db *sql.DB) ([]Feed, error) {
  */
 func GetFeedByUrl(db *sql.DB, url string) (Feed, error) {
 	var feed Feed
-	feed.Id = -1
-	rows, err := transaction{db}.
-		Prepare("select id, url, type, charset from feeds where url=?").
-		Query(url).
-		Run()
-	if err != nil {
-		return feed, err
-	}
-	var id int = -1
+    tx, err1 := db.Begin()
+    if err1 != nil {
+        return feed, err1
+    }
+    stmt, err2 := tx.Prepare("select id, url, type, charset from feeds where url=?")
+    if err2 != nil {
+        return feed, err2
+    }
+    defer stmt.Close()
+    rows, err3 := stmt.Query(url)
+    if err3 != nil {
+        return feed, err3
+    }
+	var id int
 	var _type, charset string
 	rows.Scan(&id, &url, &_type, &charset)
-	return Feed{id, url, _type, charset}, nil
-}
-
-/**
- * Get the basic information about a persisted feed from its ID.
- * @param {*sql.DB} db - The database connection to use
- * @param {int} id - The identifier of the feed
- */
-func GetFeedById(db *sql.DB, id int) (Feed, error) {
-	var feed Feed
-	rows, err := transaction{db}.
-		Prepare("select id, url, type, charset from feeds where id=?").
-		Query(id).
-		Run()
-	if err != nil || rows == nil {
-		feed.Id = -1
-		return feed, err
-	}
-	var _type, charset, url string
-	rows.Scan(&id, &url, &_type, &charset)
+	rows.Close()
 	return Feed{id, url, _type, charset}, nil
 }
 
@@ -259,24 +164,21 @@ func GetFeedById(db *sql.DB, id int) (Feed, error) {
  * @param {string} url - The URL of the feed
  */
 func DeleteFeedByUrl(db *sql.DB, url string) error {
-	_, err := transaction{db}.
-		Prepare("delete from feeds where url=?").
-		Exec(url).
-		Run()
-	return err
-}
-
-/**
- * Delete a feed by referencing its ID.
- * @param {*sql.DB} db - The database connection to use
- * @param {int} id - The identifier for the feed
- */
-func DeleteFeedById(db *sql.DB, id int) error {
-	_, err := transaction{db}.
-		Prepare("delete from feeds where id=?").
-		Exec(id).
-		Run()
-	return err
+    tx, err1 := db.Begin()
+    if err1 != nil {
+        return err1
+    }
+    stmt, err2 := tx.Prepare("delete from feeds where url=?")
+    if err2 != nil {
+        return err2
+    }
+    defer stmt.Close()
+    _, err3 := stmt.Exec(url)
+    if err3 != nil {
+        return err3
+    }
+    tx.Commit()
+    return nil
 }
 
 /**
@@ -286,12 +188,22 @@ func DeleteFeedById(db *sql.DB, id int) error {
  * @param {*rss.Item} item - The item to store the content of
  */
 func SaveNewItem(db *sql.DB, feedUrl string, item *rss.Item) error {
-	_, err := transaction{db}.
-		Prepare(`insert into items(feed_id, title, was_inserted)
-                 values((select id from feeds where url=?), ?, ?)`).
-		Exec(feedUrl, item.Title, false).
-		Run()
-	return err
+    tx, err1 := db.Begin()
+    if err1 != nil {
+        return err1
+    }
+    stmt, err2 := tx.Prepare(`insert into items(feed_id, title, was_inserted)
+                              values((select id from feeds where url=?), ?, ?)`)
+    if err2 != nil {
+        return err2
+    }
+    defer stmt.Close()
+    _, err3 := stmt.Exec(feedUrl, item.Title, false)
+    if err3 != nil {
+        return err3
+    }
+    tx.Commit()
+    return nil
 }
 
 /**
@@ -300,15 +212,21 @@ func SaveNewItem(db *sql.DB, feedUrl string, item *rss.Item) error {
  * @param {string} url - The URL of the feed to get items from
  */
 func GetItemsByFeedUrl(db *sql.DB, url string) ([]Item, error) {
-	items := make([]Item, 1)
-	rows, err := transaction{db}.
-		Prepare(`select id, feed_id, was_inserted, inserted_on
-                 from items where feed_id=(select id from feeds where url=?)`).
-		Query(url).
-		Run()
-	if err != nil || rows == nil {
-		return items, err
-	}
+    var items []Item
+    tx, err1 := db.Begin()
+    if err1 != nil {
+        return items, err1
+    }
+    stmt, err2 := tx.Prepare(`select id, feed_id, was_inserted, inserted_on
+                              from items where feed_id=(select id from feeds where url=?)`)
+    if err2 != nil {
+        return items, err2
+    }
+    defer stmt.Close()
+    rows, err3 := stmt.Query(url)
+    if err3 != nil {
+        return items, err3
+    }
 	for rows.Next() {
 		var id, feedId int
 		var title string
@@ -317,32 +235,7 @@ func GetItemsByFeedUrl(db *sql.DB, url string) ([]Item, error) {
 		rows.Scan(&id, &feedId, &title, &wasInserted, &insertedOn)
 		items = append(items, Item{id, feedId, title, wasInserted, insertedOn})
 	}
-	return items, nil
-}
-
-/**
- * Get the items stored for a particular feed in reference to its Id.
- * @param {*sql.DB} db - The database connection to use
- * @param {int} feedId - The identifier of the feed to get items from
- */
-func GetItemsByFeedId(db *sql.DB, feedId int) ([]Item, error) {
-	items := make([]Item, 1)
-	rows, err := transaction{db}.
-		Prepare(`select id, feed_id, title, was_inserted, inserted_on
-                 from items where feed_id=?`).
-		Query(feedId).
-		Run()
-	if err != nil || rows == nil {
-		return items, err
-	}
-	for rows.Next() {
-		var id, feedId int
-		var title string
-		var wasInserted bool
-		var insertedOn time.Time
-		rows.Scan(&id, &feedId, &title, &wasInserted, &insertedOn)
-		items = append(items, Item{id, feedId, title, wasInserted, insertedOn})
-	}
+	rows.Close()
 	return items, nil
 }
 
@@ -352,9 +245,19 @@ func GetItemsByFeedId(db *sql.DB, feedId int) ([]Item, error) {
  * @param {int} id - The identifier of the item to delete
  */
 func DeleteItem(db *sql.DB, id int) error {
-	_, err := transaction{db}.
-		Prepare("delete from items where id=?").
-		Exec(id).
-		Run()
-	return err
+    tx, err1 := db.Begin()
+    if err1 != nil {
+        return err1
+    }
+    stmt, err2 := tx.Prepare("delete from items where id=?")
+    if err2 != nil {
+        return err2
+    }
+    defer stmt.Close()
+    _, err3 := stmt.Exec(id)
+    if err3 != nil {
+        return err3
+    }
+    tx.Commit()
+    return nil
 }
