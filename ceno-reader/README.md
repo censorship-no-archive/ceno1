@@ -3,6 +3,9 @@
 This package contains an implementation of a CENO agent responsible for reading RSS and Atom
 feeds for sites which it populates a template with.
 
+You can read all about how the CENO Reader handles RSS in the 
+[dedicated RSS documentation](https://github.com/equalitie/ceno/blob/rss-reader/ceno-reader/docs/rss-feeds.md).
+
 **Contents**
 
 1. Dependencies
