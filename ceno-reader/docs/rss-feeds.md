@@ -38,14 +38,6 @@ containing the following fields:
 2. `description`
 3. `link`
 
-### Double-Insertion Prevention
-
-In order to avoid accidentally reinserting an article that has not been updated after restarting
-the Reader software, a small SQLite database is managed which contains the URLs of RSS feeds
-being followed as well as some basic information about individual items.  This includes information
-such as the item's title, the corresponding feed's URL, as well as if and when the particular
-article linked to by the RSS item has been inserted into the distributed storage medium.
-
 ### Bundles and Insertion
 
 The CENO Reader does not reproduce any solutions that are already present in the CENO software.
