@@ -1,6 +1,6 @@
 # RSS and CENO
 
-The CENO Reader component exists to provide CENO with an automatic system for making relevant
+The CENO Reader component exists to provide CENO with an automatic system for making preselected 
 content available to users as soon as possible.  The CENO Reader can subscribe to RSS feeds,
 and will insert bundles of articles received from feeds into a distributed storage automatically.
 
