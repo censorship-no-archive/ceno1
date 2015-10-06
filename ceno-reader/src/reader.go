@@ -120,7 +120,6 @@ func followHandler(requests chan SaveFeedRequest) func(http.ResponseWriter, *htt
  * TODO - Periodically delete items from the DB that we won't see again
  */
 
-
 func main() {
 	// Configure the i18n library to use the preferred language set in the CENOLANG environment variable
 	setLanguage := os.Getenv("CENOLANG")

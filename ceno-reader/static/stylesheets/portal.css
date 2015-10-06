@@ -16,10 +16,8 @@ ul#languageSelect li:before {
 }
 
 div#articleSection {
-    padding-top: 20px;
-    padding-left: 30px;
-    padding-right: 30px;
-    padding-bottom: 20px;
+    padding: 20px 30px;
+    margin-top: 30px;
 }
 
 div#articleSection div.content {
@@ -31,6 +29,7 @@ div.content {
     width: 80%;
     margin-left: auto;
     margin-right: auto;
+    margin-top: 10px;
 }
 
 div.sitePanel {
@@ -40,4 +39,19 @@ div.sitePanel {
     margin-bottom: 40px;
     margin-left: 50px;
     margin-right: 50px;
+    padding: 0;
+}
+
+div.feedUrl {
+    margin-top: 10px;
+    text-align: center;
+}
+
+div.feedDescription {
+    margin-left: 15px;
+}
+
+div.feedDescription p {
+    font-size: 0.75em;
+    margin: 0;
 }
