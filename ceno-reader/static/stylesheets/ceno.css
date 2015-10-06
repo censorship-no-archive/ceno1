@@ -60,6 +60,11 @@ a {
     text-decoration: none;
 }
 
+a:hover {
+    color: #e43624;
+    text-decoration: none;
+}
+
 h1 {
     font-weight: bold;
     font-size: 30px;

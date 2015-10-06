@@ -25,6 +25,10 @@ div#articleSection div.content {
     margin-right: auto;
 }
 
+div#moreButton {
+    text-align: center;
+}
+
 div.content {
     width: 80%;
     margin-left: auto;
