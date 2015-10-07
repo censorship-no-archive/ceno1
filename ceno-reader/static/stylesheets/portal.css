@@ -46,6 +46,17 @@ div.sitePanel {
     padding: 0;
 }
 
+div.feedLogo {
+    height: 200px;
+    padding-top: 0px;
+}
+
+img.feedLogo {
+    margin-left: auto;
+    margin-right: auto;
+    height: 200px;
+}
+
 div.feedUrl {
     margin-top: 10px;
     text-align: center;

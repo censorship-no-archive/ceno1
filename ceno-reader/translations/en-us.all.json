@@ -46,5 +46,17 @@
   {
     "id": "not_recognized_charset_chr",
     "translation": "Expected charset {{.Expect}}, but got {{.Actual}}."
+  },
+  {
+    "id": "articles_word",
+    "translation": "articles"
+  },
+  {
+    "id": "last_published_word",
+    "translation": "last published"
+  },
+  {
+    "id": "latest_word",
+    "translation": "latest"
   }
 ]

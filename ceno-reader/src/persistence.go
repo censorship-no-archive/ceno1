@@ -124,7 +124,7 @@ func AllFeeds(db *sql.DB) ([]Feed, error) {
 		var url, _type, charset string
 		var id int
 		rows.Scan(&id, &url, &_type, &charset)
-		feeds = append(feeds, Feed{id, url, _type, charset})
+		feeds = append(feeds, Feed{id, url, _type, charset, 0, "", "", ""})
 	}
 	rows.Close()
 	return feeds, nil
@@ -154,7 +154,7 @@ func GetFeed(db *sql.DB, url string) (Feed, error) {
 	var _type, charset string
 	rows.Scan(&id, &url, &_type, &charset)
 	rows.Close()
-	return Feed{id, url, _type, charset}, nil
+	return Feed{id, url, _type, charset, 0, "", "", ""}, nil
 }
 
 /**
