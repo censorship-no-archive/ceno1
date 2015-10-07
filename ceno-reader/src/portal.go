@@ -69,6 +69,8 @@ func CreatePortalPage(w http.ResponseWriter, r *http.Request) {
 	}
 	t.Execute(w, map[string]interface{}{
 		"Languages":        languages,
+		"Previous":         T("previous_word"),
+		"More":             T("more_word"),
 		"CenoPortalModule": module,
 	})
 }

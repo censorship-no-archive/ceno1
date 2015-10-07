@@ -85,8 +85,16 @@
                 </div>
             </div>
         </div>
-        <div id="moreButton">
-            See more ( &gt; )
+        <div id="navButtons" class="row">
+            <div class="col-md-4">
+                <a href="javascript:void(0);" id="prevButton">{{.Previous}}</a>
+            </div>
+            <div class="col-md-4">
+                {{.Page}} <span id="currentPage">1</span> / <span id="totalPages">1</span>
+            </div>
+            <div class="col-md-4">
+                <a href="javascript:void(0);" id="moreButton">{{.More}}</a>
+            </div>
         </div>
     </div>
 

@@ -58,5 +58,13 @@
   {
     "id": "latest_word",
     "translation": "latest"
+  },
+  {
+    "id": "previous_word",
+    "translation": "previous"
+  },
+  {
+    "id": "more_word",
+    "translation": "more"
   }
 ]

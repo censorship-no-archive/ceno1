@@ -14,9 +14,30 @@
 var feeds = cenoPortalModule.feeds;
 var placeholders = 4;
 var feedIndex = 0;
-var maxFeedIndex = Math.ceil(feeds.length / placeholders);
+var maxFeedIndex = Math.floor(feeds.length / placeholders);
 
-console.log('feeds', feeds.length, 'maxFeedIndex', maxFeedIndex);
+var previousButton = document.getElementById('prevButton');
+var moreButton = document.getElementById('moreButton');
+
+previousButton.addEventListener('click', function () {
+    if (feedIndex >= 1) {
+        feedIndex--;
+        setPageNumber();
+        fillFeedTemplates();
+    }
+});
+
+moreButton.addEventListener('click', function () {
+    if (feedIndex < maxFeedIndex) {
+        feedIndex++;
+        setPageNumber();
+        fillFeedTemplates();
+    }
+});
+
+function setPageNumber() {
+    document.getElementById('currentPage').innerHTML = feedIndex;
+}
 
 /**
  * Fill templates showing information about feeds. Each of the four has the form
@@ -34,11 +55,8 @@ console.log('feeds', feeds.length, 'maxFeedIndex', maxFeedIndex);
  *   <p></p>
  *  </div>
  * </div>
- *
- * @param {[object]} feeds - The array of all feeds
- * @param {int} feedIndex - The "page number" index- each "page" shows four feeds
  */
-function fillFeedTemplates(feeds, feedIndex) {
+function fillFeedTemplates() {
     var containers = document.getElementsByClassName('sitePanel');
     var articles = cenoPortalModule.articles;
     var lastPublished = cenoPortalModule.lastPublished;
@@ -46,12 +64,13 @@ function fillFeedTemplates(feeds, feedIndex) {
     for (var i = 0, len = containers.length; i < len; i++) {
         containers[i].innerHTML = '';
     }
+    console.log('feedIndex =', feedIndex);
     for (var i = 0; i < placeholders; i++) {
         var index = feedIndex * placeholders + i;
-        if (index > maxFeedIndex) {
+        console.log('index =', index);
+        if (index >= feeds.length) {
             break;
         }
-        console.log(index);
         var feedLogo = document.createElement('div');
         feedLogo.setAttribute('class', 'feedLogo');
         var logo = document.createElement('img');
@@ -83,6 +102,8 @@ function fillFeedTemplates(feeds, feedIndex) {
     }
 }
 
-fillFeedTemplates(feeds, 0);
+fillFeedTemplates();
+setPageNumber();
+document.getElementById('totalPages').innerHTML = maxFeedIndex;
 
 })();
