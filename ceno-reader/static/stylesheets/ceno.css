@@ -55,14 +55,10 @@ button {
     font-weight: 400;
 }
 
-a {
+a, a:hover, a:active, a:visited, a:after, a:before, a:focus {
     color: #e43624;
     text-decoration: none;
-}
-
-a:hover {
-    color: #e43624;
-    text-decoration: none;
+    outline: 0;
 }
 
 h1 {
