@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"html/template"
 	"net/http"
 	"path"
@@ -23,6 +24,15 @@ func initModuleWithArticles(feedUrl string) (map[string]interface{}, error) {
  * Build the articles template with links to articles in a particular feed.
  */
 func CreateArticlePage(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Got a request for a CENO site")
+	articles := [...]Item{
+		{0, "Title1", "https://site.com/rss", "Chopin, Beethoven, Bach", "08/10/15"},
+		{1, "Title2", "https://site.com/rss", "Chopin, Bach", "08/10/15"},
+		{2, "Title3", "https://site.com/rss", "Chopin, Mozart", "08/10/15"},
+		{3, "Title4", "https://site.com/rss", "Chopin", "08/10/15"},
+		{4, "Title5", "https://site.com/rss", "Beethoven, Bach", "08/10/15"},
+		{5, "Title6", "https://site.com/rss", "Bach", "08/10/15"},
+	}
 	t, err := template.ParseFiles(path.Join(".", "templates", "articles.html"))
 	if err != nil {
 		// TODO - Create a more useful error page to use
@@ -49,6 +59,7 @@ func CreateArticlePage(w http.ResponseWriter, r *http.Request) {
 	}
 	t.Execute(w, map[string]interface{}{
 		"Languages":        languages,
+		"Articles":         articles,
 		"CenoPortalModule": module,
 	})
 }

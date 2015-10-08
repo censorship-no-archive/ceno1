@@ -16,8 +16,9 @@
          The frontend code will then be able to use that data. -->
     <div class="content">
         <ul id="languageSelect">
-            {{range $i, $language := .Languages}}
-            <li>{{$language}}</li>{{end}}
+            {{range $i, $language := .Languages}}<li>
+                {{$language}}
+            </li>{{end}}
         </ul>
     </div>
     
@@ -36,7 +37,20 @@
 
     <div class="bgbeige">
         <div id="articleList" class="content">
-            <!-- Filled by JS -->    
+            <!-- Filled by JS -->
+            {{range $i, $article := .Articles}}<li>
+                <p class="articleTitle">
+                    {{$article.Title}}
+                </p>
+                <div class="articleInfo">
+                    <span class="articleAuthor">
+                        {{$article.Authors}}
+                    </span>
+                    <span class="articlePublished">
+                        {{$article.Published}}
+                    </span>
+                </div>
+            </li>{{end}}
         </div>
     </div>
 

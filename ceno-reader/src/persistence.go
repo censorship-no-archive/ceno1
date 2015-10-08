@@ -15,11 +15,11 @@ import (
 )
 
 type Item struct {
-	Id          int
-	FeedId      int
-	Title       string
-	WasInserted bool
-	InsertedOn  time.Time
+	Id        int
+	Title     string `json:"title"`
+	FeedUrl   string `json:"feedUrl"`
+	Authors   string `json:"authors"`
+	Published string `json:"published"`
 }
 
 const createFeedsTable = `create table if not exists feeds(
@@ -33,8 +33,8 @@ const createItemsTable = `create table if not exists items(
     id integer primary key,
     feed_url varchar(255),
     title varchar(255),
-    was_inserted boolean,
-    inserted_on date
+    authors text,
+    published varchar(64)
 );`
 
 var tableInitializers = []string{
@@ -227,12 +227,10 @@ func GetItems(db *sql.DB, feedUrl string) ([]Item, error) {
 		return items, err3
 	}
 	for rows.Next() {
-		var id, feedId int
-		var title string
-		var wasInserted bool
-		var insertedOn time.Time
-		rows.Scan(&id, &feedId, &title, &wasInserted, &insertedOn)
-		items = append(items, Item{id, feedId, title, wasInserted, insertedOn})
+		var id int
+		var title, authors, published string
+		rows.Scan(&id, &feedUrl, &title, &authors, &published)
+		items = append(items, Item{id, feedUrl, title, authors, published})
 	}
 	rows.Close()
 	return items, nil
