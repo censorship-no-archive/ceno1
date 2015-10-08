@@ -28,42 +28,36 @@ func initModuleWithArticles(feedUrl string) (map[string]interface{}, error) {
 func CreateArticlePage(w http.ResponseWriter, r *http.Request) {
 	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
 	articles := [...]Item{
-		{0, "Title1", "https://site.com/rss", "Chopin, Beethoven, Bach", "08/10/15"},
-		{1, "Title2", "https://site.com/rss", "Chopin, Bach", "08/10/15"},
-		{2, "Title3", "https://site.com/rss", "Chopin, Mozart", "08/10/15"},
-		{3, "Title4", "https://site.com/rss", "Chopin", "08/10/15"},
-		{4, "Title5", "https://site.com/rss", "Beethoven, Bach", "08/10/15"},
-		{5, "Title6", "https://site.com/rss", "Bach", "08/10/15"},
-		{0, "Title1", "https://site.com/rss", "Chopin, Beethoven, Bach", "08/10/15"},
-		{1, "Title2", "https://site.com/rss", "Chopin, Bach", "08/10/15"},
-		{2, "Title3", "https://site.com/rss", "Chopin, Mozart", "08/10/15"},
-		{3, "Title4", "https://site.com/rss", "Chopin", "08/10/15"},
-		{4, "Title5", "https://site.com/rss", "Beethoven, Bach", "08/10/15"},
-		{0, "Title1", "https://site.com/rss", "Chopin, Beethoven, Bach", "08/10/15"},
-		{1, "Title2", "https://site.com/rss", "Chopin, Bach", "08/10/15"},
-		{0, "Title1", "https://site.com/rss", "Chopin, Beethoven, Bach", "08/10/15"},
-		{1, "Title2", "https://site.com/rss", "Chopin, Bach", "08/10/15"},
-		{2, "Title3", "https://site.com/rss", "Chopin, Mozart", "08/10/15"},
-		{3, "Title4", "https://site.com/rss", "Chopin", "08/10/15"},
-		{0, "Title1", "https://site.com/rss", "Chopin, Beethoven, Bach", "08/10/15"},
-		{1, "Title2", "https://site.com/rss", "Chopin, Bach", "08/10/15"},
-		{2, "Title3", "https://site.com/rss", "Chopin, Mozart", "08/10/15"},
-		{3, "Title4", "https://site.com/rss", "Chopin", "08/10/15"},
-		{4, "Title5", "https://site.com/rss", "Beethoven, Bach", "08/10/15"},
-		{5, "Title6", "https://site.com/rss", "Bach", "08/10/15"},
-		{4, "Title5", "https://site.com/rss", "Beethoven, Bach", "08/10/15"},
-		{5, "Title6", "https://site.com/rss", "Bach", "08/10/15"},
-		{2, "Title3", "https://site.com/rss", "Chopin, Mozart", "08/10/15"},
-		{3, "Title4", "https://site.com/rss", "Chopin", "08/10/15"},
-		{4, "Title5", "https://site.com/rss", "Beethoven, Bach", "08/10/15"},
-		{5, "Title6", "https://site.com/rss", "Bach", "08/10/15"},
-		{5, "Title6", "https://site.com/rss", "Bach", "08/10/15"},
-		{0, "Title1", "https://site.com/rss", "Chopin, Beethoven, Bach", "08/10/15"},
-		{1, "Title2", "https://site.com/rss", "Chopin, Bach", "08/10/15"},
-		{2, "Title3", "https://site.com/rss", "Chopin, Mozart", "08/10/15"},
-		{3, "Title4", "https://site.com/rss", "Chopin", "08/10/15"},
-		{4, "Title5", "https://site.com/rss", "Beethoven, Bach", "08/10/15"},
-		{5, "Title6", "https://site.com/rss", "Bach", "08/10/15"},
+		{0, "Title1", "https://news.ycombinator.com", "https://site.com/rss", "Chopin, Beethoven, Bach", "08/10/15"},
+		{0, "Title2", "https://news.ycombinator.com", "https://site.com/rss", "Chopin, Bach", "08/10/15"},
+		{0, "Title3", "https://news.ycombinator.com", "https://site.com/rss", "Chopin, Beethoven", "08/10/15"},
+		{0, "Title4", "https://news.ycombinator.com", "https://site.com/rss", "Beethoven, Bach", "08/10/15"},
+		{0, "Title5", "https://news.ycombinator.com", "https://site.com/rss", "Bach", "08/10/15"},
+		{0, "Title6", "https://news.ycombinator.com", "https://site.com/rss", "Beethoven, Bach", "08/10/15"},
+		{0, "Title7", "https://news.ycombinator.com", "https://site.com/rss", "Chopin", "08/10/15"},
+		{0, "Title8", "https://news.ycombinator.com", "https://site.com/rss", "Chopin", "08/10/15"},
+		{0, "Title9", "https://news.ycombinator.com", "https://site.com/rss", "Chopin, Beethoven, Bach", "08/10/15"},
+		{0, "Title10", "https://news.ycombinator.com", "https://site.com/rss", "Chopin, Beethoven, Bach", "08/10/15"},
+		{0, "Title11", "https://news.ycombinator.com", "https://site.com/rss", "Beethoven", "08/10/15"},
+		{0, "Title12", "https://news.ycombinator.com", "https://site.com/rss", "Chopin", "08/10/15"},
+		{0, "Title13", "https://news.ycombinator.com", "https://site.com/rss", "Beethoven, Bach", "08/10/15"},
+		{0, "Title14", "https://news.ycombinator.com", "https://site.com/rss", "Chopin, Beethoven, Bach", "08/10/15"},
+		{0, "Title15", "https://news.ycombinator.com", "https://site.com/rss", "Chopin, Beethoven, Bach", "08/10/15"},
+		{0, "Title1", "https://news.ycombinator.com", "https://site.com/rss", "Chopin, Beethoven, Bach", "08/10/15"},
+		{0, "Title2", "https://news.ycombinator.com", "https://site.com/rss", "Beethoven, Bach", "08/10/15"},
+		{0, "Title3", "https://news.ycombinator.com", "https://site.com/rss", "Chopin, Bach", "08/10/15"},
+		{0, "Title4", "https://news.ycombinator.com", "https://site.com/rss", "Chopin, Beethoven", "08/10/15"},
+		{0, "Title5", "https://news.ycombinator.com", "https://site.com/rss", "Chopin, Bach", "08/10/15"},
+		{0, "Title6", "https://news.ycombinator.com", "https://site.com/rss", "Debussy", "08/10/15"},
+		{0, "Title7", "https://news.ycombinator.com", "https://site.com/rss", "Haydn, Debussy", "08/10/15"},
+		{0, "Title8", "https://news.ycombinator.com", "https://site.com/rss", "Haydn", "08/10/15"},
+		{0, "Title9", "https://news.ycombinator.com", "https://site.com/rss", "Haydn, Beethoven, Bach", "08/10/15"},
+		{0, "Title10", "https://news.ycombinator.com", "https://site.com/rss", "Debussy, Beethoven, Bach", "08/10/15"},
+		{0, "Title11", "https://news.ycombinator.com", "https://site.com/rss", "Chopin, Bach", "08/10/15"},
+		{0, "Title12", "https://news.ycombinator.com", "https://site.com/rss", "Chopin, Beethoven, Bach", "08/10/15"},
+		{0, "Title13", "https://news.ycombinator.com", "https://site.com/rss", "Chopin, Beethoven", "08/10/15"},
+		{0, "Title14", "https://news.ycombinator.com", "https://site.com/rss", "Beethoven", "08/10/15"},
+		{0, "Title15", "https://news.ycombinator.com", "https://site.com/rss", "Beethoven, Bach", "08/10/15"},
 	}
 	t, err := template.ParseFiles(path.Join(".", "templates", "articles.html"))
 	if err != nil {
@@ -78,7 +72,6 @@ func CreateArticlePage(w http.ResponseWriter, r *http.Request) {
 	languages := [...]string{"english", "french"}
 	moduleData, articlesErr := initModuleWithArticles(feedUrl)
 	moduleData["Languages"] = languages
-	moduleData["Page"] = "articles"
 	moduleData["articles"] = articles
 	moduleData["authorWord"] = T("authors_word")
 	moduleData["publishedWord"] = T("published_word")
@@ -96,6 +89,8 @@ func CreateArticlePage(w http.ResponseWriter, r *http.Request) {
 	}
 	t.Execute(w, map[string]interface{}{
 		"Languages":        languages,
+		"Previous":         T("previous_word"),
+		"More":             T("more_word"),
 		"CenoPortalModule": module,
 	})
 }

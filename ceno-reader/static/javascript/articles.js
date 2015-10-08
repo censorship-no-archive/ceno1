@@ -3,14 +3,47 @@
 var articles = cenoPortalModule.articles;
 var articlesPerPage = 12;
 var articleIndex = 0;
-var maxArticleIndex = Math.floor(articles.length / articlesPerPage);
+var maxArticlesIndex = Math.floor(articles.length / articlesPerPage);
+
+// Navigation buttons/anchors used to page through articles
+var previousButton = document.getElementById('prevButton');
+var moreButton = document.getElementById('moreButton');
+
+/**
+ * Navigate to the previous set of articles.
+ */
+previousButton.addEventListener('click', function () {
+    if (articleIndex >= 1) {
+        articleIndex--;
+        setPageNumber();
+        fillArticleTemplates();
+    }
+});
+
+/**
+ * Navigate to the next set of articles.
+ */
+moreButton.addEventListener('click', function () {
+    if (articleIndex < maxArticlesIndex) {
+        articleIndex++;
+        setPageNumber();
+        fillArticleTemplates();
+    }
+});
+
+/**
+ * Change the page number displayed between the navigation buttons.
+ */
+function setPageNumber() {
+    document.getElementById('currentPage').innerHTML = '' + (articleIndex + 1);
+}
 
 /**
  * Fill templates showing information about articles.
  * Each article has the form
  *
  * <li>
- *   <p class="articleTitle"></p>
+ *   <a href="articleURL"><p class="articleTitle"></p></a>
  *   <div class="articleInfo">
  *     <span class="articlePublished"></span>
  *     <span> | </span>
@@ -29,20 +62,23 @@ function fillArticleTemplates() {
             break;
         }
         var li = document.createElement('li');
+        var anchor = document.createElement('a');
+        anchor.setAttribute('href', articles[index].url);
         var articleTitle = document.createElement('p');
         articleTitle.setAttribute('class', 'articleTitle');
-        articleTitle.innerHTML = articles[articleIndex].title;
+        articleTitle.innerHTML = articles[index].title;
         var articleInfo = document.createElement('div');
         articleInfo.setAttribute('class', 'articleInfo');
         var articlePublished = document.createElement('span');
         articlePublished.setAttribute('class', 'articlePublished');
-        articlePublished.innerHTML = publishedOn + ' ' + articles[articleIndex].published;
+        articlePublished.innerHTML = publishedOn + ' ' + articles[index].published;
         var separator = document.createElement('span');
         separator.innerHTML = ' | ';
         var articleAuthor = document.createElement('span'); 
         articleAuthor.setAttribute('class', 'articleAuthor');
-        articleAuthor.innerHTML = publishedBy + ' ' + articles[articleIndex].authors;
-        li.appendChild(articleTitle);
+        articleAuthor.innerHTML = publishedBy + ' ' + articles[index].authors;
+        anchor.appendChild(articleTitle);
+        li.appendChild(anchor);
         articleInfo.appendChild(articlePublished);
         articleInfo.appendChild(separator);
         articleInfo.appendChild(articleAuthor);
@@ -51,6 +87,11 @@ function fillArticleTemplates() {
     }
 }
 
+// Show the first set of articles
 fillArticleTemplates();
+// Set the current page (of articles) number to 1
+setPageNumber();
+// Set the total number of pages of articles
+document.getElementById('totalPages').innerHTML = '' + (maxArticlesIndex + 1);
 
 })();

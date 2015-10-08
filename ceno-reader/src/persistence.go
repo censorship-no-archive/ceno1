@@ -17,6 +17,7 @@ import (
 type Item struct {
 	Id        int
 	Title     string `json:"title"`
+	Url       string `json:"url"`
 	FeedUrl   string `json:"feedUrl"`
 	Authors   string `json:"authors"`
 	Published string `json:"published"`
@@ -31,8 +32,9 @@ const createFeedsTable = `create table if not exists feeds(
 
 const createItemsTable = `create table if not exists items(
     id integer primary key,
-    feed_url varchar(255),
     title varchar(255),
+    url varchar(255),
+    feed_url varchar(255),
     authors text,
     published varchar(64)
 );`
@@ -191,13 +193,20 @@ func SaveItem(db *sql.DB, feedUrl string, item *rss.Item) error {
 	if err1 != nil {
 		return err1
 	}
-	stmt, err2 := tx.Prepare(`insert into items(feed_url, title, was_inserted)
-                              values(?, ?, ?)`)
+	stmt, err2 := tx.Prepare(`insert into items(title, url, feed_url, authors, published)
+                              values(?, ?, ?, ?, ?)`)
 	if err2 != nil {
 		return err2
 	}
 	defer stmt.Close()
-	_, err3 := stmt.Exec(feedUrl, item.Title, false)
+	url := item.Links[0].Href
+	authors := item.Author.Name
+	if item.Contributors != nil {
+		for _, contrib := range item.Contributors {
+			authors += " " + contrib
+		}
+	}
+	_, err3 := stmt.Exec(item.Title, url, feedUrl, authors, item.PubDate)
 	if err3 != nil {
 		return err3
 	}
@@ -216,7 +225,7 @@ func GetItems(db *sql.DB, feedUrl string) ([]Item, error) {
 	if err1 != nil {
 		return items, err1
 	}
-	stmt, err2 := tx.Prepare(`select id, feed_url, was_inserted, inserted_on
+	stmt, err2 := tx.Prepare(`select id, title, url, authors, published
                               from items where feed_url=?`)
 	if err2 != nil {
 		return items, err2
@@ -228,9 +237,9 @@ func GetItems(db *sql.DB, feedUrl string) ([]Item, error) {
 	}
 	for rows.Next() {
 		var id int
-		var title, authors, published string
-		rows.Scan(&id, &feedUrl, &title, &authors, &published)
-		items = append(items, Item{id, feedUrl, title, authors, published})
+		var title, authors, published, url string
+		rows.Scan(&id, &title, &url, &authors, &published)
+		items = append(items, Item{id, title, url, feedUrl, authors, published})
 	}
 	rows.Close()
 	return items, nil
