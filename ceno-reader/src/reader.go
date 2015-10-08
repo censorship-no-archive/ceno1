@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/gorilla/mux"
 	rss "github.com/jteeuwen/go-pkg-rss"
 	"github.com/jteeuwen/go-pkg-xmlx"
 	_ "github.com/mattn/go-sqlite3"
@@ -15,7 +16,7 @@ import (
 /**
  * Handle the receipt of a new channel.
  * @param {*rss.Feed} feed - A pointer to the object representing the feed received from
- * @param {[]*rss.Channel] newChannels - An array of pointers to received channels
+ * @param {[]*rss.Channel} newChannels - An array of pointers to received channels
  */
 func channelFeedHandler(feed *rss.Feed, newChannels []*rss.Channel) {
 	return
@@ -147,10 +148,12 @@ func main() {
 	// Set up the HTTP server to listen for requests for new feeds to read
 	requestNewFollow := make(chan SaveFeedRequest)
 	go followFeeds(requestNewFollow)
-	http.Handle("/", http.FileServer(http.Dir("./static")))
-	http.HandleFunc("/follow", followHandler(requestNewFollow))
-	http.HandleFunc("/portal", CreatePortalPage)
-	http.HandleFunc("/articles", CreateArticlePage)
+	router := mux.NewRouter()
+	router.Handle("/", http.FileServer(http.Dir("./static")))
+	router.HandleFunc("/follow", followHandler(requestNewFollow)).Methods("POST")
+	router.HandleFunc("/portal", CreatePortalPage).Methods("GET")
+	router.HandleFunc("/cenosite", CreateArticlePage).Methods("GET")
+	http.Handle("/", router)
 	fmt.Println(T("listening_msg_rdr", map[string]interface{}{"Port": Configuration.PortNumber}))
 	if err := http.ListenAndServe(Configuration.PortNumber, nil); err != nil {
 		panic(err)
