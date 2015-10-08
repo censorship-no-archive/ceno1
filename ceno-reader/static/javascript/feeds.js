@@ -16,9 +16,13 @@ var placeholders = 4;
 var feedIndex = 0;
 var maxFeedIndex = Math.floor(feeds.length / placeholders);
 
+// Navigation buttons/anchors used to page through feeds
 var previousButton = document.getElementById('prevButton');
 var moreButton = document.getElementById('moreButton');
 
+/**
+ * Navigate to the previous set of feeds.
+ */
 previousButton.addEventListener('click', function () {
     if (feedIndex >= 1) {
         feedIndex--;
@@ -27,6 +31,9 @@ previousButton.addEventListener('click', function () {
     }
 });
 
+/**
+ * Navigate to the next set of feeds.
+ */
 moreButton.addEventListener('click', function () {
     if (feedIndex < maxFeedIndex) {
         feedIndex++;
@@ -35,8 +42,21 @@ moreButton.addEventListener('click', function () {
     }
 });
 
+/**
+ * Change the page number displayed between the navigation buttons.
+ */
 function setPageNumber() {
-    document.getElementById('currentPage').innerHTML = feedIndex;
+    document.getElementById('currentPage').innerHTML = '' + (feedIndex + 1);
+}
+
+/**
+ * Produce a link that can be understood as being followed from the
+ * feeds page going to a particular list of articles.
+ * Such links are of the form cenosite/<base64(feed's url)>
+ * @param {string} feedUrl - The URL of the RSS or Atom feed
+ */
+function articlesLink(feedUrl) {
+    return 'cenosite/' + btoa(feedUrl);
 }
 
 /**
@@ -81,7 +101,7 @@ function fillFeedTemplates() {
         var feedUrl = document.createElement('div');
         feedUrl.setAttribute('class', 'feedUrl');
         var anchor = document.createElement('a');
-        anchor.setAttribute('href', feeds[index].url);
+        anchor.setAttribute('href', articlesLink(feeds[index].url));
         anchor.innerHTML = feeds[index].url;
         feedUrl.appendChild(anchor);
         containers[i].appendChild(feedUrl);
@@ -102,8 +122,11 @@ function fillFeedTemplates() {
     }
 }
 
+// Show the first set of feeds
 fillFeedTemplates();
+// Set the current page (of feeds) number to 1
 setPageNumber();
-document.getElementById('totalPages').innerHTML = maxFeedIndex;
+// Set the total number of pages of feeds
+document.getElementById('totalPages').innerHTML = '' + (maxFeedIndex + 1);
 
 })();
