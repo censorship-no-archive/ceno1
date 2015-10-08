@@ -3,9 +3,9 @@
 <head>
     <title>CENO Portal</title>
     <meta charset="utf-8" />
-    <link rel="stylesheet" href="stylesheets/bootstrap.min.css" />
-    <link rel="stylesheet" href="stylesheets/ceno.css" />
-    <link rel="stylesheet" href="stylesheets/portal.css" />
+    <link rel="stylesheet" href="/stylesheets/bootstrap.min.css" />
+    <link rel="stylesheet" href="/stylesheets/ceno.css" />
+    <link rel="stylesheet" href="/stylesheets/portal.css" />
     <script type="text/javascript" id="jsonPlaceholder">
           var cenoPortalModule = JSON.parse("{{.CenoPortalModule}}");
     </script>
@@ -37,39 +37,12 @@
 
     <div class="bgbeige">
         <div id="articleList" class="content">
-            <!-- Filled by JS -->
-            {{range $i, $article := .Articles}}<li>
-                <p class="articleTitle">
-                    {{$article.Title}}
-                </p>
-                <div class="articleInfo">
-                    <span class="articleAuthor">
-                        {{$article.Authors}}
-                    </span>
-                    <span class="articlePublished">
-                        {{$article.Published}}
-                    </span>
-                </div>
-            </li>{{end}}
+            <ul id="articleListing">
+            </ul>
         </div>
     </div>
 
-    <hr />
-
-    <div class="content row">
-        <div class="col-md-9">
-            <p>
-                eQualitie is awesome eQualitie is awesome eQualitie is awesome eQualitie is awesome 
-                eQualitie is awesome eQualitie is awesome eQualitie is awesome eQualitie is awesome 
-                eQualitie is awesome eQualitie is awesome eQualitie is awesome eQualitie is awesome 
-                eQualitie is awesome eQualitie is awesome eQualitie is awesome eQualitie is awesome 
-            </p>
-        </div>
-        <div class="col-md-3">
-            <img id="eqLogo" src="images/logo_eq.png" />
-        </div>
-    </div>
-
+    <script src="javascript/articles.js"></script>
     <script src="javascript/languages.js"></script>
 </body>
 </html>

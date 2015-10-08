@@ -3,8 +3,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/nicksnyder/go-i18n/i18n"
 	"html/template"
 	"net/http"
+	"os"
 	"path"
 )
 
@@ -24,8 +26,38 @@ func initModuleWithArticles(feedUrl string) (map[string]interface{}, error) {
  * Build the articles template with links to articles in a particular feed.
  */
 func CreateArticlePage(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Got a request for a CENO site")
+	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
 	articles := [...]Item{
+		{0, "Title1", "https://site.com/rss", "Chopin, Beethoven, Bach", "08/10/15"},
+		{1, "Title2", "https://site.com/rss", "Chopin, Bach", "08/10/15"},
+		{2, "Title3", "https://site.com/rss", "Chopin, Mozart", "08/10/15"},
+		{3, "Title4", "https://site.com/rss", "Chopin", "08/10/15"},
+		{4, "Title5", "https://site.com/rss", "Beethoven, Bach", "08/10/15"},
+		{5, "Title6", "https://site.com/rss", "Bach", "08/10/15"},
+		{0, "Title1", "https://site.com/rss", "Chopin, Beethoven, Bach", "08/10/15"},
+		{1, "Title2", "https://site.com/rss", "Chopin, Bach", "08/10/15"},
+		{2, "Title3", "https://site.com/rss", "Chopin, Mozart", "08/10/15"},
+		{3, "Title4", "https://site.com/rss", "Chopin", "08/10/15"},
+		{4, "Title5", "https://site.com/rss", "Beethoven, Bach", "08/10/15"},
+		{0, "Title1", "https://site.com/rss", "Chopin, Beethoven, Bach", "08/10/15"},
+		{1, "Title2", "https://site.com/rss", "Chopin, Bach", "08/10/15"},
+		{0, "Title1", "https://site.com/rss", "Chopin, Beethoven, Bach", "08/10/15"},
+		{1, "Title2", "https://site.com/rss", "Chopin, Bach", "08/10/15"},
+		{2, "Title3", "https://site.com/rss", "Chopin, Mozart", "08/10/15"},
+		{3, "Title4", "https://site.com/rss", "Chopin", "08/10/15"},
+		{0, "Title1", "https://site.com/rss", "Chopin, Beethoven, Bach", "08/10/15"},
+		{1, "Title2", "https://site.com/rss", "Chopin, Bach", "08/10/15"},
+		{2, "Title3", "https://site.com/rss", "Chopin, Mozart", "08/10/15"},
+		{3, "Title4", "https://site.com/rss", "Chopin", "08/10/15"},
+		{4, "Title5", "https://site.com/rss", "Beethoven, Bach", "08/10/15"},
+		{5, "Title6", "https://site.com/rss", "Bach", "08/10/15"},
+		{4, "Title5", "https://site.com/rss", "Beethoven, Bach", "08/10/15"},
+		{5, "Title6", "https://site.com/rss", "Bach", "08/10/15"},
+		{2, "Title3", "https://site.com/rss", "Chopin, Mozart", "08/10/15"},
+		{3, "Title4", "https://site.com/rss", "Chopin", "08/10/15"},
+		{4, "Title5", "https://site.com/rss", "Beethoven, Bach", "08/10/15"},
+		{5, "Title6", "https://site.com/rss", "Bach", "08/10/15"},
+		{5, "Title6", "https://site.com/rss", "Bach", "08/10/15"},
 		{0, "Title1", "https://site.com/rss", "Chopin, Beethoven, Bach", "08/10/15"},
 		{1, "Title2", "https://site.com/rss", "Chopin, Bach", "08/10/15"},
 		{2, "Title3", "https://site.com/rss", "Chopin, Mozart", "08/10/15"},
@@ -47,19 +79,23 @@ func CreateArticlePage(w http.ResponseWriter, r *http.Request) {
 	moduleData, articlesErr := initModuleWithArticles(feedUrl)
 	moduleData["Languages"] = languages
 	moduleData["Page"] = "articles"
+	moduleData["articles"] = articles
+	moduleData["authorWord"] = T("authors_word")
+	moduleData["publishedWord"] = T("published_word")
 	marshalled, err := json.Marshal(moduleData)
 	var module string
 	// TODO - Serve an error
 	if articlesErr != nil {
 		module = ""
+		fmt.Println(articlesErr)
 	} else if err != nil {
 		module = ""
+		fmt.Println(err)
 	} else {
 		module = string(marshalled[:])
 	}
 	t.Execute(w, map[string]interface{}{
 		"Languages":        languages,
-		"Articles":         articles,
 		"CenoPortalModule": module,
 	})
 }

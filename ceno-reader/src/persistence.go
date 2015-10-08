@@ -216,8 +216,8 @@ func GetItems(db *sql.DB, feedUrl string) ([]Item, error) {
 	if err1 != nil {
 		return items, err1
 	}
-	stmt, err2 := tx.Prepare(`select id, feed_id, was_inserted, inserted_on
-                              from items where feed_id=(select id from feeds where url=?)`)
+	stmt, err2 := tx.Prepare(`select id, feed_url, was_inserted, inserted_on
+                              from items where feed_url=?`)
 	if err2 != nil {
 		return items, err2
 	}

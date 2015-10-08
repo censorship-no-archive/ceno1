@@ -66,5 +66,13 @@
   {
     "id": "more_word",
     "translation": "more"
+  },
+  {
+    "id": "published_word",
+    "translation": "published on"
+  },
+  {
+    "id": "authors_word",
+    "translation": "by"
   }
 ]

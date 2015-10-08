@@ -1,3 +1,19 @@
+p.articleTitle {
+    font-weight: bold;
+    font-size: 0.9em;
+    padding: 0;
+    margin-bottom: 0;
+}
+
+div.articleInfo {
+    margin: 0;
+}
+
+div.articleInfo span {
+    font-size: 0.8em;
+    padding: 0;
+}
+
 ul#languageSelect {
     list-style: none;
     margin-left: 0;
@@ -27,6 +43,20 @@ div#articleSection div.content {
 
 div#navButtons {
     text-align: center;
+}
+
+div#articleList {
+    padding: 20px 0 20px 0;
+    overflow: scroll;
+    height: 100%;
+}
+
+div#articleList ul {
+    list-style: none;
+}
+
+div#articleList ul li {
+    margin-bottom: 20px;
 }
 
 div.content {
