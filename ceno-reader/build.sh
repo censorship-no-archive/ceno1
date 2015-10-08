@@ -23,8 +23,6 @@ echo "goi18n"
 go get -u github.com/nicksnyder/go-i18n/goi18n
 echo "go-sqlite3"
 go get github.com/mattn/go-sqlite3
-echo "mux"
-go get github.com/gorilla/mux
 
 echo ""
 #echo "Merging localizaton files."
