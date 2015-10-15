@@ -119,27 +119,28 @@ func followHandler(requests chan SaveFeedRequest) func(http.ResponseWriter, *htt
  * DELETE /unfollow {"url": string}
  */
 func unfollowHandler(w http.ResponseWriter, r *http.Request) {
-    if r.Method != "DELETE" {
-        w.Write([]byte(T("method_not_impl_rdr")))
-        return
-    }
-    deleteReq := DeleteFeedRequest{}
-    decoder := json.NewDecoder(r.Body)
-    err := decoder.Decode(&deleteReq)
-    if err != nil {
-        fmt.Println("Error decoding JSON")
-        fmt.Println(err)
-        w.Write([]byte(T("invalid_unfollow_req_rdr")))
-        return
-    }
-    deleteErr := DeleteFeed(DBConnection, deleteReq.Url)
-    if deleteErr != nil {
-        w.Write([]byte(T("feed_delete_err_rdr", map[string]interface{}{
-            "Error": deleteErr.Error(),
-        })))
-    } else {
-        w.Write([]byte(T("feed_delete_success_rdr")))
-    }
+	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
+	if r.Method != "DELETE" {
+		w.Write([]byte(T("method_not_impl_rdr")))
+		return
+	}
+	deleteReq := DeleteFeedRequest{}
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&deleteReq)
+	if err != nil {
+		fmt.Println("Error decoding JSON")
+		fmt.Println(err)
+		w.Write([]byte(T("invalid_unfollow_req_rdr")))
+		return
+	}
+	deleteErr := DeleteFeed(DBConnection, deleteReq.Url)
+	if deleteErr != nil {
+		w.Write([]byte(T("feed_delete_err_rdr", map[string]interface{}{
+			"Error": deleteErr.Error(),
+		})))
+	} else {
+		w.Write([]byte(T("feed_delete_success_rdr")))
+	}
 }
 
 /**
@@ -147,7 +148,7 @@ func unfollowHandler(w http.ResponseWriter, r *http.Request) {
  * the distributed store being used.
  */
 func insertHandler(w http.ResponseWriter, r *http.Request) {
-    w.Write([]byte("method_not_impl_rdr")) // TODO
+	w.Write([]byte("method_not_impl_rdr")) // TODO
 }
 
 /**
@@ -184,7 +185,7 @@ func main() {
 	http.Handle("/", http.FileServer(http.Dir("./static")))
 	http.HandleFunc("/follow", followHandler(requestNewFollow))
 	http.HandleFunc("/unfollow", unfollowHandler)
-    http.HandleFunc("/insert", insertHandler)
+	http.HandleFunc("/insert", insertHandler)
 	fmt.Println(T("listening_msg_rdr", map[string]interface{}{"Port": Configuration.PortNumber}))
 	if err := http.ListenAndServe(Configuration.PortNumber, nil); err != nil {
 		panic(err)
