@@ -46,33 +46,5 @@
   {
     "id": "not_recognized_charset_chr",
     "translation": "Expected charset {{.Expect}}, but got {{.Actual}}."
-  },
-  {
-    "id": "articles_word",
-    "translation": "articles"
-  },
-  {
-    "id": "last_published_word",
-    "translation": "last published"
-  },
-  {
-    "id": "latest_word",
-    "translation": "latest"
-  },
-  {
-    "id": "previous_word",
-    "translation": "previous"
-  },
-  {
-    "id": "more_word",
-    "translation": "more"
-  },
-  {
-    "id": "published_word",
-    "translation": "published on"
-  },
-  {
-    "id": "authors_word",
-    "translation": "by"
   }
 ]

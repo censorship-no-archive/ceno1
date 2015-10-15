@@ -4,9 +4,7 @@ SOURCE_FILES="src/reader.go \
     src/data.go \
     src/charsetreaders.go \
     src/config.go \
-    src/persistence.go \
-    src/portal.go \
-    src/articles.go"
+    src/persistence.go
 
 echo "Formatting go files."
 for file in `ls src/*.go`; do

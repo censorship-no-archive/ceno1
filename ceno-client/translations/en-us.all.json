@@ -162,5 +162,34 @@
   {
     "id": "you_asked_for_html",
     "translation": "You asked for "
+  },
+
+  {
+    "id": "articles_word",
+    "translation": "articles"
+  },
+  {
+    "id": "last_published_word",
+    "translation": "last published"
+  },
+  {
+    "id": "latest_word",
+    "translation": "latest"
+  },
+  {
+    "id": "previous_word",
+    "translation": "previous"
+  },
+  {
+    "id": "more_word",
+    "translation": "more"
+  },
+  {
+    "id": "published_word",
+    "translation": "published on"
+  },
+  {
+    "id": "authors_word",
+    "translation": "by"
   }
 ]
