@@ -90,6 +90,17 @@ func followFeeds(requests chan SaveFeedRequest) {
 }
 
 /**
+ * Write a file listing items that have been inserted into Freenet
+ * @param feedUrl - The URL of the feed from which the items were served
+ * @param marshalledItems - The marshalled information about items to write
+ */
+func writeItemsFile(feedUrl string, marshalledItems []byte) error {
+    filename := base64.StdEncoding.EncodeToString([]byte(feedUrl)) + ".json"
+    location := path.Join(JSON_FILE_DIR, filename)
+    return ioutil.WriteFile(location, marshalledItems, os.ModePerm)
+}
+
+/**
  * Handle requests to have a new RSS or Atom feed followed.
  * POST /follow {"url": string, "type": string, "charset": string}
  * @param {chan Feed} requests - A channel through which descriptions of feeds to be followed are received
@@ -145,10 +156,57 @@ func unfollowHandler(w http.ResponseWriter, r *http.Request) {
 
 /**
  * Handle a request to have JSON files describing feeds and articles generated and inserted into
- * the distributed store being used.
+ * the distributed store being used. Also creates files for distribution in json-files.
  */
 func insertHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("method_not_impl_rdr")) // TODO
+    feeds, feedErr := AllFeeds(DBConnection)
+    if feedsErr != nil {
+        fmt.Println("Couldn't get feeds")
+        fmt.Println(feedErr)
+        return
+    }
+    marshalledFeeds, marshalError := json.Marshal(map[string]interface{} {
+        "version": 1.0,
+        "feeds": feeds
+    })
+    if marshalError != nil {
+        fmt.Println("Couldn't marshal array of feeds")
+        fmt.Println(marshalError)
+        return
+    }
+    feedsInsertStatus := InsertFreenet(FeedsListIdentifier, marshalledFeeds)
+    if feedsInsertedStatus == Success {
+        feedWriteErr := ioutil.WriteFile(FeedsJsonFile, marshalledFeeds, os.ModePerm)
+        if feedsWriteErr != nil {
+            fmt.Println("Couldn't write " + FeedsJsonFile)
+            fmt.Println(writeErr)
+        }
+    } else {
+        fmt.Println("Failed to insert feeds list into Freenet")
+    }
+    for _, feed := range feeds {
+        items, itemsError := GetItems(DBConnection, feed.Url)
+        if itemsError != nil {
+            fmt.Println("Couldn't get items for " + feed.Url)
+            fmt.Println(itemsError)
+        } else {
+            marshalled, marshalErr := json.Marshal(map[string]interface{}{
+                "version": 1.0,
+                "items": items,
+            })
+            if marshalErr != nil {
+                fmt.Println("Couldn't marshal items for " + feed.Url)
+                fmt.Println(marshalErr)
+            } else {
+                insertStatus := InsertFreenet(feed.Url, marshalled)
+                if insertStatus == Success {
+                    writeErr := writeItemsFile(feed.Url, items)
+                } else {
+                    fmt.Println("Could not insert items into Freenet")
+                }
+            }
+        }
+    }
 }
 
 /**
