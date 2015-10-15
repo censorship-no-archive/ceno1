@@ -300,6 +300,8 @@ func main() {
 		Configuration = conf
 	}
 	// Create an HTTP proxy server
+	http.Handle("/cenoresources/",
+		http.StripPrefix("/cenoresources/", http.FileServer(http.Dir("./static"))))
 	http.HandleFunc("/lookup", directHandler)
 	http.HandleFunc("/portal", CreatePortalPage)
 	http.HandleFunc("/cenosite", CreateArticlePage)

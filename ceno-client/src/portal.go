@@ -71,9 +71,6 @@ func CreatePortalPage(w http.ResponseWriter, r *http.Request) {
 		"Languages":        languages,
 		"Previous":         T("previous_word"),
 		"More":             T("more_word"),
-		"BootstrapCSS":     LoadResource(Stylesheet, "bootstrap.min.css"),
-		"CenoCSS":          LoadResource(Stylesheet, "ceno.css"),
-		"PortalCSS":        LoadResource(Stylesheet, "portal.css"),
 		"CenoPortalModule": module,
 	})
 }
