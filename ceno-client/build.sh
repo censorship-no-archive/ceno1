@@ -3,6 +3,7 @@
 SOURCE_FILES="src/client.go \
     src/errorhandling.go \
     src/clientconfig.go \
+    src/data.go \
     src/portal.go \
     src/articles.go"
 
