@@ -1,14 +1,18 @@
 package main
 
 import (
+	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	rss "github.com/jteeuwen/go-pkg-rss"
 	"github.com/jteeuwen/go-pkg-xmlx"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/nicksnyder/go-i18n/i18n"
+	"io/ioutil"
 	"net/http"
 	"os"
+	"path"
 	"time"
 )
 
@@ -95,9 +99,9 @@ func followFeeds(requests chan SaveFeedRequest) {
  * @param marshalledItems - The marshalled information about items to write
  */
 func writeItemsFile(feedUrl string, marshalledItems []byte) error {
-    filename := base64.StdEncoding.EncodeToString([]byte(feedUrl)) + ".json"
-    location := path.Join(JSON_FILE_DIR, filename)
-    return ioutil.WriteFile(location, marshalledItems, os.ModePerm)
+	filename := base64.StdEncoding.EncodeToString([]byte(feedUrl)) + ".json"
+	location := path.Join(JSON_FILE_DIR, filename)
+	return ioutil.WriteFile(location, marshalledItems, os.ModePerm)
 }
 
 /**
@@ -159,31 +163,31 @@ func unfollowHandler(w http.ResponseWriter, r *http.Request) {
  * the distributed store being used. Also creates files for distribution in json-files.
  */
 func insertHandler(w http.ResponseWriter, r *http.Request) {
-    feeds, feedErr := AllFeeds(DBConnection)
-    if feedsErr != nil {
-        fmt.Println("Couldn't get feeds")
-        fmt.Println(feedErr)
-        return
-    }
-    writeFeedsErr := writeFeeds(feeds)
-    if writeFeedsErr != nil {
-        fmt.Println(writeFeedsErr)
-        return
-    }
-    for _, feed := range feeds {
-        items, itemsError := GetItems(DBConnection, feed.Url)
-        if itemsError != nil {
-            fmt.Println("Couldn't get items for " + feed.Url)
-            fmt.Println(itemsError)
-        } else {
-            writeItemsErr := writeItems(items)
-            if writeItemsErr != nil {
-                fmt.Println("Could not write items for " + feed.Url)
-            } else {
-                fmt.Println("Success!")
-            }
-        }
-    }
+	feeds, feedErr := AllFeeds(DBConnection)
+	if feedErr != nil {
+		fmt.Println("Couldn't get feeds")
+		fmt.Println(feedErr)
+		return
+	}
+	writeFeedsErr := writeFeeds(feeds)
+	if writeFeedsErr != nil {
+		fmt.Println(writeFeedsErr)
+		return
+	}
+	for _, feed := range feeds {
+		items, itemsError := GetItems(DBConnection, feed.Url)
+		if itemsError != nil {
+			fmt.Println("Couldn't get items for " + feed.Url)
+			fmt.Println(itemsError)
+		} else {
+			writeItemsErr := writeItems(feed.Url, items)
+			if writeItemsErr != nil {
+				fmt.Println("Could not write items for " + feed.Url)
+			} else {
+				fmt.Println("Success!")
+			}
+		}
+	}
 }
 
 /**
@@ -193,28 +197,29 @@ func insertHandler(w http.ResponseWriter, r *http.Request) {
  * @param feeds - Information about the feeds being followed
  */
 func writeFeeds(feeds []Feed) error {
-    marshalledFeeds, marshalError := json.Marshal(map[string]interface{} {
-        "version": 1.0,
-        "feeds": feeds
-    })
-    if marshalError != nil {
-        fmt.Println("Couldn't marshal array of feeds")
-        fmt.Println(marshalError)
-        return marshalError
-    }
-    feedsInsertStatus := InsertFreenet(FeedsListIdentifier, marshalledFeeds)
-    if feedsInsertedStatus == Success {
-        feedWriteErr := ioutil.WriteFile(FeedsJsonFile, marshalledFeeds, os.ModePerm)
-        if feedsWriteErr != nil {
-            fmt.Println("Couldn't write " + FeedsJsonFile)
-            fmt.Println(writeErr)
-            return writeErr
-        }
-    } else {
-        fmt.Println("Failed to insert feeds list into Freenet")
-        return errors.New(T("insertion_fail_err"))
-    }
-    return nil
+	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
+	marshalledFeeds, marshalError := json.Marshal(map[string]interface{}{
+		"version": 1.0,
+		"feeds":   feeds,
+	})
+	if marshalError != nil {
+		fmt.Println("Couldn't marshal array of feeds")
+		fmt.Println(marshalError)
+		return marshalError
+	}
+	feedsInsertedStatus := InsertFreenet(FeedsListIdentifier, marshalledFeeds)
+	if feedsInsertedStatus == Success {
+		feedWriteErr := ioutil.WriteFile(FeedsJsonFile, marshalledFeeds, os.ModePerm)
+		if feedWriteErr != nil {
+			fmt.Println("Couldn't write " + FeedsJsonFile)
+			fmt.Println(feedWriteErr)
+			return feedWriteErr
+		}
+	} else {
+		fmt.Println("Failed to insert feeds list into Freenet")
+		return errors.New(T("insertion_fail_err"))
+	}
+	return nil
 }
 
 /**
@@ -225,28 +230,29 @@ func writeFeeds(feeds []Feed) error {
  * @param items - Information about the items being followed
  */
 func writeItems(feedUrl string, items []Item) error {
-    marshalled, marshalErr := json.Marshal(map[string]interface{}{
-        "version": 1.0,
-        "items": items,
-    })
-    if marshalErr != nil {
-        fmt.Println("Couldn't marshal items for " + feedUrl)
-        fmt.Println(marshalErr)
-        return marshalErr
-    }
-    insertStatus := InsertFreenet(feedUrl, marshalled)
-    if insertStatus == Success {
-        writeErr := writeItemsFile(feedUrl, items)
-        if writeErr != nil {
-            fmt.Println("Couldn't write item")
-            fmt.Println(writeErr)
-            return writeErr
-        }
-    } else {
-        fmt.Println("Could not insert items into Freenet")
-        return errors.New(T("insertion_fail_err"))
-    }
-    return nil
+	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
+	marshalled, marshalErr := json.Marshal(map[string]interface{}{
+		"version": 1.0,
+		"items":   items,
+	})
+	if marshalErr != nil {
+		fmt.Println("Couldn't marshal items for " + feedUrl)
+		fmt.Println(marshalErr)
+		return marshalErr
+	}
+	insertStatus := InsertFreenet(feedUrl, marshalled)
+	if insertStatus == Success {
+		writeErr := writeItemsFile(feedUrl, marshalled)
+		if writeErr != nil {
+			fmt.Println("Couldn't write item")
+			fmt.Println(writeErr)
+			return writeErr
+		}
+	} else {
+		fmt.Println("Could not insert items into Freenet")
+		return errors.New(T("insertion_fail_err"))
+	}
+	return nil
 }
 
 /**

@@ -1,9 +1,5 @@
 package main
 
-import (
-    "net/http"
-)
-
 // Type covering `bool` to add more explanatory power than using bools
 // directly to report whether a request was satisfied or not.
 type RequestStatus bool
@@ -19,6 +15,6 @@ const Failure RequestStatus = false
  * @return Success if the request was sent successfully, otherwise Failure
  */
 func InsertFreenet(url string, data []byte) RequestStatus {
-    //  TODO
-    return Success
+	//  TODO
+	return Success
 }

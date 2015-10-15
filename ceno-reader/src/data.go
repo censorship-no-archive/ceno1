@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"github.com/jteeuwen/go-pkg-xmlx"
 	"net/http"
+	"path"
 	"time"
-    "path"
 )
 
 // The name of the environment variable we expect the user to specify
@@ -40,7 +40,8 @@ var CharsetReaders map[string]xmlx.CharsetFunc = map[string]xmlx.CharsetFunc{
 
 // Location to write the main JSON file about feeds being followed
 const JSON_FILE_DIR = "json-files"
-var FeedJsonFile string = path.Join(JSON_FILE_DIR, "feeds.json")
+
+var FeedsJsonFile string = path.Join(JSON_FILE_DIR, "feeds.json")
 
 // A special identifier that can be used to find the top-level JSON file listing feeds
 const FeedsListIdentifier string = "MyFeeds.json"
