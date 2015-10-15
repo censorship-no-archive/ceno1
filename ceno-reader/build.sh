@@ -4,7 +4,7 @@ SOURCE_FILES="src/reader.go \
     src/data.go \
     src/charsetreaders.go \
     src/config.go \
-    src/persistence.go
+    src/persistence.go"
 
 echo "Formatting go files."
 for file in `ls src/*.go`; do
@@ -28,5 +28,5 @@ echo ""
 #$GOPATH/bin/goi18n *.json
 #cd ..
 
-
 go build $SOURCE_FILES && echo "Compiled reader successfully."
+

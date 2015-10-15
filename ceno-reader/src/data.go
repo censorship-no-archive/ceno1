@@ -66,5 +66,5 @@ type SaveFeedRequest struct {
  * JSON data expected in a request to have a feed unfollowed.
  */
 type DeleteFeedRequest struct {
-    Url string `json:"url"`
+	Url string `json:"url"`
 }
