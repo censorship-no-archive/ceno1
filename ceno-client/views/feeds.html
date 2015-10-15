@@ -3,10 +3,15 @@
 <head>
     <title>CENO Portal</title>
     <meta charset='utf-8' />
-    <!--<link rel="stylesheet" href="stylesheets/pure-min.css" />-->
-    <link rel="stylesheet" href="stylesheets/bootstrap.min.css" />
-    <link rel="stylesheet" href="stylesheets/ceno.css" />
-    <link rel="stylesheet" href="stylesheets/portal.css" />
+    <style type="text/css" id="bootstrapCSS">
+    {{.BootstrapCSS}}
+    </style>
+    <style type="text/css" id="cenoCSS">
+    {{.CenoCSS}}
+    </style>
+    <style type="text/css" id="portalCSS">
+    {{.PortalCSS}}
+    </style>
     <script type="text/javascript" id="jsonPlaceholder">
           var cenoPortalModule = JSON.parse("{{.CenoPortalModule}}");
     </script>
@@ -24,7 +29,7 @@
     
     <div class="content row">
         <div class="col-md-3">
-            <img id="cenoLogo" class="pure-img" src="images/logo_ceno.png" /> 
+            <img id="cenoLogo" class="pure-img" src="/cenoresource/images/logo_ceno.png" /> 
         </div>
         <div class="col-md-9">
             <p>
@@ -110,11 +115,11 @@
             </p>
         </div>
         <div class="col-md-3">
-            <img id="eqLogo" src="images/logo_eq.png" />
+            <img id="eqLogo" src="/cenoresource/images/logo_eq.png" />
         </div>
     </div>
     
-    <script src="javascript/languages.js"></script>
-    <script src="javascript/feeds.js"></script>
+    <script src="/cenoresource/javascript/languages.js"></script>
+    <script src="/cenoresource/javascript/feeds.js"></script>
 </body>
 </html>

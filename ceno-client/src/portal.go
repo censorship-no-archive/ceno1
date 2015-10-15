@@ -43,7 +43,7 @@ func initModuleWithFeeds() (map[string]interface{}, error) {
  */
 func CreatePortalPage(w http.ResponseWriter, r *http.Request) {
 	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
-	t, err := template.ParseFiles(path.Join(".", "templates", "feeds.html"))
+	t, err := template.ParseFiles(path.Join(".", "views", "feeds.html"))
 	if err != nil {
 		// Serve some kind of error message
 		w.Header().Set("Content-Type", "text/plain")
@@ -71,6 +71,9 @@ func CreatePortalPage(w http.ResponseWriter, r *http.Request) {
 		"Languages":        languages,
 		"Previous":         T("previous_word"),
 		"More":             T("more_word"),
+		"BootstrapCSS":     LoadResource(Stylesheet, "bootstrap.min.css"),
+		"CenoCSS":          LoadResource(Stylesheet, "ceno.css"),
+		"PortalCSS":        LoadResource(Stylesheet, "portal.css"),
 		"CenoPortalModule": module,
 	})
 }
