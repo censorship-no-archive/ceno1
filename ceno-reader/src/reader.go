@@ -165,24 +165,10 @@ func insertHandler(w http.ResponseWriter, r *http.Request) {
         fmt.Println(feedErr)
         return
     }
-    marshalledFeeds, marshalError := json.Marshal(map[string]interface{} {
-        "version": 1.0,
-        "feeds": feeds
-    })
-    if marshalError != nil {
-        fmt.Println("Couldn't marshal array of feeds")
-        fmt.Println(marshalError)
+    writeFeedsErr := writeFeeds(feeds)
+    if writeFeedsErr != nil {
+        fmt.Println(writeFeedsErr)
         return
-    }
-    feedsInsertStatus := InsertFreenet(FeedsListIdentifier, marshalledFeeds)
-    if feedsInsertedStatus == Success {
-        feedWriteErr := ioutil.WriteFile(FeedsJsonFile, marshalledFeeds, os.ModePerm)
-        if feedsWriteErr != nil {
-            fmt.Println("Couldn't write " + FeedsJsonFile)
-            fmt.Println(writeErr)
-        }
-    } else {
-        fmt.Println("Failed to insert feeds list into Freenet")
     }
     for _, feed := range feeds {
         items, itemsError := GetItems(DBConnection, feed.Url)
@@ -190,23 +176,77 @@ func insertHandler(w http.ResponseWriter, r *http.Request) {
             fmt.Println("Couldn't get items for " + feed.Url)
             fmt.Println(itemsError)
         } else {
-            marshalled, marshalErr := json.Marshal(map[string]interface{}{
-                "version": 1.0,
-                "items": items,
-            })
-            if marshalErr != nil {
-                fmt.Println("Couldn't marshal items for " + feed.Url)
-                fmt.Println(marshalErr)
+            writeItemsErr := writeItems(items)
+            if writeItemsErr != nil {
+                fmt.Println("Could not write items for " + feed.Url)
             } else {
-                insertStatus := InsertFreenet(feed.Url, marshalled)
-                if insertStatus == Success {
-                    writeErr := writeItemsFile(feed.Url, items)
-                } else {
-                    fmt.Println("Could not insert items into Freenet")
-                }
+                fmt.Println("Success!")
             }
         }
     }
+}
+
+/**
+ * Write information about feeds being followed.
+ * Try to insert JSON containing this information to Freenet and, only if that succeeds,
+ * write the JSON to a file for distribution with the client.
+ * @param feeds - Information about the feeds being followed
+ */
+func writeFeeds(feeds []Feed) error {
+    marshalledFeeds, marshalError := json.Marshal(map[string]interface{} {
+        "version": 1.0,
+        "feeds": feeds
+    })
+    if marshalError != nil {
+        fmt.Println("Couldn't marshal array of feeds")
+        fmt.Println(marshalError)
+        return marshalError
+    }
+    feedsInsertStatus := InsertFreenet(FeedsListIdentifier, marshalledFeeds)
+    if feedsInsertedStatus == Success {
+        feedWriteErr := ioutil.WriteFile(FeedsJsonFile, marshalledFeeds, os.ModePerm)
+        if feedsWriteErr != nil {
+            fmt.Println("Couldn't write " + FeedsJsonFile)
+            fmt.Println(writeErr)
+            return writeErr
+        }
+    } else {
+        fmt.Println("Failed to insert feeds list into Freenet")
+        return errors.New(T("insertion_fail_err"))
+    }
+    return nil
+}
+
+/**
+ * Write information about items received from a feed being followed.
+ * Try to insert JSON containing this information into Freenet and, only if that succeeds,
+ * write teh JSON to a file for distribution with the client.
+ * @param feedUrl - The URL of the feed from which the items were received
+ * @param items - Information about the items being followed
+ */
+func writeItems(feedUrl string, items []Item) error {
+    marshalled, marshalErr := json.Marshal(map[string]interface{}{
+        "version": 1.0,
+        "items": items,
+    })
+    if marshalErr != nil {
+        fmt.Println("Couldn't marshal items for " + feedUrl)
+        fmt.Println(marshalErr)
+        return marshalErr
+    }
+    insertStatus := InsertFreenet(feedUrl, marshalled)
+    if insertStatus == Success {
+        writeErr := writeItemsFile(feedUrl, items)
+        if writeErr != nil {
+            fmt.Println("Couldn't write item")
+            fmt.Println(writeErr)
+            return writeErr
+        }
+    } else {
+        fmt.Println("Could not insert items into Freenet")
+        return errors.New(T("insertion_fail_err"))
+    }
+    return nil
 }
 
 /**
