@@ -91,6 +91,7 @@ func followFeeds(requests chan SaveFeedRequest) {
 
 /**
  * Handle requests to have a new RSS or Atom feed followed.
+ * POST /follow {"url": string, "type": string, "charset": string}
  * @param {chan Feed} requests - A channel through which descriptions of feeds to be followed are received
  */
 func followHandler(requests chan SaveFeedRequest) func(http.ResponseWriter, *http.Request) {
@@ -106,17 +107,50 @@ func followHandler(requests chan SaveFeedRequest) func(http.ResponseWriter, *htt
 		if err := decoder.Decode(&feedInfo); err != nil {
 			fmt.Println("Error decoding JSON")
 			fmt.Println(err)
-			w.Write([]byte(T("minvalid_follow_req_rdr")))
+			w.Write([]byte(T("invalid_follow_req_rdr")))
 			return
 		}
-		fmt.Println("JSON decoded")
-		fmt.Println("Feed doesn't exist yet")
 		requests <- SaveFeedRequest{feedInfo, w}
 	}
 }
 
 /**
- * TODO - Write a handler for unfollowing feeds
+ * Handle requests to have an RSS or Atom feed unfollowed.
+ * DELETE /unfollow {"url": string}
+ */
+func unfollowHandler(w http.ResponseWriter, r *http.Request) {
+    if r.Method != "DELETE" {
+        w.Write([]byte(T("method_not_impl_rdr")))
+        return
+    }
+    deleteReq := DeleteFeedRequest{}
+    decoder := json.NewDecoder(r.Body)
+    err := decoder.Decode(&deleteReq)
+    if err != nil {
+        fmt.Println("Error decoding JSON")
+        fmt.Println(err)
+        w.Write([]byte(T("invalid_unfollow_req_rdr")))
+        return
+    }
+    deleteErr := DeleteFeed(DBConnection, deleteReq.Url)
+    if deleteErr != nil {
+        w.Write([]byte(T("feed_delete_err_rdr", map[string]interface{}{
+            "Error": deleteErr.Error(),
+        })))
+    } else {
+        w.Write([]byte(T("feed_delete_success_rdr")))
+    }
+}
+
+/**
+ * Handle a request to have JSON files describing feeds and articles generated and inserted into
+ * the distributed store being used.
+ */
+func insertHandler(w http.ResponseWriter, r *http.Request) {
+    w.Write([]byte("method_not_impl_rdr")) // TODO
+}
+
+/**
  * TODO - Periodically delete items from the DB that we won't see again
  */
 
@@ -149,8 +183,8 @@ func main() {
 	go followFeeds(requestNewFollow)
 	http.Handle("/", http.FileServer(http.Dir("./static")))
 	http.HandleFunc("/follow", followHandler(requestNewFollow))
-	http.HandleFunc("/portal", CreatePortalPage)
-	http.HandleFunc("/cenosite", CreateArticlePage)
+	http.HandleFunc("/unfollow", unfollowHandler)
+    http.HandleFunc("/insert", insertHandler)
 	fmt.Println(T("listening_msg_rdr", map[string]interface{}{"Port": Configuration.PortNumber}))
 	if err := http.ListenAndServe(Configuration.PortNumber, nil); err != nil {
 		panic(err)

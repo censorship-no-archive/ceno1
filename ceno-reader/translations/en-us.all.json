@@ -44,6 +44,18 @@
     "translation": "Got items from a feed {{.URL}} that is not being followed."
   },
   {
+    "id": "invalid_unfollow_req_rdr",
+    "translation": "Requests to unfollow a feed must be JSON containing a url field."
+  },
+  {
+    "id": "feed_delete_err_rdr",
+    "translation": "Encountered an error deleting feed. Error: {{.Error}}"
+  },
+  {
+    "id": "feed_delete_success_rdr",
+    "translation": "Successfully unfollowed feed."
+  },
+  {
     "id": "not_recognized_charset_chr",
     "translation": "Expected charset {{.Expect}}, but got {{.Actual}}."
   }

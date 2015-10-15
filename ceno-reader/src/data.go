@@ -61,3 +61,10 @@ type SaveFeedRequest struct {
 	FeedInfo Feed
 	W        http.ResponseWriter
 }
+
+/**
+ * JSON data expected in a request to have a feed unfollowed.
+ */
+type DeleteFeedRequest struct {
+    Url string `json:"url"`
+}
