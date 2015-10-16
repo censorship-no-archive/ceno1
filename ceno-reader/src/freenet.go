@@ -2,8 +2,8 @@ package main
 
 import (
 	"bytes"
+	"encoding/base64"
 	"net/http"
-	"time"
 )
 
 // Type covering `bool` to add more explanatory power than using bools
@@ -47,7 +47,9 @@ func InsertFreenet(bundleData []byte) RequestStatus {
  * @param url - The URL of the page to have bundled.
  */
 func GetBundle(url string) ([]byte, RequestStatus) {
-	response, err := http.Get(url)
+	b64Url := base64.StdEncoding.EncodeToString([]byte(url))
+	bundleUrl := Configuration.BundleServer + "/?url=" + b64Url
+	response, err := http.Get(bundleUrl)
 	if err != nil || response.StatusCode != STATUS_OK {
 		return nil, Failure
 	}

@@ -39,7 +39,7 @@ func itemFeedHandler(feed *rss.Feed, channel *rss.Channel, newItems []*rss.Item)
 		bundleData, bundleStatus := GetBundle(url)
 		if bundleStatus == Failure {
 			fmt.Println(T("bundle_fail_err", map[string]string{
-				"Url":   url,
+				"Url": url,
 			}))
 			continue
 		}
@@ -216,12 +216,12 @@ func insertHandler(w http.ResponseWriter, r *http.Request) {
 func writeFeeds(feeds []Feed) error {
 	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
 	marshalledFeeds, marshalError := json.Marshal(map[string]interface{}{
-		"url": FeedListIdentifier,
-        "created": time.Now().Format(time.UnixDate),
-        "bundle": map[string]interface{}{
-            "version": 1.0,
-		    "feeds":   feeds,
-        },
+		"url":     FeedsListIdentifier,
+		"created": time.Now().Format(time.UnixDate),
+		"bundle": map[string]interface{}{
+			"version": 1.0,
+			"feeds":   feeds,
+		},
 	})
 	if marshalError != nil {
 		fmt.Println("Couldn't marshal array of feeds")
@@ -253,12 +253,12 @@ func writeFeeds(feeds []Feed) error {
 func writeItems(feedUrl string, items []Item) error {
 	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
 	marshalled, marshalErr := json.Marshal(map[string]interface{}{
-        "url": feedUrl,
-        "created": time.Now().Format(time.UnixDate),
-        "bundle": map[string]interface{}{
-		    "version": 1.0,
-		    "items":   items,
-        },
+		"url":     feedUrl,
+		"created": time.Now().Format(time.UnixDate),
+		"bundle": map[string]interface{}{
+			"version": 1.0,
+			"items":   items,
+		},
 	})
 	if marshalErr != nil {
 		fmt.Println("Couldn't marshal items for " + feedUrl)
