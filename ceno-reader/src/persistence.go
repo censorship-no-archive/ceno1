@@ -14,15 +14,6 @@ import (
 	"time"
 )
 
-type Item struct {
-	Id        int
-	Title     string `json:"title"`
-	Url       string `json:"url"`
-	FeedUrl   string `json:"feedUrl"`
-	Authors   string `json:"authors"`
-	Published string `json:"published"`
-}
-
 const createFeedsTable = `create table if not exists feeds(
     id integer primary key,
     url varchar(255) unique,

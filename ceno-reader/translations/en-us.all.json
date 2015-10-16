@@ -62,5 +62,13 @@
   {
     "id": "insertion_fail_err",
     "translation": "Failed to insert feeds list into Freenet"
+  },
+  {
+    "id": "bundle_fail_err",
+    "translation": "Failed to created a bundle for {{.Url}}. Error: {{.Error}}"
+  },
+  {
+    "id": "insert_success_rdr",
+    "translation": "Successfully inserted a bundle for {{.Url}}."
   }
 ]

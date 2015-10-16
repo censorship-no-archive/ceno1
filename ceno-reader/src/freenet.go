@@ -43,8 +43,31 @@ func InsertFreenet(url string, bundle []byte) RequestStatus {
 	request.Header.Set("Content-Type", "application/json")
 	client := &http.Client{}
 	response, err3 := client.Do(request)
-	if err3 != nil || response.StatusCode != STATUS_OK {
+	if err3 != nil {
 		return Failure
 	}
+    defer response.Body.Close()
+    if response.StatusCode != STATUS_OK {
+        return Failure
+    }
 	return Success
+}
+
+/**
+ * Retrieve a bundle for a site from the Bundle Server by sending a GET
+ * request to /?url=<base64(url)>
+ * @param url - The URL of the page to have bundled.
+ */
+func GetBundle(url string) ([]byte, RequestStatus) {
+    response, err := http.Get(url)
+    if err != nil || response.StatusCode != STATUS_OK {
+        return nil, Failure
+    }
+    defer response.Body.Close()
+    output := make([]byte, MAX_BUNDLE_SIZE)
+    bytesRead, readErr := response.Body.Read(output)
+    if readErr != nil {
+        return nil, Failure
+    }
+    return output[:bytesRead], Success
 }

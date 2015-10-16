@@ -46,6 +46,19 @@ var FeedsJsonFile string = path.Join(JSON_FILE_DIR, "feeds.json")
 // A special identifier that can be used to find the top-level JSON file listing feeds
 const FeedsListIdentifier string = "MyFeeds.json"
 
+// Types for explicitly stating a number of bytes to allocate to something like
+// a byte array ([]byte).
+type ByteSize int
+const (
+    Bytes = 1
+    Kilobytes = 1024 * Bytes
+    Megabytes = 1024 * Kilobytes
+    Gigabytes = 1024 * Megabytes
+)
+
+// Maximum number of bytes we will allow for a bundle of a page
+const MAX_BUNDLE_SIZE ByteSize = 100 * Megabytes
+
 /**
  * Describes a feed, so that, when items of the feed are handled,
  * the appropriate functionality can be invoked.
@@ -59,6 +72,19 @@ type Feed struct {
 	LastPublished string `json:"lastPublished"`
 	LogoUrl       string `json:"logo"`
 	Latest        string `json:"latest"`
+}
+
+/**
+ * Describes an RSS or Atom item.  It only contains fields that overlap
+ * with both.
+ */
+type Item struct {
+	Id        int
+	Title     string `json:"title"`
+	Url       string `json:"url"`
+	FeedUrl   string `json:"feedUrl"`
+	Authors   string `json:"authors"`
+	Published string `json:"published"`
 }
 
 /**

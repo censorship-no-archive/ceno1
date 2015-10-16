@@ -33,14 +33,32 @@ func channelFeedHandler(feed *rss.Feed, newChannels []*rss.Channel) {
  */
 func itemFeedHandler(feed *rss.Feed, channel *rss.Channel, newItems []*rss.Item) {
 	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
-	// TODO - Before inserting items into the database, try to insert them into
-	// Freenet and get the key and identifier we will use.
 	fmt.Println("Feed URL is", feed.Url)
 	for _, item := range newItems {
-		saveErr := SaveItem(DBConnection, feed.Url, item)
-		if saveErr != nil {
-			fmt.Println(T("db_store_error_rdr", map[string]interface{}{"Error": saveErr.Error()}))
-		}
+        url := item.Links[0].Href
+        bundle, bundleErr := GetBundle(url)
+        if bundleErr != nil {
+            fmt.Println(T("bundle_fail_err", map[string]string{
+                "Url": url,
+                "Error": bundleErr.Error(),
+            }))
+            continue
+        }
+        inserted := InsertFreenet(url, bundle)
+        if inserted == Success {
+		    saveErr := SaveItem(DBConnection, feed.Url, item)
+		    if saveErr != nil {
+			    fmt.Println(T("db_store_error_rdr", map[string]string{
+                    "Error": saveErr.Error(),
+                }))
+		    } else {
+                fmt.Println(T("insert_success_rdr", map[string]string{
+                    "Url": url,
+                }))
+            }
+        } else {
+            fmt.Println(T("insertion_fail_err"))
+        }
 	}
 }
 

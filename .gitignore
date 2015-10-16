@@ -34,5 +34,6 @@ ceno-node/src/db/*
 
 ceno-node/test/db/*
 
+
 # Stupid OSX files
 .DS_Store
