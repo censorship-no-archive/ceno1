@@ -41,8 +41,10 @@ func reportInsertSuccess(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&insertReq)
 	if err != nil || len(insertReq.Url) == 0 || len(insertReq.Created) == 0 || len(insertReq.Bundle) == 0 {
+		fmt.Println("Error inserting bundle. Error:" + err.Error())
 		http.Error(w, err.Error(), BAD_REQUEST)
 	} else {
+		fmt.Println("Success!")
 		w.Write([]byte("okay"))
 	}
 }

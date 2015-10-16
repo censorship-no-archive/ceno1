@@ -3,6 +3,8 @@ package main
 import (
 	"bytes"
 	"encoding/base64"
+	"fmt"
+	"io"
 	"net/http"
 )
 
@@ -24,18 +26,27 @@ const STATUS_OK int = 200
  */
 func InsertFreenet(bundleData []byte) RequestStatus {
 	reader := bytes.NewReader(bundleData)
-	request, err1 := http.NewRequest("POST", Configuration.BundleInserter, reader)
+	insertUrl := Configuration.BundleInserter + "/insert"
+	fmt.Println("Bundle data")
+	fmt.Println(string(bundleData))
+	request, err1 := http.NewRequest("POST", insertUrl, reader)
 	if err1 != nil {
+		fmt.Println("Insert error")
+		fmt.Println(err1)
 		return Failure
 	}
 	request.Header.Set("Content-Type", "application/json")
 	client := &http.Client{}
 	response, err2 := client.Do(request)
 	if err2 != nil {
+		fmt.Println("Insert error")
+		fmt.Println(err2)
 		return Failure
 	}
 	defer response.Body.Close()
 	if response.StatusCode != STATUS_OK {
+		fmt.Println("Insert error")
+		fmt.Printf("Status code %d\n", response.StatusCode)
 		return Failure
 	}
 	return Success
@@ -51,12 +62,18 @@ func GetBundle(url string) ([]byte, RequestStatus) {
 	bundleUrl := Configuration.BundleServer + "/?url=" + b64Url
 	response, err := http.Get(bundleUrl)
 	if err != nil || response.StatusCode != STATUS_OK {
+		fmt.Printf("In GetBundle err = %s, status = %d\n", err.Error(), response.StatusCode)
+		return nil, Failure
+	}
+	output := make([]byte, MAX_BUNDLE_SIZE)
+	bytesRead, readErr := response.Body.Read(output)
+	// We will frequently get an EOF error reading to the end of the body,
+	// however the content of the body will be read into `output`.
+	if readErr != nil && readErr != io.EOF {
 		return nil, Failure
 	}
 	defer response.Body.Close()
-	output := make([]byte, MAX_BUNDLE_SIZE)
-	bytesRead, readErr := response.Body.Read(output)
-	if readErr != nil {
+	if bytesRead == 0 {
 		return nil, Failure
 	}
 	return output[:bytesRead], Success

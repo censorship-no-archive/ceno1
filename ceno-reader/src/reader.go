@@ -216,20 +216,25 @@ func insertHandler(w http.ResponseWriter, r *http.Request) {
 func writeFeeds(feeds []Feed) error {
 	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
 	marshalledFeeds, marshalError := json.Marshal(map[string]interface{}{
-		"url":     FeedsListIdentifier,
-		"created": time.Now().Format(time.UnixDate),
-		"bundle": map[string]interface{}{
-			"version": 1.0,
-			"feeds":   feeds,
-		},
+		"version": 1.0,
+		"feeds":   feeds,
 	})
 	if marshalError != nil {
 		fmt.Println("Couldn't marshal array of feeds")
 		fmt.Println(marshalError)
 		return marshalError
 	}
-	feedsInsertedStatus := InsertFreenet(marshalledFeeds)
+	// The bundle inserter expects the "bundle" field to be a string,
+	// so the JSON decoder used to decode the data below would return an error
+	// if it tried to also treat the bundle as the JSON that it is and decode that too.
+	bundleData, _ := json.Marshal(map[string]string{
+		"url":     FeedsListIdentifier,
+		"created": time.Now().Format(time.UnixDate),
+		"bundle":  fmt.Sprintf("%s", string(marshalledFeeds)),
+	})
+	feedsInsertedStatus := InsertFreenet(bundleData)
 	if feedsInsertedStatus == Success {
+		// We don't want to write the data that was sent to the BI. Just the feeds stuff.
 		feedWriteErr := ioutil.WriteFile(FeedsJsonFile, marshalledFeeds, os.ModePerm)
 		if feedWriteErr != nil {
 			fmt.Println("Couldn't write " + FeedsJsonFile)
@@ -253,21 +258,26 @@ func writeFeeds(feeds []Feed) error {
 func writeItems(feedUrl string, items []Item) error {
 	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
 	marshalled, marshalErr := json.Marshal(map[string]interface{}{
-		"url":     feedUrl,
-		"created": time.Now().Format(time.UnixDate),
-		"bundle": map[string]interface{}{
-			"version": 1.0,
-			"items":   items,
-		},
+		"version": 1.0,
+		"items":   items,
 	})
 	if marshalErr != nil {
 		fmt.Println("Couldn't marshal items for " + feedUrl)
 		fmt.Println(marshalErr)
 		return marshalErr
 	}
-	insertStatus := InsertFreenet(marshalled)
+	// The bundle inserter expects the "bundle" field to be a string,
+	// so the JSON decoder used to decode the data below would return an error
+	// if it tried to also treat the bundle as the JSON that it is and decode that too.
+	bundleData, _ := json.Marshal(map[string]string{
+		"url":     feedUrl,
+		"created": time.Now().Format(time.UnixDate),
+		"bundle":  fmt.Sprintf("%s", string(marshalled)),
+	})
+	insertStatus := InsertFreenet(bundleData)
 	if insertStatus == Success {
 		writeErr := writeItemsFile(feedUrl, marshalled)
+		// We don't want to write the data that was sent to the bundle inserter, just the items stuff.
 		if writeErr != nil {
 			fmt.Println("Couldn't write item")
 			fmt.Println(writeErr)
