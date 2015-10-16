@@ -10,15 +10,15 @@ public class Channel {
 	private String requestSSK;
 	private Long lastKnownEdition = 0L;
 
-	public Channel() {
+	public Channel() throws MalformedURLException {
 		this(null, null);
 	}
 
-	public Channel(String insertSSK) {
+	public Channel(String insertSSK) throws MalformedURLException {
 		this(insertSSK, null);
 	}
 
-	public Channel(String insertSSK, Long providedEdition) {
+	public Channel(String insertSSK, Long providedEdition) throws MalformedURLException {
 		if (insertSSK == null) {
 			FreenetURI[] channelKeyPair = CENOBridge.nodeInterface.generateKeyPair();
 			this.insertSSK = channelKeyPair[0].toString();
@@ -33,17 +33,10 @@ public class Channel {
 			return;
 		}
 
-		FreenetURI insertURI = null;
-		try {
-			insertURI = new FreenetURI(insertSSK);
-		} catch (MalformedURLException e) {
-			return;
-		}
+		FreenetURI insertURI = new FreenetURI(insertSSK);
 
-		if (providedEdition == null) {
-			if (insertURI.isUSK()) {
-				lastKnownEdition = insertURI.getEdition();
-			}
+		if (insertURI.isUSK()) {
+			this.lastKnownEdition = insertURI.getEdition();
 		}
 	}
 	

@@ -1,0 +1,146 @@
+package plugins.CENO.Bridge.Signaling;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.security.SecureRandom;
+
+import org.bouncycastle.crypto.AsymmetricBlockCipher;
+import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
+import org.bouncycastle.crypto.DataLengthException;
+import org.bouncycastle.crypto.InvalidCipherTextException;
+import org.bouncycastle.crypto.engines.AESEngine;
+import org.bouncycastle.crypto.engines.RSAEngine;
+import org.bouncycastle.crypto.generators.RSAKeyPairGenerator;
+import org.bouncycastle.crypto.modes.CBCBlockCipher;
+import org.bouncycastle.crypto.paddings.PKCS7Padding;
+import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
+import org.bouncycastle.crypto.params.KeyParameter;
+import org.bouncycastle.crypto.params.ParametersWithIV;
+import org.bouncycastle.crypto.params.RSAKeyGenerationParameters;
+import org.bouncycastle.crypto.params.RSAKeyParameters;
+
+import freenet.support.Logger;
+
+public class Crypto {
+	
+	private static final int ASYM_KEY_MODULUS_LENGTH = 4096;
+	private static final BigInteger ASYM_KEY_EXPONENT = new BigInteger("17", 10);
+	private static final int ASYM_KEY_CERTAINTY = 80;
+	
+	private SecureRandom srng;
+	
+	public Crypto() {
+		srng = new SecureRandom();
+	}
+	
+	public AsymmetricCipherKeyPair generateAsymKey() {
+		RSAKeyGenerationParameters kparams = new RSAKeyGenerationParameters(ASYM_KEY_EXPONENT, srng, ASYM_KEY_MODULUS_LENGTH, ASYM_KEY_CERTAINTY);
+		
+		RSAKeyPairGenerator kpg = new RSAKeyPairGenerator();
+		kpg.init(kparams);
+		
+		AsymmetricCipherKeyPair keypair = kpg.generateKeyPair();
+		
+		return keypair;
+	}
+	
+	public byte[] encryptMessage(byte[] signedMessage, String keyModulus, String keyExponent) {
+		//Make a new symmetric key for the message
+		byte[] aesKeyAndIV = new byte[32 + 16];
+		srng.nextBytes(aesKeyAndIV);
+
+		//Encrypt the message with the new symmetric key
+		PaddedBufferedBlockCipher aesCipher = new PaddedBufferedBlockCipher(new CBCBlockCipher(new AESEngine()), new PKCS7Padding());
+		KeyParameter aesKeyParameters = new KeyParameter(aesKeyAndIV, 16, 32);
+		ParametersWithIV aesParameters = new ParametersWithIV(aesKeyParameters, aesKeyAndIV, 0, 16);
+		aesCipher.init(true, aesParameters);
+
+		byte[] encryptedMessage = new byte[aesCipher.getOutputSize(signedMessage.length)];
+		int offset = aesCipher.processBytes(signedMessage, 0, signedMessage.length, encryptedMessage, 0);
+
+		try {
+			aesCipher.doFinal(encryptedMessage, offset);
+		} catch(InvalidCipherTextException e) {
+			Logger.error(this, "Failed to perform symmetric encryption on RTS data: " + e.getMessage(), e);
+			return null;
+		}
+
+		RSAKeyParameters recipientPublicKey = new RSAKeyParameters(false, new BigInteger(keyModulus, 32), new BigInteger(keyExponent, 32));
+		AsymmetricBlockCipher keyCipher = new RSAEngine();
+		keyCipher.init(true, recipientPublicKey);
+		byte[] encryptedAesParameters = null;
+		try {
+			encryptedAesParameters = keyCipher.processBlock(aesKeyAndIV, 0, aesKeyAndIV.length);
+		} catch(InvalidCipherTextException e) {
+			Logger.error(this, "Failed to perform asymmetric encryption on RTS symmetric key: " + e.getMessage(), e);
+			return null;
+		}
+
+		//Assemble the final message
+		byte[] rtsMessage = new byte[encryptedAesParameters.length + encryptedMessage.length];
+		System.arraycopy(encryptedAesParameters, 0, rtsMessage, 0, encryptedAesParameters.length);
+		System.arraycopy(encryptedMessage, 0, rtsMessage, encryptedAesParameters.length, encryptedMessage.length);
+
+		return rtsMessage;
+	}
+	
+	public byte[] decryptMessage(File rtsmessage, RSAKeyParameters privKey) throws IOException, InvalidCipherTextException {
+		// initialise our ciphers
+		AsymmetricBlockCipher deccipher = new RSAEngine();
+		deccipher.init(false, privKey);
+
+		PaddedBufferedBlockCipher aescipher = new PaddedBufferedBlockCipher(new CBCBlockCipher(new AESEngine()), new PKCS7Padding());
+
+		// first n bytes will be an encrypted RSA block containting the
+		// AES IV and Key. Read that.
+		byte[] encrypted_params = new byte[deccipher.getInputBlockSize()];
+		int read = 0;
+		FileInputStream fis = new FileInputStream(rtsmessage);
+		try {
+			while(read < encrypted_params.length) {
+				read += fis.read(encrypted_params, read, encrypted_params.length - read);
+				if(read < 0) break;
+			}
+
+			if(read < 0) {
+				fis.close();
+				throw new InvalidCipherTextException("RTS Message too short");
+			}
+
+			byte[] aes_iv_and_key = deccipher.processBlock(encrypted_params, 0, encrypted_params.length);
+
+			KeyParameter kp = new KeyParameter(aes_iv_and_key, aescipher.getBlockSize(), aes_iv_and_key.length - aescipher.getBlockSize());
+			ParametersWithIV kpiv = new ParametersWithIV(kp, aes_iv_and_key, 0, aescipher.getBlockSize());
+			try {
+				aescipher.init(false, kpiv);
+			} catch (IllegalArgumentException iae) {
+				fis.close();
+				throw new InvalidCipherTextException(iae.getMessage());
+			}
+
+			byte[] plaintext = new byte[aescipher.getOutputSize((int)rtsmessage.length() - read)];
+
+			int ptbytes = 0;
+			while(read < rtsmessage.length()) {
+				byte[] buf = new byte[(int)rtsmessage.length() - read];
+
+				int thisread = fis.read(buf, 0, (int)rtsmessage.length() - read);
+				ptbytes += aescipher.processBytes(buf, 0, thisread, plaintext, ptbytes);
+				read += thisread;
+			}
+
+			try {
+				aescipher.doFinal(plaintext, ptbytes);
+			} catch (DataLengthException dle) {
+				throw new InvalidCipherTextException(dle.getMessage());
+			}
+
+			return plaintext;
+		} finally {
+			fis.close();
+		}
+	}
+
+}

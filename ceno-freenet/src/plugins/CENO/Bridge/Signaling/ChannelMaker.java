@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.concurrent.TimeUnit;
 
+import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
+import org.bouncycastle.crypto.params.RSAKeyParameters;
+
 import plugins.CENO.CENOErrCode;
 import plugins.CENO.CENOException;
 import plugins.CENO.Bridge.CENOBridge;
@@ -22,24 +25,22 @@ import freenet.support.io.ResumeFailedException;
 
 public class ChannelMaker {
 	private String bridgeInsertURI;
-	private String privateRSA;
-	private String publicRSA;
+	private AsymmetricCipherKeyPair asymKeyPair;
 
 	static final long KSK_POLLING_PAUSE = TimeUnit.MINUTES.toMillis(4);
 
-	public ChannelMaker(String insertURI, String[] RSA) throws CENOException {
+	public ChannelMaker(String insertURI, AsymmetricCipherKeyPair asymKeyPair) throws CENOException {
 		this.bridgeInsertURI = insertURI;
-		this.privateRSA = RSA[0];
-		this.publicRSA = RSA[1];
+		this.asymKeyPair = asymKeyPair;
 
 		Puzzle puzzle = generatePuzzle();
 		try {
-			ChannelMakerAnnouncer channelAnnouncer = new ChannelMakerAnnouncer(bridgeInsertURI, publicRSA, puzzle.getQuestion());
+			ChannelMakerAnnouncer channelAnnouncer = new ChannelMakerAnnouncer(bridgeInsertURI, (RSAKeyParameters) asymKeyPair.getPublic(), puzzle.getQuestion());
 			channelAnnouncer.doAnnounce();
 		} catch (IOException e) {
-			throw new CENOException(CENOErrCode.RR, "IOException in announcement channel creation");
+			throw new CENOException(CENOErrCode.RR, "IOException in channel announcer page creation");
 		} catch (InsertException e) {
-			throw new CENOException(CENOErrCode.RR, "Could not insert announcement channel");
+			throw new CENOException(CENOErrCode.RR, "Could not insert channel announcer page");
 		}
 
 		try {
@@ -58,19 +59,20 @@ public class ChannelMaker {
 
 	private class ChannelMakerAnnouncer {
 		private String bridgeInsertURI;
-		private String publicRSA;
+		private RSAKeyParameters pubAsymKey;
 		private String puzzleQuestion;
 
 
-		public ChannelMakerAnnouncer(String bridgeInsertURI, String publicRSA, String puzzleQuestion) {
+		public ChannelMakerAnnouncer(String bridgeInsertURI, RSAKeyParameters pubAsymKey, String puzzleQuestion) {
 			this.bridgeInsertURI = bridgeInsertURI;
-			this.publicRSA = publicRSA;
+			this.pubAsymKey = pubAsymKey;
 			this.puzzleQuestion = puzzleQuestion;
 		}
 
 		public void doAnnounce() throws IOException, InsertException {
 			SimpleFieldSet sfs = new SimpleFieldSet(false, true);
-			sfs.putOverwrite("publicRSA", publicRSA);
+			sfs.putOverwrite("asymkey.modulus", pubAsymKey.getModulus().toString(32));
+			sfs.putOverwrite("asymkey.pubexponent", pubAsymKey.getExponent().toString(32));
 			sfs.putOverwrite("question", puzzleQuestion);
 
 			FreenetURI insertURIconfig = new FreenetURI(bridgeInsertURI);
@@ -141,6 +143,8 @@ public class ChannelMaker {
 	}
 
 	class AnnouncementInsertionCB implements ClientPutCallback {
+		
+		private FreenetURI uri;
 
 		public AnnouncementInsertionCB() {
 		}
@@ -156,6 +160,7 @@ public class ChannelMaker {
 
 		@Override
 		public void onGeneratedURI(FreenetURI uri, BaseClientPutter state) {
+			this.uri = uri;
 		}
 
 		@Override
@@ -168,6 +173,7 @@ public class ChannelMaker {
 
 		@Override
 		public void onSuccess(BaseClientPutter state) {
+			Logger.normal(ChannelMaker.class, "Successfully inserted Channel Maker Announcer page with URI: " + uri);
 		}
 
 		@Override

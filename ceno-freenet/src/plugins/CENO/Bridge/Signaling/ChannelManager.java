@@ -1,5 +1,6 @@
 package plugins.CENO.Bridge.Signaling;
 
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,6 +49,9 @@ public class ChannelManager {
 			// TODO Log this
 			e.printStackTrace();
 			return;
+		} catch (MalformedURLException e) {
+			// TODO Log this
+			e.printStackTrace();
 		}
 		addChannel(channel);
 	}
@@ -61,7 +65,7 @@ public class ChannelManager {
 	}
 
 	private void subscribeToChannel(Channel channel) {
-		//TODO Subscribe to channel's USK
+		channel.subscribeToChannelUpdates();
 	}
 
 
