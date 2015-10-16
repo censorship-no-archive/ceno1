@@ -7,8 +7,17 @@ SOURCE_FILES="src/reader.go \
     src/persistence.go \
     src/freenet.go"
 
+MOCK_BUNDLE_SERVER_SOURCES="tests/bundleserver.go"
+
+MOCK_BUNDLE_INSERTER_SOURCES="tests/bundleinserter.go"
+
 echo "Formatting go files."
+
 for file in `ls src/*.go`; do
+  go fmt $file;
+done
+
+for file in `ls tests/*.go`; do
   go fmt $file;
 done
 
@@ -29,5 +38,6 @@ echo ""
 #$GOPATH/bin/goi18n *.json
 #cd ..
 
+go build $MOCK_BUNDLE_SERVER_SOURCES && echo "Compiled mock bundle server successfully."
+go build $MOCK_BUNDLE_INSERTER_SOURCES && echo "Compiled mock bundle inserter successfully."
 go build $SOURCE_FILES && echo "Compiled reader successfully."
-
