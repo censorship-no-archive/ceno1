@@ -35,30 +35,29 @@ func itemFeedHandler(feed *rss.Feed, channel *rss.Channel, newItems []*rss.Item)
 	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
 	fmt.Println("Feed URL is", feed.Url)
 	for _, item := range newItems {
-        url := item.Links[0].Href
-        bundle, bundleErr := GetBundle(url)
-        if bundleErr != nil {
-            fmt.Println(T("bundle_fail_err", map[string]string{
-                "Url": url,
-                "Error": bundleErr.Error(),
-            }))
-            continue
-        }
-        inserted := InsertFreenet(url, bundle)
-        if inserted == Success {
-		    saveErr := SaveItem(DBConnection, feed.Url, item)
-		    if saveErr != nil {
-			    fmt.Println(T("db_store_error_rdr", map[string]string{
-                    "Error": saveErr.Error(),
-                }))
-		    } else {
-                fmt.Println(T("insert_success_rdr", map[string]string{
-                    "Url": url,
-                }))
-            }
-        } else {
-            fmt.Println(T("insertion_fail_err"))
-        }
+		url := item.Links[0].Href
+		bundleData, bundleStatus := GetBundle(url)
+		if bundleStatus == Failure {
+			fmt.Println(T("bundle_fail_err", map[string]string{
+				"Url":   url,
+			}))
+			continue
+		}
+		inserted := InsertFreenet(bundleData)
+		if inserted == Success {
+			saveErr := SaveItem(DBConnection, feed.Url, item)
+			if saveErr != nil {
+				fmt.Println(T("db_store_error_rdr", map[string]string{
+					"Error": saveErr.Error(),
+				}))
+			} else {
+				fmt.Println(T("insert_success_rdr", map[string]string{
+					"Url": url,
+				}))
+			}
+		} else {
+			fmt.Println(T("insertion_fail_err"))
+		}
 	}
 }
 
@@ -217,15 +216,19 @@ func insertHandler(w http.ResponseWriter, r *http.Request) {
 func writeFeeds(feeds []Feed) error {
 	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
 	marshalledFeeds, marshalError := json.Marshal(map[string]interface{}{
-		"version": 1.0,
-		"feeds":   feeds,
+		"url": FeedListIdentifier,
+        "created": time.Now().Format(time.UnixDate),
+        "bundle": map[string]interface{}{
+            "version": 1.0,
+		    "feeds":   feeds,
+        },
 	})
 	if marshalError != nil {
 		fmt.Println("Couldn't marshal array of feeds")
 		fmt.Println(marshalError)
 		return marshalError
 	}
-	feedsInsertedStatus := InsertFreenet(FeedsListIdentifier, marshalledFeeds)
+	feedsInsertedStatus := InsertFreenet(marshalledFeeds)
 	if feedsInsertedStatus == Success {
 		feedWriteErr := ioutil.WriteFile(FeedsJsonFile, marshalledFeeds, os.ModePerm)
 		if feedWriteErr != nil {
@@ -250,15 +253,19 @@ func writeFeeds(feeds []Feed) error {
 func writeItems(feedUrl string, items []Item) error {
 	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
 	marshalled, marshalErr := json.Marshal(map[string]interface{}{
-		"version": 1.0,
-		"items":   items,
+        "url": feedUrl,
+        "created": time.Now().Format(time.UnixDate),
+        "bundle": map[string]interface{}{
+		    "version": 1.0,
+		    "items":   items,
+        },
 	})
 	if marshalErr != nil {
 		fmt.Println("Couldn't marshal items for " + feedUrl)
 		fmt.Println(marshalErr)
 		return marshalErr
 	}
-	insertStatus := InsertFreenet(feedUrl, marshalled)
+	insertStatus := InsertFreenet(marshalled)
 	if insertStatus == Success {
 		writeErr := writeItemsFile(feedUrl, marshalled)
 		if writeErr != nil {

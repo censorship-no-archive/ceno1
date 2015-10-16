@@ -49,11 +49,12 @@ const FeedsListIdentifier string = "MyFeeds.json"
 // Types for explicitly stating a number of bytes to allocate to something like
 // a byte array ([]byte).
 type ByteSize int
+
 const (
-    Bytes = 1
-    Kilobytes = 1024 * Bytes
-    Megabytes = 1024 * Kilobytes
-    Gigabytes = 1024 * Megabytes
+	Bytes     = 1
+	Kilobytes = 1024 * Bytes
+	Megabytes = 1024 * Kilobytes
+	Gigabytes = 1024 * Megabytes
 )
 
 // Maximum number of bytes we will allow for a bundle of a page

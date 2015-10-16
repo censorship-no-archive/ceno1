@@ -65,7 +65,7 @@
   },
   {
     "id": "bundle_fail_err",
-    "translation": "Failed to created a bundle for {{.Url}}. Error: {{.Error}}"
+    "translation": "Failed to created a bundle for {{.Url}}."
   },
   {
     "id": "insert_success_rdr",
