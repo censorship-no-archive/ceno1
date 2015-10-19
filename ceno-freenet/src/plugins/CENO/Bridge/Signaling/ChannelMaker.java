@@ -1,10 +1,12 @@
 package plugins.CENO.Bridge.Signaling;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.concurrent.TimeUnit;
 
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
+import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
 
 import plugins.CENO.CENOErrCode;
@@ -26,14 +28,15 @@ import freenet.support.io.ResumeFailedException;
 public class ChannelMaker {
 	private String bridgeInsertURI;
 	private AsymmetricCipherKeyPair asymKeyPair;
+	ChannelMakerListener channelListener;
 
-	static final long KSK_POLLING_PAUSE = TimeUnit.MINUTES.toMillis(4);
+	static final long KSK_POLLING_PAUSE = TimeUnit.MINUTES.toMillis(12);
 
 	public ChannelMaker(String insertURI, AsymmetricCipherKeyPair asymKeyPair) throws CENOException {
 		this.bridgeInsertURI = insertURI;
 		this.asymKeyPair = asymKeyPair;
 
-		Puzzle puzzle = generatePuzzle();
+		Puzzle puzzle = new Puzzle();
 		try {
 			ChannelMakerAnnouncer channelAnnouncer = new ChannelMakerAnnouncer(bridgeInsertURI, (RSAKeyParameters) asymKeyPair.getPublic(), puzzle.getQuestion());
 			channelAnnouncer.doAnnounce();
@@ -44,17 +47,12 @@ public class ChannelMaker {
 		}
 
 		try {
-			ChannelMakerListener channelListener = new ChannelMakerListener(puzzle.getAnswer());
+			channelListener = new ChannelMakerListener(puzzle.getAnswer());
 			Thread listenerThread = new Thread(channelListener);
 			listenerThread.start();
 		} catch (MalformedURLException e) {
 			throw new CENOException(CENOErrCode.RR, "Could not start Channel Maker Listener thread.");
 		}
-	}
-
-	private Puzzle generatePuzzle() {
-		Puzzle puzzle = new Puzzle();
-		return puzzle;
 	}
 
 	private class ChannelMakerAnnouncer {
@@ -78,13 +76,21 @@ public class ChannelMaker {
 			FreenetURI insertURIconfig = new FreenetURI(bridgeInsertURI);
 			FreenetURI announcementURI = new FreenetURI("USK", CENOBridge.announcerPath, insertURIconfig.getRoutingKey(), insertURIconfig.getCryptoKey(), insertURIconfig.getExtra());
 
+			Logger.normal(ChannelMaker.class, "Inserting announcement freesite with USK: " + announcementURI.toASCIIString());
 			CENOBridge.nodeInterface.insertFreesite(announcementURI, "default.html", sfs.toOrderedString(), new AnnouncementInsertionCB());
+		}
+	}
+	
+	public void stopListener() {
+		if (channelListener != null) {
+			channelListener.continueLoop = false;
 		}
 	}
 
 	private class ChannelMakerListener implements Runnable {
 		private String puzzleAnswer;
 		private FreenetURI channelMakingKSK;
+		private long lastHandledReq = 0L;
 
 		private volatile boolean continueLoop;
 
@@ -108,9 +114,20 @@ public class ChannelMaker {
 					}
 
 					if (kskContent != null && kskContent.getMimeType() == "text/html") {
-						Logger.normal(ChannelMakerListener.class, "A client has posted information for establishing a signaling channel");
+						try {
+							Crypto.decryptMessage(kskContent.asByteArray(), (RSAKeyParameters) asymKeyPair.getPrivate());
+						} catch (InvalidCipherTextException e) {
+							Logger.warning(ChannelMakerListener.class, "Could not get byte array from users' KSK response");
+						} catch (Exception e) {
+							Logger.warning(ChannelMakerListener.class, "Error while decrypting users' KSK response: " + e.getMessage());
+						}
 						SimpleFieldSet sfs = new SimpleFieldSet(kskContent.toString(), false, true, true);
-						ChannelManager.getInstance().addChannel(sfs);
+						Long reqID = sfs.getLong("id", -1L);
+						if (reqID > 0 && reqID != lastHandledReq) {
+							Logger.normal(ChannelMakerListener.class, "A client has posted information for establishing a signaling channel with ID: " + reqID);
+							ChannelManager.getInstance().addChannel(sfs);
+							lastHandledReq = reqID;
+						}
 					}
 					// Pause the looping thread
 					Thread.sleep(KSK_POLLING_PAUSE);
