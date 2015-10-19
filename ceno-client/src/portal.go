@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/nicksnyder/go-i18n/i18n"
 	"html/template"
 	"net/http"
@@ -41,11 +40,11 @@ func CreatePortalPage(w http.ResponseWriter, r *http.Request) {
 	languages := [...]string{"english", "french"}
 	moduleData, feedsErr := initModuleWithFeeds()
 	if feedsErr != nil {
-        // We could end up with a decode error here, but it's not quite practical to ditinguish.
-        HandleCCError(ERR_NO_FEEDS_FILE, feedsErr.Error(), ErrorState{
-            "responseWriter": w,
-            "request":        r,
-        })
+		// We could end up with a decode error here, but it's not quite practical to ditinguish.
+		HandleCCError(ERR_NO_FEEDS_FILE, feedsErr.Error(), ErrorState{
+			"responseWriter": w,
+			"request":        r,
+		})
 		return
 	}
 	moduleData["Languages"] = languages
@@ -56,11 +55,11 @@ func CreatePortalPage(w http.ResponseWriter, r *http.Request) {
 	moduleDataMarshalled, err := json.Marshal(moduleData)
 	var module string
 	if err != nil {
-        HandleCCError(ERR_CORRUPT_JSON, err.Error(), ErrorState{
-            "responseWriter": w,
-            "request":        r,
-        })
-        return
+		HandleCCError(ERR_CORRUPT_JSON, err.Error(), ErrorState{
+			"responseWriter": w,
+			"request":        r,
+		})
+		return
 	}
 	module = string(moduleDataMarshalled[:])
 	t.Execute(w, map[string]interface{}{

@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"github.com/nicksnyder/go-i18n/i18n"
 	"html/template"
 	"net/http"
@@ -54,24 +53,24 @@ func CreateArticlePage(w http.ResponseWriter, r *http.Request) {
 	// TODO - Grab language data dynamically
 	languages := [...]string{"english", "french"}
 	moduleData, articlesErr := initModuleWithArticles(feedUrl)
-    if articlesErr != nil {
-        HandleCCError(ERR_NO_ARTICLES_FILE, articlesErr.Error(), ErrorState{
-            "responseWriter": w,
-            "request":        r,
-        })
-        return
-    }
+	if articlesErr != nil {
+		HandleCCError(ERR_NO_ARTICLES_FILE, articlesErr.Error(), ErrorState{
+			"responseWriter": w,
+			"request":        r,
+		})
+		return
+	}
 	moduleData["Languages"] = languages
 	moduleData["authorWord"] = T("authors_word")
 	moduleData["publishedWord"] = T("published_word")
 	marshalled, err := json.Marshal(moduleData)
 	var module string
 	if err != nil {
-        handleCCError(ERR_CORRUPT_JSON, err.Error(), ErrorState{
-            "responseWriter": w,
-            "request":        r,
-        })
-        return
+		HandleCCError(ERR_CORRUPT_JSON, err.Error(), ErrorState{
+			"responseWriter": w,
+			"request":        r,
+		})
+		return
 	}
 	module = string(marshalled[:])
 	t.Execute(w, map[string]interface{}{
