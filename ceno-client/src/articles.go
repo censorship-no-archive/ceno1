@@ -48,33 +48,32 @@ func initModuleWithArticles(feedUrl string) (map[string]interface{}, error) {
  */
 func CreateArticlePage(w http.ResponseWriter, r *http.Request) {
 	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
-	t, err := template.ParseFiles(path.Join(".", "views", "articles.html"))
-	if err != nil {
-		// TODO - Create a more useful error page to use
-		w.Header().Set("Content-Type", "text/plain")
-		w.Write([]byte("Something went wrong!"))
-		return
-	}
+	t, _ := template.ParseFiles(path.Join(".", "views", "articles.html"))
 	// TODO - Extract feed url from URL query string
 	feedUrl := ""
 	// TODO - Grab language data dynamically
 	languages := [...]string{"english", "french"}
 	moduleData, articlesErr := initModuleWithArticles(feedUrl)
+    if articlesErr != nil {
+        HandleCCError(ERR_NO_ARTICLES_FILE, articlesErr.Error(), ErrorState{
+            "responseWriter": w,
+            "request":        r,
+        })
+        return
+    }
 	moduleData["Languages"] = languages
 	moduleData["authorWord"] = T("authors_word")
 	moduleData["publishedWord"] = T("published_word")
 	marshalled, err := json.Marshal(moduleData)
 	var module string
-	// TODO - Serve an error
-	if articlesErr != nil {
-		module = ""
-		fmt.Println(articlesErr)
-	} else if err != nil {
-		module = ""
-		fmt.Println(err)
-	} else {
-		module = string(marshalled[:])
+	if err != nil {
+        handleCCError(ERR_CORRUPT_JSON, err.Error(), ErrorState{
+            "responseWriter": w,
+            "request":        r,
+        })
+        return
 	}
+	module = string(marshalled[:])
 	t.Execute(w, map[string]interface{}{
 		"Languages":        languages,
 		"Previous":         T("previous_word"),

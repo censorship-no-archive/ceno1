@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/nicksnyder/go-i18n/i18n"
 	"html/template"
 	"net/http"
@@ -36,15 +37,17 @@ func initModuleWithFeeds() (map[string]interface{}, error) {
  */
 func CreatePortalPage(w http.ResponseWriter, r *http.Request) {
 	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
-	t, err := template.ParseFiles(path.Join(".", "views", "feeds.html"))
-	if err != nil {
-		// Serve some kind of error message
-		w.Header().Set("Content-Type", "text/plain")
-		w.Write([]byte("Something went wrong!"))
-		return
-	}
+	t, _ := template.ParseFiles(path.Join(".", "views", "feeds.html"))
 	languages := [...]string{"english", "french"}
 	moduleData, feedsErr := initModuleWithFeeds()
+	if feedsErr != nil {
+        // We could end up with a decode error here, but it's not quite practical to ditinguish.
+        HandleCCError(ERR_NO_FEEDS_FILE, feedsErr.Error(), ErrorState{
+            "responseWriter": w,
+            "request":        r,
+        })
+		return
+	}
 	moduleData["Languages"] = languages
 	moduleData["Page"] = "portal"
 	moduleData["articles"] = T("articles_word")
@@ -52,14 +55,14 @@ func CreatePortalPage(w http.ResponseWriter, r *http.Request) {
 	moduleData["latest"] = T("latest_word")
 	moduleDataMarshalled, err := json.Marshal(moduleData)
 	var module string
-	// TODO - Serve an error
-	if feedsErr != nil {
-		module = ""
-	} else if err != nil {
-		module = ""
-	} else {
-		module = string(moduleDataMarshalled[:])
+	if err != nil {
+        HandleCCError(ERR_CORRUPT_JSON, err.Error(), ErrorState{
+            "responseWriter": w,
+            "request":        r,
+        })
+        return
 	}
+	module = string(moduleDataMarshalled[:])
 	t.Execute(w, map[string]interface{}{
 		"Languages":        languages,
 		"Previous":         T("previous_word"),

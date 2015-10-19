@@ -13,6 +13,9 @@ import (
 const ( // CC errors
 	ERR_NO_CONFIG              = 1100
 	ERR_MALFORMED_URL          = 1101
+    ERR_NO_FEEDS_FILE          = 1102
+    ERR_NO_ARTICLES_FILE       = 1103
+    ERR_CORRUPT_JSON           = 1104
 	ERR_NO_CONNECT_LCS         = 1200
 	ERR_MALFORMED_LCS_RESPONSE = 1201
 	ERR_FROM_LCS               = 1202
@@ -46,6 +49,9 @@ type ErrorHandler func(ErrorState) bool
 var errorAdvice = map[ErrorCode]string{
 	ERR_NO_CONFIG:              "missing_config_err",
 	ERR_MALFORMED_URL:          "malformed_url_err",
+    ERR_NO_FEEDS_FILE:          "no_feeds_file_err",
+    ERR_NO_ARTICLES_FILE:       "no_articles_file_err",
+    ERR_CORRUPT_JSON:           "corrupt_json_err",
 	ERR_NO_CONNECT_LCS:         "agent_communication_err",
 	ERR_MALFORMED_LCS_RESPONSE: "contact_devs_err",
 	ERR_FROM_LCS:               "consult_readme_err",
@@ -68,6 +74,9 @@ var errorAdvice = map[ErrorCode]string{
 var ccErrorHandlers = map[ErrorCode]func(ErrorState) bool{
 	ERR_NO_CONFIG:              downloadConfigAndServeError,
 	ERR_MALFORMED_URL:          serveError,
+    ERR_NO_FEEDS_FILE:          downloadFeedsFileAndServeError,
+    ERR_NO_ARTICLES_FILE:       downloadArticlesFileAndServeError,
+    ERR_CORRUPT_JSON:           serveError,
 	ERR_NO_CONNECT_LCS:         serveError,
 	ERR_MALFORMED_LCS_RESPONSE: ReportDecodeError,
 	ERR_FROM_LCS:               handleLCSErrorReport,
@@ -114,6 +123,24 @@ func serveError(state ErrorState) bool {
 func downloadConfigAndServeError(state ErrorState) bool {
 	// temporary
 	return serveError(state)
+}
+
+/**
+ * Download and save the latest RSS feeds list file and serve an error saying this is happening.
+ * @param {ErrorState} state - Must contain HTTP request and response objects and error message
+ */
+func downloadFeedsFileAndServeError(state ErrorState bool {
+    // temporary
+    return serveError(state)
+}
+
+/**
+ * Download and save an articles list file and serve an error saying this is happening. 
+ * @param {ErrorState} state - Must contain HTTP request and response objects and error message
+ */
+func downloadArticlesFileAndServeError(state ErrorState) bool {
+    // temporary
+    return serveError(state)
 }
 
 /**

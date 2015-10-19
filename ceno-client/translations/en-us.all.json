@@ -20,6 +20,18 @@
     "translation": "Refer to the README to find detailed instructions about how to handle the specific error you have been presented with."
   },
   {
+    "id": "no_feeds_file_err",
+    "translation": "No feeds file was found to get a list of available RSS/Atom feeds from."
+  },
+  {
+    "id": "no_articles_file_err",
+    "translation": "No article listing file could be found for the feed you tried to access."
+  },
+  {
+    "id": "corrupt_json_err",
+    "translation": "Tried to decode JSON that was found to be corrupt."
+  },
+  {
     "id": "contact_devs_err",
     "translation": "Email ceno@equalit.ie with the details of the error that has occurred."
   },
