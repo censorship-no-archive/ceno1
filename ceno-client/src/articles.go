@@ -1,8 +1,8 @@
 package main
 
 import (
+	"encoding/base64"
 	"encoding/json"
-    "encoding/base64"
 	"fmt"
 	"github.com/nicksnyder/go-i18n/i18n"
 	"html/template"
@@ -16,9 +16,9 @@ import (
  * are named like `json-files/<base64(feed's url)>.json`
  * @param feedUrl - The URL of the RSS/Atom feed to retrieve information about articles from
  */
-func articlesFilename(feedUrl string) {
-    b64FeedUrl := base64.StdEncoding.EncodeToString(feedUrl)
-    return path.Join(".", "json-files", b64FeedUrl + ".json")
+func articlesFilename(feedUrl string) string {
+	b64FeedUrl := base64.StdEncoding.EncodeToString([]byte(feedUrl))
+	return path.Join(".", "json-files", b64FeedUrl+".json")
 }
 
 /**
@@ -27,17 +27,17 @@ func articlesFilename(feedUrl string) {
  * @return a map with a "feeds" key and corresponding array of Feed structs and an optional error
  */
 func initModuleWithArticles(feedUrl string) (map[string]interface{}, error) {
-    articleInfoFile, openErr := os.Open(articlesFilename(feedUrl))
-    if openErr != nil {
-        return nil, openErr
-    }
-    defer articleInfoFile.Close()
-    articles := make([]item, 1)
-    decoder := json.NewDecoder(articleInfoFile)
-    decodeErr := decoder.Decode(&articles)
-    if decodeErr != nil {
-        return nil, decodeErr
-    }
+	articleInfoFile, openErr := os.Open(articlesFilename(feedUrl))
+	if openErr != nil {
+		return nil, openErr
+	}
+	defer articleInfoFile.Close()
+	articles := make([]Item, 1)
+	decoder := json.NewDecoder(articleInfoFile)
+	decodeErr := decoder.Decode(&articles)
+	if decodeErr != nil {
+		return nil, decodeErr
+	}
 	mapping := make(map[string]interface{})
 	mapping["articles"] = articles
 	return mapping, nil
@@ -61,7 +61,6 @@ func CreateArticlePage(w http.ResponseWriter, r *http.Request) {
 	languages := [...]string{"english", "french"}
 	moduleData, articlesErr := initModuleWithArticles(feedUrl)
 	moduleData["Languages"] = languages
-	moduleData["articles"] = articles
 	moduleData["authorWord"] = T("authors_word")
 	moduleData["publishedWord"] = T("published_word")
 	marshalled, err := json.Marshal(moduleData)

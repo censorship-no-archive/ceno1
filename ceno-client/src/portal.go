@@ -7,23 +7,24 @@ import (
 	"net/http"
 	"os"
 	"path"
+)
 
 /**
  * Get information about feeds to be injected into the portal page.
  * @return a map with a "feeds" key and corresponding array of Feed structs and an optional error
  */
 func initModuleWithFeeds() (map[string]interface{}, error) {
-    feedInfoFile, openErr := os.Open(FEED_LIST_FILENAME)
-    if openErr != nil {
-        return nil, openErr
-    }
-    defer feedInfoFile.Close()
-    decoder := json.NewDecoder(reader)
-    feedInfo := FeedInfo{}
-    decodeErr := decoder.Decode(&feedInfo)
-    if decodeErr != nil {
-        return nil, decodeErr
-    }
+	feedInfoFile, openErr := os.Open(FEED_LIST_FILENAME)
+	if openErr != nil {
+		return nil, openErr
+	}
+	defer feedInfoFile.Close()
+	decoder := json.NewDecoder(feedInfoFile)
+	feedInfo := FeedInfo{}
+	decodeErr := decoder.Decode(&feedInfo)
+	if decodeErr != nil {
+		return nil, decodeErr
+	}
 	var err error = nil
 	mapping := make(map[string]interface{})
 	mapping["feeds"] = feedInfo.Feeds

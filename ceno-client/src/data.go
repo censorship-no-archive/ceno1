@@ -29,8 +29,8 @@ type Feed struct {
  * Describes the container format that is read from json-files/feeds.json.
  */
 type FeedInfo struct {
-    Version string `json:"version"`
-    Feeds   []Feed `json:"feeds"`
+	Version string `json:"version"`
+	Feeds   []Feed `json:"feeds"`
 }
 
 /**
