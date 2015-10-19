@@ -71,7 +71,10 @@ func pollFeed(URL string, charsetReader xmlx.CharsetFunc) {
 	feed := rss.New(5, true, channelFeedHandler, itemFeedHandler)
 	for {
 		if err := feed.Fetch(URL, charsetReader); err != nil {
-			// TODO - Handle error condition
+            fmt.Println(T("feed_poll_err", map[string]string{
+                "Url": URL,
+                "Error", err.Error(),
+            }))
 		}
 		<-time.After(time.Duration(feed.SecondsTillUpdate() * 1e9))
 	}

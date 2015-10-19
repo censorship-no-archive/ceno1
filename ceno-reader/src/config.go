@@ -14,7 +14,7 @@ import (
 type Config struct {
 	PortNumber     string // The port to run on, e.g. ":3095"
 	BundleServer   string // The location of the Bundle Server
-	BundleInserter string // The location of the Bundle Inserter // TODO ask Marios if we send to BI, not RR
+	BundleInserter string // The location of the Bundle Inserter
 }
 
 // Default confifuration values that can be provided as options to the user.

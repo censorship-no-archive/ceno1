@@ -68,6 +68,10 @@
     "translation": "Failed to created a bundle for {{.Url}}."
   },
   {
+    "id": "feed_poll_err",
+    "translation": "Error polling feed {{.Url}}: Error: {{.Error}}"
+  },
+  {
     "id": "insert_success_rdr",
     "translation": "Successfully inserted a bundle for {{.Url}}."
   }
