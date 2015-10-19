@@ -44,3 +44,11 @@ type Item struct {
 	Authors   string `json:"authors"`
 	Published string `json:"published"`
 }
+
+/**
+ * The analogue of FeedInfo for Articles.
+ */
+type ArticleInfo struct {
+	Version int    `json:"version"`
+	Items   []Item `json:"items"`
+}

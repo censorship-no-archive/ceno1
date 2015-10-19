@@ -32,14 +32,14 @@ func initModuleWithArticles(feedUrl string) (map[string]interface{}, error) {
 		return nil, openErr
 	}
 	defer articleInfoFile.Close()
-	articles := make([]Item, 1)
+	articleInfo := ArticleInfo{}
 	decoder := json.NewDecoder(articleInfoFile)
-	decodeErr := decoder.Decode(&articles)
+	decodeErr := decoder.Decode(&articleInfo)
 	if decodeErr != nil {
 		return nil, decodeErr
 	}
 	mapping := make(map[string]interface{})
-	mapping["articles"] = articles
+	mapping["articles"] = articleInfo.Items
 	return mapping, nil
 }
 
