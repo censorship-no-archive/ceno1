@@ -12,15 +12,6 @@
 </head>
 <body>
 
-    <!-- Will have content inserted as JSON by the backend code.
-         The frontend code will then be able to use that data. -->
-    <div class="content">
-        <ul id="languageSelect">
-            {{range $i, $language := .Languages}}
-            <li>{{$language}}</li>{{end}}
-        </ul>
-    </div>
-    
     <div class="content row">
         <div class="col-md-3">
             <img id="cenoLogo" class="pure-img" src="/cenoresources/images/logo_ceno.png" /> 

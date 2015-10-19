@@ -50,8 +50,6 @@ func CreateArticlePage(w http.ResponseWriter, r *http.Request) {
 	t, _ := template.ParseFiles(path.Join(".", "views", "articles.html"))
 	// TODO - Extract feed url from URL query string
 	feedUrl := ""
-	// TODO - Grab language data dynamically
-	languages := [...]string{"english", "french"}
 	moduleData, articlesErr := initModuleWithArticles(feedUrl)
 	if articlesErr != nil {
 		HandleCCError(ERR_NO_ARTICLES_FILE, articlesErr.Error(), ErrorState{
@@ -60,7 +58,6 @@ func CreateArticlePage(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	moduleData["Languages"] = languages
 	moduleData["authorWord"] = T("authors_word")
 	moduleData["publishedWord"] = T("published_word")
 	marshalled, err := json.Marshal(moduleData)

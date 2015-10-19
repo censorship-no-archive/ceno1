@@ -37,7 +37,6 @@ func initModuleWithFeeds() (map[string]interface{}, error) {
 func CreatePortalPage(w http.ResponseWriter, r *http.Request) {
 	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
 	t, _ := template.ParseFiles(path.Join(".", "views", "feeds.html"))
-	languages := [...]string{"english", "french"}
 	moduleData, feedsErr := initModuleWithFeeds()
 	if feedsErr != nil {
 		// We could end up with a decode error here, but it's not quite practical to ditinguish.
@@ -47,7 +46,6 @@ func CreatePortalPage(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	moduleData["Languages"] = languages
 	moduleData["Page"] = "portal"
 	moduleData["articles"] = T("articles_word")
 	moduleData["lastPublished"] = T("last_published_word")
