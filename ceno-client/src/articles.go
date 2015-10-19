@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"strings"
 )
 
 /**
@@ -49,7 +50,10 @@ func CreateArticlePage(w http.ResponseWriter, r *http.Request) {
 	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
 	t, _ := template.ParseFiles(path.Join(".", "views", "articles.html"))
 	// TODO - Extract feed url from URL query string
-	feedUrl := ""
+	pathComponents := strings.Split(r.URL.Path, "/")
+	b64FeedUrl := pathComponents[len(pathComponents)-1]
+	feedUrlBytes, _ := base64.StdEncoding.DecodeString(b64FeedUrl)
+	feedUrl := string(feedUrlBytes)
 	moduleData, articlesErr := initModuleWithArticles(feedUrl)
 	if articlesErr != nil {
 		HandleCCError(ERR_NO_ARTICLES_FILE, articlesErr.Error(), ErrorState{
@@ -71,7 +75,6 @@ func CreateArticlePage(w http.ResponseWriter, r *http.Request) {
 	}
 	module = string(marshalled[:])
 	t.Execute(w, map[string]interface{}{
-		"Languages":        languages,
 		"Previous":         T("previous_word"),
 		"More":             T("more_word"),
 		"CenoPortalModule": module,
