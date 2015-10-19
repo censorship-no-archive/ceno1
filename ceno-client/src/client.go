@@ -300,7 +300,11 @@ func main() {
 		Configuration = conf
 	}
 	// Create an HTTP proxy server
+	http.Handle("/cenoresources/",
+		http.StripPrefix("/cenoresources/", http.FileServer(http.Dir("./static"))))
 	http.HandleFunc("/lookup", directHandler)
+	http.HandleFunc("/portal", CreatePortalPage)
+	http.HandleFunc("/cenosite", CreateArticlePage)
 	http.HandleFunc("/", proxyHandler)
 	fmt.Println(T("listening_msg_cli", map[string]interface{}{"Port": Configuration.PortNumber}))
 	err := http.ListenAndServe(Configuration.PortNumber, nil)

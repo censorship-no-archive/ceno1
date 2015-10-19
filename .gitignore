@@ -18,6 +18,14 @@ ceno-client/client
 ceno-client/FreenetCENO.tar.gz
 ceno-client/FreenetCENO
 
+# Compiled CENO reader service and mock servers
+ceno-reader/reader
+ceno-reader/bundleserver
+ceno-reader/bundleinserter
+
+# SQLite database used by ceno-reader
+ceno-reader/feeds.db
+
 ../fred
 
 # Vim temporary files
@@ -27,6 +35,7 @@ ceno-client/FreenetCENO
 ceno-node/src/db/*
 
 ceno-node/test/db/*
+
 
 # Stupid OSX files
 .DS_Store

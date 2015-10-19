@@ -4,6 +4,14 @@
     "translation": "Check that all of the components of CENO are running."
   },
   {
+    "id": "articles_word",
+    "translation": "articles"
+  },
+  {
+    "id": "authors_word",
+    "translation": "by"
+  },
+  {
     "id": "bundle_err_cli",
     "translation": "Bundler encountered an error: {{.Message}}"
   },
@@ -52,6 +60,14 @@
     "translation": "Some data was entered incorrectly. Please try again."
   },
   {
+    "id": "last_published_word",
+    "translation": "last published"
+  },
+  {
+    "id": "latest_word",
+    "translation": "latest"
+  },
+  {
     "id": "lcs_addr_cfg",
     "translation": "Address of local cache server (LCS) [{{.Default}}]: "
   },
@@ -88,6 +104,10 @@
     "translation": "Missing {{.View}} view."
   },
   {
+    "id": "more_word",
+    "translation": "more"
+  },
+  {
     "id": "no_bundle_prepared_html",
     "translation": "We couldn't prepare your bundle!"
   },
@@ -116,12 +136,20 @@
     "translation": "The page you have requested is being prepared. Please refresh this page in a few moments to check if it's ready."
   },
   {
+    "id": "previous_word",
+    "translation": "previous"
+  },
+  {
     "id": "provide_new_settings_cfg",
     "translation": "Please provide new settings using the format of the examples provided to configure CENO."
   },
   {
     "id": "proxy_port_num_cfg",
     "translation": "Proxy server port number [{{.Default}}]: "
+  },
+  {
+    "id": "published_word",
+    "translation": "published on"
   },
   {
     "id": "pwp_path_cfg",

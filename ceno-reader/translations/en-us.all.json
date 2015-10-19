@@ -1,0 +1,78 @@
+[
+  {
+    "id": "listening_msg_rdr",
+    "translation": "The reader server is listening on localhost{{.Port}}."
+  },
+  {
+    "id": "method_not_impl_rdr",
+    "translation": "This endpoint does not handle requests with the method you specified."
+  },
+  {
+    "id": "invalid_follow_req_rdr",
+    "translation": "The data you supplied describing the feed you want to follow is not appropriate."
+  },
+  {
+    "id": "req_handle_success_rdr",
+    "translation": "Your request to follow a new feed has been handled successfully."
+  },
+  {
+    "id": "no_config_rdr",
+    "translation": "No well-formatted configuration file could be read from the location {{.Location}}."
+  },
+  {
+    "id": "invalid_config_rdr",
+    "translation": "The configuration file provided contains invalid data or formatting."
+  },
+  {
+    "id": "database_init_error_rdr",
+    "translation": "Could not establish a connection to the database. Error: {{.Error}}"
+  },
+  {
+    "id": "feed_exists_rdr",
+    "translation": "Requested feed at {{.URL}} is already being followed."
+  },
+  {
+    "id": "db_lookup_error_rdr",
+    "translation": "Could not perform lookup. Error: {{.Error}}"
+  },
+  {
+    "id": "db_store_error_rdr",
+    "translation": "Could not save or update the database. Error: {{.Error}}"
+  },
+  {
+    "id": "not_followed_feed_err",
+    "translation": "Got items from a feed {{.URL}} that is not being followed."
+  },
+  {
+    "id": "invalid_unfollow_req_rdr",
+    "translation": "Requests to unfollow a feed must be JSON containing a url field."
+  },
+  {
+    "id": "feed_delete_err_rdr",
+    "translation": "Encountered an error deleting feed. Error: {{.Error}}"
+  },
+  {
+    "id": "feed_delete_success_rdr",
+    "translation": "Successfully unfollowed feed."
+  },
+  {
+    "id": "not_recognized_charset_chr",
+    "translation": "Expected charset {{.Expect}}, but got {{.Actual}}."
+  },
+  {
+    "id": "insertion_fail_err",
+    "translation": "Failed to insert feeds list into Freenet"
+  },
+  {
+    "id": "bundle_fail_err",
+    "translation": "Failed to created a bundle for {{.Url}}."
+  },
+  {
+    "id": "feed_poll_err",
+    "translation": "Error polling feed {{.Url}}: Error: {{.Error}}"
+  },
+  {
+    "id": "insert_success_rdr",
+    "translation": "Successfully inserted a bundle for {{.Url}}."
+  }
+]
