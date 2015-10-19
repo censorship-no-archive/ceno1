@@ -29,7 +29,7 @@ if you don't already have it set..
 
 ```bash
 export GOPATH=$HOME/go
-export GOROOT=/usr/lib/go
+export GOROOT=/usr/local/go
 export PATH=$PATH:$GOROOT/bin
 ```
 
@@ -64,20 +64,6 @@ The URI of the bundle server to request new bundles for RSS items from.
 ### BundleInserter
 
 The URI of the bundle inserter to post requests to have bundles stored in.
-
-### FeedTemplate
-
-The path to the template HTML file that will be filled with short descriptions of RSS items.
-For more information about these templates, see the
-[Golang documentation](https://golang.org/pkg/html/template/#ParseFiles)
-
-This file must exist by the time you run `reader`.
-
-### FeedListFile
-
-The path to a file within which information about feeds being followed will be stored.
-
-This file must exist by the time you run `reader`.
 
 ## Translating
 
