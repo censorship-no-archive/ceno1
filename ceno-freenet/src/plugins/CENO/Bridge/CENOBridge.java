@@ -1,13 +1,20 @@
 package plugins.CENO.Bridge;
 
+import java.math.BigInteger;
+
+import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
+import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 
+import plugins.CENO.CENOException;
 import plugins.CENO.CENOL10n;
 import plugins.CENO.Configuration;
 import plugins.CENO.Version;
+import plugins.CENO.Bridge.Signaling.ChannelMaker;
+import plugins.CENO.Bridge.Signaling.Crypto;
 import plugins.CENO.FreenetInterface.HighLevelSimpleClientInterface;
 import plugins.CENO.FreenetInterface.NodeInterface;
 import freenet.keys.FreenetURI;
@@ -34,6 +41,8 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 	private HighLevelSimpleClientInterface client;
 	public static NodeInterface nodeInterface;
 	private RequestReceiver reqReceiver;
+	
+	ChannelMaker channelMaker;
 
 	// Plugin-specific configuration
 	public static final String pluginUri = "/plugins/plugins.CENO.CENOBridge";
@@ -66,11 +75,24 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 		// If CENO has no private key for inserting freesites,
 		// generate a new key pair and store it in the configuration file
 		if (initConfig.getProperty("insertURI") == null) {
-			Logger.warning(this, "CENOBridge will generate a new public key for inserting bundles.");
+			Logger.warning(this, "CENOBridge will generate a new public key for inserting bundles");
 			FreenetURI[] keyPair = nodeInterface.generateKeyPair();
 			initConfig.setProperty("insertURI", keyPair[0].toString());
 			initConfig.setProperty("requestURI", keyPair[1].toString());
 			initConfig.storeProperties();
+		}
+		
+		AsymmetricCipherKeyPair asymKeyPair;
+		if (initConfig.getProperty("asymkey.privexponent") == null || initConfig.getProperty("asymkey.modulus") == null || initConfig.getProperty("asymkey.pubexponent") == null) {
+			Logger.warning(this, "CENOBridge will generate a new RSA key pair for the decentralized signaling. This might take a while");
+			asymKeyPair = Crypto.generateAsymKey();
+			initConfig.setProperty("asymkey.privexponent", ((RSAKeyParameters) asymKeyPair.getPrivate()).getExponent().toString(23));
+			initConfig.setProperty("asymkey.modulus", ((RSAKeyParameters) asymKeyPair.getPublic()).getModulus().toString(32));
+			initConfig.setProperty("asymkey.pubexponent", ((RSAKeyParameters) asymKeyPair.getPublic()).getExponent().toString(32));
+			initConfig.storeProperties();
+		} else {
+			asymKeyPair = new AsymmetricCipherKeyPair(new RSAKeyParameters(false, new BigInteger(initConfig.getProperty("asymkey.modulus"),32), new BigInteger(initConfig.getProperty("asymkey.pubexponent"), 32)),
+					new RSAKeyParameters(true, new BigInteger(initConfig.getProperty("asymkey.modulus"), 32), new BigInteger(initConfig.getProperty("asymkey.privexponent"), 32)));
 		}
 
 		nodeInterface.clearOutboxLog(bridgeFreemail, clientFreemail);
@@ -78,6 +100,13 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 		reqReceiver = new RequestReceiver(new String[]{bridgeFreemail});
 		// Start a thread for polling for new freemails
 		reqReceiver.loopFreemailBoxes();
+		
+		try {
+			channelMaker = new ChannelMaker(initConfig.getProperty("insertURI"),asymKeyPair);
+		} catch (CENOException e) {
+			Logger.error(this, "Could not start decentralized signaling channel maker");
+			terminate();
+		}
 
 		// Configure CENO's jetty embedded server
 		cenoHttpServer = new Server();
@@ -94,6 +123,8 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 		} catch (Exception ex) {
 			Logger.error(this, "HTTP Server terminated abnormally");
 			Logger.error(this, ex.getMessage());
+			terminate();
+			return;
 		}
 	}
 

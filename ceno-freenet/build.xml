@@ -19,6 +19,7 @@
 	<property name="sun-mail.location" location="lib/mail.jar"/>
 	<property name="apache-commonsvalidator.location" location="lib/commons-validator-1.4.1.jar"/>
 	<property name="apache-commonscompress.location" location="lib/commons-compress-1.9.jar"/>
+	<property name="bouncy-castle.location" location="lib/bcprov-jdk15on-152.jar"/>
 
 
 	<available file="src/plugins/CENO/Version.java" property="version.present"/>
@@ -74,6 +75,7 @@
 				<pathelement location="${sun-mail.location}"/>
 				<pathelement location="${apache-commonsvalidator.location}" />
 				<pathelement location="${apache-commonscompress.location}" />
+				<pathelement location="${bouncy-castle.location}" />
 			</classpath>
 			<include name="**/*.java"/>
 			<exclude name="**/*Test.java"/>
