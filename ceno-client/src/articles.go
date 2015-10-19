@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+    "encoding/base64"
 	"fmt"
 	"github.com/nicksnyder/go-i18n/i18n"
 	"html/template"
@@ -10,37 +11,14 @@ import (
 	"path"
 )
 
-var articles [30]Item = [30]Item{
-	{0, "Title1", "https://news.ycombinator.com", "https://site.com/rss", "Chopin, Beethoven, Bach", "08/10/15"},
-	{0, "Title2", "https://news.ycombinator.com", "https://site.com/rss", "Chopin, Bach", "08/10/15"},
-	{0, "Title3", "https://news.ycombinator.com", "https://site.com/rss", "Chopin, Beethoven", "08/10/15"},
-	{0, "Title4", "https://news.ycombinator.com", "https://site.com/rss", "Beethoven, Bach", "08/10/15"},
-	{0, "Title5", "https://news.ycombinator.com", "https://site.com/rss", "Bach", "08/10/15"},
-	{0, "Title6", "https://news.ycombinator.com", "https://site.com/rss", "Beethoven, Bach", "08/10/15"},
-	{0, "Title7", "https://news.ycombinator.com", "https://site.com/rss", "Chopin", "08/10/15"},
-	{0, "Title8", "https://news.ycombinator.com", "https://site.com/rss", "Chopin", "08/10/15"},
-	{0, "Title9", "https://news.ycombinator.com", "https://site.com/rss", "Chopin, Beethoven, Bach", "08/10/15"},
-	{0, "Title10", "https://news.ycombinator.com", "https://site.com/rss", "Chopin, Beethoven, Bach", "08/10/15"},
-	{0, "Title11", "https://news.ycombinator.com", "https://site.com/rss", "Beethoven", "08/10/15"},
-	{0, "Title12", "https://news.ycombinator.com", "https://site.com/rss", "Chopin", "08/10/15"},
-	{0, "Title13", "https://news.ycombinator.com", "https://site.com/rss", "Beethoven, Bach", "08/10/15"},
-	{0, "Title14", "https://news.ycombinator.com", "https://site.com/rss", "Chopin, Beethoven, Bach", "08/10/15"},
-	{0, "Title15", "https://news.ycombinator.com", "https://site.com/rss", "Chopin, Beethoven, Bach", "08/10/15"},
-	{0, "Title1", "https://news.ycombinator.com", "https://site.com/rss", "Chopin, Beethoven, Bach", "08/10/15"},
-	{0, "Title2", "https://news.ycombinator.com", "https://site.com/rss", "Beethoven, Bach", "08/10/15"},
-	{0, "Title3", "https://news.ycombinator.com", "https://site.com/rss", "Chopin, Bach", "08/10/15"},
-	{0, "Title4", "https://news.ycombinator.com", "https://site.com/rss", "Chopin, Beethoven", "08/10/15"},
-	{0, "Title5", "https://news.ycombinator.com", "https://site.com/rss", "Chopin, Bach", "08/10/15"},
-	{0, "Title6", "https://news.ycombinator.com", "https://site.com/rss", "Debussy", "08/10/15"},
-	{0, "Title7", "https://news.ycombinator.com", "https://site.com/rss", "Haydn, Debussy", "08/10/15"},
-	{0, "Title8", "https://news.ycombinator.com", "https://site.com/rss", "Haydn", "08/10/15"},
-	{0, "Title9", "https://news.ycombinator.com", "https://site.com/rss", "Haydn, Beethoven, Bach", "08/10/15"},
-	{0, "Title10", "https://news.ycombinator.com", "https://site.com/rss", "Debussy, Beethoven, Bach", "08/10/15"},
-	{0, "Title11", "https://news.ycombinator.com", "https://site.com/rss", "Chopin, Bach", "08/10/15"},
-	{0, "Title12", "https://news.ycombinator.com", "https://site.com/rss", "Chopin, Beethoven, Bach", "08/10/15"},
-	{0, "Title13", "https://news.ycombinator.com", "https://site.com/rss", "Chopin, Beethoven", "08/10/15"},
-	{0, "Title14", "https://news.ycombinator.com", "https://site.com/rss", "Beethoven", "08/10/15"},
-	{0, "Title15", "https://news.ycombinator.com", "https://site.com/rss", "Beethoven, Bach", "08/10/15"},
+/**
+ * JSON files containing information about articles stored in the distributed cache (Freenet)
+ * are named like `json-files/<base64(feed's url)>.json`
+ * @param feedUrl - The URL of the RSS/Atom feed to retrieve information about articles from
+ */
+func articlesFilename(feedUrl string) {
+    b64FeedUrl := base64.StdEncoding.EncodeToString(feedUrl)
+    return path.Join(".", "json-files", b64FeedUrl + ".json")
 }
 
 /**
@@ -49,7 +27,17 @@ var articles [30]Item = [30]Item{
  * @return a map with a "feeds" key and corresponding array of Feed structs and an optional error
  */
 func initModuleWithArticles(feedUrl string) (map[string]interface{}, error) {
-	//items, err := GetItems(DBConnection, feedUrl)
+    articleInfoFile, openErr := os.Open(articlesFilename(feedUrl))
+    if openErr != nil {
+        return nil, openErr
+    }
+    defer articleInfoFile.Close()
+    articles := make([]item, 1)
+    decoder := json.NewDecoder(articleInfoFile)
+    decodeErr := decoder.Decode(&articles)
+    if decodeErr != nil {
+        return nil, decodeErr
+    }
 	mapping := make(map[string]interface{})
 	mapping["articles"] = articles
 	return mapping, nil

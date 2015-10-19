@@ -7,6 +7,9 @@ const LANG_ENVVAR string = "CENOLANG"
 // The language to fall back on if no language is set in ${LANG_ENVVAR}
 const DEFAULT_LANG string = "en-us"
 
+// The name of the file containing information about feeds being followed
+const FEED_LIST_FILENAME string = "./json-files/feeds.json"
+
 /**
  * Describes a feed, so that, when items of the feed are handled,
  * the appropriate functionality can be invoked.
@@ -20,6 +23,14 @@ type Feed struct {
 	LastPublished string `json:"lastPublished"`
 	LogoUrl       string `json:"logo"`
 	Latest        string `json:"latest"`
+}
+
+/**
+ * Describes the container format that is read from json-files/feeds.json.
+ */
+type FeedInfo struct {
+    Version string `json:"version"`
+    Feeds   []Feed `json:"feeds"`
 }
 
 /**

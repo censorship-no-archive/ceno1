@@ -7,34 +7,26 @@ import (
 	"net/http"
 	"os"
 	"path"
-)
 
 /**
  * Get information about feeds to be injected into the portal page.
  * @return a map with a "feeds" key and corresponding array of Feed structs and an optional error
  */
 func initModuleWithFeeds() (map[string]interface{}, error) {
-	// TODO - Actually get feeds
-	// feeds, err := AllFeeds(DBConnection)
-	// Generting fake data for testing purposes
-	now := "Wed Oct 07 2015 12:50:46 GMT-0400 (EDT)"
-	kitten := "https://d13yacurqjgara.cloudfront.net/users/87003/screenshots/926295/dri1.jpg"
-	latest := "How the Internet is broken and no amount of tubes can fix it"
-	feeds := [...]Feed{
-		{0, "https://site.com/rss", "RSS", "", 32, now, kitten, latest},
-		{1, "https://news.ycombinator.com/rss", "RSS", "", 42, now, kitten, latest},
-		{2, "https://bbc.co.uk/rss", "RSS", "", 10, now, kitten, latest},
-		{3, "https://fake.com/rss", "RSS", "", 99, now, kitten, latest},
-		{4, "https://rss.whatsup.ca", "RSS", "", 32, now, kitten, latest},
-		{5, "https://sayans.com/atom", "Atom", "", 9001, now, kitten, latest},
-		{6, "https:///atom.frank.fr", "Atom", "", 1, now, kitten, latest},
-		{7, "https://github.com/rss", "RSS", "", 123, now, kitten, latest},
-		{8, "https://politika.fr/atom", "Atom", "", 22, now, kitten, latest},
-		{9, "https://events.com/rss", "RSS", "", 11, now, kitten, latest},
-	}
+    feedInfoFile, openErr := os.Open(FEED_LIST_FILENAME)
+    if openErr != nil {
+        return nil, openErr
+    }
+    defer feedInfoFile.Close()
+    decoder := json.NewDecoder(reader)
+    feedInfo := FeedInfo{}
+    decodeErr := decoder.Decode(&feedInfo)
+    if decodeErr != nil {
+        return nil, decodeErr
+    }
 	var err error = nil
 	mapping := make(map[string]interface{})
-	mapping["feeds"] = feeds
+	mapping["feeds"] = feedInfo.Feeds
 	return mapping, err
 }
 
