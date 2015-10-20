@@ -102,6 +102,10 @@ div.feedLogo {
     padding-top: 0px;
 }
 
+img#cenoLogo {
+    margin-left: 25px;
+}
+
 img.feedLogo {
     margin-left: auto;
     margin-right: auto;
