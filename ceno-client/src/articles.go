@@ -77,6 +77,7 @@ func CreateArticlePage(w http.ResponseWriter, r *http.Request) {
 	t.Execute(w, map[string]interface{}{
 		"Previous":         T("previous_word"),
 		"More":             T("more_word"),
+		"PortalBlurb":      T("portal_blurb"),
 		"CenoPortalModule": module,
 	})
 }

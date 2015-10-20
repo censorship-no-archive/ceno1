@@ -1,7 +1,7 @@
 [
   {
     "id": "agent_communication_err",
-    "translation": "Check that all of the components of CENO are running."
+    "translation": "vérifier que toutes les composantes de CENO courent"
   },
   {
     "id": "articles_word",
@@ -45,7 +45,7 @@
   },
   {
     "id": "error_cli",
-    "translation": "Error: {{.Message}}"
+    "translation": "Erreur: {{.Message}}"
   },
   {
     "id": "error_we_got_html",
@@ -89,7 +89,7 @@
   },
   {
     "id": "listening_msg_cli",
-    "translation": "CENO proxy server listening for HTTP requests at http://127.0.0.1{{.Port}}"
+    "translation": "CENO serveur proxy écoute pour les demandes HTTP à http://127.0.0.1{{.Port}}"
   },
   {
     "id": "malformed_url_cli",
@@ -149,7 +149,7 @@
   },
   {
     "id": "portal_blurb",
-    "translation": "The CENO portal service gives you direct access to selected content, presented in an approachable way, as soon as you get started with CENO. That means no long wait for new content and a seamless first-time experience with CENO."
+    "translation": ""
   },
   {
     "id": "previous_word",

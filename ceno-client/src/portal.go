@@ -46,7 +46,6 @@ func CreatePortalPage(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	moduleData["Page"] = "portal"
 	moduleData["articles"] = T("articles_word")
 	moduleData["lastPublished"] = T("last_published_word")
 	moduleData["latest"] = T("latest_word")
@@ -63,6 +62,7 @@ func CreatePortalPage(w http.ResponseWriter, r *http.Request) {
 	t.Execute(w, map[string]interface{}{
 		"Previous":         T("previous_word"),
 		"More":             T("more_word"),
+		"PortalBlurb":      T("portal_blurb"),
 		"CenoPortalModule": module,
 	})
 }
