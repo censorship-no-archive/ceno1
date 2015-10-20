@@ -35,7 +35,7 @@ public class ChannelMaker {
 	private AsymmetricCipherKeyPair asymKeyPair;
 	ChannelMakerListener channelListener;
 
-	static final long KSK_POLLING_PAUSE = TimeUnit.MINUTES.toMillis(12);
+	static final long KSK_POLLING_PAUSE = TimeUnit.MINUTES.toMillis(5);
 
 	public ChannelMaker(String insertURI, AsymmetricCipherKeyPair asymKeyPair) throws CENOException {
 		this.bridgeInsertURI = insertURI;
@@ -100,7 +100,7 @@ public class ChannelMaker {
 	private class ChannelMakerListener implements Runnable {
 		private String puzzleAnswer;
 		private FreenetURI channelMakingKSK;
-		private long lastHandledReq = 0L;
+		private int lastHandledReq = 0;
 
 		private volatile boolean continueLoop;
 
@@ -131,7 +131,7 @@ public class ChannelMaker {
 						} catch (Exception e) {
 							Logger.warning(ChannelMakerListener.class, "Error while decrypting users' KSK response: " + e.getMessage());
 						}
-						SimpleFieldSet sfs = new SimpleFieldSet(kskContent.toString(), false, true, true);
+						SimpleFieldSet sfs = new SimpleFieldSet(new String(kskContent.asByteArray()), false, true, true);
 						int reqID = sfs.getInt("id", -1);
 						if (reqID > 0 && reqID != lastHandledReq) {
 							Logger.normal(ChannelMakerListener.class, "A client has posted information for establishing a signaling channel with ID: " + reqID);
