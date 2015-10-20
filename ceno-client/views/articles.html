@@ -11,17 +11,7 @@
     </script>
 </head>
 <body>
-   
-    <!-- Will have content inserted as JSON by the backend code.
-         The frontend code will then be able to use that data. -->
-    <div class="content">
-        <ul id="languageSelect">
-            {{range $i, $language := .Languages}}<li>
-                {{$language}}
-            </li>{{end}}
-        </ul>
-    </div>
-    
+     
     <div class="content row">
         <div class="col-md-3">
             <img id="cenoLogo" class="pure-img" src="/cenoresources/images/logo_ceno.png" /> 
@@ -35,21 +25,20 @@
         </div>
     </div>
 
-    <div class="bgbeige">
-        <div id="articleList" class="content">
-            <ul id="articleListing">
-            </ul>
+    <div id="articleList" class="content">
+        <ul id="articleListing">
+            <!-- Filled by JS -->
+        </ul>
+    </div>
+    <div id="navButtons" class="content row">
+        <div class="col-md-4">
+            <a href="javascript:void(0);" id="prevButton">{{.Previous}}</a>
         </div>
-        <div id="navButtons" class="content row">
-            <div class="col-md-4">
-                <a href="javascript:void(0);" id="prevButton">{{.Previous}}</a>
-            </div>
-            <div class="col-md-4">
-                 <span id="currentPage">1</span> / <span id="totalPages">1</span>
-            </div>
-            <div class="col-md-4">
-                <a href="javascript:void(0);" id="moreButton">{{.More}}</a>
-            </div>
+        <div class="col-md-4">
+            <span id="currentPage">1</span> / <span id="totalPages">1</span>
+        </div>
+        <div class="col-md-4">
+            <a href="javascript:void(0);" id="moreButton">{{.More}}</a>
         </div>
     </div>
 
