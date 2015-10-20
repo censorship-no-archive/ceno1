@@ -12,17 +12,22 @@ import org.bouncycastle.crypto.params.RSAKeyParameters;
 import plugins.CENO.CENOErrCode;
 import plugins.CENO.CENOException;
 import plugins.CENO.Bridge.CENOBridge;
+import freenet.client.ClientMetadata;
+import freenet.client.DefaultMIMETypes;
 import freenet.client.FetchException;
 import freenet.client.FetchResult;
+import freenet.client.InsertBlock;
 import freenet.client.InsertException;
 import freenet.client.async.BaseClientPutter;
 import freenet.client.async.ClientContext;
 import freenet.client.async.ClientPutCallback;
+import freenet.client.async.PersistenceDisabledException;
 import freenet.keys.FreenetURI;
 import freenet.node.RequestClient;
 import freenet.support.Logger;
 import freenet.support.SimpleFieldSet;
 import freenet.support.api.Bucket;
+import freenet.support.api.RandomAccessBucket;
 import freenet.support.io.ResumeFailedException;
 
 public class ChannelMaker {
@@ -77,7 +82,12 @@ public class ChannelMaker {
 			FreenetURI announcementURI = new FreenetURI("USK", CENOBridge.announcerPath, insertURIconfig.getRoutingKey(), insertURIconfig.getCryptoKey(), insertURIconfig.getExtra());
 
 			Logger.normal(ChannelMaker.class, "Inserting announcement freesite with USK: " + announcementURI.toASCIIString());
-			CENOBridge.nodeInterface.insertFreesite(announcementURI, "default.html", sfs.toOrderedString(), new AnnouncementInsertionCB());
+			try {
+				CENOBridge.nodeInterface.insertSingleChunk(announcementURI, sfs.toOrderedString(),new AnnouncementInsertionCB());
+			} catch (PersistenceDisabledException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -110,10 +120,10 @@ public class ChannelMaker {
 						kskContent = CENOBridge.nodeInterface.fetchURI(channelMakingKSK);
 					} catch (FetchException e) {
 						// TODO Fine-grain log messages according to FetchException codes
-						Logger.warning(ChannelMakerListener.class, "Exception while fetching KSK clients use for making channels");
+						Logger.minor(ChannelMakerListener.class, "Exception while fetching KSK clients use for making channels: " + e.getShortMessage());
 					}
 
-					if (kskContent != null && kskContent.getMimeType() == "text/html") {
+					if (kskContent != null) {
 						try {
 							Crypto.decryptMessage(kskContent.asByteArray(), (RSAKeyParameters) asymKeyPair.getPrivate());
 						} catch (InvalidCipherTextException e) {
@@ -122,7 +132,7 @@ public class ChannelMaker {
 							Logger.warning(ChannelMakerListener.class, "Error while decrypting users' KSK response: " + e.getMessage());
 						}
 						SimpleFieldSet sfs = new SimpleFieldSet(kskContent.toString(), false, true, true);
-						Long reqID = sfs.getLong("id", -1L);
+						int reqID = sfs.getInt("id", -1);
 						if (reqID > 0 && reqID != lastHandledReq) {
 							Logger.normal(ChannelMakerListener.class, "A client has posted information for establishing a signaling channel with ID: " + reqID);
 							ChannelManager.getInstance().addChannel(sfs);

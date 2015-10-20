@@ -1,9 +1,12 @@
 package plugins.CENO.Client;
 
+import java.net.MalformedURLException;
+
 import plugins.CENO.CENOL10n;
 import plugins.CENO.Version;
 import plugins.CENO.FreenetInterface.HighLevelSimpleClientInterface;
 import plugins.CENO.FreenetInterface.NodeInterface;
+import freenet.client.InsertException;
 import freenet.pluginmanager.FredPlugin;
 import freenet.pluginmanager.FredPluginHTTP;
 import freenet.pluginmanager.FredPluginRealVersioned;
@@ -24,7 +27,6 @@ import freenet.support.api.HTTPRequest;
 public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRealVersioned, FredPluginHTTP, FredPluginThreadless {
 
 	// Interface objects with fred
-	private static HighLevelSimpleClientInterface client;
 	public static NodeInterface nodeInterface;
 	private static final ClientHandler clientHandler = new ClientHandler();
 
@@ -48,7 +50,8 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 	public void runPlugin(PluginRespirator pr)
 	{
 		// Initialize interfaces with Freenet node
-		client = new HighLevelSimpleClientInterface(pr.getNode());
+		//TODO initialized within NodeInterface, do not expose HLSC but only via nodeInterface
+		new HighLevelSimpleClientInterface(pr.getNode());
 		nodeInterface = new NodeInterface(pr.getNode(), pr);
 		new CENOL10n("CENOLANG");
 
@@ -57,9 +60,22 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 		ULPRManager.init();
 
 		// Initialize RS
-		RequestSender.init(new String[]{bridgeFreemail});
-		nodeInterface.copyAccprops(clientFreemail);
-		nodeInterface.setRandomNextMsgNumber(clientFreemail, bridgeFreemail);
+		ChannelMaker channelMaker = null;
+		try {
+			channelMaker = new ChannelMaker(null);
+		} catch (MalformedURLException e) {
+			//TODO Log
+			terminate();
+		}
+		try {
+			channelMaker.establishChannel();
+		} catch (MalformedURLException e) {
+			//TODO Log
+			terminate();
+		} catch (InsertException e) {
+			//TODO Log
+			terminate();
+		}
 	}
 
 	/**
