@@ -7,6 +7,9 @@ const LANG_ENVVAR string = "CENOLANG"
 // The language to fall back on if no language is set in ${LANG_ENVVAR}
 const DEFAULT_LANG string = "en-us"
 
+// The name of the file containing information about feeds being followed
+const FEED_LIST_FILENAME string = "./json-files/feeds.json"
+
 /**
  * Describes a feed, so that, when items of the feed are handled,
  * the appropriate functionality can be invoked.
@@ -23,6 +26,14 @@ type Feed struct {
 }
 
 /**
+ * Describes the container format that is read from json-files/feeds.json.
+ */
+type FeedInfo struct {
+	Version int    `json:"version"`
+	Feeds   []Feed `json:"feeds"`
+}
+
+/**
  * Describes an RSS/Atom item.
  */
 type Item struct {
@@ -32,4 +43,12 @@ type Item struct {
 	FeedUrl   string `json:"feedUrl"`
 	Authors   string `json:"authors"`
 	Published string `json:"published"`
+}
+
+/**
+ * The analogue of FeedInfo for Articles.
+ */
+type ArticleInfo struct {
+	Version int    `json:"version"`
+	Items   []Item `json:"items"`
 }

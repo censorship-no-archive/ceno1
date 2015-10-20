@@ -28,6 +28,10 @@
     "translation": "Contact"
   },
   {
+    "id": "corrupt_json_err",
+    "translation": "Tried to decode JSON that was found to be corrupt."
+  },
+  {
     "id": "decode_error_cli",
     "translation": "Error decoding response from LCS: {{.Message}}"
   },
@@ -108,12 +112,20 @@
     "translation": "more"
   },
   {
+    "id": "no_articles_file_err",
+    "translation": "No article listing file could be found for the feed you tried to access."
+  },
+  {
     "id": "no_bundle_prepared_html",
     "translation": "We couldn't prepare your bundle!"
   },
   {
     "id": "no_config_cli",
     "translation": "Could not read configuration file at {{.Location}}"
+  },
+  {
+    "id": "no_feeds_file_err",
+    "translation": "No feeds file was found to get a list of available RSS/Atom feeds from."
   },
   {
     "id": "no_reach_lcs_cli",
