@@ -12,9 +12,9 @@
  */
 
 var feeds = cenoPortalModule.feeds;
-var placeholders = 4;
+var feedsPerPage = 4;
 var feedIndex = 0;
-var maxFeedIndex = Math.floor(feeds.length / placeholders);
+var maxFeedIndex = Math.floor(feeds.length / feedsPerPage);
 
 // Navigation buttons/anchors used to page through feeds
 var previousButton = document.getElementById('prevButton');
@@ -62,63 +62,40 @@ function articlesLink(feedUrl) {
 /**
  * Fill templates showing information about feeds. Each of the four has the form
  *
- * <div class="sitePanel">
- *  <div class="feedLogo">
- *    <img></img>
- *  </div>
- *  <div class="feedUrl">
- *    <a></a>
- *  </div>
- *  <div class="feedDescription">
+ * <li>
+ *   <a class="feedUrl" href="/cenosite/<base64(feedURL)>"></a>
  *   <p></p>
  *   <p></p>
  *   <p></p>
- *  </div>
- * </div>
+ * </li>
  */
 function fillFeedTemplates() {
-    var containers = document.getElementsByClassName('sitePanel');
+    var container = document.getElementById('feedListing');
     var articles = cenoPortalModule.articles;
     var lastPublished = cenoPortalModule.lastPublished;
     var latest = cenoPortalModule.latest;
-    for (var i = 0, len = containers.length; i < len; i++) {
-        containers[i].innerHTML = '';
-    }
-    console.log('feedIndex =', feedIndex);
-    for (var i = 0; i < placeholders; i++) {
-        var index = feedIndex * placeholders + i;
-        console.log('index =', index);
+    container.innerHTML = '';
+    for (var i = 0; i < feedsPerPage; i++) {
+        var index = feedIndex * feedsPerPage + i;
         if (index >= feeds.length) {
             break;
         }
-        var feedLogo = document.createElement('div');
-        feedLogo.setAttribute('class', 'feedLogo');
-        var logo = document.createElement('img');
-        logo.setAttribute('src', feeds[index].logo);
-        logo.setAttribute('class', 'feedLogo');
-        feedLogo.appendChild(logo);
-        containers[i].appendChild(feedLogo);
-        var feedUrl = document.createElement('div');
-        feedUrl.setAttribute('class', 'feedUrl');
+        var li = document.createElement('li');
         var anchor = document.createElement('a');
+        var publications = document.createElement('p');
+        var lastPubDate = document.createElement('p');
+        var latestTitle = document.createElement('p');
+        anchor.setAttribute('class', 'feedUrl');
         anchor.setAttribute('href', articlesLink(feeds[index].url));
-        anchor.innerHTML = feeds[index].url;
-        feedUrl.appendChild(anchor);
-        containers[i].appendChild(feedUrl);
-        var feedDescription = document.createElement('div');
-        feedDescription.setAttribute('class', 'feedDescription');
-        var p1 = document.createElement('p');
-        p1.innerHTML = latest + ': ' + feeds[index].articles;
-        var p2 = document.createElement('p');
-        var d = new Date(feeds[index].lastPublished);
-        var formattedDate = [d.getDate(), d.getMonth() + 1, ('' + d.getFullYear()).slice(2)].join('/');
-        p2.innerHTML = lastPublished + ': ' + formattedDate;
-        var p3 = document.createElement('p');
-        p3.innerHTML = latest + ': ' + feeds[index].latest;
-        feedDescription.appendChild(p1);
-        feedDescription.appendChild(p2);
-        feedDescription.appendChild(p3);
-        containers[i].appendChild(feedDescription);
+        anchor.innerHTML = '&gt; ' + feeds[index].url;
+        publications.innerHTML = articles + ': ' + feeds[index].articles;
+        lastPubDate.innerHTML = lastPublished + ': ' + feeds[index].lastPublished;
+        latestTitle.innerHTML = latest + ': ' +feeds[index].latest;
+        li.appendChild(anchor);
+        li.appendChild(publications);
+        li.appendChild(lastPubDate);
+        li.appendChild(latestTitle);
+        container.appendChild(li);
     }
 }
 

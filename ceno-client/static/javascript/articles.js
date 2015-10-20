@@ -1,7 +1,7 @@
 (function () {
 
 var articles = cenoPortalModule.articles;
-var articlesPerPage = 12;
+var articlesPerPage = 10;
 var articleIndex = 0;
 var maxArticlesIndex = Math.floor(articles.length / articlesPerPage);
 

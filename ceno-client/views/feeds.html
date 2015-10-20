@@ -11,15 +11,6 @@
     </script>
 </head>
 <body>
-
-    <!-- Will have content inserted as JSON by the backend code.
-         The frontend code will then be able to use that data. -->
-    <div class="content">
-        <ul id="languageSelect">
-            {{range $i, $language := .Languages}}
-            <li>{{$language}}</li>{{end}}
-        </ul>
-    </div>
     
     <div class="content row">
         <div class="col-md-3">
@@ -34,85 +25,23 @@
         </div>
     </div>
 
-    <div id="articleSection" class="bgbeige">
-        <!-- Filled by JS -->
-        <div class="content row">
-            <div class="sitePanel col-md-6">
-                <div class="feedLogo" style="background-color: #333; height: 200px"></div>
-                <div class="feedUrl">
-                    <a href="#">the.international.bbc.co.uk</a>
-                </div>
-                <div class="feedDescription">
-                    <p>Articles: 32</p>
-                    <p>Last Published: 13/10/2015</p>
-                    <p>Latest: How the Internet is broken and no amount of tubes can save it</p>
-                </div>
-            </div>
-            <div class="sitePanel col-md-6">
-                <div class="feedLogo" style="background-color: #333; height: 200px"></div>
-                <div class="feedUrl">
-                    <a href="#">the.international.bbc.co.uk</a>
-                </div>
-                <div class="feedDescription">
-                    <p>Articles: 32</p>
-                    <p>Last Published: 13/10/2015</p>
-                    <p>Latest: How the Internet is broken and no amount of tubes can save it</p>
-                </div>
-            </div>
+    <div id="feedList" class="content">
+        <ul id="feedListing">
+            <!-- Filled by JS -->
+        </ul>
+    </div>
+    <div id="navButtons" class="row">
+        <div class="col-md-4">
+            <a href="javascript:void(0);" id="prevButton">{{.Previous}}</a>
         </div>
-        <div class="content row">
-            <div class="sitePanel col-md-6">
-                <div class="feedLogo" style="background-color: #333; height: 200px"></div>
-                <div class="feedUrl">
-                    <a href="#">the.international.bbc.co.uk</a>
-                </div>
-                <div class="feedDescription">
-                    <p>Articles: 32</p>
-                    <p>Last Published: 13/10/2015</p>
-                    <p>Latest: How the Internet is broken and no amount of tubes can save it</p>
-                </div>
-            </div>
-            <div class="sitePanel col-md-6">
-                <div class="feedLogo" style="background-color: #333; height: 200px"></div>
-                <div class="feedUrl">
-                    <a href="#">the.international.bbc.co.uk</a>
-                </div>
-                <div class="feedDescription">
-                    <p>Articles: 32</p>
-                    <p>Last Published: 13/10/2015</p>
-                    <p>Latest: How the Internet is broken and no amount of tubes can save it</p>
-                </div>
-            </div>
+        <div class="col-md-4">
+            {{.Page}} <span id="currentPage">1</span> / <span id="totalPages">1</span>
         </div>
-        <div id="navButtons" class="row">
-            <div class="col-md-4">
-                <a href="javascript:void(0);" id="prevButton">{{.Previous}}</a>
-            </div>
-            <div class="col-md-4">
-                {{.Page}} <span id="currentPage">1</span> / <span id="totalPages">1</span>
-            </div>
-            <div class="col-md-4">
-                <a href="javascript:void(0);" id="moreButton">{{.More}}</a>
-            </div>
+        <div class="col-md-4">
+            <a href="javascript:void(0);" id="moreButton">{{.More}}</a>
         </div>
     </div>
 
-    <hr />
-
-    <div class="content row">
-        <div class="col-md-9">
-            <p>
-                eQualitie is awesome eQualitie is awesome eQualitie is awesome eQualitie is awesome 
-                eQualitie is awesome eQualitie is awesome eQualitie is awesome eQualitie is awesome 
-                eQualitie is awesome eQualitie is awesome eQualitie is awesome eQualitie is awesome 
-                eQualitie is awesome eQualitie is awesome eQualitie is awesome eQualitie is awesome 
-            </p>
-        </div>
-        <div class="col-md-3">
-            <img id="eqLogo" src="/cenoresources/images/logo_eq.png" />
-        </div>
-    </div>
-    
     <script src="/cenoresources/javascript/languages.js"></script>
     <script src="/cenoresources/javascript/feeds.js"></script>
 </body>

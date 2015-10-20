@@ -47,7 +47,6 @@ div#navButtons {
 
 div#articleList {
     padding: 20px 0 20px 0;
-    overflow: scroll;
     height: 100%;
 }
 
@@ -57,6 +56,28 @@ div#articleList ul {
 
 div#articleList ul li {
     margin-bottom: 20px;
+    background-color: #eeedea;
+    padding: 10px;
+}
+
+div#feedList {
+    padding: 20px 0 20px 0;
+    height: 100%;
+}
+
+div#feedList ul {
+    list-style: none;
+}
+
+div#feedList ul li {
+    margin-bottom: 20px;
+    background-color: #eeedea;
+    padding: 10px;
+}
+
+div#feedList ul li p {
+    font-size: 0.8em;
+    margin: 0 0 0 15px;
 }
 
 div.content {
