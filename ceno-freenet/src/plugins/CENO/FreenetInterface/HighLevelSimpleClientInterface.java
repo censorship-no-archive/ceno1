@@ -1,5 +1,6 @@
 package plugins.CENO.FreenetInterface;
 
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 
 import freenet.client.FetchContext;
@@ -22,6 +23,8 @@ import freenet.node.Node;
 import freenet.node.RequestClient;
 import freenet.node.RequestStarter;
 import freenet.support.Logger;
+import freenet.support.SimpleReadOnlyArrayBucket;
+import freenet.support.api.RandomAccessBucket;
 
 public class HighLevelSimpleClientInterface {
 
@@ -90,7 +93,7 @@ public class HighLevelSimpleClientInterface {
 	public static InsertContext getInsertContext(boolean b) {
 		return HLSCInterface.client.getInsertContext(b);
 	}
-	
+
 	public static RequestClient getRequestClient() {
 		return HLSCInterface.requestClient;
 	}
@@ -169,6 +172,19 @@ public class HighLevelSimpleClientInterface {
 			return null;
 		}
 		return insertURI;
+	}
+
+	public static FreenetURI insertSingleChunk(FreenetURI uri, String content, ClientPutCallback cb) throws InsertException, PersistenceDisabledException, UnsupportedEncodingException {
+		RandomAccessBucket b = new SimpleReadOnlyArrayBucket(content.getBytes("UTF-8"));
+
+		InsertContext ctx = node.clientCore.makeClient((short)0, true, false).getInsertContext(true);
+
+		ClientPutter clientPutter = new ClientPutter(cb, b, uri,
+				null, // Modern ARKs easily fit inside 1KB so should be pure SSKs => no MIME type; this improves fetchability considerably
+				ctx,
+				RequestStarter.INTERACTIVE_PRIORITY_CLASS, false, null, false, node.clientCore.clientContext, null, -1L);
+		node.clientCore.clientContext.start(clientPutter);
+		return uri;
 	}
 
 }
