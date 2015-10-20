@@ -71,7 +71,6 @@ type Feed struct {
 	Charset       string `json:"charset"`
 	Articles      int    `json:"articles"`
 	LastPublished string `json:"lastPublished"`
-	LogoUrl       string `json:"logo"`
 	Latest        string `json:"latest"`
 }
 

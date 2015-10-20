@@ -26,7 +26,7 @@ same JSON syntax.  Optional arguments are typed `opt type`- for example, `opt st
 
 Method | Route     | Arguments | Description
 -------|-----------|-----------|------------
-POST   | /follow   | {"url": string, "type": opt string, "logo": opt string} | Instruct the reader to subscribe to a new feed
+POST   | /follow   | {"url": string, "type": opt string} | Instruct the reader to subscribe to a new feed
 DELETE | /unfollow | {"url": string} | Instruct the reader to unsubscribe from a feed
 POST   | /insert   | N/A       | Have the reader generate new JSON files describing feeds and insert and save them
 
@@ -36,7 +36,6 @@ Argument | Example                          | Description
 ---------|----------------------------------|-------------
 url      | https://news.ycombinator.com/rss | The URL of an RSS or Atom feed to subscribe to
 type     | RSS, Atom                        | RSS if the feed is an RSS feed or Atom
-logo     | https://cats.cat/cat.png         | A URL for an image to use as the site's logo
 
 ### Unfollow
 
