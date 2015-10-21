@@ -79,7 +79,7 @@ public class ChannelMaker {
 			sfs.putOverwrite("question", puzzleQuestion);
 
 			FreenetURI insertURIconfig = new FreenetURI(bridgeInsertURI);
-			FreenetURI announcementURI = new FreenetURI("USK", CENOBridge.announcerPath, insertURIconfig.getRoutingKey(), insertURIconfig.getCryptoKey(), insertURIconfig.getExtra());
+			FreenetURI announcementURI = new FreenetURI("USK", CENOBridge.ANNOUNCER_PATH, insertURIconfig.getRoutingKey(), insertURIconfig.getCryptoKey(), insertURIconfig.getExtra());
 
 			Logger.normal(ChannelMaker.class, "Inserting announcement freesite with USK: " + announcementURI.toASCIIString());
 			try {

@@ -1,9 +1,11 @@
 package plugins.CENO.Client;
 
 import plugins.CENO.CENOL10n;
+import plugins.CENO.Configuration;
 import plugins.CENO.Version;
 import plugins.CENO.FreenetInterface.HighLevelSimpleClientInterface;
 import plugins.CENO.FreenetInterface.NodeInterface;
+import freenet.keys.FreenetURI;
 import freenet.pluginmanager.FredPlugin;
 import freenet.pluginmanager.FredPluginHTTP;
 import freenet.pluginmanager.FredPluginRealVersioned;
@@ -28,17 +30,20 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 	private static final ClientHandler clientHandler = new ClientHandler();
 
 	// Plugin-specific configuration
-	public static final String pluginUri = "/plugins/plugins.CENO.CENO";
-	public static final String pluginName = "CENO";
-	private static final Version version = new Version(Version.PluginType.CLIENT);
+	public static final String PLUGIN_URI = "/plugins/plugins.CENO.CENO";
+	public static final String PLUGIN_NAME = "CENO";
+	private static final Version VERSION = new Version(Version.PluginType.CLIENT);
+	
+	public static Configuration initConfig;
+	private static final String CONFIGPATH = ".CENO/client.properties";
 
 	// Bridge and freemail-specific constants
-	public static final String bridgeKey = "SSK@mlfLfkZmWIYVpKbsGSzOU~-XuPp~ItUhD8GlESxv8l4,tcB-IHa9c4wpFudoSm0k-iTaiE~INdeQXvcYP2M1Nec,AQACAAE/";
-	public static final String bridgeIdentityRequestURI = "USK@QfqLw7-BJpGGMnhnJQ3~KkCiciMAsoihBCtSqy6nNbY,-lG83h70XIJ03r4ckdNnsY4zIQ-J8qTqwzSBeIG5q3s,AQACAAE/WebOfTrust/0";
-	public static final String bridgeFreemail = "DEFLECTBridge@ih5ixq57yetjdbrspbtskdp6fjake4rdacziriiefnjkwlvhgw3a.freemail";
+	public static final String BRIDGE_KEY = "SSK@mlfLfkZmWIYVpKbsGSzOU~-XuPp~ItUhD8GlESxv8l4,tcB-IHa9c4wpFudoSm0k-iTaiE~INdeQXvcYP2M1Nec,AQACAAE/";
+	public static final String BRIDGE_IDENTITY_REQUEST_URI = "USK@QfqLw7-BJpGGMnhnJQ3~KkCiciMAsoihBCtSqy6nNbY,-lG83h70XIJ03r4ckdNnsY4zIQ-J8qTqwzSBeIG5q3s,AQACAAE/WebOfTrust/0";
+	public static final String BRIDGE_FREEMAIL = "DEFLECTBridge@ih5ixq57yetjdbrspbtskdp6fjake4rdacziriiefnjkwlvhgw3a.freemail";
 
-	public static final String clientIdentityInsertURI = "USK@SNS-BKGDFS4ciG3HV6o5MQjvIdCDn9G8DfIeIK~7kBQ,WMeRYMzx2tQHM~O8UWglUmBnjIhp~bh8xue-6g2pmps,AQECAAE/WebOfTrust/0";
-	public static final String clientFreemail = "CENO@54u2ko3lssqgalpvfqbq44gwfquqrejm3itl4rxj5nt7v6mjy22q.freemail";
+	public static final String CLIENT_IDENTITY_INSERT_URI = "USK@SNS-BKGDFS4ciG3HV6o5MQjvIdCDn9G8DfIeIK~7kBQ,WMeRYMzx2tQHM~O8UWglUmBnjIhp~bh8xue-6g2pmps,AQECAAE/WebOfTrust/0";
+	public static final String CLIENT_FREEMAIL = "CENO@54u2ko3lssqgalpvfqbq44gwfquqrejm3itl4rxj5nt7v6mjy22q.freemail";
 
 	/**
 	 * {@inheritDoc}
@@ -51,6 +56,9 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 		new HighLevelSimpleClientInterface(pr.getNode());
 		nodeInterface = new NodeInterface(pr.getNode(), pr);
 		new CENOL10n("CENOLANG");
+		
+		initConfig = new Configuration(CONFIGPATH);
+		initConfig.readProperties();
 
 		// Initialize LCS
 		nodeInterface.initFetchContexts();
@@ -65,7 +73,7 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 	 */
 	@Override
 	public String getVersion() {
-		return version.getVersion();
+		return VERSION.getVersion();
 	}
 
 	/**
@@ -73,7 +81,7 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 	 */
 	@Override
 	public long getRealVersion() {
-		return version.getRealVersion();
+		return VERSION.getRealVersion();
 	}
 
 	/**
@@ -83,9 +91,9 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 	public void terminate()
 	{
 		// Clear the CENO client freemail outbox directory
-		nodeInterface.clearOutboxMessages(clientFreemail, bridgeFreemail);
+		nodeInterface.clearOutboxMessages(CLIENT_FREEMAIL, BRIDGE_FREEMAIL);
 		//TODO Release ULPRs' resources
-		Logger.normal(this, pluginName + " terminated.");
+		Logger.normal(this, PLUGIN_NAME + " terminated.");
 	}
 
 	@Override

@@ -42,7 +42,7 @@ public class RequestSender {
 
 		if (shouldSendFreemail(url)) {
 			synchronized (requestSender.bridgeFreemails) {
-				if (CENOClient.nodeInterface.sendFreemail(CENOClient.clientFreemail, requestSender.bridgeFreemails, url, "", "CENO")) {	
+				if (CENOClient.nodeInterface.sendFreemail(CENOClient.CLIENT_FREEMAIL, requestSender.bridgeFreemails, url, "", "CENO")) {	
 					Logger.normal(RequestSender.class, "Sent request to the bridge for URL: " + url);
 				} else {
 					Logger.error(RequestSender.class, "Excpetion while trying to signal Bridge for URL: " + url);

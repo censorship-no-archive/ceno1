@@ -90,7 +90,7 @@ public class ChannelMaker implements Runnable {
 		}
 		FreenetURI bridgeKey;
 		try {
-			bridgeKey = new FreenetURI(CENOClient.bridgeKey);
+			bridgeKey = new FreenetURI(CENOClient.BRIDGE_KEY);
 		} catch (MalformedURLException e1) {
 			channelStatus = ChannelStatus.fatal;
 			return;

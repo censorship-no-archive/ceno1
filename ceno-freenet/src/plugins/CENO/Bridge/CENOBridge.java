@@ -45,20 +45,20 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 	ChannelMaker channelMaker;
 
 	// Plugin-specific configuration
-	public static final String pluginUri = "/plugins/plugins.CENO.CENOBridge";
-	public static final String pluginName = "CENOBridge";
+	public static final String PLUGIN_URI = "/plugins/plugins.CENO.CENOBridge";
+	public static final String PLUGIN_NAME = "CENOBridge";
 	public static Configuration initConfig;
-	private Version version = new Version(Version.PluginType.BRIDGE);
-	private static final String configPath = System.getProperty("user.home") + "/.CENO/bridge.properties";
+	private static final Version VERSION = new Version(Version.PluginType.BRIDGE);
+	private static final String CONFIGPATH = System.getProperty("user.home") + "/.CENO/bridge.properties";
 
-	public static final String bridgeFreemail = "DEFLECTBridge@ih5ixq57yetjdbrspbtskdp6fjake4rdacziriiefnjkwlvhgw3a.freemail";
-	public static final String clientFreemail = "CENO@54u2ko3lssqgalpvfqbq44gwfquqrejm3itl4rxj5nt7v6mjy22q.freemail";
-	public static final String clientIdentityRequestURI = "USK@7ymlO2uUoGAt9SwDDnDWLCkIkSzaJr5G6etn~vmJxrU,WMeRYMzx2tQHM~O8UWglUmBnjIhp~bh8xue-6g2pmps,AQACAAE/WebOfTrust/0";
+	public static final String BRIDGE_FREEMAIL = "DEFLECTBridge@ih5ixq57yetjdbrspbtskdp6fjake4rdacziriiefnjkwlvhgw3a.freemail";
+	public static final String CLIENT_FREEMAIL = "CENO@54u2ko3lssqgalpvfqbq44gwfquqrejm3itl4rxj5nt7v6mjy22q.freemail";
+	public static final String CLIENT_IDENTITY_REQUEST_URI = "USK@7ymlO2uUoGAt9SwDDnDWLCkIkSzaJr5G6etn~vmJxrU,WMeRYMzx2tQHM~O8UWglUmBnjIhp~bh8xue-6g2pmps,AQACAAE/WebOfTrust/0";
 
-	public static final String backboneIdentityRequestURI = "USK@M9UhahTX81i-bB7N8rmWwY5LKKEPfPWgoewNLNkLMmg,IqlCA047XPFoBhxb4gU7YbHWEUV-9iz9mJblXO~w9Zk,AQACAAE/WebOfTrust/0";
-	public static final String backboneFreemail = "deflectbackbone@gpksc2qu27zvrp3md3g7fomwyghewkfbb56plifb5qgszwilgjua.freemail";
+	public static final String BACKBONE_IDENTITY_REQUEST_URI = "USK@M9UhahTX81i-bB7N8rmWwY5LKKEPfPWgoewNLNkLMmg,IqlCA047XPFoBhxb4gU7YbHWEUV-9iz9mJblXO~w9Zk,AQACAAE/WebOfTrust/0";
+	public static final String BACKBONE_FREEMAIL = "deflectbackbone@gpksc2qu27zvrp3md3g7fomwyghewkfbb56plifb5qgszwilgjua.freemail";
 
-	public static final String announcerPath = "CENO-signaler";
+	public static final String ANNOUNCER_PATH = "CENO-signaler";
 
 	public void runPlugin(PluginRespirator pr)
 	{
@@ -70,7 +70,7 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 		new CENOL10n("CENOLANG");
 		
 		// Read properties of the configuration file
-		initConfig = new Configuration(configPath);
+		initConfig = new Configuration(CONFIGPATH);
 		initConfig.readProperties();
 		// If CENO has no private key for inserting freesites,
 		// generate a new key pair and store it in the configuration file
@@ -95,9 +95,9 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 					new RSAKeyParameters(true, new BigInteger(initConfig.getProperty("asymkey.modulus"), 32), new BigInteger(initConfig.getProperty("asymkey.privexponent"), 32)));
 		}
 
-		nodeInterface.clearOutboxLog(bridgeFreemail, clientFreemail);
+		nodeInterface.clearOutboxLog(BRIDGE_FREEMAIL, CLIENT_FREEMAIL);
 		// Initialize RequestReceiver
-		reqReceiver = new RequestReceiver(new String[]{bridgeFreemail});
+		reqReceiver = new RequestReceiver(new String[]{BRIDGE_FREEMAIL});
 		// Start a thread for polling for new freemails
 		reqReceiver.loopFreemailBoxes();
 		
@@ -174,11 +174,11 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 	}
 
 	public String getVersion() {
-		return version.getVersion();
+		return VERSION.getVersion();
 	}
 
 	public long getRealVersion() {
-		return version.getRealVersion();
+		return VERSION.getRealVersion();
 	}
 
 	/**
@@ -189,7 +189,7 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 	{
 		// Stop the thread that is polling for freemails
 		reqReceiver.stopLooping();
-		nodeInterface.clearOutboxLog(bridgeFreemail, clientFreemail);
+		nodeInterface.clearOutboxLog(BRIDGE_FREEMAIL, CLIENT_FREEMAIL);
 		
 		channelMaker.stopListener();
 
@@ -203,7 +203,7 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 			}
 		}
 
-		Logger.normal(this, pluginName + " terminated.");
+		Logger.normal(this, PLUGIN_NAME + " terminated.");
 	}
 
 }

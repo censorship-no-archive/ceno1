@@ -108,7 +108,7 @@ public class ULPRManager {
 		updateULPRStatus(url, ULPRStatus.starting);
 		FreenetURI calculatedUSK = null;
 		try {
-			calculatedUSK = URLtoUSKTools.computeUSKfromURL(url, CENOClient.bridgeKey);
+			calculatedUSK = URLtoUSKTools.computeUSKfromURL(url, CENOClient.BRIDGE_KEY);
 		} catch (Exception e) {
 			Logger.error(this, "Could not calculate USK for URL: " + url);
 			updateULPRStatus(url, ULPRStatus.couldNotStart);

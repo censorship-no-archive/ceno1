@@ -54,7 +54,7 @@ public class LookupHandler extends AbstractCENOClientHandler {
 		// Calculate the retrieval address of the inserted bundle for this URL
 		FreenetURI calculatedUSK = null;
 		try {
-			calculatedUSK = URLtoUSKTools.computeUSKfromURL(urlParam, CENOClient.bridgeKey);
+			calculatedUSK = URLtoUSKTools.computeUSKfromURL(urlParam, CENOClient.BRIDGE_KEY);
 		} catch (Exception e) {
 			return returnError(new CENOException(CENOErrCode.LCS_HANDLER_URL_INVALID), clientIsHtml);
 		}
