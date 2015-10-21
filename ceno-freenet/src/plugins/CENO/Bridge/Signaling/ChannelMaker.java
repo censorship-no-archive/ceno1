@@ -30,7 +30,7 @@ public class ChannelMaker {
 	private AsymmetricCipherKeyPair asymKeyPair;
 	ChannelMakerListener channelListener;
 
-	static final long KSK_POLLING_PAUSE = TimeUnit.MINUTES.toMillis(10);
+	static final long KSK_POLLING_PAUSE = TimeUnit.MINUTES.toMillis(5);
 
 	public ChannelMaker(String insertURI, AsymmetricCipherKeyPair asymKeyPair) throws CENOException {
 		this.bridgeInsertURI = insertURI;
@@ -117,13 +117,14 @@ public class ChannelMaker {
 					} catch (FetchException e) {
 						// TODO Fine-grain log messages according to FetchException codes
 						if(e.mode == FetchExceptionMode.RECENTLY_FAILED) {
-							window += TimeUnit.MINUTES.toMillis(1);
+							window++;
 						}
 						Logger.minor(ChannelMakerListener.class, "Exception while fetching KSK clients use for making channels: " + e.getShortMessage());
 					}
 
 					if (kskContent != null) {
-						window -= TimeUnit.MINUTES.toMillis(1);
+						Logger.minor(this, "Congestion window for fetching KSKs without getting Recently Failed exceptions set to: " + window + " minutes");
+						window--;
 						/*
 						try {
 							Crypto.decryptMessage(kskContent.asByteArray(), (RSAKeyParameters) asymKeyPair.getPrivate());
@@ -142,7 +143,7 @@ public class ChannelMaker {
 						}
 					}
 					// Pause the looping thread
-					Thread.sleep(KSK_POLLING_PAUSE + window);
+					Thread.sleep(KSK_POLLING_PAUSE + TimeUnit.MINUTES.toMillis(window));
 				}
 			} catch (InterruptedException e) {
 				continueLoop = false;

@@ -40,6 +40,7 @@ public class ChannelMaker implements Runnable {
 			if (signalSSKString != null && signalSSKString.isEmpty()) {
 				signalSSK = new FreenetURI(signalSSKString);
 				this.signalSSK = signalSSK;
+				channelStatus = ChannelStatus.puzzleSolved;
 			} else {
 				this.signalSSK = CENOClient.nodeInterface.generateKeyPair()[0];
 			}
