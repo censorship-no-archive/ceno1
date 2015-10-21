@@ -158,6 +158,7 @@ func stripHttps(URL string) (string, bool) {
  * @param {*Request} r - Information about the request
  */
 func directHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Got request to directHandler")
 	qs := r.URL.Query()
 	T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
 	URLS, found := qs["url"]
@@ -166,7 +167,7 @@ func directHandler(w http.ResponseWriter, r *http.Request) {
 			"responseWriter": w,
 			"request":        r,
 		})
-        return
+		return
 	}
 	// Decode the URL so we can save effort by just passing the modified request to
 	// the proxyHandler function from here.
@@ -176,27 +177,28 @@ func directHandler(w http.ResponseWriter, r *http.Request) {
 			"responseWriter": w,
 			"request":        r,
 		})
-        return
+		return
 	}
 	decodedURL := string(decodedBytes)
+	fmt.Println("Decoded URL to " + decodedURL)
 	stripped, rewritten := stripHttps(decodedURL)
-    if stripped == CENOPORTAL || stripped == PORTAL {
-        CreatePortalPage(w, r)
-    } else {
-	    if rewritten {
-		    r.Header.Set(REWRITTEN_HEADER, "true")
-	    }
-	    newURL, parseErr := url.Parse(stripped)
-	    if parseErr != nil {
-		    HandleCCError(ERR_MALFORMED_URL, T("malformed_url_cli", map[string]interface{}{
-			    "URL": stripped,
-		    }), ErrorState{"responseWriter": w, "request": r})
-	    } else {
-		    // Finally we can pass the modified request onto the proxy server.
-		    r.URL = newURL
-		    proxyHandler(w, r)
-	    }
-    }
+	if stripped == CENOPORTAL || stripped == PORTAL {
+		CreatePortalPage(w, r)
+	} else {
+		if rewritten {
+			r.Header.Set(REWRITTEN_HEADER, "true")
+		}
+		newURL, parseErr := url.Parse(stripped)
+		if parseErr != nil {
+			HandleCCError(ERR_MALFORMED_URL, T("malformed_url_cli", map[string]interface{}{
+				"URL": stripped,
+			}), ErrorState{"responseWriter": w, "request": r})
+		} else {
+			// Finally we can pass the modified request onto the proxy server.
+			r.URL = newURL
+			proxyHandler(w, r)
+		}
+	}
 }
 
 /**
