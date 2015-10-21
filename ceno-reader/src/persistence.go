@@ -18,7 +18,10 @@ const createFeedsTable = `create table if not exists feeds(
     id integer primary key,
     url varchar(255) unique,
     type varchar(8),
-    charset varchar(64)
+    charset varchar(64),
+    articles integer,
+    lastPublished varchar(64),
+    latest varchar(255)
 );`
 
 const createItemsTable = `create table if not exists items(
@@ -109,15 +112,16 @@ func AllFeeds(db *sql.DB) ([]Feed, error) {
 	if err1 != nil {
 		return feeds, err1
 	}
-	rows, err2 := tx.Query("select id, url, type, charset from feeds")
+	rows, err2 := tx.Query(`select id, url, type, charset, articles, lastPublished, latest
+                            from feeds`)
 	if err2 != nil {
 		return feeds, err2
 	}
 	for rows.Next() {
-		var url, _type, charset string
-		var id int
-		rows.Scan(&id, &url, &_type, &charset)
-		feeds = append(feeds, Feed{id, url, _type, charset, 0, "", "", ""})
+		var url, _type, charset, lastPublished, latest string
+		var id, articles int
+		rows.Scan(&id, &url, &_type, &charset, &articles, &lastPublished, &latest)
+		feeds = append(feeds, Feed{id, url, _type, charset, articles, lastPublished, latest})
 	}
 	rows.Close()
 	return feeds, nil
@@ -134,7 +138,8 @@ func GetFeed(db *sql.DB, url string) (Feed, error) {
 	if err1 != nil {
 		return feed, err1
 	}
-	stmt, err2 := tx.Prepare("select id, url, type, charset from feeds where url=?")
+	stmt, err2 := tx.Prepare(`select id, url, type, charset, articles, lastPublished, latest
+                              from feeds where url=?`)
 	if err2 != nil {
 		return feed, err2
 	}
@@ -143,11 +148,11 @@ func GetFeed(db *sql.DB, url string) (Feed, error) {
 	if err3 != nil {
 		return feed, err3
 	}
-	var id int
-	var _type, charset string
-	rows.Scan(&id, &url, &_type, &charset)
+	var id, articles int
+	var _type, charset, lastPublished, latest string
+	rows.Scan(&id, &url, &_type, &charset, &articles, &lastPublished, &latest)
 	rows.Close()
-	return Feed{id, url, _type, charset, 0, "", "", ""}, nil
+	return Feed{id, url, _type, charset, articles, lastPublished, latest}, nil
 }
 
 /**
@@ -184,6 +189,7 @@ func SaveItem(db *sql.DB, feedUrl string, item *rss.Item) error {
 	if err1 != nil {
 		return err1
 	}
+	// Insert the item itself
 	stmt, err2 := tx.Prepare(`insert into items(title, url, feed_url, authors, published)
                               values(?, ?, ?, ?, ?)`)
 	if err2 != nil {
@@ -200,6 +206,18 @@ func SaveItem(db *sql.DB, feedUrl string, item *rss.Item) error {
 	_, err3 := stmt.Exec(item.Title, url, feedUrl, authors, item.PubDate)
 	if err3 != nil {
 		return err3
+	}
+	// Update the feed the article came from accordingly
+	stmt2, err4 := tx.Prepare(`update feeds set
+                               articles=articles+1 lastPublished=?, latest=?
+                               where url=?`)
+	if err4 != nil {
+		return err4
+	}
+	defer stmt2.Close()
+	_, err5 := stmt2.Exec(item.PubDate, item.Title, feedUrl)
+	if err5 != nil {
+		return err5
 	}
 	tx.Commit()
 	return nil

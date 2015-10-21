@@ -68,13 +68,14 @@ func itemFeedHandler(feed *rss.Feed, channel *rss.Channel, newItems []*rss.Item)
  */
 func pollFeed(URL string, charsetReader xmlx.CharsetFunc) {
 	// Poll every five seconds
+	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
 	feed := rss.New(5, true, channelFeedHandler, itemFeedHandler)
 	for {
 		if err := feed.Fetch(URL, charsetReader); err != nil {
-            fmt.Println(T("feed_poll_err", map[string]string{
-                "Url": URL,
-                "Error", err.Error(),
-            }))
+			fmt.Println(T("feed_poll_err", map[string]string{
+				"Url":   URL,
+				"Error": err.Error(),
+			}))
 		}
 		<-time.After(time.Duration(feed.SecondsTillUpdate() * 1e9))
 	}
