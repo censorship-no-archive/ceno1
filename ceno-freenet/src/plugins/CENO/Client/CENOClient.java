@@ -1,12 +1,9 @@
 package plugins.CENO.Client;
 
-import java.net.MalformedURLException;
-
 import plugins.CENO.CENOL10n;
 import plugins.CENO.Version;
 import plugins.CENO.FreenetInterface.HighLevelSimpleClientInterface;
 import plugins.CENO.FreenetInterface.NodeInterface;
-import freenet.client.InsertException;
 import freenet.pluginmanager.FredPlugin;
 import freenet.pluginmanager.FredPluginHTTP;
 import freenet.pluginmanager.FredPluginRealVersioned;
@@ -59,23 +56,8 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 		nodeInterface.initFetchContexts();
 		ULPRManager.init();
 
-		// Initialize RS
-		ChannelMaker channelMaker = null;
-		try {
-			channelMaker = new ChannelMaker(null);
-		} catch (MalformedURLException e) {
-			//TODO Log
-			terminate();
-		}
-		try {
-			channelMaker.establishChannel();
-		} catch (MalformedURLException e) {
-			//TODO Log
-			terminate();
-		} catch (InsertException e) {
-			//TODO Log
-			terminate();
-		}
+		// Initialize RS - Make a new class ChannelManager that handles ChannelMaker
+		//ChannelMaker channelMaker = new ChannelMaker();
 	}
 
 	/**

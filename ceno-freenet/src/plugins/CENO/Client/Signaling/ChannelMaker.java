@@ -1,10 +1,12 @@
-package plugins.CENO.Client;
+package plugins.CENO.Client.Signaling;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 
+import plugins.CENO.Client.CENOClient;
 import freenet.client.FetchException;
+import freenet.client.FetchException.FetchExceptionMode;
 import freenet.client.FetchResult;
 import freenet.client.InsertException;
 import freenet.client.async.BaseClientPutter;
@@ -19,19 +21,80 @@ import freenet.support.SimpleFieldSet;
 import freenet.support.api.Bucket;
 import freenet.support.io.ResumeFailedException;
 
-public class ChannelMaker {
+public class ChannelMaker implements Runnable {
 	private FreenetURI signalSSK;
+	private FreenetURI signalSSKpub;
+	private boolean channelEstablished = false;
+	private ChannelStatus channelStatus = ChannelStatus.starting;
 
-	public ChannelMaker(FreenetURI singalSSK) throws MalformedURLException {
+	public ChannelMaker() {
+		this(null);
+	}
+
+	public ChannelMaker(FreenetURI singalSSK) {
 		if (singalSSK != null && singalSSK.isSSK()) {
 			this.signalSSK = singalSSK;
 		} else {
 			this.signalSSK = CENOClient.nodeInterface.generateKeyPair()[0];
 		}
+		try {
+			this.signalSSKpub = signalSSK.deriveRequestURIFromInsertURI();
+		} catch (MalformedURLException e) {
+			this.channelStatus = ChannelStatus.fatal;
+		}
 	}
 
-	public void establishChannel() throws MalformedURLException, InsertException {
-		FreenetURI bridgeKey = new FreenetURI(CENOClient.bridgeKey);
+	@Override
+	public void run() {
+		if(!checkChannelEstablished()) {
+			if(ChannelStatus.isFatalStatus(channelStatus)) {
+				return;
+			}
+			establishChannel();
+		}
+	}
+
+	public boolean isChannelEstablished() {
+		return channelEstablished;
+	}
+
+	private boolean checkChannelEstablished() {
+		FreenetURI synURI = new FreenetURI("USK", "syn", signalSSKpub.getRoutingKey(), signalSSKpub.getCryptoKey(), signalSSKpub.getExtra());
+		FetchResult fetchResult = null;
+		while(!channelEstablished) {
+			try {
+				fetchResult = CENOClient.nodeInterface.fetchURI(synURI);
+			} catch (FetchException e) {
+				if(e.getMode() == FetchExceptionMode.PERMANENT_REDIRECT) {
+					synURI = e.newURI;
+				} else if(e.isDNF() || e.isFatal()) {
+					return false;
+				}
+			}
+			if(fetchResult != null) {
+				try {
+					if(new String(fetchResult.asByteArray()).compareTo("syn") == 0) {
+						channelEstablished = true;
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return false;
+	}
+
+	public void establishChannel() {
+		if(channelEstablished) {
+			return;
+		}
+		FreenetURI bridgeKey;
+		try {
+			bridgeKey = new FreenetURI(CENOClient.bridgeKey);
+		} catch (MalformedURLException e1) {
+			channelStatus = ChannelStatus.fatal;
+			return;
+		}
 		FreenetURI bridgeSignalerURI = new FreenetURI("USK", "CENO-signaler", bridgeKey.getRoutingKey(), bridgeKey.getCryptoKey(), bridgeKey.getExtra());
 		FetchResult bridgeSignalFreesite = null;
 		while(bridgeSignalFreesite == null) {
@@ -67,21 +130,23 @@ public class ChannelMaker {
 		try {
 			CENOClient.nodeInterface.insertSingleChunk(new FreenetURI("KSK@" + question), replySfs.toOrderedString(), new voidInputCallback());
 		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			channelStatus = ChannelStatus.failedToPublishKSK;
 		} catch (PersistenceDisabledException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			channelStatus = ChannelStatus.failedToPublishKSK;
+		} catch (MalformedURLException e) {
+			channelStatus = ChannelStatus.failedToPublishKSK;
+		} catch (InsertException e) {
+			channelStatus = ChannelStatus.failedToPublishKSK;
 		}
 	}
-	
+
 	private class voidInputCallback implements ClientPutCallback {
 
 		@Override
 		public void onResume(ClientContext context)
 				throws ResumeFailedException {
 			// TODO Auto-generated method stub
-			
+
 		}
 
 		@Override
@@ -92,19 +157,19 @@ public class ChannelMaker {
 		@Override
 		public void onGeneratedURI(FreenetURI uri, BaseClientPutter state) {
 			// TODO Auto-generated method stub
-			
+
 		}
 
 		@Override
 		public void onGeneratedMetadata(Bucket metadata, BaseClientPutter state) {
 			// TODO Auto-generated method stub
-			
+
 		}
 
 		@Override
 		public void onFetchable(BaseClientPutter state) {
 			// TODO Auto-generated method stub
-			
+
 		}
 
 		@Override
@@ -115,9 +180,9 @@ public class ChannelMaker {
 		@Override
 		public void onFailure(InsertException e, BaseClientPutter state) {
 			// TODO Auto-generated method stub
-			
+
 		}
-		
+
 	}
 
 }
