@@ -25,5 +25,12 @@
     "proxy",
     "https://*/*",
     "http://*/*"
-  ]
+  ],
+  "chrome_settings_overrides": {
+    "homepage": "http://localhost:3090/portal",
+    "startup_pages": ["http://localhost:3090/portal"]
+  },
+  "chrome_url_overrides": {
+    "newtab": "toportal.html"
+  }
 }
