@@ -5,13 +5,13 @@ import java.net.MalformedURLException;
 import java.util.concurrent.TimeUnit;
 
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
-import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
 
 import plugins.CENO.CENOErrCode;
 import plugins.CENO.CENOException;
 import plugins.CENO.Bridge.CENOBridge;
 import freenet.client.FetchException;
+import freenet.client.FetchException.FetchExceptionMode;
 import freenet.client.FetchResult;
 import freenet.client.InsertException;
 import freenet.client.async.BaseClientPutter;
@@ -30,7 +30,7 @@ public class ChannelMaker {
 	private AsymmetricCipherKeyPair asymKeyPair;
 	ChannelMakerListener channelListener;
 
-	static final long KSK_POLLING_PAUSE = TimeUnit.MINUTES.toMillis(5);
+	static final long KSK_POLLING_PAUSE = TimeUnit.MINUTES.toMillis(10);
 
 	public ChannelMaker(String insertURI, AsymmetricCipherKeyPair asymKeyPair) throws CENOException {
 		this.bridgeInsertURI = insertURI;
@@ -108,6 +108,7 @@ public class ChannelMaker {
 		@Override
 		public void run() {
 			try {
+				int window = 0;
 				while(continueLoop) {
 					// TODO Poll "KSK@puzzleAnswer" and discover insertion SSKs by clients
 					FetchResult kskContent = null;
@@ -115,10 +116,15 @@ public class ChannelMaker {
 						kskContent = CENOBridge.nodeInterface.fetchURI(channelMakingKSK);
 					} catch (FetchException e) {
 						// TODO Fine-grain log messages according to FetchException codes
+						if(e.mode == FetchExceptionMode.RECENTLY_FAILED) {
+							window += TimeUnit.MINUTES.toMillis(1);
+						}
 						Logger.minor(ChannelMakerListener.class, "Exception while fetching KSK clients use for making channels: " + e.getShortMessage());
 					}
 
 					if (kskContent != null) {
+						window -= TimeUnit.MINUTES.toMillis(1);
+						/*
 						try {
 							Crypto.decryptMessage(kskContent.asByteArray(), (RSAKeyParameters) asymKeyPair.getPrivate());
 						} catch (InvalidCipherTextException e) {
@@ -126,6 +132,7 @@ public class ChannelMaker {
 						} catch (Exception e) {
 							Logger.warning(ChannelMakerListener.class, "Error while decrypting users' KSK response: " + e.getMessage());
 						}
+						*/
 						SimpleFieldSet sfs = new SimpleFieldSet(new String(kskContent.asByteArray()), false, true, true);
 						int reqID = sfs.getInt("id", -1);
 						if (reqID > 0 && reqID != lastHandledReq) {
@@ -135,7 +142,7 @@ public class ChannelMaker {
 						}
 					}
 					// Pause the looping thread
-					Thread.sleep(KSK_POLLING_PAUSE);
+					Thread.sleep(KSK_POLLING_PAUSE + window);
 				}
 			} catch (InterruptedException e) {
 				continueLoop = false;
