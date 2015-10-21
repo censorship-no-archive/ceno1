@@ -189,13 +189,6 @@ func SaveItem(db *sql.DB, feedUrl string, item *rss.Item) error {
 	if err1 != nil {
 		return err1
 	}
-	// Insert the item itself
-	stmt, err2 := tx.Prepare(`insert into items(title, url, feed_url, authors, published)
-                              values(?, ?, ?, ?, ?)`)
-	if err2 != nil {
-		return err2
-	}
-	defer stmt.Close()
 	url := item.Links[0].Href
 	authors := item.Author.Name
 	if item.Contributors != nil {
@@ -203,24 +196,63 @@ func SaveItem(db *sql.DB, feedUrl string, item *rss.Item) error {
 			authors += " " + contrib
 		}
 	}
-	_, err3 := stmt.Exec(item.Title, url, feedUrl, authors, item.PubDate)
+	// Insert the item itself
+	_, err2 := tx.Exec(`
+        insert into items(title, url, feed_url, authors, published)
+        values(?, ?, ?, ?, ?)`,
+		item.Title, url, feedUrl, authors, item.PubDate)
+	if err2 != nil {
+		return err2
+	}
+	_, err3 := tx.Exec(`
+        update feeds
+        set articles=articles+1, lastPublished=?, latest=?
+        where url=?`,
+		item.PubDate, item.Title, feedUrl)
 	if err3 != nil {
 		return err3
 	}
-	// Update the feed the article came from accordingly
-	stmt2, err4 := tx.Prepare(`update feeds set
-                               articles=articles+1 lastPublished=?, latest=?
-                               where url=?`)
-	if err4 != nil {
-		return err4
-	}
-	defer stmt2.Close()
-	_, err5 := stmt2.Exec(item.PubDate, item.Title, feedUrl)
-	if err5 != nil {
-		return err5
-	}
 	tx.Commit()
 	return nil
+	/*
+			stmt, err2 := tx.Prepare(`insert into items(title, url, feed_url, authors, published)
+		                              values(?, ?, ?, ?, ?)
+		                              update feeds
+		                              set articles=articles+1, lastPublished=?, latest=?
+		                              wehere url=?;`)
+			if err2 != nil {
+				return err2
+			}
+			defer stmt.Close()
+			url := item.Links[0].Href
+			authors := item.Author.Name
+			if item.Contributors != nil {
+				for _, contrib := range item.Contributors {
+					authors += " " + contrib
+				}
+			}
+			_, err3 := stmt.Exec(
+				item.Title, url, feedUrl, authors, item.PubDate, item.PubDate, item.Title, feedUrl)
+			if err3 != nil {
+				return err3
+			}
+			tx.Commit()
+			return nil
+				tx, _ = db.Begin()
+				// Update the feed the article came from accordingly
+				stmt2, err4 := tx.Prepare(`update feeds set
+			                               articles=articles+1, lastPublished=?, latest=?
+			                               where url=?`)
+				if err4 != nil {
+					return err4
+				}
+				defer stmt2.Close()
+				_, err5 := stmt2.Exec(item.PubDate, item.Title, feedUrl)
+				if err5 != nil {
+					return err5
+				}
+				return nil
+	*/
 }
 
 /**
