@@ -10,6 +10,7 @@ import (
 	"database/sql"
 	rss "github.com/jteeuwen/go-pkg-rss"
 	//"github.com/jteeuwen/go-pkg-xmlx"
+	"fmt"
 	_ "github.com/mattn/go-sqlite3"
 	"time"
 )
@@ -89,14 +90,12 @@ func SaveFeed(db *sql.DB, feed Feed) error {
 	if err1 != nil {
 		return err1
 	}
-	stmt, err2 := tx.Prepare("insert into feeds(url, type, charset) values(?,?,?)")
+	_, err2 := tx.Exec(`
+        insert into feeds(url, type, charset, articles, lastPublished, latest)
+        values(?,?,?,?,?,?)`,
+		feed.Url, feed.Type, feed.Charset, feed.Articles, feed.LastPublished, feed.Latest)
 	if err2 != nil {
 		return err2
-	}
-	defer stmt.Close()
-	_, err3 := stmt.Exec(feed.Url, feed.Type, feed.Charset)
-	if err3 != nil {
-		return err3
 	}
 	tx.Commit()
 	return nil
@@ -121,6 +120,8 @@ func AllFeeds(db *sql.DB) ([]Feed, error) {
 		var url, _type, charset, lastPublished, latest string
 		var id, articles int
 		rows.Scan(&id, &url, &_type, &charset, &articles, &lastPublished, &latest)
+		fmt.Printf("Found feed %s with %d articles. Last published %s on %s.\n",
+			url, articles, latest, lastPublished)
 		feeds = append(feeds, Feed{id, url, _type, charset, articles, lastPublished, latest})
 	}
 	rows.Close()

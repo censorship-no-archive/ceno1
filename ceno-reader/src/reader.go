@@ -95,6 +95,7 @@ func followFeeds(requests chan SaveFeedRequest) {
 		saveErr := SaveFeed(DBConnection, feedInfo)
 		if saveErr != nil {
 			fmt.Println("Could not save")
+			fmt.Println(saveErr)
 			request.W.Write([]byte(T("db_store_error_rdr", map[string]interface{}{"Error": saveErr.Error()})))
 			return
 		} else {
