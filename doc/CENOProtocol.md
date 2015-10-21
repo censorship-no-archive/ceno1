@@ -74,7 +74,7 @@ Step | Description                                          | Message
 6    | RS signals RR on bridge to create new bundle         | Depends on the implementation of the signaling channel
 7    | RR requests a bundle for the `<url>` in the request  | `[GET <BS>/?url=<url>]`
 8    | BS creates a bundle and returns it to the RR         | `[write {"created": <now>, "url": <url>,  "bundle": <bundle>}]`
-9    | RR requests the BI insert the bundle into Freenet    | `[POST <BI>/insert?created=<created>&url=<url>&bundle=<bundle>]`
+9    | RR requests the BI insert the bundle into Freenet    | `[POST <BI>/insert {"created": <created>, "url": <url>, "bundle": <bundle>}]`
 10   | BI acknowledges the request for insertion            | `[write "okay"]`
 
 
