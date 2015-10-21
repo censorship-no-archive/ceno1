@@ -16,8 +16,8 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
 
 public abstract class CENOJettyHandler extends AbstractHandler {
 
-	public abstract void handle(String arg0, Request arg1, HttpServletRequest arg2,
-			HttpServletResponse arg3) throws IOException, ServletException;
+	public abstract void handle(String target, Request baseRequest, HttpServletRequest request,
+			HttpServletResponse response) throws IOException, ServletException;
 
 	protected void writeWelcome(Request baseRequest, HttpServletResponse response, String requestPath) throws IOException {
 		response.setContentType("text/html;charset=utf-8");
