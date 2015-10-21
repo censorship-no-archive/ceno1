@@ -3,9 +3,9 @@ package plugins.CENO.Client;
 import plugins.CENO.CENOL10n;
 import plugins.CENO.Configuration;
 import plugins.CENO.Version;
+import plugins.CENO.Client.Signaling.ChannelMaker;
 import plugins.CENO.FreenetInterface.HighLevelSimpleClientInterface;
 import plugins.CENO.FreenetInterface.NodeInterface;
-import freenet.keys.FreenetURI;
 import freenet.pluginmanager.FredPlugin;
 import freenet.pluginmanager.FredPluginHTTP;
 import freenet.pluginmanager.FredPluginRealVersioned;
@@ -33,9 +33,12 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 	public static final String PLUGIN_URI = "/plugins/plugins.CENO.CENO";
 	public static final String PLUGIN_NAME = "CENO";
 	private static final Version VERSION = new Version(Version.PluginType.CLIENT);
-	
+
 	public static Configuration initConfig;
 	private static final String CONFIGPATH = ".CENO/client.properties";
+
+	private ChannelMaker channelMaker;
+	private Thread channelMakerThread;
 
 	// Bridge and freemail-specific constants
 	public static final String BRIDGE_KEY = "SSK@mlfLfkZmWIYVpKbsGSzOU~-XuPp~ItUhD8GlESxv8l4,tcB-IHa9c4wpFudoSm0k-iTaiE~INdeQXvcYP2M1Nec,AQACAAE/";
@@ -56,16 +59,19 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 		new HighLevelSimpleClientInterface(pr.getNode());
 		nodeInterface = new NodeInterface(pr.getNode(), pr);
 		new CENOL10n("CENOLANG");
-		
-		initConfig = new Configuration(CONFIGPATH);
-		initConfig.readProperties();
 
 		// Initialize LCS
 		nodeInterface.initFetchContexts();
 		ULPRManager.init();
 
+		initConfig = new Configuration(CONFIGPATH);
+		initConfig.readProperties();
+
 		// Initialize RS - Make a new class ChannelManager that handles ChannelMaker
-		//ChannelMaker channelMaker = new ChannelMaker();
+		channelMaker = new ChannelMaker(initConfig.getProperty("signalSSK"));
+
+		channelMakerThread = new Thread(channelMaker);
+		channelMakerThread.start();
 	}
 
 	/**
@@ -90,6 +96,15 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 	@Override
 	public void terminate()
 	{
+		if(channelMaker != null && channelMaker.canSend()) {
+			initConfig.setProperty("signalSSK", channelMaker.getSignalSSK());
+			initConfig.storeProperties();
+		}
+		
+		if(channelMakerThread != null && channelMakerThread.isAlive()) {
+			channelMakerThread.interrupt();
+		}
+
 		// Clear the CENO client freemail outbox directory
 		nodeInterface.clearOutboxMessages(CLIENT_FREEMAIL, BRIDGE_FREEMAIL);
 		//TODO Release ULPRs' resources

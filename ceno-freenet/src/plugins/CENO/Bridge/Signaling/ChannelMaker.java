@@ -1,7 +1,6 @@
 package plugins.CENO.Bridge.Signaling;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.concurrent.TimeUnit;
 
@@ -12,11 +11,8 @@ import org.bouncycastle.crypto.params.RSAKeyParameters;
 import plugins.CENO.CENOErrCode;
 import plugins.CENO.CENOException;
 import plugins.CENO.Bridge.CENOBridge;
-import freenet.client.ClientMetadata;
-import freenet.client.DefaultMIMETypes;
 import freenet.client.FetchException;
 import freenet.client.FetchResult;
-import freenet.client.InsertBlock;
 import freenet.client.InsertException;
 import freenet.client.async.BaseClientPutter;
 import freenet.client.async.ClientContext;
@@ -27,7 +23,6 @@ import freenet.node.RequestClient;
 import freenet.support.Logger;
 import freenet.support.SimpleFieldSet;
 import freenet.support.api.Bucket;
-import freenet.support.api.RandomAccessBucket;
 import freenet.support.io.ResumeFailedException;
 
 public class ChannelMaker {

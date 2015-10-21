@@ -31,14 +31,16 @@ public class ChannelMaker implements Runnable {
 		this(null);
 	}
 
-	public ChannelMaker(FreenetURI singalSSK) {
-		if (singalSSK != null && singalSSK.isSSK()) {
-			this.signalSSK = singalSSK;
-		} else {
-			this.signalSSK = CENOClient.nodeInterface.generateKeyPair()[0];
-		}
+	public ChannelMaker(String signalSSKString) {
 		try {
-			this.signalSSKpub = signalSSK.deriveRequestURIFromInsertURI();
+			FreenetURI signalSSK;
+			if (signalSSKString != null && signalSSKString.isEmpty()) {
+				signalSSK = new FreenetURI(signalSSKString);
+				this.signalSSK = signalSSK;
+			} else {
+				this.signalSSK = CENOClient.nodeInterface.generateKeyPair()[0];
+			}
+			this.signalSSKpub = this.signalSSK.deriveRequestURIFromInsertURI();
 		} catch (MalformedURLException e) {
 			this.channelStatus = ChannelStatus.fatal;
 		}
@@ -54,8 +56,16 @@ public class ChannelMaker implements Runnable {
 		}
 	}
 
-	public boolean isChannelEstablished() {
-		return channelEstablished;
+	public String getSignalSSK() {
+		return signalSSK.toASCIIString();
+	}
+
+	public boolean isFatal() {
+		return ChannelStatus.isFatalStatus(channelStatus);
+	}
+
+	public boolean canSend() {
+		return ChannelStatus.canSend(channelStatus);
 	}
 
 	private boolean checkChannelEstablished() {
@@ -103,8 +113,13 @@ public class ChannelMaker implements Runnable {
 			} catch (FetchException e) {
 				if (e.mode == FetchException.FetchExceptionMode.PERMANENT_REDIRECT) {
 					bridgeSignalerURI = e.newURI;
+					continue;
 				}
-				Logger.warning(this, "Exception while retrieving the bridge's signal page");
+				if (e.isFatal()) {
+					channelStatus = ChannelStatus.failedToGetSignalSSK;
+					return;
+				}
+				Logger.warning(this, "Exception while retrieving the bridge's signal page: " + e.getMessage());
 			}
 		}
 		SimpleFieldSet sfs;
@@ -113,22 +128,23 @@ public class ChannelMaker implements Runnable {
 			sfs = new SimpleFieldSet(new String(bridgeSignalFreesite.asByteArray()), false, true, true);
 			question = sfs.getString("question");
 		} catch (IOException e) {
-			e.printStackTrace();
+			Logger.error(this, "IOException while reading the CENO-signaler page");
 		} catch (FSParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Logger.error(this, "Exception while parsing the SFS of the CENO-signaler");
 		}
 		if (question == null) {
 			// CENO Client won't be able to signal the bridge
 			//TODO Terminate plugin
+			channelStatus = ChannelStatus.failedToSolvePuzzle;
 			return;
 		}
 		SimpleFieldSet replySfs = new SimpleFieldSet(true);
 		replySfs.put("id", (int) (Math.random() * (Integer.MAX_VALUE * 0.8)));
 		replySfs.putOverwrite("insertURI", signalSSK.toASCIIString());
-		//TODO Encrypt singalSSK{
+		//TODO Encrypt singalSSK
+		FreenetURI insertedKSK = null;
 		try {
-			CENOClient.nodeInterface.insertSingleChunk(new FreenetURI("KSK@" + question), replySfs.toOrderedString(), new voidInputCallback());
+			insertedKSK = CENOClient.nodeInterface.insertSingleChunk(new FreenetURI("KSK@" + question), replySfs.toOrderedString(), new voidInputCallback());
 		} catch (UnsupportedEncodingException e) {
 			channelStatus = ChannelStatus.failedToPublishKSK;
 		} catch (PersistenceDisabledException e) {
@@ -138,6 +154,10 @@ public class ChannelMaker implements Runnable {
 		} catch (InsertException e) {
 			channelStatus = ChannelStatus.failedToPublishKSK;
 		}
+		if(insertedKSK == null) {
+			return;
+		}
+		checkChannelEstablished();
 	}
 
 	private class voidInputCallback implements ClientPutCallback {

@@ -5,6 +5,7 @@ import java.util.EnumSet;
 public enum ChannelStatus {
 		starting,
 		fatal,
+		failedToGetSignalSSK,
 		gotSignalSSK,
 		failedToSolvePuzzle,
 		puzzleSolved,
@@ -14,9 +15,14 @@ public enum ChannelStatus {
 		waitingForSyn,
 		syn;
 		
-	static EnumSet<ChannelStatus> fatalChannelStatus = EnumSet.of(fatal, failedToSolvePuzzle, failedToEncrypt, failedToPublishKSK);
+	static EnumSet<ChannelStatus> fatalChannelStatus = EnumSet.of(fatal, failedToGetSignalSSK, failedToSolvePuzzle, failedToEncrypt, failedToPublishKSK);
+	static EnumSet<ChannelStatus> canSend = EnumSet.of(waitingForSyn, syn);
 	
 	public static boolean isFatalStatus(ChannelStatus status) {
 		return fatalChannelStatus.contains(status);
+	}
+	
+	public static boolean canSend(ChannelStatus status) {
+		return canSend.contains(status);
 	}
 }
