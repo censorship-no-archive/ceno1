@@ -4,6 +4,8 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import plugins.CENO.Bridge.CENOBridge;
+
 import freenet.node.FSParseException;
 import freenet.support.SimpleFieldSet;
 
@@ -65,6 +67,7 @@ public class ChannelManager {
 	}
 
 	private void subscribeToChannel(Channel channel) {
+		channel.publishSyn();
 		channel.subscribeToChannelUpdates();
 	}
 

@@ -41,4 +41,6 @@ public interface FreenetInterface {
 	boolean setRandomNextMsgNumber(String freemailAccount, String freemailTo);
 	boolean clearOutboxLog(String freemailAccount, String identityFrom);
 	boolean clearOutboxMessages(String freemailAccount, String freemailTo);
+	ClientGetCallback getVoidGetCallback(String successMessage, String failureMessage);
+	ClientPutCallback getVoidPutCallback(String successMessage, String failureMessage);
 }

@@ -3,6 +3,8 @@ package plugins.CENO.Client.Signaling;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import plugins.CENO.Client.CENOClient;
 import freenet.client.FetchException;
@@ -26,6 +28,7 @@ public class ChannelMaker implements Runnable {
 	private FreenetURI signalSSKpub;
 	private boolean channelEstablished = false;
 	private ChannelStatus channelStatus = ChannelStatus.starting;
+	private Date lastSynced = new Date(0);
 
 	public ChannelMaker() {
 		this(null);
@@ -78,20 +81,25 @@ public class ChannelMaker implements Runnable {
 				if(e.getMode() == FetchExceptionMode.PERMANENT_REDIRECT) {
 					synURI = e.newURI;
 				} else if(e.isDNF() || e.isFatal()) {
-					return false;
+					break;
 				}
 			}
 			if(fetchResult != null) {
 				try {
-					if(new String(fetchResult.asByteArray()).compareTo("syn") == 0) {
-						channelEstablished = true;
+					Long synDate = Long.parseLong(new String(fetchResult.asByteArray()));
+					if(System.currentTimeMillis() - synDate > TimeUnit.DAYS.toMillis(5)) {
+						establishChannel();
+						break;
 					}
+					channelEstablished = true;
+					channelStatus = ChannelStatus.syn;
+					break;
 				} catch (IOException e) {
-					e.printStackTrace();
+					break;
 				}
 			}
 		}
-		return false;
+		return channelEstablished;
 	}
 
 	public void establishChannel() {

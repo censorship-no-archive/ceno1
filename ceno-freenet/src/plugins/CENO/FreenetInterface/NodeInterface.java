@@ -17,6 +17,8 @@ import freenet.client.FetchResult;
 import freenet.client.InsertBlock;
 import freenet.client.InsertContext;
 import freenet.client.InsertException;
+import freenet.client.async.BaseClientPutter;
+import freenet.client.async.ClientContext;
 import freenet.client.async.ClientGetCallback;
 import freenet.client.async.ClientGetter;
 import freenet.client.async.ClientPutCallback;
@@ -29,9 +31,11 @@ import freenet.node.Node;
 import freenet.node.RequestClient;
 import freenet.node.RequestStarter;
 import freenet.pluginmanager.PluginRespirator;
+import freenet.support.Logger;
 import freenet.support.api.Bucket;
 import freenet.support.api.RandomAccessBucket;
 import freenet.support.io.BucketTools;
+import freenet.support.io.ResumeFailedException;
 
 public class NodeInterface implements FreenetInterface {
 
@@ -157,7 +161,7 @@ public class NodeInterface implements FreenetInterface {
 	public FreenetURI insertManifest(FreenetURI insertURI, HashMap<String, Object> bucketsByName, String defaultName, short priorityClass) throws InsertException {
 		return HighLevelSimpleClientInterface.insertManifest(insertURI, bucketsByName, defaultName, priorityClass);
 	}
-	
+
 	@Override
 	public FreenetURI insertSingleChunk(FreenetURI uri, String content, ClientPutCallback cb) throws InsertException, PersistenceDisabledException, UnsupportedEncodingException {
 		return HighLevelSimpleClientInterface.insertSingleChunk(uri, content, cb);
@@ -201,5 +205,85 @@ public class NodeInterface implements FreenetInterface {
 	@Override
 	public boolean clearOutboxMessages(String freemailAccount, String freemailTo) {
 		return FreemailAPI.clearOutboxMessages(freemailAccount, freemailTo);
+	}
+
+	@Override
+	public ClientGetCallback getVoidGetCallback(String successMessage, String failureMessage) {
+		return new VoidGetCallback(successMessage, failureMessage);
+	}
+
+	@Override
+	public ClientPutCallback getVoidPutCallback(String successMessage, String failureMessage) {
+		return new VoidPutCallback(successMessage, failureMessage);
+	}
+
+	private class VoidPutCallback implements ClientPutCallback {
+		String successMessage, failureMessage = null;
+
+		public VoidPutCallback(String successMessage, String failureMessage) {
+			this.successMessage = successMessage;
+			this.failureMessage = failureMessage;
+		}
+
+		@Override
+		public void onResume(ClientContext context)	throws ResumeFailedException {
+		}
+
+		@Override
+		public RequestClient getRequestClient() {
+			return getRequestClient();
+		}
+
+		@Override
+		public void onGeneratedURI(FreenetURI uri, BaseClientPutter state) {
+		}
+
+		@Override
+		public void onGeneratedMetadata(Bucket metadata, BaseClientPutter state) {
+		}
+
+		@Override
+		public void onFetchable(BaseClientPutter state) {
+		}
+
+		@Override
+		public void onSuccess(BaseClientPutter state) {
+			Logger.normal(this, successMessage);
+		}
+
+		@Override
+		public void onFailure(InsertException e, BaseClientPutter state) {
+			Logger.error(this, failureMessage + ": " + e.getMessage());
+		}
+
+	}
+
+	private class VoidGetCallback implements ClientGetCallback {
+		String successMessage, failureMessage = null;
+
+		public VoidGetCallback(String successMessage, String failureMessage) {
+			this.successMessage = successMessage;
+			this.failureMessage = failureMessage;
+		}
+
+		@Override
+		public void onResume(ClientContext context) throws ResumeFailedException {
+		}
+
+		@Override
+		public RequestClient getRequestClient() {
+			return getRequestClient();
+		}
+
+		@Override
+		public void onSuccess(FetchResult result, ClientGetter state) {
+			Logger.normal(this, successMessage);
+		}
+
+		@Override
+		public void onFailure(FetchException e, ClientGetter state) {
+			Logger.error(this, failureMessage + ": " + e.getMessage());
+		}
+
 	}
 }
