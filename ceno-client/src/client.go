@@ -29,6 +29,11 @@ const URL_REGEX = "(https?://)?(www\\.)?\\w+\\.\\w+"
 // that a request for http://site.com was rewritten from one for https://site.com.
 const REWRITTEN_HEADER = "X-Ceno-Rewritten"
 
+// The words "cenoportal" and "portal" respectively. Used
+// to directly reference the ceno RSS portal page
+const CENOPORTAL string = "cenoportal"
+const PORTAL string = "portal"
+
 // Result of a bundle lookup from cache server.
 type Result struct {
 	ErrCode  ErrorCode
@@ -161,33 +166,37 @@ func directHandler(w http.ResponseWriter, r *http.Request) {
 			"responseWriter": w,
 			"request":        r,
 		})
-	} else {
-		// Decode the URL so we can save effort by just passing the modified request to
-		// the proxyHandler function from here.
-		decodedBytes, err := base64.StdEncoding.DecodeString(URLS[0])
-		if err != nil {
-			HandleCCError(ERR_MALFORMED_URL, T("url_b64_cli"), ErrorState{
-				"responseWriter": w,
-				"request":        r,
-			})
-		} else {
-			decodedURL := string(decodedBytes)
-			stripped, rewritten := stripHttps(decodedURL)
-			if rewritten {
-				r.Header.Set(REWRITTEN_HEADER, "true")
-			}
-			newURL, parseErr := url.Parse(stripped)
-			if parseErr != nil {
-				HandleCCError(ERR_MALFORMED_URL, T("malformed_url_cli", map[string]interface{}{
-					"URL": stripped,
-				}), ErrorState{"responseWriter": w, "request": r})
-			} else {
-				// Finally we can pass the modified request onto the proxy server.
-				r.URL = newURL
-				proxyHandler(w, r)
-			}
-		}
+        return
 	}
+	// Decode the URL so we can save effort by just passing the modified request to
+	// the proxyHandler function from here.
+	decodedBytes, err := base64.StdEncoding.DecodeString(URLS[0])
+	if err != nil {
+		HandleCCError(ERR_MALFORMED_URL, T("url_b64_cli"), ErrorState{
+			"responseWriter": w,
+			"request":        r,
+		})
+        return
+	}
+	decodedURL := string(decodedBytes)
+	stripped, rewritten := stripHttps(decodedURL)
+    if stripped == CENOPORTAL || stripped == PORTAL {
+        CreatePortalPage(w, r)
+    } else {
+	    if rewritten {
+		    r.Header.Set(REWRITTEN_HEADER, "true")
+	    }
+	    newURL, parseErr := url.Parse(stripped)
+	    if parseErr != nil {
+		    HandleCCError(ERR_MALFORMED_URL, T("malformed_url_cli", map[string]interface{}{
+			    "URL": stripped,
+		    }), ErrorState{"responseWriter": w, "request": r})
+	    } else {
+		    // Finally we can pass the modified request onto the proxy server.
+		    r.URL = newURL
+		    proxyHandler(w, r)
+	    }
+    }
 }
 
 /**
