@@ -103,7 +103,6 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 	private void configHttpServer(Server cenoHttpServer) {
 		// Create a collection of ContextHandlers for the server
 		ContextHandlerCollection handlers = new ContextHandlerCollection();
-		cenoHttpServer.setHandler(handlers);
 
 		// Add a ServerConnector for the BundlerInserter agent
 		ServerConnector bundleInserterConnector = new ServerConnector(cenoHttpServer);
@@ -118,14 +117,13 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 		// and upon request call the appropriate CENOJettyHandler subclass
 		ContextHandler cacheInsertCtxHandler = new ContextHandler();
 		cacheInsertCtxHandler.setHandler(new BundleInserterHandler());
-		cacheInsertCtxHandler.setVirtualHosts(new String[]{"@cacheInsert"});
+		//cacheInsertCtxHandler.setVirtualHosts(new String[]{"@cacheInsert"});
 
 		// Add the configured ContextHandler to the server
 		handlers.addHandler(cacheInsertCtxHandler);
 
-		/*
-		 * Uncomment the following block if you need a lookup handler in the bridge side
-		 */
+		
+		//Uncomment the following block if you need a lookup handler in the bridge side
 		/*
 		ServerConnector httpConnector = new ServerConnector(cenoHttpServer);
 		httpConnector.setName("cacheLookup");
@@ -138,6 +136,8 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 
 		handlers.addHandler(cacheLookupCtxHandler);
 		 */
+		
+		cenoHttpServer.setHandler(handlers);
 	}
 
 	public String getVersion() {
