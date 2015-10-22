@@ -11,17 +11,11 @@ import freenet.client.FetchException;
 import freenet.client.FetchException.FetchExceptionMode;
 import freenet.client.FetchResult;
 import freenet.client.InsertException;
-import freenet.client.async.BaseClientPutter;
-import freenet.client.async.ClientContext;
-import freenet.client.async.ClientPutCallback;
 import freenet.client.async.PersistenceDisabledException;
 import freenet.keys.FreenetURI;
 import freenet.node.FSParseException;
-import freenet.node.RequestClient;
 import freenet.support.Logger;
 import freenet.support.SimpleFieldSet;
-import freenet.support.api.Bucket;
-import freenet.support.io.ResumeFailedException;
 
 public class ChannelMaker implements Runnable {
 	private FreenetURI signalSSK;
@@ -36,15 +30,15 @@ public class ChannelMaker implements Runnable {
 
 	public ChannelMaker(String signalSSKString) {
 		try {
-			FreenetURI signalSSK;
-			if (signalSSKString != null && signalSSKString.isEmpty()) {
-				signalSSK = new FreenetURI(signalSSKString);
-				this.signalSSK = signalSSK;
-				channelStatus = ChannelStatus.puzzleSolved;
+			if (signalSSKString != null) {
+				this.signalSSK = new FreenetURI(signalSSKString);
+				this.signalSSKpub = this.signalSSK.deriveRequestURIFromInsertURI();
+				channelStatus = ChannelStatus.waitingForSyn;
 			} else {
-				this.signalSSK = CENOClient.nodeInterface.generateKeyPair()[0];
+				FreenetURI newKeyPair[] = CENOClient.nodeInterface.generateKeyPair();
+				this.signalSSK = newKeyPair[0];
+				this.signalSSKpub = newKeyPair[1];
 			}
-			this.signalSSKpub = this.signalSSK.deriveRequestURIFromInsertURI();
 		} catch (MalformedURLException e) {
 			this.channelStatus = ChannelStatus.fatal;
 		}
@@ -73,6 +67,10 @@ public class ChannelMaker implements Runnable {
 	}
 
 	private boolean checkChannelEstablished() {
+		if(!canSend()) {
+			return false;
+		}
+
 		FreenetURI synURI = new FreenetURI("USK", "syn", signalSSKpub.getRoutingKey(), signalSSKpub.getCryptoKey(), signalSSKpub.getExtra());
 		FetchResult fetchResult = null;
 		while(!channelEstablished) {
@@ -88,25 +86,22 @@ public class ChannelMaker implements Runnable {
 			if(fetchResult != null) {
 				try {
 					Long synDate = Long.parseLong(new String(fetchResult.asByteArray()));
-					if(System.currentTimeMillis() - synDate > TimeUnit.DAYS.toMillis(5)) {
+					if(System.currentTimeMillis() - synDate > TimeUnit.DAYS.toMillis(25)) {
 						establishChannel();
 						break;
 					}
-					channelEstablished = true;
-					channelStatus = ChannelStatus.syn;
-					break;
 				} catch (IOException e) {
+					channelStatus = ChannelStatus.failedToParseSyn;
 					break;
 				}
+				channelStatus = ChannelStatus.syn;
+				channelEstablished = true;
 			}
 		}
 		return channelEstablished;
 	}
 
-	public void establishChannel() {
-		if(channelEstablished) {
-			return;
-		}
+	private void establishChannel() {
 		FreenetURI bridgeKey;
 		try {
 			bridgeKey = new FreenetURI(CENOClient.BRIDGE_KEY);
@@ -153,7 +148,8 @@ public class ChannelMaker implements Runnable {
 		//TODO Encrypt singalSSK
 		FreenetURI insertedKSK = null;
 		try {
-			insertedKSK = CENOClient.nodeInterface.insertSingleChunk(new FreenetURI("KSK@" + question), replySfs.toOrderedString(), new voidInputCallback());
+			insertedKSK = CENOClient.nodeInterface.insertSingleChunk(new FreenetURI("KSK@" + question), replySfs.toOrderedString(),
+					CENOClient.nodeInterface.getVoidPutCallback("Inserted private SSK key in the KSK@solution to the puzzle published by the bridge", "Failed to publish KSK@solution"));
 		} catch (UnsupportedEncodingException e) {
 			channelStatus = ChannelStatus.failedToPublishKSK;
 		} catch (PersistenceDisabledException e) {
@@ -167,51 +163,6 @@ public class ChannelMaker implements Runnable {
 			return;
 		}
 		checkChannelEstablished();
-	}
-
-	private class voidInputCallback implements ClientPutCallback {
-
-		@Override
-		public void onResume(ClientContext context)
-				throws ResumeFailedException {
-			// TODO Auto-generated method stub
-
-		}
-
-		@Override
-		public RequestClient getRequestClient() {
-			return CENOClient.nodeInterface.getRequestClient();
-		}
-
-		@Override
-		public void onGeneratedURI(FreenetURI uri, BaseClientPutter state) {
-			// TODO Auto-generated method stub
-
-		}
-
-		@Override
-		public void onGeneratedMetadata(Bucket metadata, BaseClientPutter state) {
-			// TODO Auto-generated method stub
-
-		}
-
-		@Override
-		public void onFetchable(BaseClientPutter state) {
-			// TODO Auto-generated method stub
-
-		}
-
-		@Override
-		public void onSuccess(BaseClientPutter state) {
-			Logger.normal(ChannelMaker.class, "Inserted private SSK key in the KSK@solution to the puzzle published by the bridge");
-		}
-
-		@Override
-		public void onFailure(InsertException e, BaseClientPutter state) {
-			// TODO Auto-generated method stub
-
-		}
-
 	}
 
 }

@@ -13,10 +13,11 @@ public enum ChannelStatus {
 		failedToPublishKSK,
 		publishedKSK,
 		waitingForSyn,
-		syn;
+		syn,
+		failedToParseSyn;
 		
 	static EnumSet<ChannelStatus> fatalChannelStatus = EnumSet.of(fatal, failedToGetSignalSSK, failedToSolvePuzzle, failedToEncrypt, failedToPublishKSK);
-	static EnumSet<ChannelStatus> canSend = EnumSet.of(waitingForSyn, syn);
+	static EnumSet<ChannelStatus> canSend = EnumSet.of(publishedKSK, waitingForSyn, syn);
 	
 	public static boolean isFatalStatus(ChannelStatus status) {
 		return fatalChannelStatus.contains(status);

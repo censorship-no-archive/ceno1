@@ -123,8 +123,8 @@ public class ChannelMaker {
 					}
 
 					if (kskContent != null) {
-						Logger.minor(this, "Congestion window for fetching KSKs without getting Recently Failed exceptions set to: " + window + " minutes");
 						window--;
+						Logger.minor(this, "Congestion window for fetching KSKs without getting Recently Failed exceptions set to: " + window + " minutes");
 						/*
 						try {
 							Crypto.decryptMessage(kskContent.asByteArray(), (RSAKeyParameters) asymKeyPair.getPrivate());
