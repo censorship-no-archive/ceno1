@@ -61,7 +61,7 @@ func GetBundle(url string) ([]byte, RequestStatus) {
 	b64Url := base64.StdEncoding.EncodeToString([]byte(url))
 	bundleUrl := Configuration.BundleServer + "/?url=" + b64Url
 	response, err := http.Get(bundleUrl)
-	if err != nil || response.StatusCode != STATUS_OK {
+	if err != nil || response == nil || response.StatusCode != STATUS_OK {
 		fmt.Printf("In GetBundle err = %s, status = %d\n", err.Error(), response.StatusCode)
 		return nil, Failure
 	}

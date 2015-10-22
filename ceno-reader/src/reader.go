@@ -71,6 +71,15 @@ func pollFeed(URL string, charsetReader xmlx.CharsetFunc) {
 	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
 	feed := rss.New(5, true, channelFeedHandler, itemFeedHandler)
 	for {
+		defer func() {
+			r := recover()
+			if r != nil {
+				fmt.Println(T("feed_poll_err", map[string]string{
+					"Url":   URL,
+					"Error": "Panicked when fetching from feed",
+				}))
+			}
+		}()
 		if err := feed.Fetch(URL, charsetReader); err != nil {
 			fmt.Println(T("feed_poll_err", map[string]string{
 				"Url":   URL,
