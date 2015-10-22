@@ -36,30 +36,30 @@ function browserExists() {
 }
 
 function startChromeProfile() {
-  #Experimental: Load the CENO Router extension while invoking chrome
   tempProfile=$(mktemp -d browser-profiles/chrome/google-chrome.XXXXXXX)
   $1 --profile-directory=$tempProfile --load-extension=$(pwd)/browser-extensions/ceno-chrome --no-first-run $2 &> /dev/null &
   rm -r $tempProfile
 }
 
 function startBrowser() {
-  extIntaller=./ceno-client/views/extension-en-us.html
+  portal=http://localhost:3090/portal
+  extInstaller=./ceno-client/views/extension-en-us.html
   # Open a browser window with the CENO profiles, including the plugin
   if browserExists chrome
   then
-    startChromeProfile chrome $extIntaller
+    startChromeProfile chrome $portal
   elif browserExists chromium-browser
   then
-    startChromeProfile chromium-browser $extIntaller
+    startChromeProfile chromium-browser $portal
   elif browserExists chromium
   then
-    startChromeProfile chromium $extIntaller
+    startChromeProfile chromium $portal
   elif browserExists Chromium
   then
-    startChromeProfile Chromium $extIntaller
+    startChromeProfile Chromium $portal
   elif browserExists google-chrome
   then
-    startChromeProfile google-chrome $extIntaller
+    startChromeProfile google-chrome $portal
   elif browserExists firefox
   then
       firefox -no-remote -private-window -profile "browser-profiles/firefox" $extIntaller &> /dev/null &
