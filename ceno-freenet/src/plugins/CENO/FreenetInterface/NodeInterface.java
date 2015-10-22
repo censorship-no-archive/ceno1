@@ -38,7 +38,7 @@ import freenet.support.io.ResumeFailedException;
 public class NodeInterface implements FreenetInterface {
 
 	private Node node;
-	private FetchContext ULPRFC, localFC;
+	private FetchContext ULPRFC, localFC, distFC;
 	private ConnectionOverview connectionOverview;
 
 	public NodeInterface(Node node, PluginRespirator pr) {
@@ -64,6 +64,14 @@ public class NodeInterface implements FreenetInterface {
 		this.localFC.maxRecursionLevel = 10;
 		this.localFC.maxTempLength = Long.MAX_VALUE;
 		this.localFC.maxOutputLength = Long.MAX_VALUE;
+		
+		this.distFC = HighLevelSimpleClientInterface.getFetchContext();
+		this.distFC.ignoreStore = true;
+		this.distFC.followRedirects = true;
+		this.distFC.allowSplitfiles = true;
+		this.distFC.maxRecursionLevel = 10;
+		this.distFC.maxTempLength = Long.MAX_VALUE;
+		this.distFC.maxOutputLength = Long.MAX_VALUE;
 	}
 
 	@Override
@@ -74,6 +82,11 @@ public class NodeInterface implements FreenetInterface {
 	@Override
 	public ClientGetter localFetchURI(FreenetURI uri, ClientGetCallback callback) throws FetchException {
 		return HighLevelSimpleClientInterface.fetchURI(uri, Long.MAX_VALUE, callback, localFC);
+	}
+	
+	@Override
+	public ClientGetter distFetchURI(FreenetURI uri, ClientGetCallback callback) throws FetchException {
+		return HighLevelSimpleClientInterface.fetchURI(uri, Long.MAX_VALUE, callback, distFC);
 	}
 
 	@Override

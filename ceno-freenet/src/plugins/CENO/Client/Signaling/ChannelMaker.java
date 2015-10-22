@@ -102,6 +102,7 @@ public class ChannelMaker implements Runnable {
 					channelStatus = ChannelStatus.failedToParseSyn;
 					break;
 				}
+				Logger.normal(this, "Received syn from the bridge - signaling channel established successfully");
 				channelStatus = ChannelStatus.syn;
 				lastSynced = System.currentTimeMillis();
 				channelEstablished = true;
@@ -151,6 +152,7 @@ public class ChannelMaker implements Runnable {
 			channelStatus = ChannelStatus.failedToSolvePuzzle;
 			return;
 		}
+		channelStatus = ChannelStatus.puzzleSolved;
 		SimpleFieldSet replySfs = new SimpleFieldSet(true);
 		replySfs.put("id", (int) (Math.random() * (Integer.MAX_VALUE * 0.8)));
 		replySfs.putOverwrite("insertURI", signalSSK.toString());
@@ -171,6 +173,7 @@ public class ChannelMaker implements Runnable {
 		if(insertedKSK == null) {
 			return;
 		}
+		channelStatus = ChannelStatus.publishedKSK;
 		checkChannelEstablished();
 	}
 

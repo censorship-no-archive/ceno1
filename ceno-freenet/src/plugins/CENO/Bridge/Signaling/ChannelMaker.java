@@ -10,20 +10,14 @@ import org.bouncycastle.crypto.params.RSAKeyParameters;
 import plugins.CENO.CENOErrCode;
 import plugins.CENO.CENOException;
 import plugins.CENO.Bridge.CENOBridge;
+import plugins.CENO.Client.ClientGetSyncCallback;
 import freenet.client.FetchException;
 import freenet.client.FetchException.FetchExceptionMode;
-import freenet.client.FetchResult;
 import freenet.client.InsertException;
-import freenet.client.async.BaseClientPutter;
-import freenet.client.async.ClientContext;
-import freenet.client.async.ClientPutCallback;
 import freenet.client.async.PersistenceDisabledException;
 import freenet.keys.FreenetURI;
-import freenet.node.RequestClient;
 import freenet.support.Logger;
 import freenet.support.SimpleFieldSet;
-import freenet.support.api.Bucket;
-import freenet.support.io.ResumeFailedException;
 
 public class ChannelMaker {
 	private String bridgeInsertURI;
@@ -86,7 +80,7 @@ public class ChannelMaker {
 			}
 		}
 	}
-	
+
 	public void stopListener() {
 		if (channelListener != null) {
 			channelListener.continueLoop = false;
@@ -112,9 +106,11 @@ public class ChannelMaker {
 				int window = 0;
 				while(continueLoop) {
 					// TODO Poll "KSK@puzzleAnswer" and discover insertion SSKs by clients
-					FetchResult kskContent = null;
+					String kskContent = null;
+					ClientGetSyncCallback getSyncCallback = new ClientGetSyncCallback();
 					try {
-						kskContent = CENOBridge.nodeInterface.fetchURI(channelMakingKSK);
+						CENOBridge.nodeInterface.distFetchURI(channelMakingKSK, getSyncCallback);
+						kskContent = getSyncCallback.getResult(10 * KSK_POLLING_PAUSE, TimeUnit.MILLISECONDS);
 					} catch (FetchException e) {
 						// TODO Fine-grain log messages according to FetchException codes
 						if(e.mode == FetchExceptionMode.RECENTLY_FAILED) {
@@ -134,8 +130,8 @@ public class ChannelMaker {
 						} catch (Exception e) {
 							Logger.warning(ChannelMakerListener.class, "Error while decrypting users' KSK response: " + e.getMessage());
 						}
-						*/
-						SimpleFieldSet sfs = new SimpleFieldSet(new String(kskContent.asByteArray()), false, true, true);
+						 */
+						SimpleFieldSet sfs = new SimpleFieldSet(kskContent, false, true, true);
 						int reqID = sfs.getInt("id", -1);
 						if (reqID > 0 && reqID != lastHandledReq) {
 							Logger.normal(ChannelMakerListener.class, "A client has posted information for establishing a signaling channel with ID: " + reqID);
@@ -173,43 +169,4 @@ public class ChannelMaker {
 		}
 	}
 
-	class AnnouncementInsertionCB implements ClientPutCallback {
-		
-		private FreenetURI uri;
-
-		public AnnouncementInsertionCB() {
-		}
-
-		@Override
-		public void onResume(ClientContext context) throws ResumeFailedException {
-		}
-
-		@Override
-		public RequestClient getRequestClient() {
-			return CENOBridge.nodeInterface.getRequestClient();
-		}
-
-		@Override
-		public void onGeneratedURI(FreenetURI uri, BaseClientPutter state) {
-			this.uri = uri;
-		}
-
-		@Override
-		public void onGeneratedMetadata(Bucket metadata, BaseClientPutter state) {
-		}
-
-		@Override
-		public void onFetchable(BaseClientPutter state) {
-		}
-
-		@Override
-		public void onSuccess(BaseClientPutter state) {
-			Logger.normal(ChannelMaker.class, "Successfully inserted Channel Maker Announcer page with URI: " + uri);
-		}
-
-		@Override
-		public void onFailure(InsertException e, BaseClientPutter state) {			
-		}
-
-	}
 }

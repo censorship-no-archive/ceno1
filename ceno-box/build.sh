@@ -134,21 +134,9 @@ if [[ $PLUGINS == 1 ]]; then
   cp dist/CENOBackbone.jar $CENOBOXPATH/ceno-debug/
   cd $CENOBOXPATH
 
-  echo "Building WebOfTrust plugin"
-  cd ceno-debug/plugin-WebOfTrust
-  ant dist > /dev/null
-  cp dist/WebOfTrust.jar $CENOBOXPATH/ceno-debug
-  cd $CENOBOXPATH
-
-  echo "Building Freemail plugin"
-  cd ceno-debug/plugin-Freemail
-  ant dist > /dev/null
-  cp dist/Freemail.jar $CENOBOXPATH/ceno-debug
-  cd $CENOBOXPATH
-
-  cp -r ceno-debug/{CENO.jar,WebOfTrust.jar,Freemail.jar} CENOBox/
+  cp -r ceno-debug/CENO.jar CENOBox/
   cp ceno-debug/freenet-client.ini CENOBox/freenet.ini
-  cp -r ceno-debug/{CENOBackbone.jar,WebOfTrust.jar,Freemail.jar} CENOBackbone/
+  cp -r ceno-debug/CENOBackbone CENOBackbone/
   cp ceno-debug/freenet-backbone.ini CENOBackbone/freenet.ini
 fi
 

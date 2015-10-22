@@ -4,8 +4,6 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import plugins.CENO.Bridge.CENOBridge;
-
 import freenet.node.FSParseException;
 import freenet.support.SimpleFieldSet;
 

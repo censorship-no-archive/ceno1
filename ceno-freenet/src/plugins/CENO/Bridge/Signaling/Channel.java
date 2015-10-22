@@ -4,7 +4,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 
 import plugins.CENO.Bridge.CENOBridge;
-import plugins.CENO.Bridge.RequestReceiver;
 import freenet.client.InsertException;
 import freenet.client.async.ClientContext;
 import freenet.client.async.PersistenceDisabledException;

@@ -23,6 +23,7 @@ public interface FreenetInterface {
 
 	FetchResult fetchURI(FreenetURI uri) throws FetchException;
 	ClientGetter localFetchURI(FreenetURI uri, ClientGetCallback callback) throws FetchException;
+	ClientGetter distFetchURI(FreenetURI uri, ClientGetCallback callback) throws FetchException;
 	ClientGetter fetchULPR(FreenetURI uri, ClientGetCallback callback) throws FetchException;
 	boolean subscribeToUSK(USK origUSK, USKCallback cb);
 	FreenetURI[] generateKeyPair();
