@@ -23,6 +23,9 @@ ceno-reader/reader
 ceno-reader/bundleserver
 ceno-reader/bundleinserter
 
+# Compiled tools
+ceno-reader/tools/follower
+
 # SQLite database used by ceno-reader
 ceno-reader/feeds.db
 
