@@ -6,8 +6,6 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
-import org.freenetproject.freemail.wot.ConcurrentWoTConnection;
-
 import plugins.CENO.FreenetInterface.ConnectionOverview.NodeConnections;
 import freenet.client.ClientMetadata;
 import freenet.client.DefaultMIMETypes;
@@ -43,7 +41,6 @@ public class NodeInterface implements FreenetInterface {
 	private PluginRespirator pr;
 	private FetchContext ULPRFC, localFC;
 	private ConnectionOverview connectionOverview;
-	private ConcurrentWoTConnection wotConnection;
 
 	public NodeInterface(Node node, PluginRespirator pr) {
 		this.node = node;
@@ -69,8 +66,6 @@ public class NodeInterface implements FreenetInterface {
 		this.localFC.maxRecursionLevel = 10;
 		this.localFC.maxTempLength = Long.MAX_VALUE;
 		this.localFC.maxOutputLength = Long.MAX_VALUE;
-
-		wotConnection = new ConcurrentWoTConnection(pr);
 	}
 
 	@Override
@@ -170,41 +165,6 @@ public class NodeInterface implements FreenetInterface {
 	@Override
 	public NodeConnections getConnections() {
 		return connectionOverview.getConnections();
-	}
-
-	@Override
-	public boolean sendFreemail(String freemailFrom, String freemailTo[], String subject, String content, String password) {
-		return FreemailAPI.sendFreemail(freemailFrom, freemailTo, subject, content, password);
-	}
-
-	@Override
-	public String[] getUnreadMailsSubject(String freemail, String password, String inboxFolder, boolean shouldDelete) {
-		return FreemailAPI.getUnreadMailsSubject(freemail, password, inboxFolder, shouldDelete);
-	}
-
-	@Override
-	public String[] getMailsContentFrom(String freemail, String freemailFrom, String password, String mailFolder) {
-		return FreemailAPI.getMailsContentFrom(freemail, freemailFrom, password, mailFolder);
-	}
-
-	@Override
-	public boolean copyAccprops(String freemailAccount) {
-		return FreemailAPI.copyAccprops(freemailAccount);
-	}
-
-	@Override
-	public boolean setRandomNextMsgNumber(String freemailAccount, String freemailTo) {
-		return FreemailAPI.setRandomNextMsgNumber(freemailAccount, freemailTo);
-	}
-
-	@Override
-	public boolean clearOutboxLog(String freemailAccount, String identityFrom) {
-		return FreemailAPI.clearOutboxLog(freemailAccount, identityFrom);
-	}
-
-	@Override
-	public boolean clearOutboxMessages(String freemailAccount, String freemailTo) {
-		return FreemailAPI.clearOutboxMessages(freemailAccount, freemailTo);
 	}
 
 	@Override

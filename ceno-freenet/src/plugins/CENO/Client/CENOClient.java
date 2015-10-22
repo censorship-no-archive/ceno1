@@ -42,11 +42,6 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 
 	// Bridge and freemail-specific constants
 	public static final String BRIDGE_KEY = "SSK@mlfLfkZmWIYVpKbsGSzOU~-XuPp~ItUhD8GlESxv8l4,tcB-IHa9c4wpFudoSm0k-iTaiE~INdeQXvcYP2M1Nec,AQACAAE/";
-	public static final String BRIDGE_IDENTITY_REQUEST_URI = "USK@QfqLw7-BJpGGMnhnJQ3~KkCiciMAsoihBCtSqy6nNbY,-lG83h70XIJ03r4ckdNnsY4zIQ-J8qTqwzSBeIG5q3s,AQACAAE/WebOfTrust/0";
-	public static final String BRIDGE_FREEMAIL = "DEFLECTBridge@ih5ixq57yetjdbrspbtskdp6fjake4rdacziriiefnjkwlvhgw3a.freemail";
-
-	public static final String CLIENT_IDENTITY_INSERT_URI = "USK@SNS-BKGDFS4ciG3HV6o5MQjvIdCDn9G8DfIeIK~7kBQ,WMeRYMzx2tQHM~O8UWglUmBnjIhp~bh8xue-6g2pmps,AQECAAE/WebOfTrust/0";
-	public static final String CLIENT_FREEMAIL = "CENO@54u2ko3lssqgalpvfqbq44gwfquqrejm3itl4rxj5nt7v6mjy22q.freemail";
 
 	/**
 	 * {@inheritDoc}
@@ -105,8 +100,6 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 			channelMakerThread.interrupt();
 		}
 
-		// Clear the CENO client freemail outbox directory
-		nodeInterface.clearOutboxMessages(CLIENT_FREEMAIL, BRIDGE_FREEMAIL);
 		//TODO Release ULPRs' resources
 		Logger.normal(this, PLUGIN_NAME + " terminated.");
 	}

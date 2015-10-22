@@ -112,7 +112,7 @@ public class LookupHandler extends AbstractCENOClientHandler {
 		}
 
 		// Check whether the request timeout has expired
-		if (RequestSender.shouldSendFreemail(urlParam)) {
+		if (RequestSender.shouldSignalBridge(urlParam)) {
 			if (clientIsHtml) {
 				// HTML client cannot signal RS to make requests for bundles to the bridge, so LookupHandler
 				// initiates such a request

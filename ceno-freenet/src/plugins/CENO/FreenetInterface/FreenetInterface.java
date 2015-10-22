@@ -34,13 +34,6 @@ public interface FreenetInterface {
 	FreenetURI insertManifest(FreenetURI insertURI, HashMap<String, Object> bucketsByName, String defaultName, short priorityClass) throws InsertException;
 	FreenetURI insertSingleChunk(FreenetURI uri, String content, ClientPutCallback cb) throws InsertException, PersistenceDisabledException, UnsupportedEncodingException;
 	NodeConnections getConnections();
-	boolean copyAccprops(String freemailAccount);
-	boolean sendFreemail(String freemailFrom, String freemailTo[], String subject, String content, String password);
-	String[] getUnreadMailsSubject(String freemail, String password, String inboxFolder, boolean shouldDelete);
-	String[] getMailsContentFrom(String freemail, String freemailFrom, String password, String mailFolder);
-	boolean setRandomNextMsgNumber(String freemailAccount, String freemailTo);
-	boolean clearOutboxLog(String freemailAccount, String identityFrom);
-	boolean clearOutboxMessages(String freemailAccount, String freemailTo);
 	ClientGetCallback getVoidGetCallback(String successMessage, String failureMessage);
 	ClientPutCallback getVoidPutCallback(String successMessage, String failureMessage);
 }

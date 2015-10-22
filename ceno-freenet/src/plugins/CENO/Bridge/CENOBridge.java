@@ -51,13 +51,6 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 	private static final Version VERSION = new Version(Version.PluginType.BRIDGE);
 	private static final String CONFIGPATH = ".CENO/bridge.properties";
 
-	public static final String BRIDGE_FREEMAIL = "DEFLECTBridge@ih5ixq57yetjdbrspbtskdp6fjake4rdacziriiefnjkwlvhgw3a.freemail";
-	public static final String CLIENT_FREEMAIL = "CENO@54u2ko3lssqgalpvfqbq44gwfquqrejm3itl4rxj5nt7v6mjy22q.freemail";
-	public static final String CLIENT_IDENTITY_REQUEST_URI = "USK@7ymlO2uUoGAt9SwDDnDWLCkIkSzaJr5G6etn~vmJxrU,WMeRYMzx2tQHM~O8UWglUmBnjIhp~bh8xue-6g2pmps,AQACAAE/WebOfTrust/0";
-
-	public static final String BACKBONE_IDENTITY_REQUEST_URI = "USK@M9UhahTX81i-bB7N8rmWwY5LKKEPfPWgoewNLNkLMmg,IqlCA047XPFoBhxb4gU7YbHWEUV-9iz9mJblXO~w9Zk,AQACAAE/WebOfTrust/0";
-	public static final String BACKBONE_FREEMAIL = "deflectbackbone@gpksc2qu27zvrp3md3g7fomwyghewkfbb56plifb5qgszwilgjua.freemail";
-
 	public static final String ANNOUNCER_PATH = "CENO-signaler";
 
 	public void runPlugin(PluginRespirator pr)
@@ -94,12 +87,6 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 			asymKeyPair = new AsymmetricCipherKeyPair(new RSAKeyParameters(false, new BigInteger(initConfig.getProperty("asymkey.modulus"),32), new BigInteger(initConfig.getProperty("asymkey.pubexponent"), 32)),
 					new RSAKeyParameters(true, new BigInteger(initConfig.getProperty("asymkey.modulus"), 32), new BigInteger(initConfig.getProperty("asymkey.privexponent"), 32)));
 		}
-
-		nodeInterface.clearOutboxLog(BRIDGE_FREEMAIL, CLIENT_FREEMAIL);
-		// Initialize RequestReceiver
-		reqReceiver = new RequestReceiver(new String[]{BRIDGE_FREEMAIL});
-		// Start a thread for polling for new freemails
-		reqReceiver.loopFreemailBoxes();
 		
 		try {
 			channelMaker = new ChannelMaker(initConfig.getProperty("insertURI"),asymKeyPair);
@@ -187,10 +174,6 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 	 */
 	public void terminate()
 	{
-		// Stop the thread that is polling for freemails
-		reqReceiver.stopLooping();
-		nodeInterface.clearOutboxLog(BRIDGE_FREEMAIL, CLIENT_FREEMAIL);
-		
 		channelMaker.stopListener();
 
 		// Stop cenoHttpServer and unbind ports
