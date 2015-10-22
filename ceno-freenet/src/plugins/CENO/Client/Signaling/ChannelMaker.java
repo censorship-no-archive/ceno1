@@ -3,7 +3,6 @@ package plugins.CENO.Client.Signaling;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
-import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import plugins.CENO.Client.CENOClient;
@@ -22,13 +21,14 @@ public class ChannelMaker implements Runnable {
 	private FreenetURI signalSSKpub;
 	private boolean channelEstablished = false;
 	private ChannelStatus channelStatus = ChannelStatus.starting;
-	private Date lastSynced = new Date(0);
+	private long lastSynced = 0L;
 
 	public ChannelMaker() {
-		this(null);
+		this(null, 0L);
 	}
 
-	public ChannelMaker(String signalSSKString) {
+	public ChannelMaker(String signalSSKString, long lastSynced) {
+		this.lastSynced = lastSynced;
 		try {
 			if (signalSSKString != null) {
 				this.signalSSK = new FreenetURI(signalSSKString);
@@ -55,7 +55,11 @@ public class ChannelMaker implements Runnable {
 	}
 
 	public String getSignalSSK() {
-		return signalSSK.toASCIIString();
+		return signalSSK.toString();
+	}
+	
+	public long getLastSynced() {
+		return lastSynced;
 	}
 
 	public boolean isFatal() {
@@ -67,6 +71,10 @@ public class ChannelMaker implements Runnable {
 	}
 
 	private boolean checkChannelEstablished() {
+		if (System.currentTimeMillis() - lastSynced  > TimeUnit.DAYS.toMillis(30)) {
+			return false;
+		}
+		
 		if(!canSend()) {
 			return false;
 		}
@@ -95,6 +103,7 @@ public class ChannelMaker implements Runnable {
 					break;
 				}
 				channelStatus = ChannelStatus.syn;
+				lastSynced = System.currentTimeMillis();
 				channelEstablished = true;
 			}
 		}
@@ -144,7 +153,7 @@ public class ChannelMaker implements Runnable {
 		}
 		SimpleFieldSet replySfs = new SimpleFieldSet(true);
 		replySfs.put("id", (int) (Math.random() * (Integer.MAX_VALUE * 0.8)));
-		replySfs.putOverwrite("insertURI", signalSSK.toASCIIString());
+		replySfs.putOverwrite("insertURI", signalSSK.toString());
 		//TODO Encrypt singalSSK
 		FreenetURI insertedKSK = null;
 		try {

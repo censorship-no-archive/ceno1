@@ -76,9 +76,10 @@ public class ChannelMaker {
 			FreenetURI insertURIconfig = new FreenetURI(bridgeInsertURI);
 			FreenetURI announcementURI = new FreenetURI("USK", CENOBridge.ANNOUNCER_PATH, insertURIconfig.getRoutingKey(), insertURIconfig.getCryptoKey(), insertURIconfig.getExtra());
 
-			Logger.normal(ChannelMaker.class, "Inserting announcement freesite with USK: " + announcementURI.toASCIIString());
+			Logger.normal(ChannelMaker.class, "Inserting announcement freesite with USK: " + announcementURI.toString());
 			try {
-				CENOBridge.nodeInterface.insertSingleChunk(announcementURI, sfs.toOrderedString(),new AnnouncementInsertionCB());
+				CENOBridge.nodeInterface.insertSingleChunk(announcementURI, sfs.toOrderedString(), CENOBridge.nodeInterface.getVoidPutCallback(
+						"Successfully inserted Channel Maker Announcer page with URI: " + announcementURI, ""));
 			} catch (PersistenceDisabledException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

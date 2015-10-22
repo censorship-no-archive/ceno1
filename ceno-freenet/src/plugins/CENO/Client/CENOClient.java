@@ -63,7 +63,7 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 		initConfig.readProperties();
 
 		// Initialize RS - Make a new class ChannelManager that handles ChannelMaker
-		channelMaker = new ChannelMaker(initConfig.getProperty("signalSSK"));
+		channelMaker = new ChannelMaker(initConfig.getProperty("signalSSK"), Long.parseLong(initConfig.getProperty("lastSynced", "0")));
 
 		channelMakerThread = new Thread(channelMaker);
 		channelMakerThread.start();
@@ -93,10 +93,11 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 	{
 		if(channelMaker != null && channelMaker.canSend()) {
 			initConfig.setProperty("signalSSK", channelMaker.getSignalSSK());
+			initConfig.setProperty("lastSynced", String.valueOf(channelMaker.getLastSynced()));
 			initConfig.storeProperties();
 		}
 		
-		if(channelMakerThread != null && channelMakerThread.isAlive()) {
+		if(channelMakerThread != null) {
 			channelMakerThread.interrupt();
 		}
 

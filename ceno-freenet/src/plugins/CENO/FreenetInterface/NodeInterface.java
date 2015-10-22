@@ -38,13 +38,11 @@ import freenet.support.io.ResumeFailedException;
 public class NodeInterface implements FreenetInterface {
 
 	private Node node;
-	private PluginRespirator pr;
 	private FetchContext ULPRFC, localFC;
 	private ConnectionOverview connectionOverview;
 
 	public NodeInterface(Node node, PluginRespirator pr) {
 		this.node = node;
-		this.pr = pr;
 		this.connectionOverview = new ConnectionOverview(node);
 	}
 
@@ -169,20 +167,22 @@ public class NodeInterface implements FreenetInterface {
 
 	@Override
 	public ClientGetCallback getVoidGetCallback(String successMessage, String failureMessage) {
-		return new VoidGetCallback(successMessage, failureMessage);
+		return new VoidGetCallback(successMessage, failureMessage, getRequestClient());
 	}
 
 	@Override
 	public ClientPutCallback getVoidPutCallback(String successMessage, String failureMessage) {
-		return new VoidPutCallback(successMessage, failureMessage);
+		return new VoidPutCallback(successMessage, failureMessage, getRequestClient());
 	}
 
 	private class VoidPutCallback implements ClientPutCallback {
 		String successMessage, failureMessage = null;
+		RequestClient reqClient;
 
-		public VoidPutCallback(String successMessage, String failureMessage) {
+		public VoidPutCallback(String successMessage, String failureMessage, RequestClient reqClient) {
 			this.successMessage = successMessage;
 			this.failureMessage = failureMessage;
+			this.reqClient = reqClient;
 		}
 
 		@Override
@@ -191,7 +191,7 @@ public class NodeInterface implements FreenetInterface {
 
 		@Override
 		public RequestClient getRequestClient() {
-			return getRequestClient();
+			return reqClient;
 		}
 
 		@Override
@@ -220,8 +220,9 @@ public class NodeInterface implements FreenetInterface {
 
 	private class VoidGetCallback implements ClientGetCallback {
 		String successMessage, failureMessage = null;
+		RequestClient reqClient;
 
-		public VoidGetCallback(String successMessage, String failureMessage) {
+		public VoidGetCallback(String successMessage, String failureMessage, RequestClient reqClient) {
 			this.successMessage = successMessage;
 			this.failureMessage = failureMessage;
 		}
@@ -232,7 +233,7 @@ public class NodeInterface implements FreenetInterface {
 
 		@Override
 		public RequestClient getRequestClient() {
-			return getRequestClient();
+			return reqClient;
 		}
 
 		@Override

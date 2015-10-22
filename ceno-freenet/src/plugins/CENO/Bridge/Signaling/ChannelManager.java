@@ -26,7 +26,7 @@ public class ChannelManager {
 		return instance;
 	}
 
-	public void addChannel(Channel channel) {
+	public void addChannel(Channel channel) throws MalformedURLException {
 		if (channel != null) {
 			if (!channelList.contains(channel)) {
 				channelList.add(channel);
@@ -43,7 +43,7 @@ public class ChannelManager {
 		}
 	}
 
-	public void addChannel(SimpleFieldSet sfs) {
+	public void addChannel(SimpleFieldSet sfs) throws MalformedURLException {
 		Channel channel = null;
 		try {
 			channel = new Channel(sfs.getString("insertURI"));
@@ -66,7 +66,7 @@ public class ChannelManager {
 		return false;
 	}
 
-	private void subscribeToChannel(Channel channel) {
+	private void subscribeToChannel(Channel channel) throws MalformedURLException {
 		channel.publishSyn();
 		channel.subscribeToChannelUpdates();
 	}

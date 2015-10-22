@@ -162,13 +162,13 @@ public class HighLevelSimpleClientInterface {
 		try {
 			putter = new DefaultManifestPutter(insertCb, BaseManifestPutter.bucketsByNameToManifestEntries(bucketsByName), priorityClass, insertURI, defaultName, getInsertContext(true), false, forceCryptoKey, node.clientCore.clientContext);
 		} catch (TooManyFilesInsertException e) {
-			Logger.warning(HighLevelSimpleClientInterface.class, "TooManyFiles in a single directory to fit in a single Manifest file, will not insert URI: " + insertURI.toASCIIString());
+			Logger.warning(HighLevelSimpleClientInterface.class, "TooManyFiles in a single directory to fit in a single Manifest file, will not insert URI: " + insertURI.toString());
 			return null;
 		}
 		try {
 			HLSCInterface.node.clientCore.clientContext.start(putter);
 		} catch (PersistenceDisabledException e) {
-			Logger.warning(HighLevelSimpleClientInterface.class, "Could not start Manifest insertion for URI: " + insertURI.toASCIIString() + " Error: " + e.getMessage());
+			Logger.warning(HighLevelSimpleClientInterface.class, "Could not start Manifest insertion for URI: " + insertURI.toString() + " Error: " + e.getMessage());
 			return null;
 		}
 		return insertURI;
