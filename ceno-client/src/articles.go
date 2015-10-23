@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/base64"
 	"encoding/json"
 	"github.com/nicksnyder/go-i18n/i18n"
@@ -27,14 +28,25 @@ func articlesFilename(feedUrl string) string {
  * @return a map with a "feeds" key and corresponding array of Feed structs and an optional error
  */
 func initModuleWithArticles(feedUrl string) (map[string]interface{}, error) {
-	articleInfoFile, openErr := os.Open(articlesFilename(feedUrl))
-	if openErr != nil {
-		return nil, openErr
-	}
-	defer articleInfoFile.Close()
 	articleInfo := ArticleInfo{}
-	decoder := json.NewDecoder(articleInfoFile)
-	decodeErr := decoder.Decode(&articleInfo)
+	var decodeErr error
+	result := Lookup(feedUrl)
+	if result.Complete {
+		// Serve whatever the LCS gave us as the most recent articles list for
+		// the feed we want to see.
+		decoder := json.NewDecoder(bytes.NewReader([]byte(result.Bundle)))
+		decodeErr = decoder.Decode(&articleInfo)
+	} else {
+		// Before the first complete lookup, serve from the files
+		// distributed with the client.
+		articleInfoFile, openErr := os.Open(articlesFilename(feedUrl))
+		if openErr != nil {
+			return nil, openErr
+		}
+		defer articleInfoFile.Close()
+		decoder := json.NewDecoder(articleInfoFile)
+		decodeErr = decoder.Decode(&articleInfo)
+	}
 	if decodeErr != nil {
 		return nil, decodeErr
 	}
