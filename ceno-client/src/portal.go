@@ -1,13 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"github.com/nicksnyder/go-i18n/i18n"
 	"html/template"
 	"net/http"
 	"os"
 	"path"
-    "bytes"
 )
 
 /**
@@ -16,25 +16,25 @@ import (
  */
 func initModuleWithFeeds() (map[string]interface{}, error) {
 	feedInfo := FeedInfo{}
-    var decodeErr error
-    // Download the latest feeds list from the LCS
-    result := Lookup(FeedsJsonFile) // Defined in data.go
-    if result.Complete {
-        // Serve whatever the LCS gave us as the most recent feeds file.
-        // After the first complete lookup, others will be served from the LCS's cache.
-        decoder := json.NewDecoder(bytes.NewReader([]byte(result.Bundle)))
-        decodeErr = decoder.Decode(&feedInfo)
-    } else {
-        // Before the first complete lookup, serve from the files distributed with
-        // the client to keep the user experience fast.
-	    feedInfoFile, openErr := os.Open(FEED_LIST_FILENAME)
-	    if openErr != nil {
-		    return nil, openErr
-	    }
-	    defer feedInfoFile.Close()
-	    decoder := json.NewDecoder(feedInfoFile)
-	    decodeErr = decoder.Decode(&feedInfo)
-    }
+	var decodeErr error
+	// Download the latest feeds list from the LCS
+	result := Lookup(FeedsJsonFile) // Defined in data.go
+	if result.Complete {
+		// Serve whatever the LCS gave us as the most recent feeds file.
+		// After the first complete lookup, others will be served from the LCS's cache.
+		decoder := json.NewDecoder(bytes.NewReader([]byte(result.Bundle)))
+		decodeErr = decoder.Decode(&feedInfo)
+	} else {
+		// Before the first complete lookup, serve from the files distributed with
+		// the client to keep the user experience fast.
+		feedInfoFile, openErr := os.Open(FEED_LIST_FILENAME)
+		if openErr != nil {
+			return nil, openErr
+		}
+		defer feedInfoFile.Close()
+		decoder := json.NewDecoder(feedInfoFile)
+		decodeErr = decoder.Decode(&feedInfo)
+	}
 	if decodeErr != nil {
 		return nil, decodeErr
 	}
