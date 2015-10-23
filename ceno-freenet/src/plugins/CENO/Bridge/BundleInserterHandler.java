@@ -19,6 +19,7 @@ import plugins.CENO.Bridge.BundlerInterface.Bundle;
 import plugins.CENO.Common.CENOJettyHandler;
 import freenet.client.InsertException;
 import freenet.client.async.BaseClientPutter;
+import freenet.support.Logger;
 
 /* ------------------------------------------------------------ */
 /** CENOBridge Plugin handler for requests to cache bundles
@@ -104,6 +105,11 @@ public class BundleInserterHandler extends CENOJettyHandler {
 		String urlParam = requestJSON.get("url").toString();
 		if((urlParam == null) || urlParam.isEmpty()) {
 			writeError(baseRequest, response, "Invalid url attribute");
+			return;
+		}
+		
+		if (!CENOBridge.isMasterBridge() && urlParam.equals("CENO-RSS")) {
+			Logger.normal(this, "Got request to insert CENO-RSS but won't handle since this is not the master bridge");
 			return;
 		}
 
