@@ -27,8 +27,6 @@ const STATUS_OK int = 200
 func InsertFreenet(bundleData []byte) RequestStatus {
 	reader := bytes.NewReader(bundleData)
 	insertUrl := Configuration.BundleInserter + "/insert"
-	fmt.Println("Bundle data")
-	fmt.Println(string(bundleData))
 	request, err1 := http.NewRequest("POST", insertUrl, reader)
 	if err1 != nil {
 		fmt.Println("Insert error")
