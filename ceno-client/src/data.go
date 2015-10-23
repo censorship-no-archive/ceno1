@@ -10,6 +10,10 @@ const DEFAULT_LANG string = "en-us"
 // The name of the file containing information about feeds being followed
 const FEED_LIST_FILENAME string = "./json-files/feeds.json"
 
+// The same as in ceno/ceno-reader/src/data.go
+// A special identifier that can be used to find the top-level JSON file listing feeds
+const FeedsJsonFile string = "CENO-RSS"
+
 /**
  * Describes a feed, so that, when items of the feed are handled,
  * the appropriate functionality can be invoked.

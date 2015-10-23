@@ -82,7 +82,7 @@ func pleaseWait(URL string, w http.ResponseWriter) {
  * Request that the LCS start a lookup process for a particular URL.
  * @param {string} lookupURL - The URL to try to find in the distributed cache
  */
-func lookup(lookupURL string) Result {
+func Lookup(lookupURL string) Result {
 	response, err := http.Get(BundleLookupURL(Configuration, lookupURL))
 	T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
 	if err != nil {
@@ -262,7 +262,7 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 	if isValidURL := validateURL(URL, w, r); !isValidURL {
 		return
 	}
-	result := lookup(URL)
+	result := Lookup(URL)
 	if result.ErrCode > 0 {
 		fmt.Println(T("err_from_lcs_cli", map[string]interface{}{
 			"Code":    result.ErrCode,

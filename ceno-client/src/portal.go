@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+    "bytes"
 )
 
 /**
@@ -14,14 +15,26 @@ import (
  * @return a map with a "feeds" key and corresponding array of Feed structs and an optional error
  */
 func initModuleWithFeeds() (map[string]interface{}, error) {
-	feedInfoFile, openErr := os.Open(FEED_LIST_FILENAME)
-	if openErr != nil {
-		return nil, openErr
-	}
-	defer feedInfoFile.Close()
-	decoder := json.NewDecoder(feedInfoFile)
 	feedInfo := FeedInfo{}
-	decodeErr := decoder.Decode(&feedInfo)
+    var decodeErr error
+    // Download the latest feeds list from the LCS
+    result := Lookup(FeedsJsonFile) // Defined in data.go
+    if result.Complete {
+        // Serve whatever the LCS gave us as the most recent feeds file.
+        // After the first complete lookup, others will be served from the LCS's cache.
+        decoder := json.NewDecoder(bytes.NewReader([]byte(result.Bundle)))
+        decodeErr = decoder.Decode(&feedInfo)
+    } else {
+        // Before the first complete lookup, serve from the files distributed with
+        // the client to keep the user experience fast.
+	    feedInfoFile, openErr := os.Open(FEED_LIST_FILENAME)
+	    if openErr != nil {
+		    return nil, openErr
+	    }
+	    defer feedInfoFile.Close()
+	    decoder := json.NewDecoder(feedInfoFile)
+	    decodeErr = decoder.Decode(&feedInfo)
+    }
 	if decodeErr != nil {
 		return nil, decodeErr
 	}
