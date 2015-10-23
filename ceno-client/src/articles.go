@@ -49,7 +49,6 @@ func initModuleWithArticles(feedUrl string) (map[string]interface{}, error) {
 func CreateArticlePage(w http.ResponseWriter, r *http.Request) {
 	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
 	t, _ := template.ParseFiles(path.Join(".", "views", "articles.html"))
-	// TODO - Extract feed url from URL query string
 	pathComponents := strings.Split(r.URL.Path, "/")
 	b64FeedUrl := pathComponents[len(pathComponents)-1]
 	feedUrlBytes, _ := base64.StdEncoding.DecodeString(b64FeedUrl)
