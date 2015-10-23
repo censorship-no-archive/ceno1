@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -25,6 +26,7 @@ const STATUS_OK int = 200
  * @return Success if the request was sent successfully, otherwise Failure
  */
 func InsertFreenet(bundleData []byte) RequestStatus {
+	fmt.Println("Going to POST to " + Configuration.BundleInserter + "/insert")
 	reader := bytes.NewReader(bundleData)
 	insertUrl := Configuration.BundleInserter + "/insert"
 	request, err1 := http.NewRequest("POST", insertUrl, reader)
@@ -47,6 +49,9 @@ func InsertFreenet(bundleData []byte) RequestStatus {
 		fmt.Printf("Status code %d\n", response.StatusCode)
 		return Failure
 	}
+	readBytes, _ := ioutil.ReadAll(response.Body)
+	fmt.Println("Response from bundle inserter")
+	fmt.Println(string(readBytes))
 	return Success
 }
 
