@@ -34,6 +34,7 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 	private HighLevelSimpleClientInterface client;
 	public static NodeInterface nodeInterface;
 	private RequestReceiver reqReceiver;
+	private static boolean isMasterBridge = false;
 
 	// Plugin-specific configuration
 	public static final String pluginUri = "/plugins/plugins.CENO.CENOBridge";
@@ -71,11 +72,19 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 			initConfig.storeProperties();
 		}
 
-		nodeInterface.clearOutboxLog(bridgeFreemail, clientFreemail);
-		// Initialize RequestReceiver
-		reqReceiver = new RequestReceiver(new String[]{bridgeFreemail});
-		// Start a thread for polling for new freemails
-		reqReceiver.loopFreemailBoxes();
+		String configIsMasterBridge = initConfig.getProperty("isMasterBridge");
+
+		if (configIsMasterBridge != null && configIsMasterBridge.equals("true")) {
+			isMasterBridge = true;
+		}
+
+		if (isMasterBridge) {
+			nodeInterface.clearOutboxLog(bridgeFreemail, clientFreemail);
+			// Initialize RequestReceiver
+			reqReceiver = new RequestReceiver(new String[]{bridgeFreemail});
+			// Start a thread for polling for new freemails
+			reqReceiver.loopFreemailBoxes();
+		}
 
 		// Configure CENO's jetty embedded server
 		cenoHttpServer = new Server();
@@ -122,7 +131,7 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 		// Add the configured ContextHandler to the server
 		handlers.addHandler(cacheInsertCtxHandler);
 
-		
+
 		//Uncomment the following block if you need a lookup handler in the bridge side
 		/*
 		ServerConnector httpConnector = new ServerConnector(cenoHttpServer);
@@ -136,7 +145,7 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 
 		handlers.addHandler(cacheLookupCtxHandler);
 		 */
-		
+
 		cenoHttpServer.setHandler(handlers);
 	}
 
@@ -146,6 +155,10 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 
 	public long getRealVersion() {
 		return version.getRealVersion();
+	}
+
+	public static boolean isMasterBridge() {
+		return isMasterBridge;
 	}
 
 	/**
