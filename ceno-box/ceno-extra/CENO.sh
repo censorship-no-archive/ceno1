@@ -103,6 +103,12 @@ case "$1" in
     fi
     ;;
 
+  'terminal')
+    export CENOLANG
+    echo "CENO language set to" $CENOLANG
+    startCENO
+    ;;
+
   *)
     CENOLANG=$(getEnvLang)
     export CENOLANG
