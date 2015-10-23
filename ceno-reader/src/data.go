@@ -44,7 +44,7 @@ const JSON_FILE_DIR = "json-files"
 var FeedsJsonFile string = path.Join(JSON_FILE_DIR, "feeds.json")
 
 // A special identifier that can be used to find the top-level JSON file listing feeds
-const FeedsListIdentifier string = "MyFeeds.json"
+const FeedsListIdentifier string = "CENO-RSS"
 
 // Types for explicitly stating a number of bytes to allocate to something like
 // a byte array ([]byte).

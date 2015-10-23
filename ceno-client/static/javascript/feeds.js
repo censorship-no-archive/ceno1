@@ -12,7 +12,7 @@
  */
 
 var feeds = cenoPortalModule.feeds;
-var feedsPerPage = 4;
+var feedsPerPage = 7;
 var feedIndex = 0;
 var maxFeedIndex = Math.floor(feeds.length / feedsPerPage);
 
