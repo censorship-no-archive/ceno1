@@ -20,9 +20,13 @@ public abstract class CENOJettyHandler extends AbstractHandler {
 			HttpServletResponse response) throws IOException, ServletException;
 
 	protected void writeWelcome(Request baseRequest, HttpServletResponse response, String requestPath) throws IOException {
+		writeMessage("Welcome to CENO", baseRequest, response, requestPath);
+	}
+	
+	protected void writeMessage(String msg, Request baseRequest, HttpServletResponse response, String requestPath) throws IOException {
 		response.setContentType("text/html;charset=utf-8");
 		response.setStatus(HttpServletResponse.SC_OK);
-		response.getWriter().print("Welcome to CENO.");
+		response.getWriter().print(msg);
 		baseRequest.setHandled(true);
 	}
 

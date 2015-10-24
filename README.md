@@ -30,7 +30,8 @@ We currently distribute CENOBox for Linux and Mac OS X.
 ### CENOBox in Linux and Mac OS X
 ```bash
 cd ~
-wget -q https://raw.githubusercontent.com/equalitie/ceno/master/ceno-box/installCENO.sh && sh installCENO.sh
+curl -0 -J -L "https://raw.githubusercontent.com/equalitie/ceno/master/ceno-box/installCENO.sh" -o "installCENO.sh"
+sh installCENO.sh
 ```
 
 CENOBox will open a new Chrome or Firefox window. Remember that you are protected
