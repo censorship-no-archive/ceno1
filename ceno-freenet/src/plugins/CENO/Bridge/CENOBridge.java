@@ -168,8 +168,10 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 	public void terminate()
 	{
 		// Stop the thread that is polling for freemails
-		reqReceiver.stopLooping();
-		nodeInterface.clearOutboxLog(bridgeFreemail, clientFreemail);
+		if (isMasterBridge) {
+			reqReceiver.stopLooping();
+			nodeInterface.clearOutboxLog(bridgeFreemail, clientFreemail);
+		}
 
 		// Stop cenoHttpServer and unbind ports
 		if (cenoHttpServer != null) {

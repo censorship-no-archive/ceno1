@@ -110,6 +110,7 @@ public class BundleInserterHandler extends CENOJettyHandler {
 		
 		if (!CENOBridge.isMasterBridge() && urlParam.equals("CENO-RSS")) {
 			Logger.normal(this, "Got request to insert CENO-RSS but won't handle since this is not the master bridge");
+			writeMessage("Not a Master bridge,  won't insert", baseRequest, response, urlParam);
 			return;
 		}
 
@@ -141,5 +142,6 @@ public class BundleInserterHandler extends CENOJettyHandler {
 		} else {
 			writeError(baseRequest, response, urlParam);
 		}
+		writeError(baseRequest, response, "OK");
 	}
 }
