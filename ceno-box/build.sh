@@ -118,7 +118,7 @@ cp -rL browser-profiles CENOBox
 rm CENOBox/browser-profiles/chrome/.gitkeep
 cp -r ceno-{freenet,extra}/* CENOBox
 mkdir CENOBox/ceno-client
-cp -r ceno-client/{views,config} CENOBox/ceno-client
+cp -r ceno-client/{views,config,static,json-files} CENOBox/ceno-client
 cp ceno-client/client CENOBox/ceno-client/CENOClient
 mkdir CENOBox/ceno-client/translations
 cp ceno-client/translations/**.all.json CENOBox/ceno-client/translations
