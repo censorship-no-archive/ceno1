@@ -33,6 +33,7 @@ public class LookupHandler extends AbstractCENOClientHandler {
 
 		// Check if URL parameter of the GET request is Empty
 		String encodedUrlParam = request.getParam("url", "");
+		String urlParam;
 		if (encodedUrlParam.isEmpty()) {
 			return returnError(new CENOException(CENOErrCode.LCS_HANDLER_URL_INVALID), clientIsHtml);
 		}
