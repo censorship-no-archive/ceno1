@@ -31,7 +31,7 @@ func initModuleWithArticles(feedUrl string) (map[string]interface{}, error) {
 	articleInfo := ArticleInfo{}
 	var decodeErr error
 	result := Lookup(feedUrl)
-	if result.Complete {
+	if result.Complete && result.Found {
 		// Serve whatever the LCS gave us as the most recent articles list for
 		// the feed we want to see.
 		decoder := json.NewDecoder(bytes.NewReader([]byte(result.Bundle)))

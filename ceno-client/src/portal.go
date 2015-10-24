@@ -19,7 +19,7 @@ func initModuleWithFeeds() (map[string]interface{}, error) {
 	var decodeErr error
 	// Download the latest feeds list from the LCS
 	result := Lookup(FeedsJsonFile) // Defined in data.go
-	if result.Complete {
+	if result.Complete && result.Found {
 		// Serve whatever the LCS gave us as the most recent feeds file.
 		// After the first complete lookup, others will be served from the LCS's cache.
 		decoder := json.NewDecoder(bytes.NewReader([]byte(result.Bundle)))
