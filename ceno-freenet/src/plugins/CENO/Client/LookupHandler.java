@@ -32,15 +32,14 @@ public class LookupHandler extends AbstractCENOClientHandler {
 		boolean clientIsHtml = isClientHtml(request);
 
 		// Check if URL parameter of the GET request is Empty
-		String encodedUrlParam = request.getParam("url", "");
-		String urlParam;
-		if (encodedUrlParam.isEmpty()) {
+		String urlParam = request.getParam("url", "");
+		if (urlParam.isEmpty()) {
 			return returnError(new CENOException(CENOErrCode.LCS_HANDLER_URL_INVALID), clientIsHtml);
 		}
 
 		// Base64 Decode the URL parameter
 		try {
-			urlParam = Base64.decodeUTF8(encodedUrlParam);
+			urlParam = Base64.decodeUTF8(urlParam);
 		} catch (IllegalBase64Exception e) {
 			return returnError(new CENOException(CENOErrCode.LCS_HANDLER_URL_DECODE), clientIsHtml);
 		}
@@ -119,7 +118,7 @@ public class LookupHandler extends AbstractCENOClientHandler {
 				// initiates such a request
 				//boolean isX_CENO_Rewrite = (request.getHeader("X-Ceno-Rewritten") != null) ? true : false;
 				RequestSender.requestFromBridge(urlParam);
-				return printStaticHTMLReplace("resources/requestedFromBridge.html", "[urlRequested]", encodedUrlParam);
+				return printStaticHTMLReplace("resources/requestedFromBridge.html", "[urlRequested]", urlParam);
 			} else {
 				JSONObject jsonResponse = new JSONObject();
 				jsonResponse.put("complete", true);
@@ -130,7 +129,7 @@ public class LookupHandler extends AbstractCENOClientHandler {
 
 		// Request to the bridge for the requested URL has not timed out and a ULPR is in progress.
 		if (clientIsHtml) {
-			return printStaticHTMLReplace("resources/sentULPR.html", "[urlRequested]", encodedUrlParam);
+			return printStaticHTMLReplace("resources/sentULPR.html", "[urlRequested]", urlParam);
 		} else {
 			JSONObject jsonResponse = new JSONObject();
 			jsonResponse.put("complete", false);
