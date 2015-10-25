@@ -1,6 +1,7 @@
 package plugins.CENO.Bridge;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.concurrent.TimeUnit;
 
 import javax.servlet.ServletException;
@@ -17,6 +18,7 @@ import org.eclipse.jetty.server.Request;
 import plugins.CENO.Bridge.BundleInserter.InsertCallback;
 import plugins.CENO.Bridge.BundlerInterface.Bundle;
 import plugins.CENO.Common.CENOJettyHandler;
+import plugins.CENO.Common.URLtoUSKTools;
 import freenet.client.InsertException;
 import freenet.client.async.BaseClientPutter;
 import freenet.support.Logger;
@@ -106,6 +108,12 @@ public class BundleInserterHandler extends CENOJettyHandler {
 		if((urlParam == null) || urlParam.isEmpty()) {
 			writeError(baseRequest, response, "Invalid url attribute");
 			return;
+		}
+
+		try {
+			urlParam = URLtoUSKTools.validateURL(urlParam);
+		} catch (MalformedURLException e) {
+			writeError(baseRequest, response, "URL failed validation and a bundle will not be inserted");
 		}
 		
 		if (!CENOBridge.isMasterBridge() && urlParam.equals("CENO-RSS")) {
