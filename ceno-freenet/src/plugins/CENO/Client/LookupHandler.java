@@ -37,11 +37,13 @@ public class LookupHandler extends AbstractCENOClientHandler {
 			return returnError(new CENOException(CENOErrCode.LCS_HANDLER_URL_INVALID), clientIsHtml);
 		}
 
-		// Base64 Decode the URL parameter
-		try {
-			urlParam = Base64.decodeUTF8(urlParam);
-		} catch (IllegalBase64Exception e) {
-			return returnError(new CENOException(CENOErrCode.LCS_HANDLER_URL_DECODE), clientIsHtml);
+		if (!clientIsHtml) {
+			// Base64 Decode the URL parameter
+			try {
+				urlParam = Base64.decodeUTF8(urlParam);
+			} catch (IllegalBase64Exception e) {
+				return returnError(new CENOException(CENOErrCode.LCS_HANDLER_URL_DECODE), clientIsHtml);
+			}
 		}
 
 		// Validate the URL requested
