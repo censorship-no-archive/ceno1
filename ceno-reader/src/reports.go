@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"strings"
 )
 
 // Descriptions of the different classes of errors, converting from the kinds of names
@@ -25,15 +26,15 @@ func ConvertErrorReport(reportMsg ErrorReportMsg) (ErrorReport, error) {
 	for _, _class := range reportMsg.ErrorClasses {
 		errorClass, found := ErrorClasses[_class]
 		if !found {
-			return nil, errors.New("No such error class " + _class)
+			return ErrorReport{}, errors.New("No such error class " + _class)
 		} else {
-			report.ErrorClasses |= errorClass
+			report.ErrorTypes |= errorClass
 		}
 	}
 	for _, _type := range reportMsg.ResourceTypes {
 		resourceType, found := Resources[_type]
 		if !found {
-			return nil, errors.New("No such resource type " + _type)
+			return ErrorReport{}, errors.New("No such resource type " + _type)
 		} else {
 			report.ResourceTypes |= resourceType
 		}
@@ -66,7 +67,7 @@ func WriteReport(reports []ErrorReport) string {
 			}
 		}
 		// Finally, append a line containing the error message.
-		reportMsg += "Error message: " + report.Message + "\n\n"
+		reportMsg += "Error message: " + report.ErrorMessage + "\n\n"
 	}
 	return reportMsg
 }
