@@ -63,7 +63,7 @@ func reportBundleCreation(w http.ResponseWriter, r *http.Request) {
 		marshalled, _ := json.Marshal(BundleResponse{
 			Url:     requestedUrl,
 			Created: time.Now().Format(time.UnixDate),
-			Bundle:  "SOMEBLOBOFDATAREPRESENTINGABUNDLE",
+			Bundle:  `SOMEBUNDLEOFDATAREPRESENTINGAFEED`,
 		})
 		fmt.Println("Success!")
 		fmt.Println(string(marshalled))
