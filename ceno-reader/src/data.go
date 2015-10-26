@@ -80,13 +80,13 @@ type Resource int
 
 const (
 	NoResources = 0
-	Feed        = 1 << iota
+	RssFeed     = 1 << iota
 	Article     = 1 << iota
 )
 
 // Map JSON-friendly string names of resource types to their internal representation
 var Resources map[string]Resource = map[string]Resource{
-	"feed":    Feed,
+	"feed":    RssFeed,
 	"article": Article,
 }
 

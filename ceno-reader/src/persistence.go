@@ -330,7 +330,9 @@ func GetErrors(db *sql.DB, kinds ErrorReport) ([]ErrorReport, error) {
 		var id, resourceTypes, errorTypes int
 		var message string
 		rows.Scan(&id, &resourceTypes, &errorTypes, &message)
-		reports = append(reports, ErrorReport{id, resourceTypes, errorTypes, message})
+		reports = append(reports, ErrorReport{
+			id, Resource(resourceTypes), ErrorClass(errorTypes), message,
+		})
 		ids = append(ids, id)
 	}
 	rows.Close()
