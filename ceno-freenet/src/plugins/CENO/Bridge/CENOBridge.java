@@ -125,6 +125,7 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 		// Configure ContextHandlers to listen to a specific port
 		// and upon request call the appropriate CENOJettyHandler subclass
 		ContextHandler cacheInsertCtxHandler = new ContextHandler();
+		cacheInsertCtxHandler.setMaxFormContentSize(2000000);
 		cacheInsertCtxHandler.setHandler(new BundleInserterHandler());
 		//cacheInsertCtxHandler.setVirtualHosts(new String[]{"@cacheInsert"});
 

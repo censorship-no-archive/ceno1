@@ -101,6 +101,15 @@ case "$1" in
       kill $(cat ceno-client/CENOClient.pid)
       echo "Stopped CENO Client proxy"
     fi
+    if ps ax | grep -v grep | grep CENOClient > /dev/null
+    then
+      kill $(pgrep CENOClient)
+      echo "Stopped CENO Client proxy"
+    fi
+    ;;
+
+  'browser')
+    startBrowser
     ;;
 
   'terminal')
