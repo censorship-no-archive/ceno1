@@ -307,6 +307,47 @@ func writeItems(feedUrl string, items []Item) error {
 }
 
 /**
+ * Handle a GET request to have an error report generated.
+ * See the ErrorReportMsg struct for information about the fields available in requests.
+ * The default behavior is to report about all resource types and all errors types, unless
+ * some are specified in the arguments.
+ */
+func reportErrorHandler(w http.ResponseWriter, r *http.Request) {
+	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
+	ermsg := ErrorReportMsg{}
+	decoder := json.NewDecoder(r.Body)
+	decodeErr := decoder.Decode(&ermsg)
+	if decodeErr != nil {
+		w.Write([]byte(T("json_decode_err", map[string]string{"Error": decodeErr.Error()})))
+		return
+	}
+	// If no resources were specified, use all of them
+	if len(ermsg.ResourceTypes) == 0 {
+		for resourceType, _ := range Resources {
+			ermsg.ResourceTypes = append(ermsg.ResourceTypes, resourceType)
+		}
+	}
+	// If no error classes were specified, use all of them
+	if len(ermsg.ErrorClasses) == 0 {
+		for errorClass, _ := range ErrorClasses {
+			ermsg.ErrorClasses = append(ermsg.ErrorClasses, errorClass)
+		}
+	}
+	errorReport, convertErr := ConvertErrorReport(ermsg)
+	if convertErr != nil {
+		w.Write([]byte(T("invalid_report_err", map[string]string{"Error": convertErr.Error()})))
+		return
+	}
+	errorReports, dbErr := GetErrors(DBConnection, errorReport)
+	if dbErr != nil {
+		w.Write([]byte(T("db_get_err", map[string]string{"Error": dbErr.Error()})))
+	} else {
+		report := WriteReport(errorReports)
+		w.Write([]byte(report))
+	}
+}
+
+/**
  * TODO - Periodically delete items from the DB that we won't see again
  */
 
@@ -341,6 +382,7 @@ func main() {
 	http.HandleFunc("/follow", followHandler(requestNewFollow))
 	http.HandleFunc("/unfollow", unfollowHandler)
 	http.HandleFunc("/insert", insertHandler)
+	http.HandleFunc("/errors", reportErrorHandler)
 	fmt.Println(T("listening_msg_rdr", map[string]interface{}{"Port": Configuration.PortNumber}))
 	if err := http.ListenAndServe(Configuration.PortNumber, nil); err != nil {
 		panic(err)
