@@ -57,6 +57,39 @@ const (
 	Gigabytes = 1024 * Megabytes
 )
 
+// Types for classes of errors that might occur. Used to report errors
+// in the database.
+type ErrorClass int
+
+const (
+	NoErrorClasses = 0
+	InvalidUrl     = 1 << iota
+	NoResponse     = 1 << iota
+	Malformed      = 1 << iota
+)
+
+// Map JSON-friendly string names of error classes to their internal representation
+var ErrorClasses map[string]ErrorClass = map[string]ErrorClass{
+	"invalidUrl": InvalidUrl,
+	"noResponse": NoResponse,
+	"malformed":  Malformed,
+}
+
+// Resources that errors can be related to
+type Resource int
+
+const (
+	NoResources = 0
+	Feed        = 1 << iota
+	Article     = 1 << iota
+)
+
+// Map JSON-friendly string names of resource types to their internal representation
+var Resources map[string]Resource = map[string]Resource{
+	"feed":    Feed,
+	"article": Article,
+}
+
 // Maximum number of bytes we will allow for a bundle of a page
 const MAX_BUNDLE_SIZE ByteSize = 100 * Megabytes
 
@@ -85,6 +118,26 @@ type Item struct {
 	FeedUrl   string `json:"feedUrl"`
 	Authors   string `json:"authors"`
 	Published string `json:"published"`
+}
+
+/**
+ * Describes an error report as related to a particular resource.
+ */
+type ErrorReport struct {
+	Id            int
+	ResourceTypes Resource
+	ErrorTypes    ErrorClass
+	ErrorMessage  string
+}
+
+/**
+ * A container for JSON data to be parsed from requests to have
+ * reports generated.  This data will be converted to and from
+ * ErrorReport structures for working with the database.
+ */
+type ErrorReportMsg struct {
+	ResourceTypes []string `json:"resources"`
+	ErrorClasses  []string `json:"classes"`
 }
 
 /**
