@@ -13,7 +13,7 @@ rows = table.tbody.find_all('tr')
 
 output = open('sources.list', 'w')
 for row in rows:
-    _, _, _, _, feed_url, feed_type = row.find_all('td')
+    _, _, _, _, feed_url, feed_type, _ = row.find_all('td')
     url = feed_url.a.text
     _type = feed_type.text
     if _type.lower() == 'html':
