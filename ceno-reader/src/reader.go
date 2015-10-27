@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"strings"
 	"time"
 )
 
@@ -322,16 +323,20 @@ func reportErrorHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// If no resources were specified, use all of them
-	if len(ermsg.ResourceTypes) == 0 {
+	if strings.Count(ermsg.ResourceTypes, ",") == 0 {
+		keys := make([]string, 2)
 		for resourceType, _ := range Resources {
-			ermsg.ResourceTypes = append(ermsg.ResourceTypes, resourceType)
+			keys = append(keys, resourceType)
 		}
+		ermsg.ResourceTypes = strings.Join(keys, ",")
 	}
 	// If no error classes were specified, use all of them
-	if len(ermsg.ErrorClasses) == 0 {
+	if strings.Count(ermsg.ErrorClasses, ",") == 0 {
+		keys := make([]string, 2)
 		for errorClass, _ := range ErrorClasses {
-			ermsg.ErrorClasses = append(ermsg.ErrorClasses, errorClass)
+			keys = append(keys, errorClass)
 		}
+		ermsg.ErrorClasses = strings.Join(keys, ",")
 	}
 	errorReport, convertErr := ConvertErrorReport(ermsg)
 	if convertErr != nil {

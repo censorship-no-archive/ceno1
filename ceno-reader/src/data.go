@@ -134,10 +134,12 @@ type ErrorReport struct {
  * A container for JSON data to be parsed from requests to have
  * reports generated.  This data will be converted to and from
  * ErrorReport structures for working with the database.
+ *
+ * resources and classes must be comma-separated lists of names.
  */
 type ErrorReportMsg struct {
-	ResourceTypes []string `json:"resources"`
-	ErrorClasses  []string `json:"classes"`
+	ResourceTypes string `json:"resources"`
+	ErrorClasses  string `json:"classes"`
 }
 
 /**

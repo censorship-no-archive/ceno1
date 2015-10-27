@@ -23,7 +23,13 @@ var errorClassDescriptions map[string]string = map[string]string{
  */
 func ConvertErrorReport(reportMsg ErrorReportMsg) (ErrorReport, error) {
 	report := ErrorReport{-1, NoResources, NoErrorClasses, ""}
-	for _, _class := range reportMsg.ErrorClasses {
+	reportErrorClasses := strings.Split(
+		strings.Replace(reportMsg.ErrorClasses, " ", "", -1),
+		",")
+	reportResourceTypes := strings.Split(
+		strings.Replace(reportMsg.ResourceTypes, " ", "", -1),
+		",")
+	for _, _class := range reportErrorClasses {
 		errorClass, found := ErrorClasses[_class]
 		if !found {
 			return ErrorReport{}, errors.New("No such error class " + _class)
@@ -31,7 +37,7 @@ func ConvertErrorReport(reportMsg ErrorReportMsg) (ErrorReport, error) {
 			report.ErrorTypes |= errorClass
 		}
 	}
-	for _, _type := range reportMsg.ResourceTypes {
+	for _, _type := range reportResourceTypes {
 		resourceType, found := Resources[_type]
 		if !found {
 			return ErrorReport{}, errors.New("No such resource type " + _type)

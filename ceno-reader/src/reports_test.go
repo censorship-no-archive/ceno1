@@ -6,8 +6,8 @@ import (
 )
 
 func TestConvertErrorReport(t *testing.T) {
-	resources := [...]string{"feed", "article"}
-	errClasses := [...]string{"invalidUrl", "malformed"}
+	resources := "feed, article"
+	errClasses := "invalidUrl, malformed"
 	reportJson := ErrorReportMsg{resources[:], errClasses[:]}
 	report, convertErr := ConvertErrorReport(reportJson)
 	if convertErr != nil {
