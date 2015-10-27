@@ -12,6 +12,8 @@ import (
 	//"github.com/jteeuwen/go-pkg-xmlx"
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -337,7 +339,13 @@ func GetErrors(db *sql.DB, kinds ErrorReport) ([]ErrorReport, error) {
 	}
 	rows.Close()
 	// Now we delete all the retrieved errors so we don't duplicate them in a later report.
-	_, execError := tx.Exec(`delete from errors where id in ?`, ids)
+	stringIds := make([]string, len(ids))
+	for i, id := range ids {
+		stringIds[i] = strconv.Itoa(id)
+	}
+	// It's typically poor practice to do this, but it's safe since we know what data is here.
+	_, execError := tx.Exec(
+		fmt.Sprintf(`delete from errors where id in (%s)`, strings.Join(stringIds, ", ")))
 	if execError != nil {
 		return reports, execError
 	}
