@@ -14,6 +14,16 @@ var errorClassDescriptions map[string]string = map[string]string{
 }
 
 /**
+ * A helper function to create a new ErrorReport without having to provide an ID to the struct.
+ * @param resourceTypes - A binary-OR list of concerned resources; eg. RssFeed | Article
+ * @param errorTypes - A binary-OR list of detected errors; eg. InvalidUrl | NoResponse
+ * @param message - An error message to describe what happened
+ */
+func NewErrorReport(resourceTypes Resources, errorTypes ErrorClass, message string) ErrorReport {
+	return ErrorReport{-1, resourceTypes, errorTypes, message}
+}
+
+/**
  * Convert the contents of a GET request for a report with certain restrictions
  * on the types of resources of interest or the classes of errors of interest
  * into the internal representation of those types, ready to go to the database.

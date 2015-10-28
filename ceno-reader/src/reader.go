@@ -75,17 +75,21 @@ func pollFeed(URL string, charsetReader xmlx.CharsetFunc) {
 		defer func() {
 			r := recover()
 			if r != nil {
-				fmt.Println(T("feed_poll_err", map[string]string{
+				errMsg := T("feed_poll_err", map[string]string{
 					"Url":   URL,
 					"Error": "Panicked when fetching from feed",
-				}))
+				})
+				fmt.Println(errMsg)
+				SaveError(DBConnection, NewErrorReport(RssFeeds, InvalidUrl|Malformed, errMsg))
 			}
 		}()
 		if err := feed.Fetch(URL, charsetReader); err != nil {
-			fmt.Println(T("feed_poll_err", map[string]string{
+			errMsg := T("feed_poll_err", map[string]string{
 				"Url":   URL,
 				"Error": err.Error(),
-			}))
+			})
+			fmt.Println(errMsg)
+			SaveError(DBConnection, NewError(RssFeeds, InvalidUrl|Malformed, errMsg))
 		}
 		<-time.After(time.Duration(feed.SecondsTillUpdate() * 1e9))
 	}
