@@ -131,18 +131,6 @@ type ErrorReport struct {
 }
 
 /**
- * A container for JSON data to be parsed from requests to have
- * reports generated.  This data will be converted to and from
- * ErrorReport structures for working with the database.
- *
- * resources and classes must be comma-separated lists of names.
- */
-type ErrorReportMsg struct {
-	ResourceTypes string `json:"resources"`
-	ErrorClasses  string `json:"classes"`
-}
-
-/**
  * Pair a Feed with a ResponseWriter to be sent accross a channel
  * So that a separate goroutine can try to handle DB operations and
  * write back to the client.

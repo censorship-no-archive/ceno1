@@ -12,8 +12,6 @@ import (
 	//"github.com/jteeuwen/go-pkg-xmlx"
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
-	"strconv"
-	"strings"
 	"time"
 )
 
@@ -308,11 +306,9 @@ func SaveError(db *sql.DB, report ErrorReport) error {
  * argument to this function.  Once error reports are retrieved from the database,
  * they are deleted since we want to avoid reporting errors twice.
  * @param {*sql.DB} db - The database connection to use
- * @param {ErrorReport} kinds - Information about the errors to fetch
  */
-func GetErrors(db *sql.DB, kinds ErrorReport) ([]ErrorReport, error) {
+func GetErrors(db *sql.DB) ([]ErrorReport, error) {
 	reports := make([]ErrorReport, 0)
-	ids := make([]int, 0)
 	tx, err := db.Begin()
 	if err != nil {
 		return reports, err
@@ -320,11 +316,7 @@ func GetErrors(db *sql.DB, kinds ErrorReport) ([]ErrorReport, error) {
 	// Get the relevant rows from the database.
 	// Note that error types and resource types are specified in the database as integers.
 	// That means we do the usual binary operations to find them.
-	rows, queryError := tx.Query(`
-		select id, resource_types, error_types, message
-		from errors
-		where resource_types & ? != 0 and error_types & ? != 0`,
-		kinds.ResourceTypes, kinds.ErrorTypes)
+	rows, queryError := tx.Query(`select id, resource_types, error_types, message from errors`)
 	if queryError != nil {
 		return reports, queryError
 	}
@@ -335,17 +327,9 @@ func GetErrors(db *sql.DB, kinds ErrorReport) ([]ErrorReport, error) {
 		reports = append(reports, ErrorReport{
 			id, Resource(resourceTypes), ErrorClass(errorTypes), message,
 		})
-		ids = append(ids, id)
 	}
 	rows.Close()
-	// Now we delete all the retrieved errors so we don't duplicate them in a later report.
-	stringIds := make([]string, len(ids))
-	for i, id := range ids {
-		stringIds[i] = strconv.Itoa(id)
-	}
-	// It's typically poor practice to do this, but it's safe since we know what data is here.
-	_, execError := tx.Exec(
-		fmt.Sprintf(`delete from errors where id in (%s)`, strings.Join(stringIds, ", ")))
+	_, execError := tx.Exec(`delete from errors`)
 	if execError != nil {
 		return reports, execError
 	}

@@ -5,28 +5,6 @@ import (
 	"testing"
 )
 
-func TestConvertErrorReport(t *testing.T) {
-	resources := "feed, article"
-	errClasses := "invalidUrl, malformed"
-	reportJson := ErrorReportMsg{resources[:], errClasses[:]}
-	report, convertErr := ConvertErrorReport(reportJson)
-	if convertErr != nil {
-		t.Error(convertErr.Error())
-	}
-	if report.ErrorTypes&InvalidUrl == 0 {
-		t.Error("Error type does not include InvalidUrl")
-	}
-	if report.ErrorTypes&Malformed == 0 {
-		t.Error("Error type does not include Malformed")
-	}
-	if report.ResourceTypes&RssFeed == 0 {
-		t.Error("Resource type does not include RssFeed")
-	}
-	if report.ResourceTypes&Article == 0 {
-		t.Error("Resource type does not include Article")
-	}
-}
-
 func TestWriteReport(t *testing.T) {
 	reports := make([]ErrorReport, 1)
 	errReport := ErrorReport{

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"strings"
 )
 
@@ -19,43 +18,8 @@ var errorClassDescriptions map[string]string = map[string]string{
  * @param errorTypes - A binary-OR list of detected errors; eg. InvalidUrl | NoResponse
  * @param message - An error message to describe what happened
  */
-func NewErrorReport(resourceTypes Resources, errorTypes ErrorClass, message string) ErrorReport {
+func NewErrorReport(resourceTypes Resource, errorTypes ErrorClass, message string) ErrorReport {
 	return ErrorReport{-1, resourceTypes, errorTypes, message}
-}
-
-/**
- * Convert the contents of a GET request for a report with certain restrictions
- * on the types of resources of interest or the classes of errors of interest
- * into the internal representation of those types, ready to go to the database.
- * @param reportMsg - The contents of the request for a report
- * @return An internal representation of the report to generate and an error if
- * values that aren't understood were supplied.
- */
-func ConvertErrorReport(reportMsg ErrorReportMsg) (ErrorReport, error) {
-	report := ErrorReport{-1, NoResources, NoErrorClasses, ""}
-	reportErrorClasses := strings.Split(
-		strings.Replace(reportMsg.ErrorClasses, " ", "", -1),
-		",")
-	reportResourceTypes := strings.Split(
-		strings.Replace(reportMsg.ResourceTypes, " ", "", -1),
-		",")
-	for _, _class := range reportErrorClasses {
-		errorClass, found := ErrorClasses[_class]
-		if !found {
-			return ErrorReport{}, errors.New("No such error class " + _class)
-		} else {
-			report.ErrorTypes |= errorClass
-		}
-	}
-	for _, _type := range reportResourceTypes {
-		resourceType, found := Resources[_type]
-		if !found {
-			return ErrorReport{}, errors.New("No such resource type " + _type)
-		} else {
-			report.ResourceTypes |= resourceType
-		}
-	}
-	return report, nil
 }
 
 /**

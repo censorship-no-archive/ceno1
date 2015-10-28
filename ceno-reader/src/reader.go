@@ -13,7 +13,6 @@ import (
 	"net/http"
 	"os"
 	"path"
-	"strings"
 	"time"
 )
 
@@ -80,7 +79,7 @@ func pollFeed(URL string, charsetReader xmlx.CharsetFunc) {
 					"Error": "Panicked when fetching from feed",
 				})
 				fmt.Println(errMsg)
-				SaveError(DBConnection, NewErrorReport(RssFeeds, InvalidUrl|Malformed, errMsg))
+				SaveError(DBConnection, NewErrorReport(RssFeed, InvalidUrl|Malformed, errMsg))
 			}
 		}()
 		if err := feed.Fetch(URL, charsetReader); err != nil {
@@ -89,7 +88,7 @@ func pollFeed(URL string, charsetReader xmlx.CharsetFunc) {
 				"Error": err.Error(),
 			})
 			fmt.Println(errMsg)
-			SaveError(DBConnection, NewError(RssFeeds, InvalidUrl|Malformed, errMsg))
+			SaveError(DBConnection, NewErrorReport(RssFeed, InvalidUrl|Malformed, errMsg))
 		}
 		<-time.After(time.Duration(feed.SecondsTillUpdate() * 1e9))
 	}
@@ -319,35 +318,7 @@ func writeItems(feedUrl string, items []Item) error {
  */
 func reportErrorHandler(w http.ResponseWriter, r *http.Request) {
 	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
-	ermsg := ErrorReportMsg{}
-	decoder := json.NewDecoder(r.Body)
-	decodeErr := decoder.Decode(&ermsg)
-	if decodeErr != nil {
-		w.Write([]byte(T("json_decode_err", map[string]string{"Error": decodeErr.Error()})))
-		return
-	}
-	// If no resources were specified, use all of them
-	if strings.Count(ermsg.ResourceTypes, ",") == 0 {
-		keys := make([]string, 2)
-		for resourceType, _ := range Resources {
-			keys = append(keys, resourceType)
-		}
-		ermsg.ResourceTypes = strings.Join(keys, ",")
-	}
-	// If no error classes were specified, use all of them
-	if strings.Count(ermsg.ErrorClasses, ",") == 0 {
-		keys := make([]string, 2)
-		for errorClass, _ := range ErrorClasses {
-			keys = append(keys, errorClass)
-		}
-		ermsg.ErrorClasses = strings.Join(keys, ",")
-	}
-	errorReport, convertErr := ConvertErrorReport(ermsg)
-	if convertErr != nil {
-		w.Write([]byte(T("invalid_report_err", map[string]string{"Error": convertErr.Error()})))
-		return
-	}
-	errorReports, dbErr := GetErrors(DBConnection, errorReport)
+	errorReports, dbErr := GetErrors(DBConnection)
 	if dbErr != nil {
 		w.Write([]byte(T("db_get_err", map[string]string{"Error": dbErr.Error()})))
 	} else {
