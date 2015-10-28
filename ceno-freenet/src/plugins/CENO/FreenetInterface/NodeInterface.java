@@ -1,10 +1,14 @@
 package plugins.CENO.FreenetInterface;
 
 import java.io.ByteArrayInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
+import org.apache.commons.compress.utils.IOUtils;
 import org.freenetproject.freemail.wot.ConcurrentWoTConnection;
 
 import plugins.CENO.FreenetInterface.ConnectionOverview.NodeConnections;
@@ -112,8 +116,8 @@ public class NodeInterface implements FreenetInterface {
 			defName = defaultName;
 		}
 
-		Bucket bucket = node.clientCore.tempBucketFactory.makeBucket(content.length());
-		BucketTools.copyFrom(bucket, new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8), 0, content.length()), content.length());
+		Bucket bucket = node.clientCore.tempBucketFactory.makeBucket(content.getBytes().length);
+		BucketTools.copyFrom(bucket, new ByteArrayInputStream(content.getBytes()), content.getBytes().length);
 
 		HashMap<String, Object> bucketsByName = new HashMap<String, Object>();
 		bucketsByName.put(defName, bucket);
