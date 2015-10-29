@@ -25,10 +25,10 @@ public class BundleInserter {
 
 	public static class InsertCallback implements ClientPutCallback {
 		protected FreenetURI cachedURI;
-		protected String uri;
+		protected String url;
 
-		public void setUri(String uri) {
-			this.uri = uri;
+		public InsertCallback(String url) {
+			this.url = url;
 		}
 
 		public void onGeneratedURI(FreenetURI freenetUri, BaseClientPutter state) {
@@ -42,11 +42,11 @@ public class BundleInserter {
 		}
 
 		public void onSuccess(BaseClientPutter state) {
-			Logger.normal(this, "Bundle caching for URL " + uri + " successful: " + cachedURI);
+			Logger.normal(this, "Bundle caching for URL " + url + " successful: " + cachedURI);
 		}
 
 		public void onFailure(InsertException e, BaseClientPutter state) {
-			Logger.error(this, "Failed to insert bundle for URL " + uri + " Error Message: " + e);
+			Logger.error(this, "Failed to insert bundle for URL " + url + " Error Message: " + e);
 			e.printStackTrace();
 		}
 
@@ -66,8 +66,7 @@ public class BundleInserter {
 	}
 
 	public static void insertBundle(String url) throws IOException, InsertException {
-		InsertCallback insertCb = new InsertCallback();
-		insertCb.setUri(url);
+		InsertCallback insertCb = new InsertCallback(url);
 		insertBundle(url, insertCb);
 	}
 
