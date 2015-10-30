@@ -1,6 +1,7 @@
 let { ToggleButton } = require('sdk/ui/button/toggle');
 let { Ci } = require('chrome');
 let { newURI } = require('sdk/url/utils');
+let { NewTabURL } = require('resource:///modules/NewTabURL.jsm');
 let events = require('sdk/system/events');
 let preferences = require('sdk/preferences/service');
 let Request = require('sdk/request').Request;
@@ -91,7 +92,9 @@ function activateCENO() {
   preferences.set(PROXY_HTTP_PORT, CENO_PORT);
   preferences.set(PROXY_SSL_ADDR, CENO_ADDR);
   preferences.set(PROXY_SSL_PORT, CENO_PORT);
+  // Set the homepage and new tab page
   preferences.set(SETTING_HOMEPAGE, CENO_PORTAL_PAGE);
+  NewTabURL.override(CENO_PORTAL_PAGE);
   // Turn proxying on
   preferences.set(PROXY_TYPE, PROXY_TYPE_MANUAL);
 }
@@ -102,7 +105,9 @@ function deactivateCENO() {
   events.off('http-on-modify-request', sendToProxy);
   // Turn the proxying off
   preferences.set(PROXY_TYPE, PROXY_TYPE_NONE);
+  // Reset the user's homepage and new tab page
   preferences.set(SETTING_HOMEPAGE, 'about:home');
+  NewTabURL.reset();
 }
 
 /* Ensure that the user has the CENO client started so we can use it to proxy HTTP requests.
