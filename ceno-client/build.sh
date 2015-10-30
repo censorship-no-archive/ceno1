@@ -22,4 +22,10 @@ cd translations
 $GOPATH/bin/goi18n *.all.json *.untranslated.json
 cd ..
 
+echo "Building feature and integration testing tools."
+cd test
+go build erroringlcs.go
+echo "  * erroringlcs - LCS that always serves an error for testing auto-refreshing."
+cd ..
+
 go build $SOURCE_FILES && echo "Compiled client successfully."
