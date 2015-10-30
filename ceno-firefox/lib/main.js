@@ -6,10 +6,9 @@ let preferences = require('sdk/preferences/service');
 let Request = require('sdk/request').Request;
 let panels = require('sdk/panel');
 let self = require('sdk/self');
-let tabs = require('sdk/tabs');
 let base64 = require('sdk/base64');
 let ss = require('sdk/simple-storage');
-var _ = require("sdk/l10n").get;
+let _ = require("sdk/l10n").get;
 
 // CENO configuration settings
 const CENO_PORT = 3090;
@@ -37,6 +36,13 @@ const PROXY_TYPE = 'network.proxy.type';
 const PROXY_TYPE_MANUAL = 1;
 const PROXY_TYPE_NONE = 0;
 
+// The address of the CENO Portal while the CENO Client is running
+const CENO_PORTAL_PAGE = 'http://' + CENO_ADDR + ':' + CENO_PORT + '/portal';
+
+// Firefox preferences for the homepage, new tab page, etc, that we will make CENO Portal
+const SETTING_HOMEPAGE = 'browser.startup.homepage';
+
+
 /* Create the URL that can be requested to directly ask the CC for a site.
  *
  * @param {string} url - The orginal URL to request
@@ -54,7 +60,7 @@ function directLookupURL(url, rewritten) {
  * @param {string} url - The URL being requested, must not contain extraneous characters
  */
 function stripHTTPS(url) {
-  var rewritten = false;
+  let rewritten = false;
   if (url.match('^https') !== null) {
     url = url.replace('https', 'http');
     rewritten = true;
@@ -85,6 +91,7 @@ function activateCENO() {
   preferences.set(PROXY_HTTP_PORT, CENO_PORT);
   preferences.set(PROXY_SSL_ADDR, CENO_ADDR);
   preferences.set(PROXY_SSL_PORT, CENO_PORT);
+  preferences.set(SETTING_HOMEPAGE, CENO_PORTAL_PAGE);
   // Turn proxying on
   preferences.set(PROXY_TYPE, PROXY_TYPE_MANUAL);
 }
@@ -95,6 +102,7 @@ function deactivateCENO() {
   events.off('http-on-modify-request', sendToProxy);
   // Turn the proxying off
   preferences.set(PROXY_TYPE, PROXY_TYPE_NONE);
+  preferences.set(SETTING_HOMEPAGE, 'about:home');
 }
 
 /* Ensure that the user has the CENO client started so we can use it to proxy HTTP requests.
@@ -102,13 +110,13 @@ function deactivateCENO() {
  * @param {function(boolean)} callback - A function to be invoked with a bool- true if proxy active
  */
 function ensureProxyIsRunning(callback) {
-  let proxyProbeReq = Request({
+  Request({
     url: 'http://localhost:3090/',
     onComplete: function (response) {
       let value = response.headers[CENO_HEADER];
-      callback(typeof value !== 'undefined'
-            && value !== null
-            && value === CENO_HEADER_VALUE);
+      callback(typeof value !== 'undefined' && 
+               value !== null &&
+               value === CENO_HEADER_VALUE);
     }
   }).get();
 }
@@ -169,8 +177,8 @@ function handleChange(state) {
       position: button,
       width: 450
     });
-    var isActive = ss.storage.active || false;
-    var word = (isActive) ? _('activeWord') : _('inactiveWord');
+    let isActive = ss.storage.active || false;
+    let word = (isActive) ? _('activeWord') : _('inactiveWord');
     panel.port.emit('inform-activity', isActive, word);
   }
 }
