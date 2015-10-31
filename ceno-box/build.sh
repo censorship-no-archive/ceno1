@@ -75,10 +75,11 @@ cd ceno-client
 if [ -a client ]; then
   rm client
 fi
-export GOPATH=$HOME/go
-sh ./build.sh
+
 echo
+GOROOT_BOOTSTRAP=$(which go)  sh ./build.sh darwin/386 darwin/amd64 linux/386 linux/amd64 linux/arm windows/386 windows/amd64
 cd $CENOBOXPATH
+echo
 
 function copyFreenetFilesTo() {
   # Copy necessary files from the Freenet installation

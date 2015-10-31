@@ -1,5 +1,18 @@
 #! /usr/bin/env sh
 
+if [ $# -gt 0 ]; then
+  if [ ! -d go ]; then
+    git clone https://go.googlesource.com/go
+  fi
+    cd go
+    git checkout go1.5.1
+    cd src
+    echo "Building go for " $1 "..."
+    GOOS=${1%/*} GOARCH=${1#*/} ./make.bash --no-clean > /dev/null
+    cd ../../
+    GOPATH=$(pwd)/go
+fi
+
 SOURCE_FILES="src/client.go \
     src/errorhandling.go \
     src/config.go \
