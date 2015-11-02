@@ -62,7 +62,7 @@ startBrowser() {
     startChromeProfile google-chrome $portal
   elif browserExists firefox
   then
-      firefox -no-remote -private-window -profile "browser-profiles/firefox" $extIntaller &> /dev/null &
+      firefox -no-remote -private-window -profile "browser-profiles/firefox" $extInstaller &> /dev/null &
   else
       echo "None of the supported browsers is installed in your machine."
       echo "Please install Chrome or Firefox and execute this script again."
