@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"strconv"
 )
 
 const ( // CC errors
@@ -97,6 +98,19 @@ var lcsErrorHandlers = map[ErrorCode]func(ErrorState) bool{
 	ERR_LCS_INTERNAL:       serveError,
 	ERR_LCS_WAIT_FREENET:   showFreenetMonitorAndServeError,
 	ERR_LCS_WAIT_PEERS:     showPeerMonitorAndServeError,
+}
+
+// Some errors will resolve themselves over time, and so the error page should,
+// depending on the error being served, automatically refresh itself the same way
+// that wait.html does.
+var AutoRefreshingErrorPages = map[ErrorCode]bool{
+	ERR_NO_CONNECT_LCS:         true,
+	ERR_MALFORMED_LCS_RESPONSE: true,
+	ERR_FROM_LCS:               true,
+	ERR_NO_CONNECT_RS:          true,
+	ERR_LCS_LOOKUP_FAILURE:     true,
+	ERR_LCS_INTERNAL:           true,
+	ERR_LCS_WAIT_FREENET:       true,
 }
 
 /********************
@@ -254,9 +268,11 @@ func ExecuteErrorPage(errorCode ErrorCode, errorMsg string, w http.ResponseWrite
 		w.Header().Set("Content-Type", "text/plain")
 		w.Write([]byte(T("missing_view", map[string]interface{}{"View": "error.html"})))
 	} else {
+		shouldRefresh := AutoRefreshingErrorPages[errorCode]
 		t.Execute(w, map[string]string{
 			"Url":              r.URL.String(),
 			"Error":            errorMsg,
+			"ShouldRefresh":    strconv.FormatBool(shouldRefresh),
 			"Advice":           T(advice),
 			"NoBundlePrepared": T("no_bundle_prepared_html"),
 			"YouAskedFor":      T("you_asked_for_html"),

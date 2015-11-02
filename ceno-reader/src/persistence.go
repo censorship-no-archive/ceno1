@@ -34,9 +34,17 @@ const createItemsTable = `create table if not exists items(
     published varchar(64)
 );`
 
+const createErrorsTable = `create table if not exists errors(
+	id integer primary key,
+	resource_types integer,
+	error_types integer,
+	message text
+);`
+
 var tableInitializers = []string{
 	createFeedsTable,
 	createItemsTable,
+	createErrorsTable,
 }
 
 /**
@@ -215,45 +223,6 @@ func SaveItem(db *sql.DB, feedUrl string, item *rss.Item) error {
 	}
 	tx.Commit()
 	return nil
-	/*
-			stmt, err2 := tx.Prepare(`insert into items(title, url, feed_url, authors, published)
-		                              values(?, ?, ?, ?, ?)
-		                              update feeds
-		                              set articles=articles+1, lastPublished=?, latest=?
-		                              wehere url=?;`)
-			if err2 != nil {
-				return err2
-			}
-			defer stmt.Close()
-			url := item.Links[0].Href
-			authors := item.Author.Name
-			if item.Contributors != nil {
-				for _, contrib := range item.Contributors {
-					authors += " " + contrib
-				}
-			}
-			_, err3 := stmt.Exec(
-				item.Title, url, feedUrl, authors, item.PubDate, item.PubDate, item.Title, feedUrl)
-			if err3 != nil {
-				return err3
-			}
-			tx.Commit()
-			return nil
-				tx, _ = db.Begin()
-				// Update the feed the article came from accordingly
-				stmt2, err4 := tx.Prepare(`update feeds set
-			                               articles=articles+1, lastPublished=?, latest=?
-			                               where url=?`)
-				if err4 != nil {
-					return err4
-				}
-				defer stmt2.Close()
-				_, err5 := stmt2.Exec(item.PubDate, item.Title, feedUrl)
-				if err5 != nil {
-					return err5
-				}
-				return nil
-	*/
 }
 
 /**
@@ -308,4 +277,68 @@ func DeleteItem(db *sql.DB, id int) error {
 	}
 	tx.Commit()
 	return nil
+}
+
+/**
+ * Save a report of the incidence of an error having occurred.
+ * Note that converting between encoded resource types and error classifications
+ * occurs strictly in the CENO Reader codebase. We aren't going to bother doing it in SQL.
+ * @param {*sql.DB} db - The database connection to use
+ * @param {Errorreport} report - Information about the error that occurred
+ */
+func SaveError(db *sql.DB, report ErrorReport) error {
+	tx, err := db.Begin()
+	if err != nil {
+		return err
+	}
+	_, execErr := tx.Exec(`
+		insert into errors (resource_types, error_types, message) values(?, ?, ?)`,
+		report.ResourceTypes, report.ErrorTypes, report.ErrorMessage)
+	if execErr != nil {
+		return execErr
+	}
+	tx.Commit()
+	return nil
+}
+
+/**
+ * Get an array of ErrorReports corresponding to the kinds specified by the
+ * argument to this function.  Once error reports are retrieved from the database,
+ * they are deleted since we want to avoid reporting errors twice.
+ * @param {*sql.DB} db - The database connection to use
+ * @param {ErrorReport} kinds - Information about the errors to fetch
+ */
+func GetErrors(db *sql.DB, kinds ErrorReport) ([]ErrorReport, error) {
+	reports := make([]ErrorReport, 0)
+	ids := make([]int, 0)
+	tx, err := db.Begin()
+	if err != nil {
+		return reports, err
+	}
+	// Get the relevant rows from the database.
+	// Note that error types and resource types are specified in the database as integers.
+	// That means we do the usual binary operations to find them.
+	rows, queryError := tx.Query(`
+		select id, resource_types, error_types, message
+		from errors
+		where resource_types & ? != 0 and error_types & ? != 0`,
+		kinds.ResourceTypes, kinds.ErrorTypes)
+	if queryError != nil {
+		return reports, queryError
+	}
+	for rows.Next() {
+		var id, resourceTypes, errorTypes int
+		var message string
+		rows.Scan(&id, &resourceTypes, &errorTypes, &message)
+		reports = append(reports, ErrorReport{id, resourceTypes, errorTypes, message})
+		ids = append(ids, id)
+	}
+	rows.Close()
+	// Now we delete all the retrieved errors so we don't duplicate them in a later report.
+	_, execError := tx.Exec(`delete from errors where id in ?`, ids)
+	if execError != nil {
+		return reports, execError
+	}
+	tx.Commit()
+	return reports, nil
 }

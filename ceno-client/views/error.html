@@ -88,6 +88,14 @@ div#stack {
     <span id="report" class="colored text"><a id="reportAnchor" href="#">{{.Report}}</a></span>
   </div>
   <script type="text/javascript">
+    var shouldRefreshStr = "{{.ShouldRefresh}}";
+    if (shouldRefreshStr === "true") {
+      setTimeout(function () {
+        var url = document.getElementById('url').innerHTML;
+        window.location.href = url;
+      }, 5000);
+    }
+  
   document.getElementById('retry').addEventListener('click', function (event) {
     var url = document.getElementById('url').innerHTML;
     window.location.href = url;
@@ -107,7 +115,6 @@ div#stack {
       link += key.charAt(i);
     }
   }
-  document.getElementById('reportAnchor').setAttribute('href', 'mailto:"' + link + '"');
-  </script>
+  document.getElementById('reportAnchor').setAttribute('href', 'mailto:"' + link + '"'); </script>
 </body>
 </html>

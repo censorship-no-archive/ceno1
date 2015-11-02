@@ -211,6 +211,8 @@ func insertHandler(w http.ResponseWriter, r *http.Request) {
 			fmt.Println("Couldn't get items for " + feed.Url)
 			fmt.Println(itemsError)
 		} else {
+			fmt.Println(items)
+			fmt.Println("Items for " + feed.Url)
 			writeItemsErr := writeItems(feed.Url, items)
 			if writeItemsErr != nil {
 				fmt.Println("Could not write items for " + feed.Url)
