@@ -1,5 +1,7 @@
 package plugins.CENO.FreenetInterface;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.HashMap;
 
 import freenet.client.FetchContext;
@@ -22,6 +24,8 @@ import freenet.node.Node;
 import freenet.node.RequestClient;
 import freenet.node.RequestStarter;
 import freenet.support.Logger;
+import freenet.support.api.Bucket;
+import freenet.support.io.BucketTools;
 
 public class HighLevelSimpleClientInterface {
 
@@ -90,7 +94,7 @@ public class HighLevelSimpleClientInterface {
 	public static InsertContext getInsertContext(boolean b) {
 		return HLSCInterface.client.getInsertContext(b);
 	}
-	
+
 	public static RequestClient getRequestClient() {
 		return HLSCInterface.requestClient;
 	}
@@ -169,6 +173,23 @@ public class HighLevelSimpleClientInterface {
 			return null;
 		}
 		return insertURI;
+	}
+
+	static Bucket getBucketFromString(String content) throws IOException {
+		// If the content is an HTML/XML file and there are hidden characters before the <html> opening tag, remove them
+		int bucketLength, index = 0;
+		if (content.indexOf("<") != 0) {
+			if (content.substring(0, 50).matches("(?ui)[\\s\\S]*\\<(!DOCTYPE)?\\s*(html|\\?xml)[\\s\\S]*")) {
+				//FIXME: Instead of creating a substring, find the index of the byte corresponding to "<" and assign it
+				// to the index variable. indexOf("<") won't work because of multi-byte UTF-8 characters
+				content = content.substring(content.indexOf("<"));
+			}
+		}
+
+		bucketLength = content.getBytes().length - index;
+		Bucket bucket = node.clientCore.tempBucketFactory.makeBucket(bucketLength);
+		BucketTools.copyFrom(bucket, new ByteArrayInputStream(content.getBytes(), index, bucketLength), bucketLength);
+		return bucket;
 	}
 
 }
