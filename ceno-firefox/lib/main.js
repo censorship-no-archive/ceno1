@@ -191,3 +191,15 @@ function handleChange(state) {
 function handleHide() {
   button.state('window', { checked: false });
 }
+
+ensureProxyIsRunning(function (proxyIsSet) {
+  if (proxyIsSet) {
+    activateCENO();
+    ss.storage.active = true;
+    console.log('Activated');
+    panel.port.emit('inform-activity', true);
+  } else {
+    console.log('Not activating');
+    panel.port.emit('issue-alert', NO_PROXY_MSG);
+  }
+});
