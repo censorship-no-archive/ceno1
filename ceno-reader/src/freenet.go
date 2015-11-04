@@ -70,18 +70,28 @@ func GetBundle(url string) ([]byte, RequestStatus) {
 	bundleUrl := Configuration.BundleServer + "/?url=" + b64Url
 	request, reqErr := http.NewRequest("GET", bundleUrl, nil)
 	if reqErr != nil {
+		fmt.Println("Failed to create request")
+		fmt.Println(reqErr)
 		return nil, Failure
 	}
 	request.Header.Set(RSS_READER_HEADER, "true")
 	client := &http.Client{}
 	response, err := client.Do(request)
 	if err != nil || response == nil || response.StatusCode != STATUS_OK {
+		if err != nil {
+			fmt.Println("Error making request")
+			fmt.Println(err)
+		} else {
+			fmt.Println("Didn't get an OK response")
+		}
 		return nil, Failure
 	}
 	output, readErr := ioutil.ReadAll(response.Body)
 	// We will frequently get an EOF error reading to the end of the body,
 	// however the content of the body will be read into `output`.
 	if readErr != nil && readErr != io.EOF {
+		fmt.Println("Got an error reading response from BS")
+		fmt.Println(readErr)
 		return nil, Failure
 	}
 	defer response.Body.Close()
