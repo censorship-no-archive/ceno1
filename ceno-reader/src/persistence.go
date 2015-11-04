@@ -306,11 +306,9 @@ func SaveError(db *sql.DB, report ErrorReport) error {
  * argument to this function.  Once error reports are retrieved from the database,
  * they are deleted since we want to avoid reporting errors twice.
  * @param {*sql.DB} db - The database connection to use
- * @param {ErrorReport} kinds - Information about the errors to fetch
  */
-func GetErrors(db *sql.DB, kinds ErrorReport) ([]ErrorReport, error) {
+func GetErrors(db *sql.DB) ([]ErrorReport, error) {
 	reports := make([]ErrorReport, 0)
-	ids := make([]int, 0)
 	tx, err := db.Begin()
 	if err != nil {
 		return reports, err
@@ -318,11 +316,7 @@ func GetErrors(db *sql.DB, kinds ErrorReport) ([]ErrorReport, error) {
 	// Get the relevant rows from the database.
 	// Note that error types and resource types are specified in the database as integers.
 	// That means we do the usual binary operations to find them.
-	rows, queryError := tx.Query(`
-		select id, resource_types, error_types, message
-		from errors
-		where resource_types & ? != 0 and error_types & ? != 0`,
-		kinds.ResourceTypes, kinds.ErrorTypes)
+	rows, queryError := tx.Query(`select id, resource_types, error_types, message from errors`)
 	if queryError != nil {
 		return reports, queryError
 	}
@@ -330,12 +324,12 @@ func GetErrors(db *sql.DB, kinds ErrorReport) ([]ErrorReport, error) {
 		var id, resourceTypes, errorTypes int
 		var message string
 		rows.Scan(&id, &resourceTypes, &errorTypes, &message)
-		reports = append(reports, ErrorReport{id, resourceTypes, errorTypes, message})
-		ids = append(ids, id)
+		reports = append(reports, ErrorReport{
+			id, Resource(resourceTypes), ErrorClass(errorTypes), message,
+		})
 	}
 	rows.Close()
-	// Now we delete all the retrieved errors so we don't duplicate them in a later report.
-	_, execError := tx.Exec(`delete from errors where id in ?`, ids)
+	_, execError := tx.Exec(`delete from errors`)
 	if execError != nil {
 		return reports, execError
 	}

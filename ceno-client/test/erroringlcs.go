@@ -8,7 +8,7 @@ import (
 
 type ErrorCode int
 
-const INTERNAL_ERROR ErrorCode = 2140
+const INTERNAL_ERROR ErrorCode = 2300
 const ERR_MSG string = "Testing that we can serve errors and have the client auto-refresh erro pages"
 
 type ErrorResult struct {

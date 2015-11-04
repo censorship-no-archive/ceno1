@@ -5,7 +5,8 @@ SOURCE_FILES="src/reader.go \
     src/charsetreaders.go \
     src/config.go \
     src/persistence.go \
-    src/freenet.go"
+    src/freenet.go \
+    src/reports.go"
 
 MOCK_BUNDLE_SERVER_SOURCES="tests/bundleserver.go"
 
