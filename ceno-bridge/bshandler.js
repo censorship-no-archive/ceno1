@@ -43,10 +43,10 @@ function reportCompleteBundle(config, data, wasRewritten, cb) {
  * @return {string} the exact url the bundler should request
  */
 function constructRequestUrl(reqUrl, wasRewritten) {
-  var url = qs.parse(url.parse(reqUrl).query).url;
-  url = (new Buffer(url, 'base64')).toString();
-  url = wasRewritten ? url.replace('http://', 'https://') : url;
-  return url;
+  var newUrl = qs.parse(url.parse(reqUrl).query).url;
+  newUrl = (new Buffer(newUrl, 'base64')).toString();
+  newUrl = wasRewritten ? newUrl.replace('http://', 'https://') : newUrl;
+  return newUrl;
 }
 
 /**
@@ -114,7 +114,7 @@ function handler(config) {
     });
     res.writeHead(200, {'Content-Type': 'application/json'});
   
-    var bundler = makeBundler(requestedUrl, config, reqFromReader(req));
+    var bundler = makeBundler(requestedUrl, config, requestFromReader(req));
     bundler.bundle(function (err, bundle) {
       if (err) {
         if (!disconnected) {
@@ -124,15 +124,15 @@ function handler(config) {
           }));
           res.end();
         }
-        bs_log(_t.__('Encountered error creating bundle for %s', requestedURL));
+        bs_log(_t.__('Encountered error creating bundle for %s', requestedUrl));
         bs_log(_t.__('Error: %s', err.message));
       } else { // !err
         var data = {
           created: new Date(),
-          url: requestedURL,
+          url: requestedUrl,
           bundle: bundle
         };
-        bs_log(_t.__('Successfully created bundle for %s', requestedURL));
+        bs_log(_t.__('Successfully created bundle for %s', requestedUrl));
         if (!disconnected) {
           res.write(JSON.stringify(data));
           res.end();

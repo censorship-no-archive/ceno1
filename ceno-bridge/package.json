@@ -7,7 +7,7 @@
   "main": "./bundle-server.js",
   "scripts": {
     "start": "node bundle-server.js",
-    "test": "mocha tests/lookup-failure.js"
+    "test": "CENOLANG=en mocha tests/*.js"
   },
   "dependencies": {
     "request": "latest",
