@@ -51,15 +51,16 @@ func TestInsertFreenet(t *testing.T) {
 
 func TestGetBundle(t *testing.T) {
 	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		t.Log("Got a request for a bundle in test server")
 		w.Header().Set("Content-Type", "application/json")
 		lastErrMsg := ""
 		if r.Method != "GET" {
 			lastErrMsg = "Method must be POST"
 			t.Errorf("Expected a GET request, got %s\n", r.Method)
 		}
-		if w.Header().Get(RSS_READER_HEADER) != "true" {
+		if r.Header.Get(RSS_READER_HEADER) != "true" {
 			lastErrMsg = RSS_READER_HEADER + " was not set."
-			t.Errorf("Expected the %s header to be 'true'.", RSS_READER_HEADER)
+			t.Errorf("Expected the %s header to be 'true'. Got %s\n", RSS_READER_HEADER, r.Header.Get(RSS_READER_HEADER))
 		}
 		qs := r.URL.Query()
 		urls, found := qs["url"]
@@ -93,6 +94,7 @@ func TestGetBundle(t *testing.T) {
 		}
 	}))
 	setPort(testServer.URL, BundleServer)
+	t.Logf("Set config for bundle serter to %s\n", Configuration.BundleServer)
 	defer testServer.Close()
 	testUrl := "https://news.ycombinator.com"
 	bundleData, reqStatus := GetBundle(testUrl)
