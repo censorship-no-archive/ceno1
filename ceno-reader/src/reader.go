@@ -74,17 +74,21 @@ func pollFeed(URL string, charsetReader xmlx.CharsetFunc) {
 		defer func() {
 			r := recover()
 			if r != nil {
-				fmt.Println(T("feed_poll_err", map[string]string{
+				errMsg := T("feed_poll_err", map[string]string{
 					"Url":   URL,
 					"Error": "Panicked when fetching from feed",
-				}))
+				})
+				fmt.Println(errMsg)
+				SaveError(DBConnection, NewErrorReport(RssFeed, InvalidUrl|Malformed, errMsg))
 			}
 		}()
 		if err := feed.Fetch(URL, charsetReader); err != nil {
-			fmt.Println(T("feed_poll_err", map[string]string{
+			errMsg := T("feed_poll_err", map[string]string{
 				"Url":   URL,
 				"Error": err.Error(),
-			}))
+			})
+			fmt.Println(errMsg)
+			SaveError(DBConnection, NewErrorReport(RssFeed, InvalidUrl|Malformed, errMsg))
 		}
 		<-time.After(time.Duration(feed.SecondsTillUpdate() * 1e9))
 	}
@@ -307,6 +311,23 @@ func writeItems(feedUrl string, items []Item) error {
 }
 
 /**
+ * Handle a GET request to have an error report generated.
+ * See the ErrorReportMsg struct for information about the fields available in requests.
+ * The default behavior is to report about all resource types and all errors types, unless
+ * some are specified in the arguments.
+ */
+func reportErrorHandler(w http.ResponseWriter, r *http.Request) {
+	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
+	errorReports, dbErr := GetErrors(DBConnection)
+	if dbErr != nil {
+		w.Write([]byte(T("db_get_err", map[string]string{"Error": dbErr.Error()})))
+	} else {
+		report := WriteReport(errorReports)
+		w.Write([]byte(report))
+	}
+}
+
+/**
  * TODO - Periodically delete items from the DB that we won't see again
  */
 
@@ -341,6 +362,7 @@ func main() {
 	http.HandleFunc("/follow", followHandler(requestNewFollow))
 	http.HandleFunc("/unfollow", unfollowHandler)
 	http.HandleFunc("/insert", insertHandler)
+	http.HandleFunc("/errors", reportErrorHandler)
 	fmt.Println(T("listening_msg_rdr", map[string]interface{}{"Port": Configuration.PortNumber}))
 	if err := http.ListenAndServe(Configuration.PortNumber, nil); err != nil {
 		panic(err)
