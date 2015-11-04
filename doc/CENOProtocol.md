@@ -119,6 +119,9 @@ required for regular use cases.
 
 Error conditions that CENO components can encounter are described in `doc/errorConditions.md`
 and specify error codes that classify them.
+Agents expect the error messages to be JSON responses to their requests
+complying to the following schema:  
+`{"errCode": "error code from the doc/errorConditions", "errMsg": "a more detailed message describing the error"}`
 
 ### BS prompts RR to accept bundle
 

@@ -32,11 +32,9 @@ import freenet.support.Logger;
 public class BundleInserterHandler extends CENOJettyHandler {
 
 	public class HandlerInsertCallback extends InsertCallback {
-		private String url;
 
 		public HandlerInsertCallback(String url) {
-			super();
-			this.url = url;
+			super(url);
 		}
 
 		@Override
