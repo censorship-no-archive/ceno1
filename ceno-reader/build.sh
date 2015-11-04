@@ -33,12 +33,19 @@ go get -u github.com/nicksnyder/go-i18n/goi18n
 echo "go-sqlite3"
 go get github.com/mattn/go-sqlite3
 
-echo ""
+#echo ""
 #echo "Merging localizaton files."
 #cd translations
 #$GOPATH/bin/goi18n *.json
 #cd ..
 
+echo ""
+echo "Running unit tests"
+cd src
+go test
+cd ..
+
+echo ""
 go build $MOCK_BUNDLE_SERVER_SOURCES && echo "Compiled mock bundle server successfully."
 go build $MOCK_BUNDLE_INSERTER_SOURCES && echo "Compiled mock bundle inserter successfully."
 go build $SOURCE_FILES && echo "Compiled reader successfully."
