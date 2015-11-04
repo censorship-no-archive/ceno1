@@ -19,6 +19,11 @@ const Failure RequestStatus = false
 // HTTP Status response OK
 const STATUS_OK int = 200
 
+// The special header that the RSS reader will use to identify requests to the bundle
+// server as coming from the reader, which will prompt the bundle server to serve
+// us a greatly minified bundle
+const RSS_READER_HEADER = "X-Rss-Reader"
+
 /**
  * Send a POST request to the Bundle Inserter on the /insert route
  * to request that data for a url be inserted into Freenet.
@@ -63,21 +68,22 @@ func InsertFreenet(bundleData []byte) RequestStatus {
 func GetBundle(url string) ([]byte, RequestStatus) {
 	b64Url := base64.StdEncoding.EncodeToString([]byte(url))
 	bundleUrl := Configuration.BundleServer + "/?url=" + b64Url
-	response, err := http.Get(bundleUrl)
-	if err != nil || response == nil || response.StatusCode != STATUS_OK {
-		fmt.Printf("In GetBundle err = %s, status = %d\n", err.Error(), response.StatusCode)
+	request, reqErr := http.NewRequest("GET", bundleUrl, nil)
+	if reqErr != nil {
 		return nil, Failure
 	}
-	output := make([]byte, MAX_BUNDLE_SIZE)
-	bytesRead, readErr := response.Body.Read(output)
+	request.Header.Set(RSS_READER_HEADER, "true")
+	client := &http.Client{}
+	response, err := client.Do(request)
+	if err != nil || response == nil || response.StatusCode != STATUS_OK {
+		return nil, Failure
+	}
+	output, readErr := ioutil.ReadAll(response.Body)
 	// We will frequently get an EOF error reading to the end of the body,
 	// however the content of the body will be read into `output`.
 	if readErr != nil && readErr != io.EOF {
 		return nil, Failure
 	}
 	defer response.Body.Close()
-	if bytesRead == 0 {
-		return nil, Failure
-	}
-	return output[:bytesRead], Success
+	return output, Success
 }
