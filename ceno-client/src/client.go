@@ -44,9 +44,13 @@ type Result struct {
 	Bundle   string
 }
 
-func log(msg string) {
+/**
+ * Log the date and a message
+ * @param {string} msg - The message to be logged
+ */
+func log(v ...interface{}) {
 	t := strings.Replace(time.Now().Format("Jan 01, 2006 15:04:05.000"), ".", ":", 1)
-	fmt.Println(t, msg)
+	fmt.Println(t, v)
 }
 
 /**

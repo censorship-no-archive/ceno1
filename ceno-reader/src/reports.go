@@ -1,7 +1,7 @@
 package main
 
 import (
-	"errors"
+	"strings"
 )
 
 // Descriptions of the different classes of errors, converting from the kinds of names
@@ -13,32 +13,13 @@ var errorClassDescriptions map[string]string = map[string]string{
 }
 
 /**
- * Convert the contents of a GET request for a report with certain restrictions
- * on the types of resources of interest or the classes of errors of interest
- * into the internal representation of those types, ready to go to the database.
- * @param reportMsg - The contents of the request for a report
- * @return An internal representation of the report to generate and an error if
- * values that aren't understood were supplied.
+ * A helper function to create a new ErrorReport without having to provide an ID to the struct.
+ * @param resourceTypes - A binary-OR list of concerned resources; eg. RssFeed | Article
+ * @param errorTypes - A binary-OR list of detected errors; eg. InvalidUrl | NoResponse
+ * @param message - An error message to describe what happened
  */
-func ConvertErrorReport(reportMsg ErrorReportMsg) (ErrorReport, error) {
-	report := ErrorReport{-1, NoResources, NoErrorClasses, ""}
-	for _, _class := range reportMsg.ErrorClasses {
-		errorClass, found := ErrorClasses[_class]
-		if !found {
-			return nil, errors.New("No such error class " + _class)
-		} else {
-			report.ErrorClasses |= errorClass
-		}
-	}
-	for _, _type := range reportMsg.ResourceTypes {
-		resourceType, found := Resources[_type]
-		if !found {
-			return nil, errors.New("No such resource type " + _type)
-		} else {
-			report.ResourceTypes |= resourceType
-		}
-	}
-	return report, nil
+func NewErrorReport(resourceTypes Resource, errorTypes ErrorClass, message string) ErrorReport {
+	return ErrorReport{-1, resourceTypes, errorTypes, message}
 }
 
 /**
@@ -66,7 +47,7 @@ func WriteReport(reports []ErrorReport) string {
 			}
 		}
 		// Finally, append a line containing the error message.
-		reportMsg += "Error message: " + report.Message + "\n\n"
+		reportMsg += "Error message: " + report.ErrorMessage + "\n\n"
 	}
 	return reportMsg
 }

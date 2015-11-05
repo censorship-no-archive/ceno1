@@ -74,5 +74,17 @@
   {
     "id": "insert_success_rdr",
     "translation": "Successfully inserted a bundle for {{.Url}}."
+  },
+  {
+    "id": "json_decode_err",
+    "translation": "Could not decode the provided JSON. Error: {{.Error}}"
+  },
+  {
+    "id": "invalid_report_err",
+    "translation": "Could not convert the information provided into an error query. Error: {{.Error}}"
+  },
+  {
+    "id": "db_get_err",
+    "translation": "Database query failed. Error: {{.Error}}"
   }
 ]

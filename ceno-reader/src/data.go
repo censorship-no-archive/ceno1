@@ -80,13 +80,13 @@ type Resource int
 
 const (
 	NoResources = 0
-	Feed        = 1 << iota
+	RssFeed     = 1 << iota
 	Article     = 1 << iota
 )
 
 // Map JSON-friendly string names of resource types to their internal representation
 var Resources map[string]Resource = map[string]Resource{
-	"feed":    Feed,
+	"feed":    RssFeed,
 	"article": Article,
 }
 
@@ -128,16 +128,6 @@ type ErrorReport struct {
 	ResourceTypes Resource
 	ErrorTypes    ErrorClass
 	ErrorMessage  string
-}
-
-/**
- * A container for JSON data to be parsed from requests to have
- * reports generated.  This data will be converted to and from
- * ErrorReport structures for working with the database.
- */
-type ErrorReportMsg struct {
-	ResourceTypes []string `json:"resources"`
-	ErrorClasses  []string `json:"classes"`
 }
 
 /**
