@@ -59,7 +59,6 @@ function requestWasRewritten(request) {
   return typeof headerValue !== 'undefined' && headerValue === 'true';
 }
 
-
 /**
  * Determine if the request came from the RSS Reader.
  * @param {IncomingMessage} request - The client's request
@@ -68,6 +67,23 @@ function requestWasRewritten(request) {
 function requestFromReader(request) {
   var headerValue = request.headers[RSS_READER_HEADER];
   return typeof headerValue !== 'undefined' && headerValue === 'true';
+}
+
+/**
+ * An on-original-received handler to strip resources from a document by replacing
+ * attributes in particular tags with an empty string.
+ * @param {string} tag - The name of the tag to find (e.g. a)
+ * @param {string} attr - The attribute to replace the value of (e.g. href)
+ */
+function stripResource(tag, attr) {
+  return function (reqFn, originalDoc, url, callback) {
+    var diff = {};
+    b.htmlFinder(originalDoc, tag, attr)(function (value) {
+      console.log('Writing an empty diff for ' + value, 'tag =', tag, 'attr =', attr);
+      diff[value] = '';
+    });
+    callback(null, diff);
+  };
 }
 
 /**
@@ -80,26 +96,32 @@ function requestFromReader(request) {
  * @return {Bundler} A bundler object that will fetch the requested resource
  */
 function makeBundler(url, config, reqFromReader) {
+  console.log('Making bundler for ' + url);
+  console.log('Request is from RSS Reader?', reqFromReader);
   var bundler = new b.Bundler(url);
   if (config.useProxy) {
     bundler.on('originalRequest', b.proxyTo(config.proxyAddress));
     bundler.on('resourceRequest', b.proxyTo(config.proxyAddress));
   }
+  /*
   if (reqFromReader) {
-    bundler.on('originalReceived', b.replaceLinks(function () {
-      return '';
-    }));
+    bundler.on('originalReceived', stripResource('a', 'href'));
+    bundler.on('originalReceived', stripResource('img', 'src'));
+    bundler.on('originalReceived', stripResource('link', 'href'));
+    bundler.on('originalReceived', stripResource('script', 'src'));
     bundler.on('resourceReceived', function (reqFn, options, body, diffs, response, callback) {
+      console.log('Stripping link to ' + options.url);
       diffs[options.url] = '';
       callback(null, diffs);
     });
   } else {
+  */
     bundler.on('originalReceived', b.replaceImages);
     bundler.on('originalReceived', b.replaceCSSFiles);
     bundler.on('originalReceived', b.replaceJSFiles);
     bundler.on('originalReceived', b.replaceURLCalls);
     bundler.on('resourceReceived', b.bundleCSSRecursively);
-  }
+  //}
   return bundler;
 }
 
