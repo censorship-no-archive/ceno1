@@ -14,6 +14,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // The location of the configuration file to read.
@@ -41,6 +42,11 @@ type Result struct {
 	Complete bool
 	Found    bool
 	Bundle   string
+}
+
+func log(msg string) {
+	t := strings.Replace(time.Now().Format("Jan 01, 2006 15:04:05.000"), ".", ":", 1)
+	fmt.Println(t, msg)
 }
 
 /**
@@ -86,13 +92,13 @@ func Lookup(lookupURL string) Result {
 	response, err := http.Get(BundleLookupURL(Configuration, lookupURL))
 	T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
 	if err != nil {
-		fmt.Println(T("error_cli", map[string]interface{}{
+		log(T("error_cli", map[string]interface{}{
 			"Message": err.Error(),
 		}))
 		return Result{ERR_NO_CONNECT_LCS, err.Error(), false, false, ""}
 	} else if response == nil || response.StatusCode != 200 {
 		errMsg := T("lcs_not_ready_cli")
-		fmt.Println(errMsg)
+		log(errMsg)
 		return Result{ERR_LCS_NOT_READY, errMsg, false, false, ""}
 	}
 	decoder := json.NewDecoder(response.Body)
@@ -102,7 +108,7 @@ func Lookup(lookupURL string) Result {
 		decodeErrorMessage := T("decode_error_cli", map[string]interface{}{
 			"Message": err.Error(),
 		})
-		fmt.Println(decodeErrorMessage)
+		log(decodeErrorMessage)
 		reachedLCS := HandleCCError(ERR_MALFORMED_LCS_RESPONSE, err.Error(), ErrorState{
 			"requestURL": DecodeErrReportURL(Configuration),
 		})
@@ -158,7 +164,7 @@ func stripHttps(URL string) (string, bool) {
  * @param {*Request} r - Information about the request
  */
 func directHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Got request to directHandler")
+	log("Got request to directHandler")
 	qs := r.URL.Query()
 	T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
 	URLS, found := qs["url"]
@@ -180,7 +186,7 @@ func directHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	decodedURL := string(decodedBytes)
-	fmt.Println("Decoded URL to " + decodedURL)
+	log("Decoded URL to " + decodedURL)
 	stripped, rewritten := stripHttps(decodedURL)
 	if stripped == CENOPORTAL || stripped == PORTAL {
 		CreatePortalPage(w, r)
@@ -231,7 +237,7 @@ func validateURL(URL string, w http.ResponseWriter, r *http.Request) bool {
 func tryRequestBundle(URL string, rewritten bool, w http.ResponseWriter, r *http.Request) {
 	T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
 	if err := requestNewBundle(URL, rewritten); err != nil {
-		fmt.Println(T("bundle_err_cli", map[string]interface{}{
+		log(T("bundle_err_cli", map[string]interface{}{
 			"Message": err.Error(),
 		}))
 		HandleLCSError(ERR_NO_CONNECT_RS, err.Error(), ErrorState{
@@ -255,7 +261,7 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 	URL := r.URL.String()
 	T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
 	wasRewritten := r.Header.Get(REWRITTEN_HEADER) == "true"
-	fmt.Println(T("got_request_msg_cli", map[string]interface{}{
+	log(T("got_request_msg_cli", map[string]interface{}{
 		"URL":       URL,
 		"Rewritten": wasRewritten,
 	}))
@@ -264,7 +270,7 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	result := Lookup(URL)
 	if result.ErrCode > 0 {
-		fmt.Println(T("err_from_lcs_cli", map[string]interface{}{
+		log(T("err_from_lcs_cli", map[string]interface{}{
 			"Code":    result.ErrCode,
 			"Message": result.ErrMsg,
 		}))
@@ -305,7 +311,7 @@ func main() {
 	T, _ := i18n.Tfunc(setLanguage, "en-us")
 	// Read an existing configuration file or have the user supply settings
 	if conf, err := ReadConfigFile(CONFIG_FILE); err != nil {
-		fmt.Println(T("no_config_cli", map[string]interface{}{"Location": CONFIG_FILE}))
+		log(T("no_config_cli", map[string]interface{}{"Location": CONFIG_FILE}))
 		Configuration = GetConfigFromUser()
 	} else {
 		Configuration = conf
@@ -317,7 +323,7 @@ func main() {
 	http.HandleFunc("/portal", CreatePortalPage)
 	http.HandleFunc("/cenosite/", CreateArticlePage)
 	http.HandleFunc("/", proxyHandler)
-	fmt.Println(T("listening_msg_cli", map[string]interface{}{"Port": Configuration.PortNumber}))
+	log(T("listening_msg_cli", map[string]interface{}{"Port": Configuration.PortNumber}))
 	err := http.ListenAndServe(Configuration.PortNumber, nil)
 	if err != nil {
 		panic(err)
