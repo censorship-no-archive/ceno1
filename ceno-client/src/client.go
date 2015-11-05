@@ -45,12 +45,14 @@ type Result struct {
 }
 
 /**
- * Log the date and a message
- * @param {string} msg - The message to be logged
+ * Log the current time and a message
+ * @param {interface} msg - The message to be logged
  */
-func log(v ...interface{}) {
+func log(msg interface{}) string {
 	t := strings.Replace(time.Now().Format("Jan 01, 2006 15:04:05.000"), ".", ":", 1)
-	fmt.Println(t, v)
+	s := fmt.Sprintf("%s %v", t, msg)
+	fmt.Println(s)
+	return s
 }
 
 /**
