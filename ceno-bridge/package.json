@@ -14,7 +14,8 @@
     "require": "latest",
     "equalitie-bundler": "~1.0.0",
     "i18n": "latest",
-    "node-readability": "latest"
+    "node-readability": "latest",
+    "dateformat": "latest"
   },
   "devDependencies": {
     "should": "latest",

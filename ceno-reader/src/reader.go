@@ -13,8 +13,29 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"strings"
 	"time"
 )
+
+/**
+ * Log the current time and a message
+ * @param {interface} msg - The message to be logged
+ */
+func log(msg interface{}) string {
+	t := strings.Replace(time.Now().Format("Jan 01, 2006 15:04:05.000"), ".", ":", 1)
+	s := fmt.Sprintf("%s %v", t, msg)
+	fmt.Println(s)
+	return s
+}
+
+/**
+ * Log and then panic the current time and a message
+ * @param {interface} msg - The message to be logged
+ */
+func logPanic(v interface{}) {
+	s := log(v)
+	panic(s)
+}
 
 /**
  * Handle the receipt of a new channel.
@@ -33,12 +54,12 @@ func channelFeedHandler(feed *rss.Feed, newChannels []*rss.Channel) {
  */
 func itemFeedHandler(feed *rss.Feed, channel *rss.Channel, newItems []*rss.Item) {
 	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
-	fmt.Println("Feed URL is", feed.Url)
+	log("Feed URL is " + feed.Url)
 	for _, item := range newItems {
 		url := item.Links[0].Href
 		bundleData, bundleStatus := GetBundle(url)
 		if bundleStatus == Failure {
-			fmt.Println(T("bundle_fail_err", map[string]string{
+			log(T("bundle_fail_err", map[string]string{
 				"Url": url,
 			}))
 			continue
@@ -47,16 +68,16 @@ func itemFeedHandler(feed *rss.Feed, channel *rss.Channel, newItems []*rss.Item)
 		if inserted == Success {
 			saveErr := SaveItem(DBConnection, feed.Url, item)
 			if saveErr != nil {
-				fmt.Println(T("db_store_error_rdr", map[string]string{
+				log(T("db_store_error_rdr", map[string]string{
 					"Error": saveErr.Error(),
 				}))
 			} else {
-				fmt.Println(T("insert_success_rdr", map[string]string{
+				log(T("insert_success_rdr", map[string]string{
 					"Url": url,
 				}))
 			}
 		} else {
-			fmt.Println(T("insertion_fail_err"))
+			log(T("insertion_fail_err"))
 		}
 	}
 }
@@ -78,7 +99,7 @@ func pollFeed(URL string, charsetReader xmlx.CharsetFunc) {
 					"Url":   URL,
 					"Error": "Panicked when fetching from feed",
 				})
-				fmt.Println(errMsg)
+				log(errMsg)
 				SaveError(DBConnection, NewErrorReport(RssFeed, InvalidUrl|Malformed, errMsg))
 			}
 		}()
@@ -87,7 +108,7 @@ func pollFeed(URL string, charsetReader xmlx.CharsetFunc) {
 				"Url":   URL,
 				"Error": err.Error(),
 			})
-			fmt.Println(errMsg)
+			log(errMsg)
 			SaveError(DBConnection, NewErrorReport(RssFeed, InvalidUrl|Malformed, errMsg))
 		}
 		<-time.After(time.Duration(feed.SecondsTillUpdate() * 1e9))
@@ -103,16 +124,16 @@ func followFeeds(requests chan SaveFeedRequest) {
 	for {
 		request := <-requests
 		feedInfo := request.FeedInfo
-		fmt.Println("Got a request to handle a feed.")
-		fmt.Println(feedInfo)
+		log("Got a request to handle a feed.")
+		log(feedInfo)
 		saveErr := SaveFeed(DBConnection, feedInfo)
 		if saveErr != nil {
-			fmt.Println("Could not save")
-			fmt.Println(saveErr)
+			log("Could not save")
+			log(saveErr)
 			request.W.Write([]byte(T("db_store_error_rdr", map[string]interface{}{"Error": saveErr.Error()})))
 			return
 		} else {
-			fmt.Println("Saved")
+			log("Saved")
 			request.W.Write([]byte(T("req_handle_success_rdr")))
 		}
 		if feedInfo.Charset == "" {
@@ -147,7 +168,7 @@ func writeItemsFile(feedUrl string, marshalledItems []byte) error {
 func followHandler(requests chan SaveFeedRequest) func(http.ResponseWriter, *http.Request) {
 	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
 	return func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("Got request")
+		log("Got request")
 		if r.Method != "POST" {
 			w.Write([]byte(T("method_not_impl_rdr")))
 			return
@@ -155,8 +176,8 @@ func followHandler(requests chan SaveFeedRequest) func(http.ResponseWriter, *htt
 		feedInfo := Feed{}
 		decoder := json.NewDecoder(r.Body)
 		if err := decoder.Decode(&feedInfo); err != nil {
-			fmt.Println("Error decoding JSON")
-			fmt.Println(err)
+			log("Error decoding JSON")
+			log(err)
 			w.Write([]byte(T("invalid_follow_req_rdr")))
 			return
 		}
@@ -178,8 +199,8 @@ func unfollowHandler(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&deleteReq)
 	if err != nil {
-		fmt.Println("Error decoding JSON")
-		fmt.Println(err)
+		log("Error decoding JSON")
+		log(err)
 		w.Write([]byte(T("invalid_unfollow_req_rdr")))
 		return
 	}
@@ -200,28 +221,28 @@ func unfollowHandler(w http.ResponseWriter, r *http.Request) {
 func insertHandler(w http.ResponseWriter, r *http.Request) {
 	feeds, feedErr := AllFeeds(DBConnection)
 	if feedErr != nil {
-		fmt.Println("Couldn't get feeds")
-		fmt.Println(feedErr)
+		log("Couldn't get feeds")
+		log(feedErr)
 		return
 	}
 	writeFeedsErr := writeFeeds(feeds)
 	if writeFeedsErr != nil {
-		fmt.Println(writeFeedsErr)
+		log(writeFeedsErr)
 		return
 	}
 	for _, feed := range feeds {
 		items, itemsError := GetItems(DBConnection, feed.Url)
 		if itemsError != nil {
-			fmt.Println("Couldn't get items for " + feed.Url)
-			fmt.Println(itemsError)
+			log("Couldn't get items for " + feed.Url)
+			log(itemsError)
 		} else {
-			fmt.Println(items)
-			fmt.Println("Items for " + feed.Url)
+			log(items)
+			log("Items for " + feed.Url)
 			writeItemsErr := writeItems(feed.Url, items)
 			if writeItemsErr != nil {
-				fmt.Println("Could not write items for " + feed.Url)
+				log("Could not write items for " + feed.Url)
 			} else {
-				fmt.Println("Success!")
+				log("Success!")
 			}
 		}
 	}
@@ -240,8 +261,8 @@ func writeFeeds(feeds []Feed) error {
 		"feeds":   feeds,
 	})
 	if marshalError != nil {
-		fmt.Println("Couldn't marshal array of feeds")
-		fmt.Println(marshalError)
+		log("Couldn't marshal array of feeds")
+		log(marshalError)
 		return marshalError
 	}
 	// The bundle inserter expects the "bundle" field to be a string,
@@ -257,12 +278,12 @@ func writeFeeds(feeds []Feed) error {
 		// We don't want to write the data that was sent to the BI. Just the feeds stuff.
 		feedWriteErr := ioutil.WriteFile(FeedsJsonFile, marshalledFeeds, os.ModePerm)
 		if feedWriteErr != nil {
-			fmt.Println("Couldn't write " + FeedsJsonFile)
-			fmt.Println(feedWriteErr)
+			log("Couldn't write " + FeedsJsonFile)
+			log(feedWriteErr)
 			return feedWriteErr
 		}
 	} else {
-		fmt.Println("Failed to insert feeds list into Freenet")
+		log("Failed to insert feeds list into Freenet")
 		return errors.New(T("insertion_fail_err"))
 	}
 	return nil
@@ -282,8 +303,8 @@ func writeItems(feedUrl string, items []Item) error {
 		"items":   items,
 	})
 	if marshalErr != nil {
-		fmt.Println("Couldn't marshal items for " + feedUrl)
-		fmt.Println(marshalErr)
+		log("Couldn't marshal items for " + feedUrl)
+		log(marshalErr)
 		return marshalErr
 	}
 	// The bundle inserter expects the "bundle" field to be a string,
@@ -299,12 +320,12 @@ func writeItems(feedUrl string, items []Item) error {
 		writeErr := writeItemsFile(feedUrl, marshalled)
 		// We don't want to write the data that was sent to the bundle inserter, just the items stuff.
 		if writeErr != nil {
-			fmt.Println("Couldn't write item")
-			fmt.Println(writeErr)
+			log("Couldn't write item")
+			log(writeErr)
 			return writeErr
 		}
 	} else {
-		fmt.Println("Could not insert items into Freenet")
+		log("Could not insert items into Freenet")
 		return errors.New(T("insertion_fail_err"))
 	}
 	return nil
@@ -343,9 +364,10 @@ func main() {
 	// Check that the configuration supplied has valid fields, or panic
 	conf, err := ReadConfigFile(CONFIG_FILE)
 	if err != nil {
-		panic(T("no_config_rdr", map[string]interface{}{"Location": CONFIG_FILE}))
+		log(err)
+		logPanic(T("no_config_rdr", map[string]interface{}{"Location": CONFIG_FILE}))
 	} else if !ValidConfiguration(conf) {
-		panic(T("invalid_config_rdr"))
+		logPanic(T("invalid_config_rdr"))
 	} else {
 		Configuration = conf
 	}
@@ -353,7 +375,7 @@ func main() {
 	var dbErr error
 	DBConnection, dbErr = InitDBConnection(DB_FILENAME)
 	if dbErr != nil {
-		panic(T("database_init_error_rdr", map[string]interface{}{"Error": dbErr.Error()}))
+		logPanic(T("database_init_error_rdr", map[string]interface{}{"Error": dbErr.Error()}))
 	}
 	// Set up the HTTP server to listen for requests for new feeds to read
 	requestNewFollow := make(chan SaveFeedRequest)
@@ -363,8 +385,8 @@ func main() {
 	http.HandleFunc("/unfollow", unfollowHandler)
 	http.HandleFunc("/insert", insertHandler)
 	http.HandleFunc("/errors", reportErrorHandler)
-	fmt.Println(T("listening_msg_rdr", map[string]interface{}{"Port": Configuration.PortNumber}))
+	log(T("listening_msg_rdr", map[string]interface{}{"Port": Configuration.PortNumber}))
 	if err := http.ListenAndServe(Configuration.PortNumber, nil); err != nil {
-		panic(err)
+		logPanic(err)
 	}
 }

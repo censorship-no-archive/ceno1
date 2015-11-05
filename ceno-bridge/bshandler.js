@@ -1,6 +1,7 @@
 var fs = require('fs');
 var qs = require('querystring');
 var url = require('url');
+var dateFormat = require('dateformat');
 
 var makeReadable = require('node-readability');
 var request = require('request');
@@ -21,8 +22,12 @@ const REWRITTEN_HEADER = 'x-ceno-rewritten';
 // to the value 'true', we should strip out images, css, and js from the bundle.
 const RSS_READER_HEADER = 'x-rss-reader';
 
+// The format of date-time printed in the logs. A formatted date looks like:
+// Nov 04, 2015 03:02:14:116
+const LOGGING_DATEFORMAT = ("mmm dd, yyyy HH:MM:ss:l")
+
 function bs_log(msg) {
-  console.log('[BUNDLE SERVER] ' + msg);
+  console.log(dateFormat(new Date(), LOGGING_DATEFORMAT) + ' [BUNDLE SERVER] ' + msg);
 }
 
 // POST to the RR to prompt it to accept a completed bundle.
