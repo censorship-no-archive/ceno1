@@ -2,6 +2,7 @@ var fs = require('fs');
 var qs = require('querystring');
 var url = require('url');
 
+var makeReadable = require('node-readability');
 var request = require('request');
 var b = require('equalitie-bundler');
 
@@ -103,25 +104,31 @@ function makeBundler(url, config, reqFromReader) {
     bundler.on('originalRequest', b.proxyTo(config.proxyAddress));
     bundler.on('resourceRequest', b.proxyTo(config.proxyAddress));
   }
-  /*
   if (reqFromReader) {
-    bundler.on('originalReceived', stripResource('a', 'href'));
-    bundler.on('originalReceived', stripResource('img', 'src'));
-    bundler.on('originalReceived', stripResource('link', 'href'));
-    bundler.on('originalReceived', stripResource('script', 'src'));
-    bundler.on('resourceReceived', function (reqFn, options, body, diffs, response, callback) {
-      console.log('Stripping link to ' + options.url);
-      diffs[options.url] = '';
-      callback(null, diffs);
+    console.log('Making a readable page.');
+    bundler.on('originalReceived', function (requestFn, originalDoc, url, callback) {
+      var diff = {};
+      makeReadable(originalDoc, {charset: 'utf-8'}, function (err, article, meta) {
+        // Let's assume we're dealing with RTL text, for simplicity
+        // TODO - Find a way to switch this on/off
+        var content = '<html dir="rtl"><head><meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/></head>';
+        if (article.content.slice(0, 6) !== '<body>') {
+          content += '<body>' + article.content + '</body></html>';
+        } else {
+          content += article.content + '</html>';
+        }
+        diff[originalDoc] = content;
+        article.close();
+        callback(null, diff);
+      });
     });
   } else {
-  */
     bundler.on('originalReceived', b.replaceImages);
     bundler.on('originalReceived', b.replaceCSSFiles);
     bundler.on('originalReceived', b.replaceJSFiles);
     bundler.on('originalReceived', b.replaceURLCalls);
     bundler.on('resourceReceived', b.bundleCSSRecursively);
-  //}
+  }
   return bundler;
 }
 

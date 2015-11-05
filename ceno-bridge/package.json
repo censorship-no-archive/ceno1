@@ -13,7 +13,8 @@
     "request": "latest",
     "require": "latest",
     "equalitie-bundler": "~1.0.0",
-    "i18n": "latest"
+    "i18n": "latest",
+    "node-readability": "latest"
   },
   "devDependencies": {
     "should": "latest",
