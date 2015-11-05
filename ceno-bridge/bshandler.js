@@ -122,6 +122,7 @@ function makeBundler(url, config, reqFromReader) {
         callback(null, diff);
       });
     });
+    bundler.on('originalReceived', b.replaceImages);
   } else {
     bundler.on('originalReceived', b.replaceImages);
     bundler.on('originalReceived', b.replaceCSSFiles);
