@@ -77,7 +77,7 @@
   },
   {
     "id": "lcs_lookup_failure_err",
-    "translation": "Check that the LCS and CENO Freenet plugin are running correctly and that peers are connected."
+    "translation": "Check that the LCS and CENO Freenet plugin are running correctly and that peers are connected or wait for this page to refresh when everything is ready."
   },
   {
     "id": "lcs_not_ready_cli",
