@@ -60,6 +60,9 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 		RequestSender.init(new String[]{bridgeFreemail});
 		nodeInterface.copyAccprops(clientFreemail);
 		nodeInterface.setRandomNextMsgNumber(clientFreemail, bridgeFreemail);
+		
+		// Subscribe to updates of the CENO Portal feeds.json
+		// USKUpdateFetcher.subscribeFetchUSK(uskUri);
 	}
 
 	/**
