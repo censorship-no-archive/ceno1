@@ -44,6 +44,9 @@ ceno-node/src/db/*
 
 ceno-node/test/db/*
 
+CENOBox
+CENOBridge
+CENOBackbone
 
 # Stupid OSX files
 .DS_Store

@@ -64,7 +64,7 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 		initConfig.readProperties();
 		// If CENO has no private key for inserting freesites,
 		// generate a new key pair and store it in the configuration file
-		if (initConfig.getProperty("insertURI") == null) {
+		if (initConfig.getProperty("insertURI") == null || initConfig.getProperty("insertURI").isEmpty()) {
 			Logger.warning(this, "CENOBridge will generate a new public key for inserting bundles.");
 			FreenetURI[] keyPair = nodeInterface.generateKeyPair();
 			initConfig.setProperty("insertURI", keyPair[0].toString());
@@ -106,7 +106,7 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 
 	/**
 	 * Configure CENO's embedded server
-	 * 
+	 *
 	 * @param cenoHttpServer the jetty server to be configured
 	 */
 	private void configHttpServer(Server cenoHttpServer) {
