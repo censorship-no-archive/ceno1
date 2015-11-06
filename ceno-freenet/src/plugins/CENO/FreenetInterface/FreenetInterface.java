@@ -11,7 +11,9 @@ import freenet.client.InsertException;
 import freenet.client.async.ClientGetCallback;
 import freenet.client.async.ClientGetter;
 import freenet.client.async.ClientPutCallback;
+import freenet.client.async.USKCallback;
 import freenet.keys.FreenetURI;
+import freenet.keys.USK;
 import freenet.node.RequestClient;
 import freenet.support.api.Bucket;
 
@@ -20,6 +22,7 @@ public interface FreenetInterface {
 	FetchResult fetchURI(FreenetURI uri) throws FetchException;
 	ClientGetter localFetchURI(FreenetURI uri, ClientGetCallback callback) throws FetchException;
 	ClientGetter fetchULPR(FreenetURI uri, ClientGetCallback callback) throws FetchException;
+	boolean subscribeToUSK(USK origUSK, USKCallback cb);
 	FreenetURI[] generateKeyPair();
 	RequestClient getRequestClient();
 	FreenetURI insertBlock(InsertBlock insert, boolean getCHKOnly, String filenameHint) throws InsertException;
