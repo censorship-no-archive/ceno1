@@ -109,6 +109,10 @@ function makeBundler(url, config, reqFromReader) {
     bundler.on('originalRequest', b.proxyTo(config.proxyAddress));
     bundler.on('resourceRequest', b.proxyTo(config.proxyAddress));
   }
+  if (typeof config.userAgent !== 'undefined' && config.userAgent.length > 0) {
+    bundler.on('originalRequest', b.spoofHeaders({'User-Agent': config.userAgent}));
+    bundler.on('resourceRequest', b.spoofHeaders({'User-Agent': config.userAgent}));
+  }
   if (reqFromReader) {
     console.log('Making a readable page.');
     bundler.on('originalReceived', function (requestFn, originalDoc, url, callback) {
