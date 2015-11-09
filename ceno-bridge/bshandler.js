@@ -120,14 +120,20 @@ function makeBundler(url, config, reqFromReader) {
       makeReadable(originalDoc, {charset: 'utf-8'}, function (err, article, meta) {
         // Let's assume we're dealing with RTL text, for simplicity
         // TODO - Find a way to switch this on/off
-        var content = '<html dir="rtl"><head><meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/></head>';
-        if (article.content.slice(0, 6) !== '<body>') {
-          content += '<body>' + article.content + '</body></html>';
+        if (err) {
+          var message = _t.__('Error: %s', err.message);
+          bs_log(message);
+          diff[originalDoc] = message;
         } else {
-          content += article.content + '</html>';
+          var content = '<html dir="rtl"><head><meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/></head>';
+          if (article.content.slice(0, 6) !== '<body>') {
+            content += '<body>' + article.content + '</body></html>';
+          } else {
+            content += article.content + '</html>';
+          }
+          diff[originalDoc] = content;
+          article.close();
         }
-        diff[originalDoc] = content;
-        article.close();
         callback(null, diff);
       });
     });
