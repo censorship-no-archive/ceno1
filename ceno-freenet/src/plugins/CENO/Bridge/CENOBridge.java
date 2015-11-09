@@ -35,6 +35,7 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 	public static NodeInterface nodeInterface;
 	private RequestReceiver reqReceiver;
 	private static boolean isMasterBridge = false;
+	private static boolean isSignalBridge = false;
 
 	// Plugin-specific configuration
 	public static final String pluginUri = "/plugins/plugins.CENO.CENOBridge";
@@ -72,13 +73,19 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 			initConfig.storeProperties();
 		}
 
-		String configIsMasterBridge = initConfig.getProperty("isMasterBridge");
+		String confIsMasterBridge = initConfig.getProperty("isMasterBridge");
 
-		if (configIsMasterBridge != null && configIsMasterBridge.equals("true")) {
+		if (confIsMasterBridge != null && confIsMasterBridge.equals("true")) {
 			isMasterBridge = true;
 		}
 
-		if (isMasterBridge) {
+		String confIsSingalBridge = initConfig.getProperty("isSignalBridge");
+
+		if (confIsSingalBridge != null && confIsSingalBridge.equals("true")) {
+			isSignalBridge = true;
+		}
+
+		if (isSignalBridge) {
 			nodeInterface.clearOutboxLog(bridgeFreemail, clientFreemail);
 			// Initialize RequestReceiver
 			reqReceiver = new RequestReceiver(new String[]{bridgeFreemail});
@@ -169,7 +176,7 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 	public void terminate()
 	{
 		// Stop the thread that is polling for freemails
-		if (isMasterBridge) {
+		if (isSignalBridge) {
 			reqReceiver.stopLooping();
 			nodeInterface.clearOutboxLog(bridgeFreemail, clientFreemail);
 		}
