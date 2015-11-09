@@ -142,21 +142,19 @@ function handler(config) {
   return function (req, res) {
     var disconnected = false; // A flag set when the request is closed.
     var requestedUrl = constructRequestUrl(req.url, requestWasRewritten(req));
-  
+
     req.on('close', function () {
       disconnected = true;
       bs_log(_t.__('Request ended prematurely'));
     });
     res.writeHead(200, {'Content-Type': 'application/json'});
-  
+
     var bundler = makeBundler(requestedUrl, config, requestFromReader(req));
     bundler.bundle(function (err, bundle) {
       if (err) {
         if (!disconnected) {
           res.statusCode = 500;
-          res.write(JSON.stringify({
-            error: err.message
-          }));
+          res.write('{"error": "' + err.message + '"}');
           res.end();
         }
         bs_log(_t.__('Encountered error creating bundle for %s', requestedUrl));
