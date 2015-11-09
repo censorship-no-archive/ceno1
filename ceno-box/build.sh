@@ -68,7 +68,7 @@ if [ ! -d "$FREENET_DIR" ]; then
 fi
 
 if [ ! -f "$FREENET_DIR/freenet.jar" ]; then
-    echo "The path given does not correspond to a Freenet installation"
+    echo "$FREENET_DIR" "does not correspond to a Freenet installation"
     exit 1
 fi
 
