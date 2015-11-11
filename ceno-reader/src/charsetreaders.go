@@ -8,6 +8,9 @@ import (
 	"strings"
 )
 
+/**
+ * Copied from the go-i18n README.
+ */
 func HandleISO88591(charset string, r io.Reader) (io.Reader, error) {
 	if strings.ToLower(charset) == "iso-8859-1" {
 		return r, nil
