@@ -147,7 +147,7 @@ func followFeeds(requests chan SaveFeedRequest) {
 			return
 		} else {
 			log("Saved")
-			writeFeedsErr := writeFeeds(feeds)
+			writeFeedsErr := writeFeeds([]Feed{feedInfo})
 			if writeFeedsErr != nil {
 				log("Error writing feeds file")
 				log(writeFeedsErr)
@@ -251,16 +251,16 @@ func insertHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	for _, feed := range feeds {
-		items, itemserror := getitems(dbconnection, feed.url)
-		if itemserror != nil {
-			log("couldn't get items for " + feed.url)
-			log(itemserror)
+		items, itemsError := GetItems(DBConnection, feed.Url)
+		if itemsError != nil {
+			log("couldn't get items for " + feed.Url)
+			log(itemsError)
 		} else {
 			log(items)
-			log("items for " + feed.url)
-			writeItemserr := writeItems(feed.url, items)
-			if writeItemserr != nil {
-				log("could not write items for " + feed.url)
+			log("items for " + feed.Url)
+			writeItemsErr := writeItems(feed.Url, items)
+			if writeItemsErr != nil {
+				log("could not write items for " + feed.Url)
 			} else {
 				log("success!")
 			}
