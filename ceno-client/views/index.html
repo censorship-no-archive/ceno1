@@ -2,13 +2,17 @@
 <html>
 <head>
   <title>CENO Portal</title>
-  <meta charset='utf-8' />
-  <link rel="stylesheet" type="text/css" href="cenoresources/stylesheets/pure-min.css" />
-  <script type="text/javascript" id="jsonPlaceholder">
-    var cenoPortalModule = JSON.parse("{{.CenoPortalModule}}");
-  </script>
+  {{template "RESOURCES" . }}
+  <link rel="stylesheet" type="text/css" href="cenoresources/stylesheets/index.css" />
 </head>
 <body>
   {{template "NAV" . }}
+  <div id="splash">
+    <img src="cenoresources/images/logo_ceno.png" />
+    <div id="congratulations">
+      <div><p>CONGRATULATIONS!</p></div>
+      <div><p>YOU ARE NOW AVOIDING CENSORSHIP</p></div>
+    </div>
+  </div>
 </body>
 </html>

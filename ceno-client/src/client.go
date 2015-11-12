@@ -308,7 +308,7 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 
 func testPortalHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Got request for test portal page")
-	t, _ := template.ParseFiles("./views/index.html", "./views/nav.html")
+	t, _ := template.ParseFiles("./views/index.html", "./views/nav.html", "./views/resources.html")
 	t.Execute(w, nil)
 }
 
