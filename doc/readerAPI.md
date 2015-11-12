@@ -31,30 +31,31 @@ same JSON syntax.  Optional arguments are typed `opt type`- for example, `opt st
 
 Method | Route     | Arguments | Description
 -------|-----------|-----------|------------
-POST   | /follow   | {"url": string, "type": opt string} | Instruct the reader to subscribe to a new feed
+POST   | /follow   | {"url": string, "logo": string, "type": opt string} | Instruct the reader to subscribe to a new feed
 DELETE | /unfollow | {"url": string} | Instruct the reader to unsubscribe from a feed
 POST   | /insert   | N/A       | Have the reader generate new JSON files describing feeds and insert and save them
 GET    | /errors   | N/A       | Have the reader write a human-friendly report about errors polling feeds
 
 ### Follow
 
-Argument | Example                          | Description
----------|----------------------------------|-------------
-url      | https://news.ycombinator.com/rss | The URL of an RSS or Atom feed to subscribe to
-type     | RSS, Atom                        | RSS if the feed is an RSS feed or Atom
+Argument | Example                              | Description
+---------|--------------------------------------|-------------
+url      | https://news.ycombinator.com/rss     | The URL of an RSS or Atom feed to subscribe to
+logo     | https://news.ycombinator.com/y18.gif | The URL of an image to use as the logo for the RSS feed in the CENO Portal
+type     | RSS, Atom                            | RSS if the feed is an RSS feed or Atom
 
 **Examples**
 
 curl:
 
 ```bash
-curl -XPOST :3096/follow -H "Content-Type: application/json" -d '{"url": "https://news.ycombinator.com/rss", "type": "rss"}'
+curl -XPOST :3096/follow -H "Content-Type: application/json" -d '{"url": "https://news.ycombinator.com/rss", "logo": "https://news.ycombinator.com/y18.gif", "type": "RSS"}'
 ```
 
 httpie:
 
 ```bash
-http POST :3096/follow url=https://news.ycombinator.com/rss type=RSS
+http POST :3096/follow url=https://news.ycombinator.com/rss logo=https://news.ycombinator.com/y18.gif type=RSS
 ```
 
 ### Unfollow
