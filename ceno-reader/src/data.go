@@ -100,6 +100,7 @@ const MAX_BUNDLE_SIZE ByteSize = 100 * Megabytes
 type Feed struct {
 	Id            int
 	Url           string `json:"url"`
+	Logo          string `json:"logo"`
 	Type          string `json:"type"`
 	Charset       string `json:"charset"`
 	Articles      int    `json:"articles"`
