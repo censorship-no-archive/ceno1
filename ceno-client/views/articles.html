@@ -1,45 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>CENO Portal</title>
-    <meta charset="utf-8" />
-    <link rel="stylesheet" href="/cenoresources/stylesheets/bootstrap.min.css" />
-    <link rel="stylesheet" href="/cenoresources/stylesheets/ceno.css" />
-    <link rel="stylesheet" href="/cenoresources/stylesheets/portal.css" />
-    <script type="text/javascript" id="jsonPlaceholder">
-          var cenoPortalModule = JSON.parse("{{.CenoPortalModule}}");
-    </script>
+  <title>CENO Portal</title>
+  <meta charset='utf-8' />
+  <link rel="stylesheet" type="text/css" href="cenosite/stylesheets/pure.min.css" />
+  <script type="text/javascript" id="jsonPlaceholder">
+    var cenoPortalModule = JSON.parse("{{.CenoPortalModule}}");
+  </script>
 </head>
 <body>
-     
-    <div class="content row">
-        <div class="col-md-3">
-            <img id="cenoLogo" class="pure-img" src="/cenoresources/images/logo_ceno.png" /> 
-        </div>
-        <div class="col-md-9">
-            <p id="portalBlurb">
-                {{.PortalBlurb}}
-            </p>
-        </div>
-    </div>
-
-    <div id="articleList" class="content">
-        <ul id="articleListing">
-            <!-- Filled by JS -->
-        </ul>
-    </div>
-    <div id="navButtons" class="content row">
-        <div class="col-md-4">
-            <a href="javascript:void(0);" id="prevButton">{{.Previous}}</a>
-        </div>
-        <div class="col-md-4">
-            {{.Page}} <span id="currentPage">1</span> / <span id="totalPages">1</span>
-        </div>
-        <div class="col-md-4">
-            <a href="javascript:void(0);" id="moreButton">{{.More}}</a>
-        </div>
-    </div>
-
-    <script src="/cenoresources/javascript/articles.js"></script>
 </body>
 </html>
