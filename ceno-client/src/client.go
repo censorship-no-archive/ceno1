@@ -306,6 +306,12 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func testPortalHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Got request for test portal page")
+	t, _ := template.ParseFiles("./views/index.html", "./views/nav.html")
+	t.Execute(w, nil)
+}
+
 func main() {
 	// Configure the i18n library to use the preferred language set in the CENOLANG environement variable
 	setLanguage := os.Getenv("CENOLANG")
@@ -327,6 +333,7 @@ func main() {
 		http.StripPrefix("/cenoresources/", http.FileServer(http.Dir("./static"))))
 	http.HandleFunc("/lookup", directHandler)
 	http.HandleFunc("/portal", CreatePortalPage)
+	http.HandleFunc("/testportal", testPortalHandler)
 	http.HandleFunc("/cenosite/", CreateArticlePage)
 	http.HandleFunc("/", proxyHandler)
 	log(T("listening_msg_cli", map[string]interface{}{"Port": Configuration.PortNumber}))
