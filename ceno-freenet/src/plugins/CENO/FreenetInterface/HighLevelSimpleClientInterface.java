@@ -1,5 +1,7 @@
 package plugins.CENO.FreenetInterface;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 
@@ -24,7 +26,9 @@ import freenet.node.RequestClient;
 import freenet.node.RequestStarter;
 import freenet.support.Logger;
 import freenet.support.SimpleReadOnlyArrayBucket;
+import freenet.support.api.Bucket;
 import freenet.support.api.RandomAccessBucket;
+import freenet.support.io.BucketTools;
 
 public class HighLevelSimpleClientInterface {
 
@@ -185,6 +189,7 @@ public class HighLevelSimpleClientInterface {
 				RequestStarter.INTERACTIVE_PRIORITY_CLASS, false, null, false, node.clientCore.clientContext, null, -1L);
 		node.clientCore.clientContext.start(clientPutter);
 		return uri;
+	}
 
 	static Bucket getBucketFromString(String content) throws IOException {
 		// If the content is an HTML/XML file and there are hidden characters before the <html> opening tag, remove them

@@ -62,7 +62,7 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 		client = new HighLevelSimpleClientInterface(pluginRespirator.getNode(), pluginRespirator.getHLSimpleClient());
 		nodeInterface = new NodeInterface(pluginRespirator.getNode(), pluginRespirator);
 		nodeInterface.initFetchContexts();
-		new CENOL10n("CENOLANG");
+		CENOL10n.getInstance().setLanguageFromEnvVar("CENOLANG");
 
 		// Read properties of the configuration file
 		initConfig = new Configuration(CONFIGPATH);
@@ -95,6 +95,7 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 		} catch (CENOException e) {
 			Logger.error(this, "Could not start decentralized signaling channel maker");
 			terminate();
+		}
 
 		String confIsMasterBridge = initConfig.getProperty("isMasterBridge");
 
@@ -106,14 +107,6 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 
 		if (confIsSingalBridge != null && confIsSingalBridge.equals("true")) {
 			isSignalBridge = true;
-		}
-
-		if (isSignalBridge) {
-			nodeInterface.clearOutboxLog(bridgeFreemail, clientFreemail);
-			// Initialize RequestReceiver
-			reqReceiver = new RequestReceiver(new String[]{bridgeFreemail});
-			// Start a thread for polling for new freemails
-			reqReceiver.loopFreemailBoxes();
 		}
 
 		// Configure CENO's jetty embedded server

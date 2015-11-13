@@ -12,6 +12,7 @@ import freenet.client.InsertException;
 import freenet.client.async.ClientGetCallback;
 import freenet.client.async.ClientGetter;
 import freenet.client.async.ClientPutCallback;
+import freenet.client.async.PersistenceDisabledException;
 import freenet.client.async.USKCallback;
 import freenet.keys.FreenetURI;
 import freenet.keys.USK;
