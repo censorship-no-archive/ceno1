@@ -47,7 +47,7 @@ func channelFeedHandler(feed *rss.Feed, newChannels []*rss.Channel) {
 }
 
 /**
- * Handle the receipt of a new item.
+ * Handle the receipt of new items.
  * @param {*rss.Feed} feed - A pointer to the object representing the feed received from
  * @param {*rss.Channel} channel - A pointer to the channel object the item was received from
  * @param {[]*rss.Item} newItems - An array of pointers to items received from the channel
@@ -78,6 +78,19 @@ func itemFeedHandler(feed *rss.Feed, channel *rss.Channel, newItems []*rss.Item)
 			}
 		} else {
 			log(T("insertion_fail_err"))
+		}
+	}
+	items, itemsError := GetItems(DBConnection, feed.Url)
+	if itemsError != nil {
+		log("couldn't get items for " + feed.Url)
+		log(itemsError)
+	} else {
+		writeItemsErr := writeItems(feed.Url, items)
+		if writeItemsErr != nil {
+			log("could not write items for " + feed.Url)
+			log(writeItemsErr)
+		} else {
+			log("success!")
 		}
 	}
 }
@@ -111,7 +124,7 @@ func pollFeed(URL string, charsetReader xmlx.CharsetFunc) {
 			log(errMsg)
 			SaveError(DBConnection, NewErrorReport(RssFeed, InvalidUrl|Malformed, errMsg))
 		}
-		<-time.After(time.Duration(feed.SecondsTillUpdate() * 1e9))
+		<-time.After(3 * time.Hour)
 	}
 }
 
@@ -134,6 +147,13 @@ func followFeeds(requests chan SaveFeedRequest) {
 			return
 		} else {
 			log("Saved")
+			writeFeedsErr := writeFeeds([]Feed{feedInfo})
+			if writeFeedsErr != nil {
+				log("Error writing feeds file")
+				log(writeFeedsErr)
+			} else {
+				log("Saved new feeds.json file and inserted it into Freenet")
+			}
 			request.W.Write([]byte(T("req_handle_success_rdr")))
 		}
 		if feedInfo.Charset == "" {
@@ -233,16 +253,16 @@ func insertHandler(w http.ResponseWriter, r *http.Request) {
 	for _, feed := range feeds {
 		items, itemsError := GetItems(DBConnection, feed.Url)
 		if itemsError != nil {
-			log("Couldn't get items for " + feed.Url)
+			log("couldn't get items for " + feed.Url)
 			log(itemsError)
 		} else {
 			log(items)
-			log("Items for " + feed.Url)
+			log("items for " + feed.Url)
 			writeItemsErr := writeItems(feed.Url, items)
 			if writeItemsErr != nil {
-				log("Could not write items for " + feed.Url)
+				log("could not write items for " + feed.Url)
 			} else {
-				log("Success!")
+				log("success!")
 			}
 		}
 	}
