@@ -17,6 +17,14 @@ import (
 	"time"
 )
 
+// A message for the user to receive after requesting a new feed be followed.
+const FOLLOW_REQ_MSG = `Your request is being processed.
+If anything goes wrong, an error will be recorded.
+You can have a report about errors generated using this service's /errors route.
+Use the following curl command:
+    curl :3096/errors
+`
+
 /**
  * Log the current time and a message
  * @param {interface} msg - The message to be logged
@@ -120,7 +128,7 @@ func pollFeed(URL string, charsetReader xmlx.CharsetFunc) {
  * @param {chan Feed} requests - A channel through which descriptions of feeds to be followed are received
  */
 func followFeeds(requests chan SaveFeedRequest) {
-	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
+	//T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
 	for {
 		request := <-requests
 		feedInfo := request.Feed()
@@ -130,13 +138,11 @@ func followFeeds(requests chan SaveFeedRequest) {
 		if saveErr != nil {
 			log("Could not save")
 			log(saveErr)
-			errMsg := T("db_store_error_rdr", map[string]interface{}{"Error": saveErr.Error()})
-			request.Respond(errMsg)
+			//errMsg := T("db_store_error_rdr", map[string]interface{}{"Error": saveErr.Error()})
 			return
 		} else {
 			log("Saved")
-			msg := T("req_handle_success_rdr")
-			request.Respond(msg)
+			////msg := T("req_handle_success_rdr")
 		}
 		if feedInfo.Charset == "" {
 			go pollFeed(feedInfo.Url, nil)
@@ -183,14 +189,8 @@ func followHandler(requests chan SaveFeedRequest) func(http.ResponseWriter, *htt
 			w.Write([]byte(T("invalid_follow_req_rdr")))
 			return
 		}
-		// Create a channel through which the request handler can write a response.
-		response := make(chan string, 1)
-		requests <- SaveFeedRequest{feedInfo, response}
-		// Have a goroutine wait for the follow handler's response and write it to the client.
-		go func() {
-			msg := <-response
-			w.Write([]byte(msg))
-		}()
+		requests <- SaveFeedRequest{feedInfo}
+		w.Write([]byte(FOLLOW_REQ_MSG))
 	}
 }
 

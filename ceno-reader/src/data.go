@@ -133,15 +133,10 @@ type ErrorReport struct {
 // Contains information about a request to have a feed followed.
 type SaveFeedRequest struct {
 	FeedInfo Feed
-	Response chan string
 }
 
 func (r SaveFeedRequest) Feed() Feed {
 	return r.FeedInfo
-}
-
-func (r SaveFeedRequest) Respond(msg string) {
-	r.Response <- msg
 }
 
 /**
