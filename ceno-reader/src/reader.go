@@ -123,18 +123,20 @@ func followFeeds(requests chan SaveFeedRequest) {
 	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
 	for {
 		request := <-requests
-		feedInfo := request.FeedInfo
+		feedInfo := request.Feed()
 		log("Got a request to handle a feed.")
 		log(feedInfo)
 		saveErr := SaveFeed(DBConnection, feedInfo)
 		if saveErr != nil {
 			log("Could not save")
 			log(saveErr)
-			request.W.Write([]byte(T("db_store_error_rdr", map[string]interface{}{"Error": saveErr.Error()})))
+			errMsg := T("db_store_error_rdr", map[string]interface{}{"Error": saveErr.Error()})
+			request.Respond(errMsg)
 			return
 		} else {
 			log("Saved")
-			request.W.Write([]byte(T("req_handle_success_rdr")))
+			msg := T("req_handle_success_rdr")
+			request.Respond(msg)
 		}
 		if feedInfo.Charset == "" {
 			go pollFeed(feedInfo.Url, nil)
@@ -181,7 +183,14 @@ func followHandler(requests chan SaveFeedRequest) func(http.ResponseWriter, *htt
 			w.Write([]byte(T("invalid_follow_req_rdr")))
 			return
 		}
-		requests <- SaveFeedRequest{feedInfo, w}
+		// Create a channel through which the request handler can write a response.
+		response := make(chan string, 1)
+		requests <- SaveFeedRequest{feedInfo, response}
+		// Have a goroutine wait for the follow handler's response and write it to the client.
+		go func() {
+			msg := <-response
+			w.Write([]byte(msg))
+		}()
 	}
 }
 

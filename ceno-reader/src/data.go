@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"github.com/jteeuwen/go-pkg-xmlx"
-	"net/http"
 	"path"
 	"time"
 )
@@ -131,14 +130,18 @@ type ErrorReport struct {
 	ErrorMessage  string
 }
 
-/**
- * Pair a Feed with a ResponseWriter to be sent accross a channel
- * So that a separate goroutine can try to handle DB operations and
- * write back to the client.
- */
+// Contains information about a request to have a feed followed.
 type SaveFeedRequest struct {
 	FeedInfo Feed
-	W        http.ResponseWriter
+	Response chan string
+}
+
+func (r SaveFeedRequest) Feed() Feed {
+	return r.FeedInfo
+}
+
+func (r SaveFeedRequest) Respond(msg string) {
+	r.Response <- msg
 }
 
 /**
