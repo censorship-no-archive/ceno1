@@ -312,6 +312,18 @@ func testPortalHandler(w http.ResponseWriter, r *http.Request) {
 	t.Execute(w, nil)
 }
 
+func testChannelsHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Got request for test channels page")
+	t, _ := template.ParseFiles("./views/channels.html", "./views/nav.html", "./views/resources.html", "./views/breadcrumbs.html")
+	t.Execute(w, nil)
+}
+
+func testArticlesHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Got request for test articles page")
+	t, _ := template.ParseFiles("./views/index.html", "./views/nav.html", "./views/resources.html", "./views/breadcrumbs.html")
+	t.Execute(w, nil)
+}
+
 func main() {
 	// Configure the i18n library to use the preferred language set in the CENOLANG environement variable
 	setLanguage := os.Getenv("CENOLANG")
@@ -334,6 +346,8 @@ func main() {
 	http.HandleFunc("/lookup", directHandler)
 	http.HandleFunc("/portal", CreatePortalPage)
 	http.HandleFunc("/testportal", testPortalHandler)
+	http.HandleFunc("/testchannels", testChannelsHandler)
+	http.HandleFunc("/testarticles", testArticlesHandler)
 	http.HandleFunc("/cenosite/", CreateArticlePage)
 	http.HandleFunc("/", proxyHandler)
 	log(T("listening_msg_cli", map[string]interface{}{"Port": Configuration.PortNumber}))
