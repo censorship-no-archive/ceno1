@@ -132,22 +132,3 @@ Step | Description                   | Message
 -----|-------------------------------|-------------------
 1    | BS prompts RR to store bundle | `[POST <RR>/complete {"bundle": <bundle>, "url": <url>, "created": <date_created>}]`
 2    | RR reports acknowledgement    | `[write "okay"]`
-
-### CC requests peer status
-
-The CENO Portal page would like to display the current status of CENO's connectivity to
-the underlying distributed storage system, measured by the number of connected peers.
-We will require whichever agent is managing this connection to report this status as one of three values:
-
-Value   | Description
---------|--------------
-okay    | There are enough peer connections established to securely download content from.
-warning | There are enough peer connections to download content from, but perhaps not as securely or reliably.
-error   | There are not enough peer connections to download content from at all.
-
-The receiving agent (such as the LCS)- denoted here as `<A>`- should be able to engage the CC in the following communication:
-
-Step | Description                                                | Message
------|------------------------------------------------------------|--------------
-1    | CC requests the current peer status                        | `[GET <A>/status]`
-2    | Agent responds with a status value and explanatory message | `[write {"status": <"okay", "warning", or "error">, "message": <text>}]`
