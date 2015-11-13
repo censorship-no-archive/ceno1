@@ -46,12 +46,46 @@ func setPort(URL string, agent Agent) (port string) {
 }
 
 func TestInsertFreenet(t *testing.T) {
-
+	// Acts like the bundle inserter
+	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/plain")
+		bundle := struct {
+			Created string `json:"created"`
+			Url     string `json:"url"`
+			Bundle  string `json:"bundle"`
+		}{}
+		defer r.Body.Close()
+		decoder := json.NewDecoder(r.Body)
+		decodeErr := decoder.Decode(&bundle)
+		lastErrMsg := ""
+		if decodeErr != nil {
+			lastErrMsg = decodeErr.Error()
+			t.Error(lastErrMsg)
+		}
+		_, parseErr := url.Parse(bundle.Url)
+		if parseErr != nil {
+			lastErrMsg = parseErr.Error()
+			t.Error(lastErrMsg)
+		}
+		if len(lastErrMsg) > 0 {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(lastErrMsg))
+		} else {
+			w.Write([]byte("okay"))
+		}
+	}))
+	setPort(testServer.URL, BundleInserter)
+	defer testServer.Close()
+	bundle := []byte(`{"url": "https://news.ycombinator.com", "created": "now", "bundle": "somebundledata"}`)
+	status := InsertFreenet(bundle)
+	if status == Failure {
+		t.Error("Call to InsertFreenet failed.")
+	}
 }
 
 func TestGetBundle(t *testing.T) {
+	// Acts like the bundle server
 	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		t.Log("Got a request for a bundle in test server")
 		w.Header().Set("Content-Type", "application/json")
 		lastErrMsg := ""
 		if r.Method != "GET" {
