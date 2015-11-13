@@ -52,6 +52,7 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 	public static Configuration initConfig;
 	private static final Version VERSION = new Version(Version.PluginType.BRIDGE);
 	private static final String CONFIGPATH = ".CENO/bridge.properties";
+	public static final String PORTAL_DOC_NAME = "CENO-RSS";
 
 	public static final String ANNOUNCER_PATH = "CENO-signaler";
 
