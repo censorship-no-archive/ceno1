@@ -320,7 +320,7 @@ func testChannelsHandler(w http.ResponseWriter, r *http.Request) {
 
 func testArticlesHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Got request for test articles page")
-	t, _ := template.ParseFiles("./views/index.html", "./views/nav.html", "./views/resources.html", "./views/breadcrumbs.html")
+	t, _ := template.ParseFiles("./views/articles.html", "./views/nav.html", "./views/resources.html", "./views/breadcrumbs.html")
 	t.Execute(w, nil)
 }
 
