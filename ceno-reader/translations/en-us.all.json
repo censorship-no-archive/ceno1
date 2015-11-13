@@ -88,6 +88,14 @@
     "translation": "Database query failed. Error: {{.Error}}"
   },
   {
+    "id": "request_fail_err",
+    "translation": "Request for {{.URL}} failed. Error: {{.Error}}"
+  },
+  {
+    "id": "image_insert_fail_err",
+    "translation": "Failed to insert the following logo into Freenet: {{.Logo}}"
+  },
+  {
     "id": "follow_request_msg",
     "translation": "Your request is being processed. If anything goes wrong, an error will be recorded. You can have a report about errors generated using this service's /errors route. Use the following curl command:   curl :3096/errors "
   }

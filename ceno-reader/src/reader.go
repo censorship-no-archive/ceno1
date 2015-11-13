@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -38,6 +39,32 @@ func log(msg interface{}) string {
 func logPanic(v interface{}) {
 	s := log(v)
 	panic(s)
+}
+
+/**
+ * Fetch an image and insert it into Freenet.
+ * @param {string} imgUrl - The URL of the image to insert
+ * @return {RequestStatus} Success if the image is fetched and inserted properly or else Failure
+ */
+func InsertImage(imgUrl string) RequestStatus {
+	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
+	response, err := http.Get(imgUrl)
+	if err != nil {
+		log(T("request_fail_err", map[string]string{
+			"URL":   imgUrl,
+			"Error": err.Error(),
+		}))
+		return Failure
+	}
+	defer response.Body.Close()
+	// Read the image into the JSON structure that the bundle inserter expects.
+	// We use bytes.Replace to avoid converting the (potentially large) image from a byte slice
+	// to a string and then the whole JSON data back to a byte slice.
+	imgBytes, _ := ioutil.ReadAll(response.Body)
+	now := time.Now().Format(time.UnixDate)
+	bundleStr := fmt.Sprintf(`{"url": "%s", "created": "%s", "bundle": "{{BUNDLE}}"}`, imgUrl, now)
+	bundle := bytes.Replace([]byte(bundleStr), []byte("{{BUNDLE}}"), imgBytes, 1)
+	return InsertFreenet(bundle)
 }
 
 /**
@@ -135,6 +162,9 @@ func followFeeds(requests chan SaveFeedRequest) {
 		} else {
 			msg := T("req_handle_success_rdr")
 			log(msg)
+			if InsertImage(feedInfo.Logo) == Failure {
+				log(T("image_insert_fail_err", map[string]string{"Logo": feedInfo.Logo}))
+			}
 		}
 		if feedInfo.Charset == "" {
 			go pollFeed(feedInfo.Url, nil)
