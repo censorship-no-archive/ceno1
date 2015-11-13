@@ -81,10 +81,10 @@ func TestGetBundle(t *testing.T) {
 			response, _ := json.Marshal(map[string]string{"error": lastErrMsg})
 			w.Write(response)
 		} else {
-			response, _ := json.Marshal(map[string]string{
-				"created": "now",
-				"url":     strUrl,
-				"bundle":  "Hello world!",
+			response, _ := json.Marshal(BundleContainer{
+				"now",
+				strUrl,
+				"Hello world!",
 			})
 			w.Write(response)
 		}

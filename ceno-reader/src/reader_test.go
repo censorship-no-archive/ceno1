@@ -8,18 +8,14 @@ import (
 	"testing"
 )
 
-// The URL of eQualit.ie's logo, which we will use as our test image in TestInsertImage
-const EQ_LOGO_URL = "https://equalit.ie/wp-content/uploads/2014/06/eq-logo03-e1401820293471.png"
+// The URL of a test logo, which we will use as our test image in TestInsertImage
+const LOGO_URL = "https://news.ycombinator.com/y18.gif"
 
 func TestInsertImage(t *testing.T) {
 	// Acts like the bundle inserter
 	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/plain")
-		bundle := struct {
-			Created string `json:"created"`
-			Url     string `json:"url"`
-			Bundle  string `json:"bundle"`
-		}{}
+		bundle := BundleContainer{}
 		defer r.Body.Close()
 		decoder := json.NewDecoder(r.Body)
 		decodeErr := decoder.Decode(&bundle)
@@ -47,8 +43,8 @@ func TestInsertImage(t *testing.T) {
 	defer testServer.Close()
 	// Defined in test_helpers.go
 	SetPort(testServer.URL, BundleInserter)
-	status := InsertImage(EQ_LOGO_URL)
+	status := InsertImage(LOGO_URL)
 	if status == Failure {
-		t.Error("Request to insert eQualit.ie's logo failed.")
+		t.Error("Request to insert logo failed.")
 	}
 }
