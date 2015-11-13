@@ -78,7 +78,7 @@ func channelFeedHandler(feed *rss.Feed, newChannels []*rss.Channel) {
 }
 
 /**
- * Handle the receipt of a new item.
+ * Handle the receipt of new items.
  * @param {*rss.Feed} feed - A pointer to the object representing the feed received from
  * @param {*rss.Channel} channel - A pointer to the channel object the item was received from
  * @param {[]*rss.Item} newItems - An array of pointers to items received from the channel
@@ -109,6 +109,19 @@ func itemFeedHandler(feed *rss.Feed, channel *rss.Channel, newItems []*rss.Item)
 			}
 		} else {
 			log(T("insertion_fail_err"))
+		}
+	}
+	items, itemsError := GetItems(DBConnection, feed.Url)
+	if itemsError != nil {
+		log("couldn't get items for " + feed.Url)
+		log(itemsError)
+	} else {
+		writeItemsErr := writeItems(feed.Url, items)
+		if writeItemsErr != nil {
+			log("could not write items for " + feed.Url)
+			log(writeItemsErr)
+		} else {
+			log("success!")
 		}
 	}
 }
@@ -142,7 +155,7 @@ func pollFeed(URL string, charsetReader xmlx.CharsetFunc) {
 			log(errMsg)
 			SaveError(DBConnection, NewErrorReport(RssFeed, InvalidUrl|Malformed, errMsg))
 		}
-		<-time.After(time.Duration(feed.SecondsTillUpdate() * 1e9))
+		<-time.After(3 * time.Hour)
 	}
 }
 
@@ -163,8 +176,15 @@ func followFeeds(requests chan SaveFeedRequest) {
 		} else {
 			msg := T("req_handle_success_rdr")
 			log(msg)
+			// NOTE - Here, we may not want to store the feeds.json file if we couldn't store a logo
 			if InsertImage(feedInfo.Logo) == Failure {
 				log(T("image_insert_fail_err", map[string]string{"Logo": feedInfo.Logo}))
+			}
+			writeFeedsErr := writeFeeds([]Feed{feedInfo})
+			if writeFeedsErr != nil {
+				log(T("insertion_fail_err"))
+			} else {
+				log(T("saved_feeds_file"))
 			}
 		}
 		if feedInfo.Charset == "" {
@@ -251,6 +271,7 @@ func unfollowHandler(w http.ResponseWriter, r *http.Request) {
  * the distributed store being used. Also creates files for distribution in json-files.
  */
 func insertHandler(w http.ResponseWriter, r *http.Request) {
+	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
 	feeds, feedErr := AllFeeds(DBConnection)
 	if feedErr != nil {
 		log("Couldn't get feeds")
@@ -259,22 +280,22 @@ func insertHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	writeFeedsErr := writeFeeds(feeds)
 	if writeFeedsErr != nil {
-		log(writeFeedsErr)
+		log(T("insertion_fail_err"))
 		return
+	} else {
+		log(T("saved_feeds_file"))
 	}
 	for _, feed := range feeds {
 		items, itemsError := GetItems(DBConnection, feed.Url)
 		if itemsError != nil {
-			log("Couldn't get items for " + feed.Url)
+			log("couldn't get items for " + feed.Url)
 			log(itemsError)
 		} else {
-			log(items)
-			log("Items for " + feed.Url)
 			writeItemsErr := writeItems(feed.Url, items)
 			if writeItemsErr != nil {
-				log("Could not write items for " + feed.Url)
+				log(T("item_insertion_fail_err", map[string]string{"Url": feed.Url}))
 			} else {
-				log("Success!")
+				log(T("item_insertion_success", map[string]string{"Url": feed.Url}))
 			}
 		}
 	}
@@ -293,8 +314,6 @@ func writeFeeds(feeds []Feed) error {
 		"feeds":   feeds,
 	})
 	if marshalError != nil {
-		log("Couldn't marshal array of feeds")
-		log(marshalError)
 		return marshalError
 	}
 	// The bundle inserter expects the "bundle" field to be a string,
@@ -310,8 +329,6 @@ func writeFeeds(feeds []Feed) error {
 		// We don't want to write the data that was sent to the BI. Just the feeds stuff.
 		feedWriteErr := ioutil.WriteFile(FeedsJsonFile, marshalledFeeds, os.ModePerm)
 		if feedWriteErr != nil {
-			log("Couldn't write " + FeedsJsonFile)
-			log(feedWriteErr)
 			return feedWriteErr
 		}
 	} else {
@@ -352,9 +369,10 @@ func writeItems(feedUrl string, items []Item) error {
 		writeErr := writeItemsFile(feedUrl, marshalled)
 		// We don't want to write the data that was sent to the bundle inserter, just the items stuff.
 		if writeErr != nil {
-			log("Couldn't write item")
-			log(writeErr)
+			log(T("insertion_fail_err"))
 			return writeErr
+		} else {
+			log(T("saved_feeds_file"))
 		}
 	} else {
 		log("Could not insert items into Freenet")

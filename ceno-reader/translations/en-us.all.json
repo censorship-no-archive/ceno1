@@ -96,6 +96,18 @@
     "translation": "Failed to insert the following logo into Freenet: {{.Logo}}"
   },
   {
+    "id": "saved_feeds_file",
+    "translation": "Saved new feeds.json file and inserted it into Freenet"
+  },
+  {
+    "id": "item_insertion_fail_err",
+    "translation": "Failed to insert items for {{.Url}}"
+  },
+  {
+    "id": "item_insertion_success",
+    "translation": "Inserted items for {{.Url}}"
+  },
+  {
     "id": "follow_request_msg",
     "translation": "Your request is being processed. If anything goes wrong, an error will be recorded. You can have a report about errors generated using this service's /errors route. Use the following curl command:   curl :3096/errors "
   }
