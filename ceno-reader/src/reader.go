@@ -123,21 +123,18 @@ func pollFeed(URL string, charsetReader xmlx.CharsetFunc) {
  * @param {chan Feed} requests - A channel through which descriptions of feeds to be followed are received
  */
 func followFeeds(requests chan SaveFeedRequest) {
-	//T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
+	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
 	for {
 		request := <-requests
 		feedInfo := request.Feed()
-		log("Got a request to handle a feed.")
-		log(feedInfo)
 		saveErr := SaveFeed(DBConnection, feedInfo)
 		if saveErr != nil {
-			log("Could not save")
-			log(saveErr)
-			//errMsg := T("db_store_error_rdr", map[string]interface{}{"Error": saveErr.Error()})
+			errMsg := T("db_store_error_rdr", map[string]interface{}{"Error": saveErr.Error()})
+			log(errMsg)
 			return
 		} else {
-			log("Saved")
-			////msg := T("req_handle_success_rdr")
+			msg := T("req_handle_success_rdr")
+			log(msg)
 		}
 		if feedInfo.Charset == "" {
 			go pollFeed(feedInfo.Url, nil)
