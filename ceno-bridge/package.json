@@ -7,13 +7,15 @@
   "main": "./bundle-server.js",
   "scripts": {
     "start": "node bundle-server.js",
-    "test": "mocha tests/lookup-failure.js"
+    "test": "CENOLANG=en mocha tests/*.js -t 20000"
   },
   "dependencies": {
     "request": "latest",
     "require": "latest",
-    "equalitie-bundler": "~1.0.0",
-    "i18n": "latest"
+    "equalitie-bundler": "1.1.3",
+    "i18n": "latest",
+    "node-readability": "latest",
+    "dateformat": "latest"
   },
   "devDependencies": {
     "should": "latest",

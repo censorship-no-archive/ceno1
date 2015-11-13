@@ -53,7 +53,7 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 		//TODO initialized within NodeInterface, do not expose HLSC but only via nodeInterface
 		new HighLevelSimpleClientInterface(pr.getNode());
 		nodeInterface = new NodeInterface(pr.getNode(), pr);
-		new CENOL10n("CENOLANG");
+		CENOL10n.getInstance().setLanguageFromEnvVar("CENOLANG");
 
 		// Initialize LCS
 		nodeInterface.initFetchContexts();
@@ -67,6 +67,8 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 
 		channelMakerThread = new Thread(channelMaker);
 		channelMakerThread.start();
+		// Subscribe to updates of the CENO Portal feeds.json
+		// USKUpdateFetcher.subscribeFetchUSK(uskUri);
 	}
 
 	/**

@@ -174,3 +174,5 @@ chrome.extension.onMessage.addListener(function (req, sender, respond) {
     console.log('Unrecognized directive');
   };
 });
+
+activateCENO(function () {});

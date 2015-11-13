@@ -1,5 +1,4 @@
-/* This file contains code to test that the bundle-server correctly implements the `lookup failure`
- * portion of the CENO protocol described at
+/* This file contains code to test that the bundle-server correctly implements the `lookup failure` * portion of the CENO protocol described at
  * https://github.com/equalitie/ceno/blob/master/doc/CENOProtocol.md#lookup-failure
  */
 
@@ -8,14 +7,16 @@ var path = require('path');
 var http = require('http');
 var should = require('should');
 var request = require('request');
+var handler = require('../bshandler');
 
 describe('bundler-server', function () {
   before(function (done) {
+    process.env['CENOLANG'] = 'en';
     // Run an instance of the bundle-server using the request handler written for it.
     this.config = JSON.parse(fs.readFileSync(path.join('config', 'node.json')));
-    var handler = require('../bshandler')(this.config);
+    reqHandler = handler(this.config);
 
-    this.bServer = http.createServer(handler);
+    this.bServer = http.createServer(reqHandler);
     this.bServer.listen(this.config.port);
     done();
   });

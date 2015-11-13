@@ -1,6 +1,5 @@
 package plugins.CENO.FreenetInterface;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
@@ -132,8 +131,7 @@ public class NodeInterface implements FreenetInterface {
 			defName = defaultName;
 		}
 
-		Bucket bucket = node.clientCore.tempBucketFactory.makeBucket(content.length());
-		BucketTools.copyFrom(bucket, new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8), 0, content.length()), content.length());
+		Bucket bucket = HighLevelSimpleClientInterface.getBucketFromString(content);
 
 		HashMap<String, Object> bucketsByName = new HashMap<String, Object>();
 		bucketsByName.put(defName, bucket);
@@ -149,8 +147,7 @@ public class NodeInterface implements FreenetInterface {
 			mimeType = "text/html";
 		}
 
-		RandomAccessBucket bucket = node.clientCore.tempBucketFactory.makeBucket(content.length());
-		BucketTools.copyFrom(bucket, new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8), 0, content.length()), content.length());
+		RandomAccessBucket bucket = (RandomAccessBucket) HighLevelSimpleClientInterface.getBucketFromString(content);
 
 		InsertBlock ib = new InsertBlock(bucket, new ClientMetadata(mimeType), insertURI);
 		InsertContext ictx = HighLevelSimpleClientInterface.getInsertContext(true);
