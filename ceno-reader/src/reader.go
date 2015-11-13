@@ -17,13 +17,8 @@ import (
 	"time"
 )
 
-// A message for the user to receive after requesting a new feed be followed.
-const FOLLOW_REQ_MSG = `Your request is being processed.
-If anything goes wrong, an error will be recorded.
-You can have a report about errors generated using this service's /errors route.
-Use the following curl command:
-    curl :3096/errors
-`
+// The ID of A message for the user to receive after requesting a new feed be followed.
+const FOLLOW_REQ_MSG = "follow_request_msg"
 
 /**
  * Log the current time and a message
@@ -190,7 +185,7 @@ func followHandler(requests chan SaveFeedRequest) func(http.ResponseWriter, *htt
 			return
 		}
 		requests <- SaveFeedRequest{feedInfo}
-		w.Write([]byte(FOLLOW_REQ_MSG))
+		w.Write([]byte(T(FOLLOW_REQ_MSG)))
 	}
 }
 

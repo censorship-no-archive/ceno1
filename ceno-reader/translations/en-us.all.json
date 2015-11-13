@@ -86,5 +86,9 @@
   {
     "id": "db_get_err",
     "translation": "Database query failed. Error: {{.Error}}"
+  },
+  {
+    "id": "follow_request_msg",
+    "translation": "Your request is being processed. If anything goes wrong, an error will be recorded. You can have a report about errors generated using this service's /errors route. Use the following curl command:   curl :3096/errors "
   }
 ]
