@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -57,13 +56,15 @@ func InsertImage(imgUrl string) RequestStatus {
 		return Failure
 	}
 	defer response.Body.Close()
-	// Read the image into the JSON structure that the bundle inserter expects.
-	// We use bytes.Replace to avoid converting the (potentially large) image from a byte slice
-	// to a string and then the whole JSON data back to a byte slice.
 	imgBytes, _ := ioutil.ReadAll(response.Body)
 	now := time.Now().Format(time.UnixDate)
-	bundleStr := fmt.Sprintf(`{"url": "%s", "created": "%s", "bundle": "{{BUNDLE}}"}`, imgUrl, now)
-	bundle := bytes.Replace([]byte(bundleStr), []byte("{{BUNDLE}}"), imgBytes, 1)
+	// We can't really get around the problem of converting the image bytes to a string and back
+	// without incurring invalid value errors along the way. It's sad, but at least this code is nice and works.
+	bundle, _ := json.Marshal(map[string]string{
+		"url":     imgUrl,
+		"created": now,
+		"bundle":  string(imgBytes),
+	})
 	return InsertFreenet(bundle)
 }
 
