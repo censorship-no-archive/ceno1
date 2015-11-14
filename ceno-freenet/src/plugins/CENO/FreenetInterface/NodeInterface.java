@@ -2,7 +2,6 @@ package plugins.CENO.FreenetInterface;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
 import plugins.CENO.FreenetInterface.ConnectionOverview.NodeConnections;
@@ -31,7 +30,6 @@ import freenet.pluginmanager.PluginRespirator;
 import freenet.support.Logger;
 import freenet.support.api.Bucket;
 import freenet.support.api.RandomAccessBucket;
-import freenet.support.io.BucketTools;
 import freenet.support.io.ResumeFailedException;
 
 public class NodeInterface implements FreenetInterface {
@@ -56,6 +54,7 @@ public class NodeInterface implements FreenetInterface {
 		this.ULPRFC.maxTempLength = Long.MAX_VALUE;
 		this.ULPRFC.maxOutputLength = Long.MAX_VALUE;
 
+		// Set up a FetchContext instance for lookup requests in the local cache only
 		this.localFC = HighLevelSimpleClientInterface.getFetchContext();
 		this.localFC.localRequestOnly = true;
 		this.localFC.followRedirects = true;
@@ -64,6 +63,7 @@ public class NodeInterface implements FreenetInterface {
 		this.localFC.maxTempLength = Long.MAX_VALUE;
 		this.localFC.maxOutputLength = Long.MAX_VALUE;
 		
+		// Set up a FetchContext instance for lookup requests in the distributed cache only
 		this.distFC = HighLevelSimpleClientInterface.getFetchContext();
 		this.distFC.ignoreStore = true;
 		this.distFC.followRedirects = true;

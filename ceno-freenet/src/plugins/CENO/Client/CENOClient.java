@@ -13,7 +13,6 @@ import freenet.pluginmanager.FredPluginThreadless;
 import freenet.pluginmanager.FredPluginVersioned;
 import freenet.pluginmanager.PluginHTTPException;
 import freenet.pluginmanager.PluginRespirator;
-import freenet.support.Base64;
 import freenet.support.Logger;
 import freenet.support.api.HTTPRequest;
 
@@ -41,9 +40,6 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 	private ChannelMaker channelMaker;
 	private Thread channelMakerThread;
 
-	public static final String PORTAL_DOC_NAME = "CENO-RSS";
-	public static final String B64_PORTAL_DOC_NAME = Base64.encodeStandardUTF8(PORTAL_DOC_NAME);
-
 	// Bridge and freemail-specific constants
 	public static final String BRIDGE_KEY = "SSK@mlfLfkZmWIYVpKbsGSzOU~-XuPp~ItUhD8GlESxv8l4,tcB-IHa9c4wpFudoSm0k-iTaiE~INdeQXvcYP2M1Nec,AQACAAE/";
 
@@ -57,6 +53,7 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 		//TODO initialized within NodeInterface, do not expose HLSC but only via nodeInterface
 		new HighLevelSimpleClientInterface(pr.getNode());
 		nodeInterface = new NodeInterface(pr.getNode(), pr);
+		nodeInterface.initFetchContexts();
 		CENOL10n.getInstance().setLanguageFromEnvVar("CENOLANG");
 
 		// Initialize LCS

@@ -38,9 +38,7 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 	private Server cenoHttpServer;
 
 	// Interface objects with fred
-	private HighLevelSimpleClientInterface client;
 	public static NodeInterface nodeInterface;
-	private RequestReceiver reqReceiver;
 	ChannelMaker channelMaker;
 
 	private static boolean isMasterBridge = false;
@@ -52,16 +50,15 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 	public static Configuration initConfig;
 	private static final Version VERSION = new Version(Version.PluginType.BRIDGE);
 	private static final String CONFIGPATH = ".CENO/bridge.properties";
-	public static final String PORTAL_DOC_NAME = "CENO-RSS";
 
 	public static final String ANNOUNCER_PATH = "CENO-signaler";
 
 	public void runPlugin(PluginRespirator pr)
 	{
-		// Initialize interfaces with fred
-		pluginRespirator = pr;
-		client = new HighLevelSimpleClientInterface(pluginRespirator.getNode(), pluginRespirator.getHLSimpleClient());
-		nodeInterface = new NodeInterface(pluginRespirator.getNode(), pluginRespirator);
+		// Initialize interfaces with Freenet node
+		//TODO initialized within NodeInterface, do not expose HLSC but only via nodeInterface
+		new HighLevelSimpleClientInterface(pr.getNode());
+		nodeInterface = new NodeInterface(pr.getNode(), pr);
 		nodeInterface.initFetchContexts();
 		CENOL10n.getInstance().setLanguageFromEnvVar("CENOLANG");
 
@@ -194,9 +191,9 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 	 */
 	public void terminate()
 	{
-		// Stop the thread that is polling for freemails
+		// Stop the thread that is polling for new channel requests
 		if (isSignalBridge) {
-		channelMaker.stopListener();
+			channelMaker.stopListener();
 		}
 
 		// Stop cenoHttpServer and unbind ports
