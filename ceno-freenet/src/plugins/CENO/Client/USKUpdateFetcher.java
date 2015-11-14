@@ -53,7 +53,7 @@ public class USKUpdateFetcher {
 			}
 		}
 		try {
-			subscribeFetchUSK(URLtoUSKTools.computeUSKfromURL(url, CENOClient.BRIDGE_KEY));
+			subscribeFetchUSK(URLtoUSKTools.computeUSKfromURL(url, CENOClient.getBridgeKey()));
 		} catch (MalformedURLException e) {
 			return false;
 		}
@@ -65,7 +65,7 @@ public class USKUpdateFetcher {
 		FreenetURI bridgeUri;
 		USK feedsUSK;
 		try {
-			bridgeUri = URLtoUSKTools.computeUSKfromURL(URLtoUSKTools.PORTAL_DOC_NAME, CENOClient.BRIDGE_KEY);
+			bridgeUri = URLtoUSKTools.computeUSKfromURL(URLtoUSKTools.PORTAL_DOC_NAME, CENOClient.getBridgeKey());
 			feedsUSK = new USK(bridgeUri.getRoutingKey(), bridgeUri.getCryptoKey(), bridgeUri.getExtra(), bridgeUri.getDocName(), bridgeUri.getSuggestedEdition());
 		} catch (MalformedURLException e) {
 			Logger.error(USKUpdateFetcher.class, "Could not calculate the USK of CENO Portal feeds json");

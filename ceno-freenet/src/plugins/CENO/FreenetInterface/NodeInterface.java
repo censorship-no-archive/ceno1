@@ -40,10 +40,12 @@ public class NodeInterface implements FreenetInterface {
 
 	public NodeInterface(Node node, PluginRespirator pr) {
 		this.node = node;
+		new HighLevelSimpleClientInterface(node);
 		this.connectionOverview = new ConnectionOverview(node);
+		initFetchContexts();
 	}
 
-	public void initFetchContexts() {
+	private void initFetchContexts() {
 		// Set up a FetchContext instance for Ultra-lightweight passive requests
 		this.ULPRFC = HighLevelSimpleClientInterface.getFetchContext();
 		this.ULPRFC.canWriteClientCache = true;

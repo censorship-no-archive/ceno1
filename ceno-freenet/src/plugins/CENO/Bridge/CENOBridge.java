@@ -57,9 +57,7 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 	{
 		// Initialize interfaces with Freenet node
 		//TODO initialized within NodeInterface, do not expose HLSC but only via nodeInterface
-		new HighLevelSimpleClientInterface(pr.getNode());
 		nodeInterface = new NodeInterface(pr.getNode(), pr);
-		nodeInterface.initFetchContexts();
 		CENOL10n.getInstance().setLanguageFromEnvVar("CENOLANG");
 
 		// Read properties of the configuration file

@@ -4,7 +4,6 @@ import plugins.CENO.CENOL10n;
 import plugins.CENO.Configuration;
 import plugins.CENO.Version;
 import plugins.CENO.Client.Signaling.ChannelMaker;
-import plugins.CENO.FreenetInterface.HighLevelSimpleClientInterface;
 import plugins.CENO.FreenetInterface.NodeInterface;
 import freenet.pluginmanager.FredPlugin;
 import freenet.pluginmanager.FredPluginHTTP;
@@ -28,6 +27,7 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 	// Interface objects with fred
 	public static NodeInterface nodeInterface;
 	private static final ClientHandler clientHandler = new ClientHandler();
+	private static String bridgeKey;
 
 	// Plugin-specific configuration
 	public static final String PLUGIN_URI = "/plugins/plugins.CENO.CENO";
@@ -40,7 +40,7 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 	private ChannelMaker channelMaker;
 	private Thread channelMakerThread;
 
-	// Bridge and freemail-specific constants
+	// Default bridge key (for the CENO bridge running on Deflect)
 	public static final String BRIDGE_KEY = "SSK@mlfLfkZmWIYVpKbsGSzOU~-XuPp~ItUhD8GlESxv8l4,tcB-IHa9c4wpFudoSm0k-iTaiE~INdeQXvcYP2M1Nec,AQACAAE/";
 
 	/**
@@ -51,17 +51,17 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 	{
 		// Initialize interfaces with Freenet node
 		//TODO initialized within NodeInterface, do not expose HLSC but only via nodeInterface
-		new HighLevelSimpleClientInterface(pr.getNode());
 		nodeInterface = new NodeInterface(pr.getNode(), pr);
-		nodeInterface.initFetchContexts();
 		CENOL10n.getInstance().setLanguageFromEnvVar("CENOLANG");
 
 		// Initialize LCS
-		nodeInterface.initFetchContexts();
 		ULPRManager.init();
 
 		initConfig = new Configuration(CONFIGPATH);
 		initConfig.readProperties();
+
+		String confBridgeKey = initConfig.getProperty("bridgeKey");
+		bridgeKey = (confBridgeKey != null && !confBridgeKey.isEmpty()) ? confBridgeKey : BRIDGE_KEY;
 
 		// Initialize RS - Make a new class ChannelManager that handles ChannelMaker
 		channelMaker = new ChannelMaker(initConfig.getProperty("signalSSK"), Long.parseLong(initConfig.getProperty("lastSynced", "0")));
@@ -86,6 +86,10 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 	@Override
 	public long getRealVersion() {
 		return VERSION.getRealVersion();
+	}
+
+	public static String getBridgeKey() {
+		return bridgeKey;
 	}
 
 	/**

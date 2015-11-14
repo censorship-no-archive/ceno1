@@ -114,7 +114,7 @@ public class ChannelMaker implements Runnable {
 	private void establishChannel() {
 		FreenetURI bridgeKey;
 		try {
-			bridgeKey = new FreenetURI(CENOClient.BRIDGE_KEY);
+			bridgeKey = new FreenetURI(CENOClient.getBridgeKey());
 		} catch (MalformedURLException e1) {
 			channelStatus = ChannelStatus.fatal;
 			return;
