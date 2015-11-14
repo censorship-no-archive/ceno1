@@ -35,10 +35,10 @@ public class HighLevelSimpleClientInterface {
 	protected static final boolean realTimeFlag = false;
 
 	private static volatile HighLevelSimpleClientInterface HLSCInterface = null;
-	private static HLSCRequestClient requestClient;
+	private HLSCRequestClient requestClient;
 
-	private static HighLevelSimpleClient client;
-	private static Node node;
+	private HighLevelSimpleClient client;
+	private Node node;
 
 	public class HLSCRequestClient implements RequestClient {
 
@@ -164,7 +164,7 @@ public class HighLevelSimpleClientInterface {
 	public static FreenetURI insertManifestCb(FreenetURI insertURI, HashMap<String, Object> bucketsByName, String defaultName, short priorityClass, byte[] forceCryptoKey, ClientPutCallback insertCb) throws InsertException {
 		DefaultManifestPutter putter;
 		try {
-			putter = new DefaultManifestPutter(insertCb, BaseManifestPutter.bucketsByNameToManifestEntries(bucketsByName), priorityClass, insertURI, defaultName, getInsertContext(true), false, forceCryptoKey, node.clientCore.clientContext);
+			putter = new DefaultManifestPutter(insertCb, BaseManifestPutter.bucketsByNameToManifestEntries(bucketsByName), priorityClass, insertURI, defaultName, getInsertContext(true), false, forceCryptoKey, HLSCInterface.node.clientCore.clientContext);
 		} catch (TooManyFilesInsertException e) {
 			Logger.warning(HighLevelSimpleClientInterface.class, "TooManyFiles in a single directory to fit in a single Manifest file, will not insert URI: " + insertURI.toString());
 			return null;
@@ -181,13 +181,13 @@ public class HighLevelSimpleClientInterface {
 	public static FreenetURI insertSingleChunk(FreenetURI uri, String content, ClientPutCallback cb) throws InsertException, PersistenceDisabledException, UnsupportedEncodingException {
 		RandomAccessBucket b = new SimpleReadOnlyArrayBucket(content.getBytes("UTF-8"));
 
-		InsertContext ctx = node.clientCore.makeClient((short)0, true, false).getInsertContext(true);
+		InsertContext ctx = HLSCInterface.node.clientCore.makeClient((short)0, true, false).getInsertContext(true);
 
 		ClientPutter clientPutter = new ClientPutter(cb, b, uri,
 				null, // Modern ARKs easily fit inside 1KB so should be pure SSKs => no MIME type; this improves fetchability considerably
 				ctx,
-				RequestStarter.INTERACTIVE_PRIORITY_CLASS, false, null, false, node.clientCore.clientContext, null, -1L);
-		node.clientCore.clientContext.start(clientPutter);
+				RequestStarter.INTERACTIVE_PRIORITY_CLASS, false, null, false, HLSCInterface.node.clientCore.clientContext, null, -1L);
+		HLSCInterface.node.clientCore.clientContext.start(clientPutter);
 		return uri;
 	}
 
@@ -203,7 +203,7 @@ public class HighLevelSimpleClientInterface {
 		}
 
 		bucketLength = content.getBytes().length - index;
-		Bucket bucket = node.clientCore.tempBucketFactory.makeBucket(bucketLength);
+		Bucket bucket = HLSCInterface.node.clientCore.tempBucketFactory.makeBucket(bucketLength);
 		BucketTools.copyFrom(bucket, new ByteArrayInputStream(content.getBytes(), index, bucketLength), bucketLength);
 		return bucket;
 	}
