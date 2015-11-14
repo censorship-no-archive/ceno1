@@ -1,4 +1,4 @@
-package plugins.CENO.Client;
+package plugins.CENO.Common;
 
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
@@ -12,10 +12,15 @@ import freenet.client.async.ClientGetter;
 import freenet.node.RequestClient;
 import freenet.support.io.ResumeFailedException;
 
-public class ClientGetSyncCallback implements ClientGetCallback {
+public class GetSyncCallback implements ClientGetCallback {
 	private final CountDownLatch fetchLatch = new CountDownLatch(1);
+	private RequestClient reqClient;
 	private String fetchResult;
 	private FetchException fe;
+	
+	public GetSyncCallback(RequestClient reqClient) {
+		this.reqClient = reqClient;
+	}
 
 	public void onSuccess(FetchResult result, ClientGetter state) {
 		try {
@@ -50,7 +55,7 @@ public class ClientGetSyncCallback implements ClientGetCallback {
 	}
 
 	public RequestClient getRequestClient() {
-		return CENOClient.nodeInterface.getRequestClient();
+		return reqClient;
 	}
 
 }

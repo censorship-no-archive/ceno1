@@ -10,7 +10,7 @@ import org.bouncycastle.crypto.params.RSAKeyParameters;
 import plugins.CENO.CENOErrCode;
 import plugins.CENO.CENOException;
 import plugins.CENO.Bridge.CENOBridge;
-import plugins.CENO.Client.ClientGetSyncCallback;
+import plugins.CENO.Common.GetSyncCallback;
 import freenet.client.FetchException;
 import freenet.client.FetchException.FetchExceptionMode;
 import freenet.client.InsertException;
@@ -43,6 +43,7 @@ public class ChannelMaker {
 		try {
 			channelListener = new ChannelMakerListener(puzzle.getAnswer());
 			Thread listenerThread = new Thread(channelListener);
+			listenerThread.setName("ChannelListener");
 			listenerThread.start();
 		} catch (MalformedURLException e) {
 			throw new CENOException(CENOErrCode.RR, "Could not start Channel Maker Listener thread.");
@@ -107,7 +108,7 @@ public class ChannelMaker {
 				while(continueLoop) {
 					// TODO Poll "KSK@puzzleAnswer" and discover insertion SSKs by clients
 					String kskContent = null;
-					ClientGetSyncCallback getSyncCallback = new ClientGetSyncCallback();
+					GetSyncCallback getSyncCallback = new GetSyncCallback(CENOBridge.nodeInterface.getRequestClient());
 					try {
 						CENOBridge.nodeInterface.distFetchURI(channelMakingKSK, getSyncCallback);
 						kskContent = getSyncCallback.getResult(10 * KSK_POLLING_PAUSE, TimeUnit.MILLISECONDS);

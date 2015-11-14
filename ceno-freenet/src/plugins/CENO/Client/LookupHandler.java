@@ -7,6 +7,7 @@ import net.minidev.json.JSONObject;
 import plugins.CENO.CENOErrCode;
 import plugins.CENO.CENOException;
 import plugins.CENO.Client.ULPRManager.ULPRStatus;
+import plugins.CENO.Common.GetSyncCallback;
 import plugins.CENO.Common.URLtoUSKTools;
 import plugins.CENO.FreenetInterface.ConnectionOverview.NodeConnections;
 import freenet.client.FetchException;
@@ -162,7 +163,7 @@ public class LookupHandler extends AbstractCENOClientHandler {
 			calculatedUSK = calculatedUSK.setSuggestedEdition(0);
 		}
 
-		ClientGetSyncCallback getSyncCallback = new ClientGetSyncCallback();
+		GetSyncCallback getSyncCallback = new GetSyncCallback(CENOClient.nodeInterface.getRequestClient());
 		String fetchResult = null;
 		try {
 			CENOClient.nodeInterface.localFetchURI(calculatedUSK, getSyncCallback);
