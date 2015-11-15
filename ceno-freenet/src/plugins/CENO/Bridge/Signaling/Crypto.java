@@ -85,6 +85,10 @@ public final class Crypto {
 	}
 
 	public static byte[] decryptMessage(byte[] rtsmessage, RSAKeyParameters privKey) throws IOException, InvalidCipherTextException {
+		if (!privKey.isPrivate()) {
+			return null;
+		}
+		
 		// initialise our ciphers
 		AsymmetricBlockCipher deccipher = new RSAEngine();
 		deccipher.init(false, privKey);
@@ -116,6 +120,22 @@ public final class Crypto {
 		aescipher.doFinal(plaintext, rtsmessage.length - encrypted_params.length);
 
 		return plaintext;
+	}
+
+	public static boolean isValidKeypair(String privKey, String pubKey, String modulus) {
+		if (privKey == null || pubKey == null || modulus == null) {
+			return false;
+		}
+
+		try {
+			String privMsg = new String(encryptMessage("Hello".getBytes("UTF-8"), modulus, pubKey));
+			String decMsg = decryptMessage(privMsg.getBytes(), new RSAKeyParameters(true, new BigInteger(modulus, 32), new BigInteger(privKey, 32))).toString();
+			System.out.println(decMsg);
+			return true;
+		} catch (Exception e) {
+			Logger.warning(Crypto.class, "Invalid RSA keypair: " + e.getMessage());
+			return false;
+		}
 	}
 
 }

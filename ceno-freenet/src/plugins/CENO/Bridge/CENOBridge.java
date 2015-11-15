@@ -15,7 +15,6 @@ import plugins.CENO.Configuration;
 import plugins.CENO.Version;
 import plugins.CENO.Bridge.Signaling.ChannelMaker;
 import plugins.CENO.Bridge.Signaling.Crypto;
-import plugins.CENO.FreenetInterface.HighLevelSimpleClientInterface;
 import plugins.CENO.FreenetInterface.NodeInterface;
 import freenet.keys.FreenetURI;
 import freenet.pluginmanager.FredPlugin;
@@ -26,8 +25,6 @@ import freenet.support.Logger;
 
 
 public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRealVersioned {
-
-	private PluginRespirator pluginRespirator;
 
 	public static final Integer cacheLookupPort = 3091;
 	public static final Integer requestReceiverPort = 3093;
@@ -56,7 +53,6 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 	public void runPlugin(PluginRespirator pr)
 	{
 		// Initialize interfaces with Freenet node
-		//TODO initialized within NodeInterface, do not expose HLSC but only via nodeInterface
 		nodeInterface = new NodeInterface(pr.getNode(), pr);
 		CENOL10n.getInstance().setLanguageFromEnvVar("CENOLANG");
 
@@ -72,26 +68,26 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 			initConfig.setProperty("requestURI", keyPair[1].toString());
 			initConfig.storeProperties();
 		}
-		
+
+		/*
+		// Read RSA keypair and modulus from configuration file or, if not available, create a new one
 		AsymmetricCipherKeyPair asymKeyPair;
-		if (initConfig.getProperty("asymkey.privexponent") == null || initConfig.getProperty("asymkey.modulus") == null || initConfig.getProperty("asymkey.pubexponent") == null) {
+		if (!Crypto.isValidKeypair(initConfig.getProperty("asymkey.privexponent"), initConfig.getProperty("asymkey.pubexponent"), initConfig.getProperty("asymkey.modulus"))) {
 			Logger.warning(this, "CENOBridge will generate a new RSA key pair for the decentralized signaling. This might take a while");
 			asymKeyPair = Crypto.generateAsymKey();
-			initConfig.setProperty("asymkey.privexponent", ((RSAKeyParameters) asymKeyPair.getPrivate()).getExponent().toString(23));
-			initConfig.setProperty("asymkey.modulus", ((RSAKeyParameters) asymKeyPair.getPublic()).getModulus().toString(32));
-			initConfig.setProperty("asymkey.pubexponent", ((RSAKeyParameters) asymKeyPair.getPublic()).getExponent().toString(32));
+			RSAKeyParameters pub = (RSAKeyParameters) asymKeyPair.getPublic();
+			RSAKeyParameters priv = (RSAKeyParameters) asymKeyPair.getPrivate();
+			initConfig.setProperty("asymkey.privexponent", priv.getExponent().toString(32));
+			initConfig.setProperty("asymkey.modulus", pub.getModulus().toString(32));
+			initConfig.setProperty("asymkey.pubexponent", pub.getExponent().toString(32));
 			initConfig.storeProperties();
+			Crypto.isValidKeypair(priv.getExponent().toString(32), pub.getExponent().toString(32), pub.getModulus().toString(32));
 		} else {
 			asymKeyPair = new AsymmetricCipherKeyPair(new RSAKeyParameters(false, new BigInteger(initConfig.getProperty("asymkey.modulus"),32), new BigInteger(initConfig.getProperty("asymkey.pubexponent"), 32)),
 					new RSAKeyParameters(true, new BigInteger(initConfig.getProperty("asymkey.modulus"), 32), new BigInteger(initConfig.getProperty("asymkey.privexponent"), 32)));
+			Logger.normal(this, "Found RSA key in configuration file");
 		}
-		
-		try {
-			channelMaker = new ChannelMaker(initConfig.getProperty("insertURI"),asymKeyPair);
-		} catch (CENOException e) {
-			Logger.error(this, "Could not start decentralized signaling channel maker");
-			terminate();
-		}
+		*/
 
 		String confIsMasterBridge = initConfig.getProperty("isMasterBridge");
 
@@ -101,9 +97,17 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 
 		String confIsSingalBridge = initConfig.getProperty("isSignalBridge");
 
+		/*
 		if (confIsSingalBridge != null && confIsSingalBridge.equals("true")) {
 			isSignalBridge = true;
+			try {
+				channelMaker = new ChannelMaker(initConfig.getProperty("insertURI"), asymKeyPair);
+			} catch (CENOException e) {
+				Logger.error(this, "Could not start decentralized signaling channel maker");
+				terminate();
+			}
 		}
+		*/
 
 		// Configure CENO's jetty embedded server
 		cenoHttpServer = new Server();
