@@ -1,0 +1,21 @@
+#mainNav {
+  height: 100px;
+  background-color: #f4f4f3;
+}
+
+#mainNav>img {
+  float: left;
+}
+
+#mainNav>ul {
+  height: 100%;
+  float: right;
+}
+
+#languageMenu {
+  background-color: lightgrey;
+}
+
+#mainNav>ul li {
+  height: 100%;
+}

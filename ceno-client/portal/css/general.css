@@ -1,0 +1,12 @@
+body {
+  background-color: #eeedea;
+}
+
+button {
+  width: 220px;
+  height: 64px;
+  color: white !important;
+  font-size: 1.15em;
+  font-weight: bold !important;
+  background-color: #e43624 !important;
+}

@@ -1,0 +1,12 @@
+#articleListDiv {
+  float: right;
+}
+
+#articleListDiv h3 {
+  font-size: 1.15em;
+  color: #e43624;
+}
+
+#articleListing {
+  list-style: none;
+}
