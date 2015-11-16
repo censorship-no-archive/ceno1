@@ -308,19 +308,19 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 
 func testPortalHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Got request for test portal page")
-	t, _ := template.ParseFiles("./views/index.html", "./views/nav.html", "./views/resources.html")
+	t, _ := template.ParseFiles("./views/index.html", "./views/nav.html", "./views/resources.html", "./views/scripts.html")
 	t.Execute(w, nil)
 }
 
 func testChannelsHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Got request for test channels page")
-	t, _ := template.ParseFiles("./views/channels.html", "./views/nav.html", "./views/resources.html", "./views/breadcrumbs.html")
+	t, _ := template.ParseFiles("./views/channels.html", "./views/nav.html", "./views/resources.html", "./views/breadcrumbs.html", "./views/scripts.html")
 	t.Execute(w, nil)
 }
 
 func testArticlesHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Got request for test articles page")
-	t, _ := template.ParseFiles("./views/articles.html", "./views/nav.html", "./views/resources.html", "./views/breadcrumbs.html")
+	t, _ := template.ParseFiles("./views/articles.html", "./views/nav.html", "./views/resources.html", "./views/breadcrumbs.html", "./views/scripts.html")
 	t.Execute(w, nil)
 }
 
