@@ -1,9 +1,10 @@
 package plugins.CENO.Bridge;
 
-import java.math.BigInteger;
+import java.io.UnsupportedEncodingException;
+import java.security.GeneralSecurityException;
+import java.security.KeyPair;
+import java.security.Security;
 
-import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
-import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ContextHandler;
@@ -21,6 +22,7 @@ import freenet.pluginmanager.FredPlugin;
 import freenet.pluginmanager.FredPluginRealVersioned;
 import freenet.pluginmanager.FredPluginVersioned;
 import freenet.pluginmanager.PluginRespirator;
+import freenet.support.IllegalBase64Exception;
 import freenet.support.Logger;
 
 
@@ -69,22 +71,30 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 			initConfig.storeProperties();
 		}
 
-
+		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 		// Read RSA keypair and modulus from configuration file or, if not available, create a new one
-		AsymmetricCipherKeyPair asymKeyPair;
-		if (!Crypto.isValidKeypair(initConfig.getProperty("asymkey.privexponent"), initConfig.getProperty("asymkey.pubexponent"), initConfig.getProperty("asymkey.modulus"))) {
-			Logger.warning(this, "CENOBridge will generate a new RSA key pair for the decentralized signaling. This might take a while");
-			asymKeyPair = Crypto.generateAsymKey();
-			RSAKeyParameters pub = (RSAKeyParameters) asymKeyPair.getPublic();
-			RSAKeyParameters priv = (RSAKeyParameters) asymKeyPair.getPrivate();
-			initConfig.setProperty("asymkey.privexponent", priv.getExponent().toString(32));
-			initConfig.setProperty("asymkey.modulus", pub.getModulus().toString(32));
-			initConfig.setProperty("asymkey.pubexponent", pub.getExponent().toString(32));
-			initConfig.storeProperties();
-		} else {
-			asymKeyPair = new AsymmetricCipherKeyPair(new RSAKeyParameters(false, new BigInteger(initConfig.getProperty("asymkey.modulus"), 32), new BigInteger(initConfig.getProperty("asymkey.pubexponent"), 32)),
-					new RSAKeyParameters(true, new BigInteger(initConfig.getProperty("asymkey.modulus"), 32), new BigInteger(initConfig.getProperty("asymkey.privexponent"), 32)));
-			Logger.normal(this, "Found RSA key in configuration file");
+		KeyPair asymKeyPair = null;
+		try {
+			if (!Crypto.isValidKeypair(initConfig.getProperty("asymkey.pubKey"), initConfig.getProperty("asymkey.privKey"))) {
+				Logger.warning(this, "CENOBridge will generate a new RSA key pair for the decentralized signaling. This might take a while");
+				asymKeyPair = Crypto.generateAsymKey();
+				initConfig.setProperty("asymkey.pubKey", Crypto.savePublicKey(asymKeyPair.getPublic()));
+				initConfig.setProperty("asymkey.privKey", Crypto.savePrivateKey(asymKeyPair.getPrivate()));
+				initConfig.storeProperties();
+				Crypto.isValidKeypair(asymKeyPair);
+			} else {
+				asymKeyPair = new KeyPair(Crypto.loadPublicKey(initConfig.getProperty("asymkey.pubKey")), Crypto.loadPrivateKey(initConfig.getProperty("asymkey.privKey")));
+				Logger.normal(this, "Found RSA key in configuration file");
+			}
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (GeneralSecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalBase64Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
 		String confIsMasterBridge = initConfig.getProperty("isMasterBridge");

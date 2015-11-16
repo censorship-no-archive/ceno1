@@ -1,167 +1,123 @@
 package plugins.CENO.Bridge.Signaling;
 
-import java.io.IOException;
-import java.math.BigInteger;
+import java.io.UnsupportedEncodingException;
+import java.security.GeneralSecurityException;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
-import org.bouncycastle.crypto.AsymmetricBlockCipher;
-import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
-import org.bouncycastle.crypto.InvalidCipherTextException;
-import org.bouncycastle.crypto.digests.SHA256Digest;
-import org.bouncycastle.crypto.engines.AESEngine;
-import org.bouncycastle.crypto.engines.RSAEngine;
-import org.bouncycastle.crypto.generators.RSAKeyPairGenerator;
-import org.bouncycastle.crypto.modes.CBCBlockCipher;
-import org.bouncycastle.crypto.paddings.PKCS7Padding;
-import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
-import org.bouncycastle.crypto.params.KeyParameter;
-import org.bouncycastle.crypto.params.ParametersWithIV;
-import org.bouncycastle.crypto.params.RSAKeyGenerationParameters;
-import org.bouncycastle.crypto.params.RSAKeyParameters;
+import javax.crypto.Cipher;
 
+import freenet.support.Base64;
+import freenet.support.IllegalBase64Exception;
 import freenet.support.Logger;
 
 public final class Crypto {
 
-	private static final int ASYM_KEY_MODULUS_LENGTH = 4096;
-	private static final BigInteger ASYM_KEY_EXPONENT = new BigInteger("17", 10);
-	private static final int ASYM_KEY_CERTAINTY = 80;
+	private static final int KEY_SIZE = 4096;
+	private static final String KEY_ALGORITHM = "RSA";
+	private static final String CIPHER_TRANSFORMATION = "RSA/None/OAEPWithSHA1AndMGF1Padding";
+	private static final String SECURITY_PROVIDER = "BC";
 
 	private static final SecureRandom srng = new SecureRandom();
 
 	private Crypto() {}
 
-	public static AsymmetricCipherKeyPair generateAsymKey() {
-		RSAKeyGenerationParameters kparams = new RSAKeyGenerationParameters(ASYM_KEY_EXPONENT, Crypto.srng, ASYM_KEY_MODULUS_LENGTH, ASYM_KEY_CERTAINTY);
+	public static KeyPair generateAsymKey() {
+		KeyPairGenerator generator = null;
+		try {
+			generator = KeyPairGenerator.getInstance(KEY_ALGORITHM, SECURITY_PROVIDER);
+		} catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NoSuchProviderException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		generator.initialize(KEY_SIZE, srng);
 
-		RSAKeyPairGenerator kpg = new RSAKeyPairGenerator();
-		kpg.init(kparams);
-
-		Long timeStart = System.currentTimeMillis();
-		AsymmetricCipherKeyPair keypair = kpg.generateKeyPair();
-		Logger.normal(Crypto.class, "Generated new RSA keypair in " + TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - timeStart) + " seconds");
-
-		return keypair;
+		Long startTime = System.currentTimeMillis();
+		KeyPair pair = generator.generateKeyPair();
+		Logger.normal(Crypto.class, "Generated new RSA key in " +
+				TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startTime) + " seconds");
+		return pair;
 	}
 
-	public static byte[] encryptMessage(byte[] signedMessage, String keyModulus, String keyExponent) {
-		//Make a new symmetric key for the message
-		byte[] aesKeyAndIV = new byte[32 + 16];
-		Crypto.srng.nextBytes(aesKeyAndIV);
-
-		//Encrypt the message with the new symmetric key
-		PaddedBufferedBlockCipher aesCipher = new PaddedBufferedBlockCipher(new CBCBlockCipher(new AESEngine()), new PKCS7Padding());
-		KeyParameter aesKeyParameters = new KeyParameter(aesKeyAndIV, 16, 32);
-		ParametersWithIV aesParameters = new ParametersWithIV(aesKeyParameters, aesKeyAndIV, 0, 16);
-		aesCipher.init(true, aesParameters);
-
-		byte[] encryptedMessage = new byte[aesCipher.getOutputSize(signedMessage.length)];
-		int offset = aesCipher.processBytes(signedMessage, 0, signedMessage.length, encryptedMessage, 0);
-
-		try {
-			aesCipher.doFinal(encryptedMessage, offset);
-		} catch(InvalidCipherTextException e) {
-			Logger.error(Crypto.class, "Failed to perform symmetric encryption on RTS data: " + e.getMessage(), e);
-			return null;
-		}
-
-		RSAKeyParameters recipientPublicKey = new RSAKeyParameters(false, new BigInteger(keyModulus, 32), new BigInteger(keyExponent, 32));
-		AsymmetricBlockCipher keyCipher = new RSAEngine();
-		keyCipher.init(true, recipientPublicKey);
-		byte[] encryptedAesParameters = null;
-		try {
-			encryptedAesParameters = keyCipher.processBlock(aesKeyAndIV, 0, aesKeyAndIV.length);
-		} catch(InvalidCipherTextException e) {
-			Logger.error(Crypto.class, "Failed to perform asymmetric encryption on RTS symmetric key: " + e.getMessage(), e);
-			return null;
-		}
-
-		//Assemble the final message
-		byte[] rtsMessage = new byte[encryptedAesParameters.length + encryptedMessage.length];
-		System.arraycopy(encryptedAesParameters, 0, rtsMessage, 0, encryptedAesParameters.length);
-		System.arraycopy(encryptedMessage, 0, rtsMessage, encryptedAesParameters.length, encryptedMessage.length);
-
-		return rtsMessage;
+	public static PrivateKey loadPrivateKey(String key64) throws GeneralSecurityException, IllegalBase64Exception {
+		byte[] clear = Base64.decodeStandard(key64);
+		PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(clear);
+		KeyFactory fact = KeyFactory.getInstance(KEY_ALGORITHM, SECURITY_PROVIDER);
+		PrivateKey priv = fact.generatePrivate(keySpec);
+		Arrays.fill(clear, (byte) 0);
+		return priv;
 	}
 
-	public static byte[] decryptMessage(byte[] rtsmessage, RSAKeyParameters privKey) throws IOException, InvalidCipherTextException {
-		if (!privKey.isPrivate()) {
-			return null;
-		}
-		
-		// initialise our ciphers
-		AsymmetricBlockCipher deccipher = new RSAEngine();
-		deccipher.init(false, privKey);
 
-		PaddedBufferedBlockCipher aescipher = new PaddedBufferedBlockCipher(new CBCBlockCipher(new AESEngine()), new PKCS7Padding());
-
-		// first n bytes will be an encrypted RSA block containting the
-		// AES IV and Key. Read that.
-		byte[] encrypted_params = new byte[deccipher.getInputBlockSize()];
-		if(rtsmessage.length < encrypted_params.length) {
-			throw new InvalidCipherTextException("Message too short");
-		}
-
-		System.arraycopy(rtsmessage, 0, encrypted_params, 0, encrypted_params.length);
-
-		byte[] aes_iv_and_key = deccipher.processBlock(encrypted_params, 0, encrypted_params.length);
-
-		KeyParameter kp = new KeyParameter(aes_iv_and_key, aescipher.getBlockSize(), aes_iv_and_key.length - aescipher.getBlockSize());
-		ParametersWithIV kpiv = new ParametersWithIV(kp, aes_iv_and_key, 0, aescipher.getBlockSize());
-		try {
-			aescipher.init(false, kpiv);
-		} catch (IllegalArgumentException iae) {
-			throw new InvalidCipherTextException(iae.getMessage());
-		}
-
-		byte[] plaintext = new byte[aescipher.getOutputSize(rtsmessage.length - encrypted_params.length)];
-
-		//aescipher.processBytes(rtsmessage, rtsmessage.length, rtsmessage.length - encrypted_params.length, plaintext, 0);
-		aescipher.doFinal(plaintext, rtsmessage.length - encrypted_params.length);
-
-		return plaintext;
-	}
-	
-	private static byte[] signRtsMessage(byte[] rtsMessageBytes, RSAKeyParameters ourPrivateKey) {
-		SHA256Digest sha256 = new SHA256Digest();
-		sha256.update(rtsMessageBytes, 0, rtsMessageBytes.length);
-		byte[] hash = new byte[sha256.getDigestSize()];
-		sha256.doFinal(hash, 0);
-
-		AsymmetricBlockCipher signatureCipher = new RSAEngine();
-		signatureCipher.init(true, ourPrivateKey);
-		byte[] signature = null;
-		try {
-			signature = signatureCipher.processBlock(hash, 0, hash.length);
-		} catch(InvalidCipherTextException e) {
-			Logger.error(Crypto.class, "Failed to RSA encrypt hash: " + e.getMessage(), e);
-			return null;
-		}
-
-		byte[] signedMessage = new byte[rtsMessageBytes.length + signature.length];
-		System.arraycopy(rtsMessageBytes, 0, signedMessage, 0, rtsMessageBytes.length);
-		System.arraycopy(signature, 0, signedMessage, rtsMessageBytes.length, signature.length);
-
-		return signedMessage;
+	public static PublicKey loadPublicKey(String key64) throws GeneralSecurityException, IllegalBase64Exception {
+		byte[] data = Base64.decodeStandard(key64);
+		X509EncodedKeySpec spec = new X509EncodedKeySpec(data);
+		KeyFactory fact = KeyFactory.getInstance(KEY_ALGORITHM, SECURITY_PROVIDER);
+		return fact.generatePublic(spec);
 	}
 
-	public static boolean isValidKeypair(String privKey, String pubKey, String modulus) {
-		if (privKey == null || pubKey == null || modulus == null) {
+	public static String savePrivateKey(PrivateKey priv) throws GeneralSecurityException {
+		KeyFactory fact = KeyFactory.getInstance(KEY_ALGORITHM, SECURITY_PROVIDER);
+		PKCS8EncodedKeySpec spec = fact.getKeySpec(priv, PKCS8EncodedKeySpec.class);
+		byte[] packed = spec.getEncoded();
+		String key64 = Base64.encodeStandard(packed);
+
+		Arrays.fill(packed, (byte) 0);
+		return key64;
+	}
+
+	public static String savePublicKey(PublicKey publ) throws GeneralSecurityException {
+		KeyFactory fact = KeyFactory.getInstance(KEY_ALGORITHM, SECURITY_PROVIDER);
+		X509EncodedKeySpec spec = fact.getKeySpec(publ, X509EncodedKeySpec.class);
+		return Base64.encodeStandard(spec.getEncoded());
+	}
+
+	public static byte[] encrypt(byte[] msg, String pubKey64) throws GeneralSecurityException, IllegalBase64Exception {
+		PublicKey pubKey = loadPublicKey(pubKey64);
+		Cipher cipher = Cipher.getInstance(CIPHER_TRANSFORMATION, SECURITY_PROVIDER);
+		cipher.init(Cipher.ENCRYPT_MODE, pubKey, srng);
+		byte[] cipherText = cipher.doFinal(msg);
+		return cipherText;
+	}
+
+	public static byte[] decrypt(byte[] msg, String privKey64) throws GeneralSecurityException, IllegalBase64Exception {
+		PrivateKey privKey = loadPrivateKey(privKey64);
+		Cipher cipher = Cipher.getInstance(CIPHER_TRANSFORMATION, SECURITY_PROVIDER);
+		cipher.init(Cipher.DECRYPT_MODE, privKey);
+		byte[] plainText = cipher.doFinal(msg);
+		return plainText;
+	}
+
+	public static boolean isValidKeypair(KeyPair keyPair) throws GeneralSecurityException, IllegalBase64Exception, UnsupportedEncodingException {
+		if (keyPair == null) {
 			return false;
 		}
-		
-		AsymmetricCipherKeyPair asymKeyPair = Crypto.generateAsymKey();
+		return isValidKeypair(savePublicKey(keyPair.getPublic()), savePrivateKey(keyPair.getPrivate()));
+	}
 
-		try {
-			String privMsg = new String(encryptMessage(signRtsMessage("Hello".getBytes("UTF-8"), ((RSAKeyParameters)asymKeyPair.getPrivate())), ((RSAKeyParameters)asymKeyPair.getPublic()).getModulus().toString(32), ((RSAKeyParameters)asymKeyPair.getPublic()).getExponent().toString(32)));
-			String decMsg = decryptMessage(privMsg.getBytes(), ((RSAKeyParameters)asymKeyPair.getPrivate())).toString();
-			System.out.println(decMsg);
+	public static boolean isValidKeypair(String pubKey64, String privKey64) throws UnsupportedEncodingException, GeneralSecurityException, IllegalBase64Exception {
+		if (pubKey64 == null  || privKey64 == null) {
+			return false;
+		}
+
+		byte[] cipherText = encrypt("Hello".getBytes("UTF-8"), pubKey64);
+		if (decrypt(cipherText, privKey64).equals("Hello")) {
 			return true;
-		} catch (Exception e) {
-			Logger.warning(Crypto.class, "Invalid RSA keypair: " + e.getMessage());
-			return false;
 		}
+		return false;
 	}
 
 }
