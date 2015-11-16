@@ -6,6 +6,7 @@ let jshint = require('gulp-jshint');
 let stylish = require('jshint-stylish');
 let concat = require('gulp-concat');
 let csslint = require('gulp-csslint');
+let babel = require('gulp-babel');
 
 gulp.task('lintjs', () => {
   return gulp.src('./portal/js/*.js')
@@ -15,6 +16,9 @@ gulp.task('lintjs', () => {
 
 gulp.task('concatjs', () => {
   return gulp.src('./portal/js/*.js')
+    .pipe(babel({
+      presets: ['es2015']
+    }))
     .pipe(concat('main.js'))
     .pipe(gulp.dest('./static/javascript/'));
 });
