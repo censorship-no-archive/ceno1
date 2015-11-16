@@ -24,8 +24,10 @@ i18n.configure({
 var desiredLocale = process.env.CENOLANG;
 if (locales.indexOf(desiredLocale) < 0) {
   fmtLocales = locales.join(', ');
-  throw new Error(desiredLocale + ' is not a valid locale.  Available locales: ' + fmtLocales);
+  console.log(desiredLocale + ' is not a valid locale.  Available locales: ' + fmtLocales);
+  console.log('Default locale will be used: ' + i18n.getLocale());
+} else {
+  i18n.setLocale(desiredLocale);
 }
-i18n.setLocale(desiredLocale);
 
 module.exports = i18n;

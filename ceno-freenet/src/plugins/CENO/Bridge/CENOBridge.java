@@ -34,6 +34,8 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 	private HighLevelSimpleClientInterface client;
 	public static NodeInterface nodeInterface;
 	private RequestReceiver reqReceiver;
+	private static boolean isMasterBridge = false;
+	private static boolean isSignalBridge = false;
 
 	// Plugin-specific configuration
 	public static final String pluginUri = "/plugins/plugins.CENO.CENOBridge";
@@ -41,6 +43,7 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 	public static Configuration initConfig;
 	private Version version = new Version(Version.PluginType.BRIDGE);
 	private static final String configPath = System.getProperty("user.home") + "/.CENO/bridge.properties";
+	public static final String PORTAL_DOC_NAME = "CENO-RSS";
 
 	public static final String bridgeFreemail = "DEFLECTBridge@ih5ixq57yetjdbrspbtskdp6fjake4rdacziriiefnjkwlvhgw3a.freemail";
 	public static final String clientFreemail = "CENO@54u2ko3lssqgalpvfqbq44gwfquqrejm3itl4rxj5nt7v6mjy22q.freemail";
@@ -56,14 +59,14 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 		client = new HighLevelSimpleClientInterface(pluginRespirator.getNode(), pluginRespirator.getHLSimpleClient());
 		nodeInterface = new NodeInterface(pluginRespirator.getNode(), pluginRespirator);
 		nodeInterface.initFetchContexts();
-		new CENOL10n("CENOLANG");
+		CENOL10n.getInstance().setLanguageFromEnvVar("CENOLANG");
 
 		// Read properties of the configuration file
 		initConfig = new Configuration(configPath);
 		initConfig.readProperties();
 		// If CENO has no private key for inserting freesites,
 		// generate a new key pair and store it in the configuration file
-		if (initConfig.getProperty("insertURI") == null) {
+		if (initConfig.getProperty("insertURI") == null || initConfig.getProperty("insertURI").isEmpty()) {
 			Logger.warning(this, "CENOBridge will generate a new public key for inserting bundles.");
 			FreenetURI[] keyPair = nodeInterface.generateKeyPair();
 			initConfig.setProperty("insertURI", keyPair[0].toString());
@@ -71,11 +74,25 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 			initConfig.storeProperties();
 		}
 
-		nodeInterface.clearOutboxLog(bridgeFreemail, clientFreemail);
-		// Initialize RequestReceiver
-		reqReceiver = new RequestReceiver(new String[]{bridgeFreemail});
-		// Start a thread for polling for new freemails
-		reqReceiver.loopFreemailBoxes();
+		String confIsMasterBridge = initConfig.getProperty("isMasterBridge");
+
+		if (confIsMasterBridge != null && confIsMasterBridge.equals("true")) {
+			isMasterBridge = true;
+		}
+
+		String confIsSingalBridge = initConfig.getProperty("isSignalBridge");
+
+		if (confIsSingalBridge != null && confIsSingalBridge.equals("true")) {
+			isSignalBridge = true;
+		}
+
+		if (isSignalBridge) {
+			nodeInterface.clearOutboxLog(bridgeFreemail, clientFreemail);
+			// Initialize RequestReceiver
+			reqReceiver = new RequestReceiver(new String[]{bridgeFreemail});
+			// Start a thread for polling for new freemails
+			reqReceiver.loopFreemailBoxes();
+		}
 
 		// Configure CENO's jetty embedded server
 		cenoHttpServer = new Server();
@@ -97,13 +114,12 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 
 	/**
 	 * Configure CENO's embedded server
-	 * 
+	 *
 	 * @param cenoHttpServer the jetty server to be configured
 	 */
 	private void configHttpServer(Server cenoHttpServer) {
 		// Create a collection of ContextHandlers for the server
 		ContextHandlerCollection handlers = new ContextHandlerCollection();
-		cenoHttpServer.setHandler(handlers);
 
 		// Add a ServerConnector for the BundlerInserter agent
 		ServerConnector bundleInserterConnector = new ServerConnector(cenoHttpServer);
@@ -117,15 +133,15 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 		// Configure ContextHandlers to listen to a specific port
 		// and upon request call the appropriate CENOJettyHandler subclass
 		ContextHandler cacheInsertCtxHandler = new ContextHandler();
+		cacheInsertCtxHandler.setMaxFormContentSize(2000000);
 		cacheInsertCtxHandler.setHandler(new BundleInserterHandler());
-		cacheInsertCtxHandler.setVirtualHosts(new String[]{"@cacheInsert"});
+		//cacheInsertCtxHandler.setVirtualHosts(new String[]{"@cacheInsert"});
 
 		// Add the configured ContextHandler to the server
 		handlers.addHandler(cacheInsertCtxHandler);
 
-		/*
-		 * Uncomment the following block if you need a lookup handler in the bridge side
-		 */
+
+		//Uncomment the following block if you need a lookup handler in the bridge side
 		/*
 		ServerConnector httpConnector = new ServerConnector(cenoHttpServer);
 		httpConnector.setName("cacheLookup");
@@ -138,6 +154,8 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 
 		handlers.addHandler(cacheLookupCtxHandler);
 		 */
+
+		cenoHttpServer.setHandler(handlers);
 	}
 
 	public String getVersion() {
@@ -148,6 +166,10 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 		return version.getRealVersion();
 	}
 
+	public static boolean isMasterBridge() {
+		return isMasterBridge;
+	}
+
 	/**
 	 * Method called before termination of the CENO bridge plugin
 	 * Terminates ceNoHttpServer and releases resources
@@ -155,8 +177,10 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 	public void terminate()
 	{
 		// Stop the thread that is polling for freemails
-		reqReceiver.stopLooping();
-		nodeInterface.clearOutboxLog(bridgeFreemail, clientFreemail);
+		if (isSignalBridge) {
+			reqReceiver.stopLooping();
+			nodeInterface.clearOutboxLog(bridgeFreemail, clientFreemail);
+		}
 
 		// Stop cenoHttpServer and unbind ports
 		if (cenoHttpServer != null) {

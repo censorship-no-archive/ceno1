@@ -1,8 +1,6 @@
 package plugins.CENO.FreenetInterface;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
 import org.freenetproject.freemail.wot.ConcurrentWoTConnection;
@@ -19,15 +17,16 @@ import freenet.client.InsertException;
 import freenet.client.async.ClientGetCallback;
 import freenet.client.async.ClientGetter;
 import freenet.client.async.ClientPutCallback;
+import freenet.client.async.USKCallback;
 import freenet.keys.FreenetURI;
 import freenet.keys.InsertableClientSSK;
+import freenet.keys.USK;
 import freenet.node.Node;
 import freenet.node.RequestClient;
 import freenet.node.RequestStarter;
 import freenet.pluginmanager.PluginRespirator;
 import freenet.support.api.Bucket;
 import freenet.support.api.RandomAccessBucket;
-import freenet.support.io.BucketTools;
 
 public class NodeInterface implements FreenetInterface {
 
@@ -80,6 +79,12 @@ public class NodeInterface implements FreenetInterface {
 		return HighLevelSimpleClientInterface.fetchURI(uri, Long.MAX_VALUE, callback, ULPRFC);
 	}
 
+	@Override
+	public boolean subscribeToUSK(USK origUSK, USKCallback cb) {
+		node.clientCore.uskManager.subscribe(origUSK, cb, false, getRequestClient());
+		return true;
+	}
+
 	/**
 	 * Generate a new key pair for SSK insertions
 	 * 
@@ -112,8 +117,7 @@ public class NodeInterface implements FreenetInterface {
 			defName = defaultName;
 		}
 
-		Bucket bucket = node.clientCore.tempBucketFactory.makeBucket(content.length());
-		BucketTools.copyFrom(bucket, new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8), 0, content.length()), content.length());
+		Bucket bucket = HighLevelSimpleClientInterface.getBucketFromString(content);
 
 		HashMap<String, Object> bucketsByName = new HashMap<String, Object>();
 		bucketsByName.put(defName, bucket);
@@ -129,8 +133,7 @@ public class NodeInterface implements FreenetInterface {
 			mimeType = "text/html";
 		}
 
-		RandomAccessBucket bucket = node.clientCore.tempBucketFactory.makeBucket(content.length());
-		BucketTools.copyFrom(bucket, new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8), 0, content.length()), content.length());
+		RandomAccessBucket bucket = (RandomAccessBucket) HighLevelSimpleClientInterface.getBucketFromString(content);
 
 		InsertBlock ib = new InsertBlock(bucket, new ClientMetadata(mimeType), insertURI);
 		InsertContext ictx = HighLevelSimpleClientInterface.getInsertContext(true);

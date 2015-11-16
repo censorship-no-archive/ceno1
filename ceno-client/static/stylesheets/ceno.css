@@ -1,0 +1,81 @@
+.fgwhite {
+    color: #f4f4f3;
+}
+
+.bgwhite {
+    background-color: #f4f4f3;
+}
+ 
+.fgblack {
+    color: #4c4a4a;
+}
+
+.bgblack {
+    background-color: #4c4a4a;
+}
+
+.fgbeige {
+    color: #eeedea;
+}
+
+.bgbeige {
+    background-color: #eeedea;
+}
+
+.fgred {
+    color: #e43624;
+}
+
+.bgred {
+    background-color: #e43624;
+}
+
+html {
+    /*width: 100%;*/
+}
+
+body {
+    background-color: #f4f4f3;
+    color: #4c4a4a;
+    font-family: "Lato";
+    font-size: 16px;
+    width: 98%
+}
+    
+button {
+    width: 200px;
+    height: 64px;
+    background-color: #e43624;
+    color: #f4f4f3;
+    border: none;
+    border-radius: 1px;
+    font-size: 14px;
+    font-family: "Lato";
+    font-weight: 400;
+}
+
+a, a:hover, a:active, a:visited, a:after, a:before, a:focus {
+    color: #e43624;
+    text-decoration: none;
+    outline: 0;
+}
+
+h1 {
+    font-weight: bold;
+    font-size: 30px;
+}
+
+h2 {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+hr {
+    height: 6px;
+    width: 100%;
+    background-color: #e43624;
+    border: none;
+    padding: 0;
+    margin: 0;
+    margin-bottom: 30px;
+}

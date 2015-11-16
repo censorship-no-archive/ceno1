@@ -1,0 +1,7 @@
+{
+  "PortNumber": ":3096",
+  "BundleServer": "http://127.0.0.1:3094",
+  "BundleInserter": "http://127.0.0.1:3095",
+  "FeedTemplate": "templates/feed.html",
+  "FeedListFile": "data/feeds.json"
+}

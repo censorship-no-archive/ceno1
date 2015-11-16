@@ -126,7 +126,7 @@ public enum CENOErrCode {
 	 */
 	@Override
 	public String toString() {
-		return CENOL10n.get(name());
+		return CENOL10n.getInstance().getString(name());
 	}
 
 	/*

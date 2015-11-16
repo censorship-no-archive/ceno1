@@ -89,6 +89,10 @@ public class URLtoUSKTools {
 	 * @throws MalformedURLException if URL parameter is not a valid URL
 	 */
 	public static String validateURL(String urlParam) throws MalformedURLException {
+		if (urlParam.equalsIgnoreCase("CENO-RSS")) {
+			return "CENO-RSS";
+		}
+		
 		// Won't serve favicons
 		if (urlParam.endsWith("favicon.ico")) {
 			throw new MalformedURLException("Won't serve favicons");

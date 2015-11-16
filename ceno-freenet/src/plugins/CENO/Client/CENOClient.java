@@ -11,6 +11,7 @@ import freenet.pluginmanager.FredPluginThreadless;
 import freenet.pluginmanager.FredPluginVersioned;
 import freenet.pluginmanager.PluginHTTPException;
 import freenet.pluginmanager.PluginRespirator;
+import freenet.support.Base64;
 import freenet.support.Logger;
 import freenet.support.api.HTTPRequest;
 
@@ -33,6 +34,9 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 	public static final String pluginName = "CENO";
 	private static final Version version = new Version(Version.PluginType.CLIENT);
 
+	public static final String PORTAL_DOC_NAME = "CENO-RSS";
+	public static final String B64_PORTAL_DOC_NAME = Base64.encodeStandardUTF8(PORTAL_DOC_NAME);
+
 	// Bridge and freemail-specific constants
 	public static final String bridgeKey = "SSK@mlfLfkZmWIYVpKbsGSzOU~-XuPp~ItUhD8GlESxv8l4,tcB-IHa9c4wpFudoSm0k-iTaiE~INdeQXvcYP2M1Nec,AQACAAE/";
 	public static final String bridgeIdentityRequestURI = "USK@QfqLw7-BJpGGMnhnJQ3~KkCiciMAsoihBCtSqy6nNbY,-lG83h70XIJ03r4ckdNnsY4zIQ-J8qTqwzSBeIG5q3s,AQACAAE/WebOfTrust/0";
@@ -50,7 +54,7 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 		// Initialize interfaces with Freenet node
 		client = new HighLevelSimpleClientInterface(pr.getNode());
 		nodeInterface = new NodeInterface(pr.getNode(), pr);
-		new CENOL10n("CENOLANG");
+		CENOL10n.getInstance().setLanguageFromEnvVar("CENOLANG");
 
 		// Initialize LCS
 		nodeInterface.initFetchContexts();
@@ -60,6 +64,9 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 		RequestSender.init(new String[]{bridgeFreemail});
 		nodeInterface.copyAccprops(clientFreemail);
 		nodeInterface.setRandomNextMsgNumber(clientFreemail, bridgeFreemail);
+		
+		// Subscribe to updates of the CENO Portal feeds.json
+		USKUpdateFetcher.subscribeToBridgeFeeds();
 	}
 
 	/**

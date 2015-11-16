@@ -36,5 +36,6 @@ unzip -q CENOBox_$(echo $CENO_OS).zip
 # Start CENOBox
 echo
 cd CENOBox
+sh ./CENO.sh stop &> /dev/null
 sh ./CENO.sh
 cd ..

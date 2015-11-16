@@ -1,4 +1,4 @@
-var active = false;
+var active = true;
 
 /**
  * Update the message in the popup window informing the user of the status of the extension.
@@ -6,6 +6,7 @@ var active = false;
  */
 function setActivityStatus(isActive) {
   active = isActive;
+  console.log('plugin is active?', active);
   var activeStatus = document.getElementById('activeStatus');
   if (active) {
     activeStatus.textContent = chrome.i18n.getMessage('activeWord');

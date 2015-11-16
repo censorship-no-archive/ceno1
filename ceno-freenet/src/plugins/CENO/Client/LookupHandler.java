@@ -25,6 +25,8 @@ import freenet.support.api.HTTPRequest;
  */
 public class LookupHandler extends AbstractCENOClientHandler {
 
+	private static Long noPeersTimer = null;
+
 	@Override
 	public String handleHTTPGet(HTTPRequest request) throws PluginHTTPException {
 		// If "client" GET parameter is set to "HTML", then LCS will compose an
@@ -37,11 +39,13 @@ public class LookupHandler extends AbstractCENOClientHandler {
 			return returnError(new CENOException(CENOErrCode.LCS_HANDLER_URL_INVALID), clientIsHtml);
 		}
 
-		// Base64 Decode the URL parameter
-		try {
-			urlParam = Base64.decodeUTF8(urlParam);
-		} catch (IllegalBase64Exception e) {
-			return returnError(new CENOException(CENOErrCode.LCS_HANDLER_URL_DECODE), clientIsHtml);
+		if (!clientIsHtml) {
+			// Base64 Decode the URL parameter
+			try {
+				urlParam = Base64.decodeUTF8(urlParam);
+			} catch (IllegalBase64Exception e) {
+				return returnError(new CENOException(CENOErrCode.LCS_HANDLER_URL_DECODE), clientIsHtml);
+			}
 		}
 
 		// Validate the URL requested
@@ -88,11 +92,23 @@ public class LookupHandler extends AbstractCENOClientHandler {
 		// If the bundle was not found in the local cache:
 		NodeConnections nodeConnections = CENOClient.nodeInterface.getConnections();
 		if (nodeConnections.getCurrent() == 0) {
-			// The node is not connected to any peers yet. Could it be a firewall/connectivity issue?
-			return returnError(new CENOException(CENOErrCode.LCS_NODE_NOT_ENOUGH_PEERS), clientIsHtml);
+			LookupHandler.noPeersTimer = (LookupHandler.noPeersTimer == null) ? System.currentTimeMillis() : LookupHandler.noPeersTimer;
+			if (System.currentTimeMillis() - LookupHandler.noPeersTimer > TimeUnit.MINUTES.toMillis(5)) {
+				// The node is not connected to any peers for longer than 5 mins.
+				// Could it be a firewall/connectivity issue?
+				return returnError(new CENOException(CENOErrCode.LCS_NODE_NOT_ENOUGH_PEERS), clientIsHtml);
+			}
 		}
 
-		// The node is in state of performing ULPRs and one is initiated for the calculated SSK
+		// If the Freenet node is connected to less than 3 peers, the process will be slow
+		// and we inform the users appropriately
+		if (nodeConnections.getCurrent() < 3) {
+			return returnError(new CENOException(CENOErrCode.LCS_NODE_INITIALIZING), clientIsHtml);
+		}
+		
+		LookupHandler.noPeersTimer = null;
+
+		// The node is in state of performing ULPRs and we initiate one for the calculated SSK
 		ULPRStatus urlULPRStatus;
 		try {
 			urlULPRStatus = ULPRManager.lookupULPR(urlParam);
@@ -103,12 +119,6 @@ public class LookupHandler extends AbstractCENOClientHandler {
 		if (urlULPRStatus == ULPRStatus.failed) {
 			// Unlikely to happen
 			return returnError(new CENOException(CENOErrCode.LCS_LOOKUP_ULPR_FAILED), clientIsHtml);
-		}
-
-		// If the Freenet node is connected to less than 3 peers, the process will be slow
-		// and we inform the users appropriately
-		if (nodeConnections.getCurrent() < 3) {
-			return returnError(new CENOException(CENOErrCode.LCS_NODE_INITIALIZING), clientIsHtml);
 		}
 
 		// Check whether the request timeout has expired

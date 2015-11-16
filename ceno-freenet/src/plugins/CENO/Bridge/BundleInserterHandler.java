@@ -1,7 +1,7 @@
 package plugins.CENO.Bridge;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
+import java.net.MalformedURLException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -10,15 +10,15 @@ import javax.servlet.http.HttpServletResponse;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.ParseException;
 
-import org.eclipse.jetty.continuation.Continuation;
-import org.eclipse.jetty.continuation.ContinuationSupport;
 import org.eclipse.jetty.server.Request;
 
 import plugins.CENO.Bridge.BundleInserter.InsertCallback;
 import plugins.CENO.Bridge.BundlerInterface.Bundle;
 import plugins.CENO.Common.CENOJettyHandler;
+import plugins.CENO.Common.URLtoUSKTools;
 import freenet.client.InsertException;
 import freenet.client.async.BaseClientPutter;
+import freenet.support.Logger;
 
 /* ------------------------------------------------------------ */
 /** CENOBridge Plugin handler for requests to cache bundles
@@ -31,46 +31,22 @@ import freenet.client.async.BaseClientPutter;
  */
 public class BundleInserterHandler extends CENOJettyHandler {
 
-	/** The duration of time an insertion request times out */
-	static final long insertionRequestTimeout = TimeUnit.MINUTES.toMillis(5);
-
 	public class HandlerInsertCallback extends InsertCallback {
-		private Request baseRequest;
-		private Continuation continuation;
-		private HttpServletResponse response;
 
-		public HandlerInsertCallback(Request request, Continuation continuation, HttpServletResponse response) {
-			super();
-			this.baseRequest = request;
-			this.continuation = continuation;
-			this.response = response;
+		public HandlerInsertCallback(String url) {
+			super(url);
 		}
 
 		@Override
 		public void onSuccess(BaseClientPutter state) {
 			super.onSuccess(state);
-			response.setContentType("text/html;charset=utf-8");
-			response.setStatus(HttpServletResponse.SC_OK);
-			try {
-				response.getWriter().println("stored");
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			baseRequest.setHandled(true);
-			continuation.complete();
+			Logger.normal(this, "Successfully inserted bundle for URL: " + url);
 		}
 
 		@Override
 		public void onFailure(InsertException e, BaseClientPutter state) {
 			super.onFailure(e, state);
-			try {
-				writeError(baseRequest, response, "not stored");
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-			continuation.complete();
+			Logger.error(this, "Failed to insert bundle for URL: " + url);
 		}
 
 	}
@@ -107,6 +83,18 @@ public class BundleInserterHandler extends CENOJettyHandler {
 			return;
 		}
 
+		try {
+			urlParam = URLtoUSKTools.validateURL(urlParam);
+		} catch (MalformedURLException e) {
+			writeError(baseRequest, response, "URL failed validation and a bundle will not be inserted for: " + urlParam);
+		}
+
+		if (!CENOBridge.isMasterBridge() && urlParam.equals(CENOBridge.PORTAL_DOC_NAME)) {
+			Logger.normal(this, "Got request to insert CENO-RSS but won't handle since this is not the master bridge");
+			writeMessage("Not a Master bridge,  won't insert", baseRequest, response, urlParam);
+			return;
+		}
+
 		Bundle bundle = new Bundle(urlParam);
 		if ((requestJSON.get("bundle") != null)) {
 			bundle.setContent(requestJSON.get("bundle").toString());
@@ -115,25 +103,23 @@ public class BundleInserterHandler extends CENOJettyHandler {
 			return;
 		}
 
-		if (!bundle.getContent().isEmpty()) {
-			Continuation continuation = ContinuationSupport.getContinuation(baseRequest);
-			continuation.setTimeout(insertionRequestTimeout);
-			if (continuation.isExpired())
-			{
-				writeError(baseRequest, response, "Request timed out");
-				return;
-			}
-			try {
-				BundleInserter.insertBundle(urlParam, bundle, new HandlerInsertCallback(baseRequest, continuation, response));
-			} catch (InsertException e) {
-				writeError(baseRequest, response, "Error during insertion");
-				return;
-			} catch (Exception e1) {
-				writeError(baseRequest, response, "Exception during insertion: " + e1.getMessage());
-			}
-			continuation.suspend();
-		} else {
-			writeError(baseRequest, response, urlParam);
+		if (bundle.getContent().isEmpty()) {
+			writeError(baseRequest, response, "Bundle content empty for URL: " + urlParam);
+			return;
 		}
+
+		try {
+			BundleInserter.insertBundle(urlParam, bundle, new HandlerInsertCallback(urlParam));
+		} catch (InsertException e) {
+			writeError(baseRequest, response, "Error during insertion for URL: " + urlParam + " Error: " + e.getMessage());
+		} catch (IOException e) {
+			writeError(baseRequest, response, "IOException during insertion for URL: " + urlParam);
+			return;
+		}
+
+		response.setContentType("text/html;charset=utf-8");
+		response.setStatus(HttpServletResponse.SC_OK);
+		response.getWriter().println("stored");
+		baseRequest.setHandled(true);
 	}
 }

@@ -4,6 +4,14 @@
     "translation": "Check that all of the components of CENO are running."
   },
   {
+    "id": "articles_word",
+    "translation": "articles"
+  },
+  {
+    "id": "authors_word",
+    "translation": "by"
+  },
+  {
     "id": "bundle_err_cli",
     "translation": "Bundler encountered an error: {{.Message}}"
   },
@@ -18,6 +26,10 @@
   {
     "id": "contact_html",
     "translation": "Contact"
+  },
+  {
+    "id": "corrupt_json_err",
+    "translation": "Tried to decode JSON that was found to be corrupt."
   },
   {
     "id": "decode_error_cli",
@@ -52,12 +64,20 @@
     "translation": "Some data was entered incorrectly. Please try again."
   },
   {
+    "id": "last_published_word",
+    "translation": "last published"
+  },
+  {
+    "id": "latest_word",
+    "translation": "latest"
+  },
+  {
     "id": "lcs_addr_cfg",
     "translation": "Address of local cache server (LCS) [{{.Default}}]: "
   },
   {
     "id": "lcs_lookup_failure_err",
-    "translation": "Check that the LCS and CENO Freenet plugin are running correctly and that peers are connected."
+    "translation": "Check that the LCS and CENO Freenet plugin are running correctly and that peers are connected or wait for this page to refresh when everything is ready."
   },
   {
     "id": "lcs_not_ready_cli",
@@ -88,12 +108,24 @@
     "translation": "Missing {{.View}} view."
   },
   {
+    "id": "more_word",
+    "translation": "more"
+  },
+  {
+    "id": "no_articles_file_err",
+    "translation": "No article listing file could be found for the feed you tried to access."
+  },
+  {
     "id": "no_bundle_prepared_html",
     "translation": "We couldn't prepare your bundle!"
   },
   {
     "id": "no_config_cli",
     "translation": "Could not read configuration file at {{.Location}}"
+  },
+  {
+    "id": "no_feeds_file_err",
+    "translation": "No feeds file was found to get a list of available RSS/Atom feeds from."
   },
   {
     "id": "no_reach_lcs_cli",
@@ -116,12 +148,24 @@
     "translation": "The page you have requested is being prepared. Please refresh this page in a few moments to check if it's ready."
   },
   {
+    "id": "portal_blurb",
+    "translation": "The CENO portal service gives you direct access to selected content, presented in an approachable way, as soon as you get started. That means no long wait for new content and a seamless first-time experience."
+  },
+  {
+    "id": "previous_word",
+    "translation": "previous"
+  },
+  {
     "id": "provide_new_settings_cfg",
     "translation": "Please provide new settings using the format of the examples provided to configure CENO."
   },
   {
     "id": "proxy_port_num_cfg",
     "translation": "Proxy server port number [{{.Default}}]: "
+  },
+  {
+    "id": "published_word",
+    "translation": "published on"
   },
   {
     "id": "pwp_path_cfg",

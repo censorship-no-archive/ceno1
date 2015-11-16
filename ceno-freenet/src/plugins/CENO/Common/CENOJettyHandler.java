@@ -16,13 +16,17 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
 
 public abstract class CENOJettyHandler extends AbstractHandler {
 
-	public abstract void handle(String arg0, Request arg1, HttpServletRequest arg2,
-			HttpServletResponse arg3) throws IOException, ServletException;
+	public abstract void handle(String target, Request baseRequest, HttpServletRequest request,
+			HttpServletResponse response) throws IOException, ServletException;
 
 	protected void writeWelcome(Request baseRequest, HttpServletResponse response, String requestPath) throws IOException {
+		writeMessage("Welcome to CENO", baseRequest, response, requestPath);
+	}
+	
+	protected void writeMessage(String msg, Request baseRequest, HttpServletResponse response, String requestPath) throws IOException {
 		response.setContentType("text/html;charset=utf-8");
 		response.setStatus(HttpServletResponse.SC_OK);
-		response.getWriter().print("Welcome to CENO.");
+		response.getWriter().print(msg);
 		baseRequest.setHandled(true);
 	}
 

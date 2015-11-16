@@ -14,6 +14,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // The location of the configuration file to read.
@@ -29,6 +30,11 @@ const URL_REGEX = "(https?://)?(www\\.)?\\w+\\.\\w+"
 // that a request for http://site.com was rewritten from one for https://site.com.
 const REWRITTEN_HEADER = "X-Ceno-Rewritten"
 
+// The words "cenoportal" and "portal" respectively. Used
+// to directly reference the ceno RSS portal page
+const CENOPORTAL string = "cenoportal"
+const PORTAL string = "portal"
+
 // Result of a bundle lookup from cache server.
 type Result struct {
 	ErrCode  ErrorCode
@@ -36,6 +42,17 @@ type Result struct {
 	Complete bool
 	Found    bool
 	Bundle   string
+}
+
+/**
+ * Log the current time and a message
+ * @param {interface} msg - The message to be logged
+ */
+func log(msg interface{}) string {
+	t := strings.Replace(time.Now().Format("Jan 01, 2006 15:04:05.000"), ".", ":", 1)
+	s := fmt.Sprintf("%s %v", t, msg)
+	fmt.Println(s)
+	return s
 }
 
 /**
@@ -77,17 +94,17 @@ func pleaseWait(URL string, w http.ResponseWriter) {
  * Request that the LCS start a lookup process for a particular URL.
  * @param {string} lookupURL - The URL to try to find in the distributed cache
  */
-func lookup(lookupURL string) Result {
+func Lookup(lookupURL string) Result {
 	response, err := http.Get(BundleLookupURL(Configuration, lookupURL))
 	T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
 	if err != nil {
-		fmt.Println(T("error_cli", map[string]interface{}{
+		log(T("error_cli", map[string]interface{}{
 			"Message": err.Error(),
 		}))
 		return Result{ERR_NO_CONNECT_LCS, err.Error(), false, false, ""}
 	} else if response == nil || response.StatusCode != 200 {
 		errMsg := T("lcs_not_ready_cli")
-		fmt.Println(errMsg)
+		log(errMsg)
 		return Result{ERR_LCS_NOT_READY, errMsg, false, false, ""}
 	}
 	decoder := json.NewDecoder(response.Body)
@@ -97,7 +114,7 @@ func lookup(lookupURL string) Result {
 		decodeErrorMessage := T("decode_error_cli", map[string]interface{}{
 			"Message": err.Error(),
 		})
-		fmt.Println(decodeErrorMessage)
+		log(decodeErrorMessage)
 		reachedLCS := HandleCCError(ERR_MALFORMED_LCS_RESPONSE, err.Error(), ErrorState{
 			"requestURL": DecodeErrReportURL(Configuration),
 		})
@@ -153,6 +170,7 @@ func stripHttps(URL string) (string, bool) {
  * @param {*Request} r - Information about the request
  */
 func directHandler(w http.ResponseWriter, r *http.Request) {
+	log("Got request to directHandler")
 	qs := r.URL.Query()
 	T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
 	URLS, found := qs["url"]
@@ -161,31 +179,36 @@ func directHandler(w http.ResponseWriter, r *http.Request) {
 			"responseWriter": w,
 			"request":        r,
 		})
+		return
+	}
+	// Decode the URL so we can save effort by just passing the modified request to
+	// the proxyHandler function from here.
+	decodedBytes, err := base64.StdEncoding.DecodeString(URLS[0])
+	if err != nil {
+		HandleCCError(ERR_MALFORMED_URL, T("url_b64_cli"), ErrorState{
+			"responseWriter": w,
+			"request":        r,
+		})
+		return
+	}
+	decodedURL := string(decodedBytes)
+	log("Decoded URL to " + decodedURL)
+	stripped, rewritten := stripHttps(decodedURL)
+	if stripped == CENOPORTAL || stripped == PORTAL {
+		CreatePortalPage(w, r)
 	} else {
-		// Decode the URL so we can save effort by just passing the modified request to
-		// the proxyHandler function from here.
-		decodedBytes, err := base64.StdEncoding.DecodeString(URLS[0])
-		if err != nil {
-			HandleCCError(ERR_MALFORMED_URL, T("url_b64_cli"), ErrorState{
-				"responseWriter": w,
-				"request":        r,
-			})
+		if rewritten {
+			r.Header.Set(REWRITTEN_HEADER, "true")
+		}
+		newURL, parseErr := url.Parse(stripped)
+		if parseErr != nil {
+			HandleCCError(ERR_MALFORMED_URL, T("malformed_url_cli", map[string]interface{}{
+				"URL": stripped,
+			}), ErrorState{"responseWriter": w, "request": r})
 		} else {
-			decodedURL := string(decodedBytes)
-			stripped, rewritten := stripHttps(decodedURL)
-			if rewritten {
-				r.Header.Set(REWRITTEN_HEADER, "true")
-			}
-			newURL, parseErr := url.Parse(stripped)
-			if parseErr != nil {
-				HandleCCError(ERR_MALFORMED_URL, T("malformed_url_cli", map[string]interface{}{
-					"URL": stripped,
-				}), ErrorState{"responseWriter": w, "request": r})
-			} else {
-				// Finally we can pass the modified request onto the proxy server.
-				r.URL = newURL
-				proxyHandler(w, r)
-			}
+			// Finally we can pass the modified request onto the proxy server.
+			r.URL = newURL
+			proxyHandler(w, r)
 		}
 	}
 }
@@ -220,7 +243,7 @@ func validateURL(URL string, w http.ResponseWriter, r *http.Request) bool {
 func tryRequestBundle(URL string, rewritten bool, w http.ResponseWriter, r *http.Request) {
 	T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
 	if err := requestNewBundle(URL, rewritten); err != nil {
-		fmt.Println(T("bundle_err_cli", map[string]interface{}{
+		log(T("bundle_err_cli", map[string]interface{}{
 			"Message": err.Error(),
 		}))
 		HandleLCSError(ERR_NO_CONNECT_RS, err.Error(), ErrorState{
@@ -244,16 +267,16 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 	URL := r.URL.String()
 	T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
 	wasRewritten := r.Header.Get(REWRITTEN_HEADER) == "true"
-	fmt.Println(T("got_request_msg_cli", map[string]interface{}{
+	log(T("got_request_msg_cli", map[string]interface{}{
 		"URL":       URL,
 		"Rewritten": wasRewritten,
 	}))
 	if isValidURL := validateURL(URL, w, r); !isValidURL {
 		return
 	}
-	result := lookup(URL)
+	result := Lookup(URL)
 	if result.ErrCode > 0 {
-		fmt.Println(T("err_from_lcs_cli", map[string]interface{}{
+		log(T("err_from_lcs_cli", map[string]interface{}{
 			"Code":    result.ErrCode,
 			"Message": result.ErrMsg,
 		}))
@@ -294,15 +317,19 @@ func main() {
 	T, _ := i18n.Tfunc(setLanguage, "en-us")
 	// Read an existing configuration file or have the user supply settings
 	if conf, err := ReadConfigFile(CONFIG_FILE); err != nil {
-		fmt.Println(T("no_config_cli", map[string]interface{}{"Location": CONFIG_FILE}))
+		log(T("no_config_cli", map[string]interface{}{"Location": CONFIG_FILE}))
 		Configuration = GetConfigFromUser()
 	} else {
 		Configuration = conf
 	}
 	// Create an HTTP proxy server
+	http.Handle("/cenoresources/",
+		http.StripPrefix("/cenoresources/", http.FileServer(http.Dir("./static"))))
 	http.HandleFunc("/lookup", directHandler)
+	http.HandleFunc("/portal", CreatePortalPage)
+	http.HandleFunc("/cenosite/", CreateArticlePage)
 	http.HandleFunc("/", proxyHandler)
-	fmt.Println(T("listening_msg_cli", map[string]interface{}{"Port": Configuration.PortNumber}))
+	log(T("listening_msg_cli", map[string]interface{}{"Port": Configuration.PortNumber}))
 	err := http.ListenAndServe(Configuration.PortNumber, nil)
 	if err != nil {
 		panic(err)
