@@ -5,6 +5,7 @@ let gulp = require('gulp');
 let jshint = require('gulp-jshint');
 let stylish = require('jshint-stylish');
 let concat = require('gulp-concat');
+let csslint = require('gulp-csslint');
 
 gulp.task('lintjs', () => {
   return gulp.src('./portal/js/*.js')
@@ -13,10 +14,20 @@ gulp.task('lintjs', () => {
 });
 
 gulp.task('concatjs', () => {
-  let jsFiles = fs.readdirSync('./portal/js').map((filename) => `./portal/js/${filename}`);
-  return gulp.src(jsFiles)
+  return gulp.src('./portal/js/*.js')
     .pipe(concat('main.js'))
     .pipe(gulp.dest('./static/javascript/'));
 });
 
-gulp.task('build', ['lintjs']);
+gulp.task('concatcss', () => {
+  return gulp.src('./portal/css/*.css')
+    .pipe(concat('main.css'))
+    .pipe(gulp.dest('./static/stylesheets/'));
+});
+
+gulp.task('copyhtml', () => {
+  return gulp.src('./portal/html/*.html')
+    .pipe(gulp.dest('./views/'));
+});
+
+gulp.task('build', ['lintjs', 'concatjs', 'concatcss', 'copyhtml']);
