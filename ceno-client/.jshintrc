@@ -1,0 +1,15 @@
+{
+  "curly": true,
+  "eqeqeq": true,
+  "futurehostile": true,
+  "latedef": true,
+  "nocomma": true,
+  "nonbsp": true,
+  "shadow": true,
+  "undef": true,
+  "unused": "vars",
+  "varstmt": true,
+  "eqnull": true,
+  "browser": true,
+  "devel": true
+}
