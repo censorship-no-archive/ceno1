@@ -34,4 +34,9 @@ gulp.task('copyhtml', () => {
     .pipe(gulp.dest('./views/'));
 });
 
+// Shorthand tasks for applying changes to single resources
+gulp.task('js', ['lintjs', 'concatjs']);
+gulp.task('css', ['concatcss']);
+gulp.task('html', ['copyhtml']);
+
 gulp.task('build', ['lintjs', 'concatjs', 'concatcss', 'copyhtml']);
