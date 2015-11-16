@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 import org.bouncycastle.crypto.AsymmetricBlockCipher;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.InvalidCipherTextException;
+import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.crypto.engines.AESEngine;
 import org.bouncycastle.crypto.engines.RSAEngine;
 import org.bouncycastle.crypto.generators.RSAKeyPairGenerator;
@@ -121,15 +122,40 @@ public final class Crypto {
 
 		return plaintext;
 	}
+	
+	private static byte[] signRtsMessage(byte[] rtsMessageBytes, RSAKeyParameters ourPrivateKey) {
+		SHA256Digest sha256 = new SHA256Digest();
+		sha256.update(rtsMessageBytes, 0, rtsMessageBytes.length);
+		byte[] hash = new byte[sha256.getDigestSize()];
+		sha256.doFinal(hash, 0);
+
+		AsymmetricBlockCipher signatureCipher = new RSAEngine();
+		signatureCipher.init(true, ourPrivateKey);
+		byte[] signature = null;
+		try {
+			signature = signatureCipher.processBlock(hash, 0, hash.length);
+		} catch(InvalidCipherTextException e) {
+			Logger.error(Crypto.class, "Failed to RSA encrypt hash: " + e.getMessage(), e);
+			return null;
+		}
+
+		byte[] signedMessage = new byte[rtsMessageBytes.length + signature.length];
+		System.arraycopy(rtsMessageBytes, 0, signedMessage, 0, rtsMessageBytes.length);
+		System.arraycopy(signature, 0, signedMessage, rtsMessageBytes.length, signature.length);
+
+		return signedMessage;
+	}
 
 	public static boolean isValidKeypair(String privKey, String pubKey, String modulus) {
 		if (privKey == null || pubKey == null || modulus == null) {
 			return false;
 		}
+		
+		AsymmetricCipherKeyPair asymKeyPair = Crypto.generateAsymKey();
 
 		try {
-			String privMsg = new String(encryptMessage("Hello".getBytes("UTF-8"), modulus, pubKey));
-			String decMsg = decryptMessage(privMsg.getBytes(), new RSAKeyParameters(true, new BigInteger(modulus, 32), new BigInteger(privKey, 32))).toString();
+			String privMsg = new String(encryptMessage(signRtsMessage("Hello".getBytes("UTF-8"), ((RSAKeyParameters)asymKeyPair.getPrivate())), ((RSAKeyParameters)asymKeyPair.getPublic()).getModulus().toString(32), ((RSAKeyParameters)asymKeyPair.getPublic()).getExponent().toString(32)));
+			String decMsg = decryptMessage(privMsg.getBytes(), ((RSAKeyParameters)asymKeyPair.getPrivate())).toString();
 			System.out.println(decMsg);
 			return true;
 		} catch (Exception e) {

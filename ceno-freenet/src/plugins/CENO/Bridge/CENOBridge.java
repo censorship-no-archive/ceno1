@@ -69,7 +69,7 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 			initConfig.storeProperties();
 		}
 
-		/*
+
 		// Read RSA keypair and modulus from configuration file or, if not available, create a new one
 		AsymmetricCipherKeyPair asymKeyPair;
 		if (!Crypto.isValidKeypair(initConfig.getProperty("asymkey.privexponent"), initConfig.getProperty("asymkey.pubexponent"), initConfig.getProperty("asymkey.modulus"))) {
@@ -81,13 +81,11 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 			initConfig.setProperty("asymkey.modulus", pub.getModulus().toString(32));
 			initConfig.setProperty("asymkey.pubexponent", pub.getExponent().toString(32));
 			initConfig.storeProperties();
-			Crypto.isValidKeypair(priv.getExponent().toString(32), pub.getExponent().toString(32), pub.getModulus().toString(32));
 		} else {
-			asymKeyPair = new AsymmetricCipherKeyPair(new RSAKeyParameters(false, new BigInteger(initConfig.getProperty("asymkey.modulus"),32), new BigInteger(initConfig.getProperty("asymkey.pubexponent"), 32)),
+			asymKeyPair = new AsymmetricCipherKeyPair(new RSAKeyParameters(false, new BigInteger(initConfig.getProperty("asymkey.modulus"), 32), new BigInteger(initConfig.getProperty("asymkey.pubexponent"), 32)),
 					new RSAKeyParameters(true, new BigInteger(initConfig.getProperty("asymkey.modulus"), 32), new BigInteger(initConfig.getProperty("asymkey.privexponent"), 32)));
 			Logger.normal(this, "Found RSA key in configuration file");
 		}
-		*/
 
 		String confIsMasterBridge = initConfig.getProperty("isMasterBridge");
 
@@ -97,7 +95,6 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 
 		String confIsSingalBridge = initConfig.getProperty("isSignalBridge");
 
-		/*
 		if (confIsSingalBridge != null && confIsSingalBridge.equals("true")) {
 			isSignalBridge = true;
 			try {
@@ -107,7 +104,6 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 				terminate();
 			}
 		}
-		*/
 
 		// Configure CENO's jetty embedded server
 		cenoHttpServer = new Server();
@@ -194,7 +190,7 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 	public void terminate()
 	{
 		// Stop the thread that is polling for new channel requests
-		if (isSignalBridge) {
+		if (isSignalBridge && channelMaker != null) {
 			channelMaker.stopListener();
 		}
 
