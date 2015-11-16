@@ -81,20 +81,20 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 				initConfig.setProperty("asymkey.pubKey", Crypto.savePublicKey(asymKeyPair.getPublic()));
 				initConfig.setProperty("asymkey.privKey", Crypto.savePrivateKey(asymKeyPair.getPrivate()));
 				initConfig.storeProperties();
-				Crypto.isValidKeypair(asymKeyPair);
 			} else {
 				asymKeyPair = new KeyPair(Crypto.loadPublicKey(initConfig.getProperty("asymkey.pubKey")), Crypto.loadPrivateKey(initConfig.getProperty("asymkey.privKey")));
 				Logger.normal(this, "Found RSA key in configuration file");
 			}
 		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Logger.error(this, "Unsupported Encoding Exception during RSA key validation: " + e.getMessage());
 		} catch (GeneralSecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Logger.error(this, "General Security Exception: " + e.getMessage());
 		} catch (IllegalBase64Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Logger.error(this, "Failed to base64 encode/decode: " + e.getMessage());
+		} finally {
+			if (asymKeyPair == null) {
+				terminate();
+			}
 		}
 
 		String confIsMasterBridge = initConfig.getProperty("isMasterBridge");

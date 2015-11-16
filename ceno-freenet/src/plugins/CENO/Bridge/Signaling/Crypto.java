@@ -32,17 +32,9 @@ public final class Crypto {
 
 	private Crypto() {}
 
-	public static KeyPair generateAsymKey() {
+	public static KeyPair generateAsymKey() throws NoSuchAlgorithmException, NoSuchProviderException {
 		KeyPairGenerator generator = null;
-		try {
-			generator = KeyPairGenerator.getInstance(KEY_ALGORITHM, SECURITY_PROVIDER);
-		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (NoSuchProviderException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		generator = KeyPairGenerator.getInstance(KEY_ALGORITHM, SECURITY_PROVIDER);
 		generator.initialize(KEY_SIZE, srng);
 
 		Long startTime = System.currentTimeMillis();
@@ -86,6 +78,10 @@ public final class Crypto {
 	}
 
 	public static byte[] encrypt(byte[] msg, String pubKey64) throws GeneralSecurityException, IllegalBase64Exception {
+		if (msg.length > 254) {
+			throw new GeneralSecurityException("Cannot encrypt payload of that size");
+		}
+
 		PublicKey pubKey = loadPublicKey(pubKey64);
 		Cipher cipher = Cipher.getInstance(CIPHER_TRANSFORMATION, SECURITY_PROVIDER);
 		cipher.init(Cipher.ENCRYPT_MODE, pubKey, srng);
@@ -114,7 +110,8 @@ public final class Crypto {
 		}
 
 		byte[] cipherText = encrypt("Hello".getBytes("UTF-8"), pubKey64);
-		if (decrypt(cipherText, privKey64).equals("Hello")) {
+		String msg = new String(decrypt(cipherText, privKey64), "UTF-8");
+		if (msg.equals("Hello")) {
 			return true;
 		}
 		return false;
