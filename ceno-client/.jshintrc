@@ -1,5 +1,6 @@
 {
   "curly": true,
+  "esnext": true,
   "eqeqeq": true,
   "futurehostile": true,
   "latedef": true,
