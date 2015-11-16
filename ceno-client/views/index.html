@@ -3,7 +3,6 @@
 <head>
   <title>CENO Portal</title>
   {{template "RESOURCES" . }}
-  <link rel="stylesheet" type="text/css" href="cenoresources/stylesheets/index.css" />
 </head>
 <body>
   {{template "NAV" . }}
@@ -25,7 +24,10 @@
     </div>
     <div class="indexJump">
       <h2>Request a website</h2>
-      <input type="text" placeholder="Enter URL" id="indexUrlSearch" />
+      <form method="get" action="/lookup" name="lookupForm" id="lookupForm">
+        <input type="text" placeholder="Enter URL" id="indexUrlSearch" />
+        <input type="submit" display=hidden id="submitLookupForm" />
+      </form>
     </div>
     <div class="indexJump">
       <h2>Learn more about CeNO</h2>
@@ -36,5 +38,6 @@
       <button class="pure-button" id="tellMeMore">TELL ME MORE</a>
     </div>
   </div>
+  {{template "SCRIPTS" . }}
 </body>
 </html>
