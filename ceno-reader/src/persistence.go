@@ -125,11 +125,7 @@ func SaveFeed(db *sql.DB, feed Feed) error {
  */
 func AllFeeds(db *sql.DB) ([]Feed, error) {
 	var feeds []Feed
-	tx, err1 := db.Begin()
-	if err1 != nil {
-		return feeds, err1
-	}
-	rows, err2 := tx.Query(`select id, url, type, charset, articles, lastPublished, latest
+	rows, err2 := db.Query(`select id, url, type, charset, articles, lastPublished, latest
                             from feeds`)
 	if err2 != nil {
 		return feeds, err2
@@ -154,11 +150,7 @@ func AllFeeds(db *sql.DB) ([]Feed, error) {
  */
 func GetFeed(db *sql.DB, url string) (Feed, error) {
 	var feed Feed
-	tx, err1 := db.Begin()
-	if err1 != nil {
-		return feed, err1
-	}
-	rows, err2 := tx.Query(`select id, url, type, charset, articles, lastPublished, latest
+	rows, err2 := db.Query(`select id, url, type, charset, articles, lastPublished, latest
                               from feeds where url=?`)
 	if err2 != nil {
 		return feed, err2
@@ -236,11 +228,7 @@ func SaveItem(db *sql.DB, feedUrl string, item *rss.Item) error {
  */
 func GetItems(db *sql.DB, feedUrl string) ([]Item, error) {
 	var items []Item
-	tx, err1 := db.Begin()
-	if err1 != nil {
-		return items, err1
-	}
-	rows, err2 := tx.Query(`select id, title, url, authors, published from items where feed_url=?`,
+	rows, err2 := db.Query(`select id, title, url, authors, published from items where feed_url=?`,
 		feedUrl)
 	if err2 != nil {
 		return items, err2
@@ -306,14 +294,10 @@ func SaveError(db *sql.DB, report ErrorReport) error {
  */
 func GetErrors(db *sql.DB) ([]ErrorReport, error) {
 	reports := make([]ErrorReport, 0)
-	tx, err := db.Begin()
-	if err != nil {
-		return reports, err
-	}
 	// Get the relevant rows from the database.
 	// Note that error types and resource types are specified in the database as integers.
 	// That means we do the usual binary operations to find them.
-	rows, queryError := tx.Query(`select id, resource_types, error_types, message from errors`)
+	rows, queryError := db.Query(`select id, resource_types, error_types, message from errors`)
 	if queryError != nil {
 		return reports, queryError
 	}
@@ -326,10 +310,9 @@ func GetErrors(db *sql.DB) ([]ErrorReport, error) {
 		})
 	}
 	rows.Close()
-	_, execError := tx.Exec(`delete from errors`)
+	_, execError := db.Exec(`delete from errors`)
 	if execError != nil {
 		return reports, execError
 	}
-	tx.Commit()
 	return reports, nil
 }
