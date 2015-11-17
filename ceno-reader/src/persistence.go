@@ -20,6 +20,7 @@ import (
 const createFeedsTable = `create table if not exists feeds(
     id integer primary key,
     url varchar(255) unique,
+		logo varchar(255),
     type varchar(8),
     charset varchar(64),
     articles integer,
@@ -108,9 +109,9 @@ func SaveFeed(db *sql.DB, feed Feed) error {
 		return err1
 	}
 	_, err2 := tx.Exec(`
-        insert into feeds(url, type, charset, articles, lastPublished, latest)
-        values(?,?,?,?,?,?)`,
-		feed.Url, feed.Type, feed.Charset, feed.Articles, feed.LastPublished, feed.Latest)
+        insert into feeds(url, logo, type, charset, articles, lastPublished, latest)
+        values(?,?,?,?,?,?,?)`,
+		feed.Url, feed.Logo, feed.Type, feed.Charset, feed.Articles, feed.LastPublished, feed.Latest)
 	if err2 != nil {
 		return err2
 	}
@@ -129,18 +130,18 @@ func AllFeeds(db *sql.DB) ([]Feed, error) {
 	if err1 != nil {
 		return feeds, err1
 	}
-	rows, err2 := tx.Query(`select id, url, type, charset, articles, lastPublished, latest
+	rows, err2 := tx.Query(`select id, url, logo, type, charset, articles, lastPublished, latest
                             from feeds`)
 	if err2 != nil {
 		return feeds, err2
 	}
 	for rows.Next() {
-		var url, _type, charset, lastPublished, latest string
+		var url, logo, _type, charset, lastPublished, latest string
 		var id, articles int
-		rows.Scan(&id, &url, &_type, &charset, &articles, &lastPublished, &latest)
+		rows.Scan(&id, &url, &logo, &_type, &charset, &articles, &lastPublished, &latest)
 		fmt.Printf("Found feed %s with %d articles. Last published %s on %s.\n",
 			url, articles, latest, lastPublished)
-		feeds = append(feeds, Feed{id, url, _type, charset, articles, lastPublished, latest})
+		feeds = append(feeds, Feed{id, url, logo, _type, charset, articles, lastPublished, latest})
 	}
 	rows.Close()
 	return feeds, nil
@@ -158,7 +159,7 @@ func GetFeed(db *sql.DB, url string) (Feed, error) {
 	if err1 != nil {
 		return feed, err1
 	}
-	stmt, err2 := tx.Prepare(`select id, url, type, charset, articles, lastPublished, latest
+	stmt, err2 := tx.Prepare(`select id, url, logo, type, charset, articles, lastPublished, latest
                               from feeds where url=?`)
 	if err2 != nil {
 		return feed, err2
@@ -169,10 +170,10 @@ func GetFeed(db *sql.DB, url string) (Feed, error) {
 		return feed, err3
 	}
 	var id, articles int
-	var _type, charset, lastPublished, latest string
-	rows.Scan(&id, &url, &_type, &charset, &articles, &lastPublished, &latest)
+	var logo, _type, charset, lastPublished, latest string
+	rows.Scan(&id, &url, &logo, &_type, &charset, &articles, &lastPublished, &latest)
 	rows.Close()
-	return Feed{id, url, _type, charset, articles, lastPublished, latest}, nil
+	return Feed{id, url, logo, _type, charset, articles, lastPublished, latest}, nil
 }
 
 /**

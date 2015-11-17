@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"github.com/jteeuwen/go-pkg-xmlx"
-	"net/http"
 	"path"
 	"time"
 )
@@ -101,6 +100,7 @@ const MAX_BUNDLE_SIZE ByteSize = 100 * Megabytes
 type Feed struct {
 	Id            int
 	Url           string `json:"url"`
+	Logo          string `json:"logo"`
 	Type          string `json:"type"`
 	Charset       string `json:"charset"`
 	Articles      int    `json:"articles"`
@@ -131,14 +131,13 @@ type ErrorReport struct {
 	ErrorMessage  string
 }
 
-/**
- * Pair a Feed with a ResponseWriter to be sent accross a channel
- * So that a separate goroutine can try to handle DB operations and
- * write back to the client.
- */
+// Contains information about a request to have a feed followed.
 type SaveFeedRequest struct {
 	FeedInfo Feed
-	W        http.ResponseWriter
+}
+
+func (r SaveFeedRequest) Feed() Feed {
+	return r.FeedInfo
 }
 
 /**

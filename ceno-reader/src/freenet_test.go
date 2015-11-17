@@ -7,51 +7,47 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
-	"strings"
 	"testing"
 )
 
-// A sort of enum used to identify an agent so that a configuration setting
-// pertaining to a particular agent can be changed.
-type Agent int
-
-const (
-	BundleInserter = iota
-	BundleServer   = iota
-)
-
-// A container for parsed responses from the bundle server
-type BundleContainer struct {
-	Created string `json:"created"`
-	Url     string `json:"url"`
-	Bundle  string `json:"bundle"`
-}
-
-/**
- * Parse the port number from a URL and set the appropriate configuration value.
- * @param URL - A URL of the form http://<address>:<port>/<path>
- * @param agent - The identifier of which agent to set the configured port value of
- * @return the port number parsed as a string, e.g. "8080"
- */
-func setPort(URL string, agent Agent) (port string) {
-	parsed, _ := url.Parse(URL)
-	parts := strings.Split(parsed.Host, ":")
-	port = parts[1]
-	if agent == BundleInserter {
-		Configuration.BundleInserter = "http://127.0.0.1:" + port
-	} else {
-		Configuration.BundleServer = "http://127.0.0.1:" + port
-	}
-	return
-}
-
 func TestInsertFreenet(t *testing.T) {
-
+	// Acts like the bundle inserter
+	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/plain")
+		bundle := BundleContainer{} // Defined in test_helpers.go
+		defer r.Body.Close()
+		decoder := json.NewDecoder(r.Body)
+		decodeErr := decoder.Decode(&bundle)
+		lastErrMsg := ""
+		if decodeErr != nil {
+			lastErrMsg = decodeErr.Error()
+			t.Error(lastErrMsg)
+		}
+		_, parseErr := url.Parse(bundle.Url)
+		if parseErr != nil {
+			lastErrMsg = parseErr.Error()
+			t.Error(lastErrMsg)
+		}
+		if len(lastErrMsg) > 0 {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(lastErrMsg))
+		} else {
+			w.Write([]byte("okay"))
+		}
+	}))
+	// defined in test_helpers.go
+	SetPort(testServer.URL, BundleInserter)
+	defer testServer.Close()
+	bundle := []byte(`{"url": "https://news.ycombinator.com", "created": "now", "bundle": "somebundledata"}`)
+	status := InsertFreenet(bundle)
+	if status == Failure {
+		t.Error("Call to InsertFreenet failed.")
+	}
 }
 
 func TestGetBundle(t *testing.T) {
+	// Acts like the bundle server
 	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		t.Log("Got a request for a bundle in test server")
 		w.Header().Set("Content-Type", "application/json")
 		lastErrMsg := ""
 		if r.Method != "GET" {
@@ -85,15 +81,15 @@ func TestGetBundle(t *testing.T) {
 			response, _ := json.Marshal(map[string]string{"error": lastErrMsg})
 			w.Write(response)
 		} else {
-			response, _ := json.Marshal(map[string]string{
-				"created": "now",
-				"url":     strUrl,
-				"bundle":  "Hello world!",
+			response, _ := json.Marshal(BundleContainer{
+				"now",
+				strUrl,
+				"Hello world!",
 			})
 			w.Write(response)
 		}
 	}))
-	setPort(testServer.URL, BundleServer)
+	SetPort(testServer.URL, BundleServer)
 	t.Logf("Set config for bundle serter to %s\n", Configuration.BundleServer)
 	defer testServer.Close()
 	testUrl := "https://news.ycombinator.com"

@@ -17,6 +17,9 @@ import (
 	"time"
 )
 
+// The ID of A message for the user to receive after requesting a new feed be followed.
+const FOLLOW_REQ_MSG = "follow_request_msg"
+
 /**
  * Log the current time and a message
  * @param {interface} msg - The message to be logged
@@ -36,6 +39,34 @@ func log(msg interface{}) string {
 func logPanic(v interface{}) {
 	s := log(v)
 	panic(s)
+}
+
+/**
+ * Fetch an image and insert it into Freenet.
+ * @param {string} imgUrl - The URL of the image to insert
+ * @return {RequestStatus} Success if the image is fetched and inserted properly or else Failure
+ */
+func InsertImage(imgUrl string) RequestStatus {
+	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
+	response, err := http.Get(imgUrl)
+	if err != nil {
+		log(T("request_fail_err", map[string]string{
+			"URL":   imgUrl,
+			"Error": err.Error(),
+		}))
+		return Failure
+	}
+	defer response.Body.Close()
+	imgBytes, _ := ioutil.ReadAll(response.Body)
+	now := time.Now().Format(time.UnixDate)
+	// We can't really get around the problem of converting the image bytes to a string and back
+	// without incurring invalid value errors along the way. It's sad, but at least this code is nice and works.
+	bundle, _ := json.Marshal(map[string]string{
+		"url":     imgUrl,
+		"created": now,
+		"bundle":  string(imgBytes),
+	})
+	return InsertFreenet(bundle)
 }
 
 /**
@@ -137,25 +168,25 @@ func followFeeds(requests chan SaveFeedRequest) {
 	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
 	for {
 		request := <-requests
-		feedInfo := request.FeedInfo
-		log("Got a request to handle a feed.")
-		log(feedInfo)
+		feedInfo := request.Feed()
 		saveErr := SaveFeed(DBConnection, feedInfo)
 		if saveErr != nil {
-			log("Could not save")
-			log(saveErr)
-			request.W.Write([]byte(T("db_store_error_rdr", map[string]interface{}{"Error": saveErr.Error()})))
+			errMsg := T("db_store_error_rdr", map[string]interface{}{"Error": saveErr.Error()})
+			log(errMsg)
 			return
 		} else {
-			log("Saved")
+			msg := T("req_handle_success_rdr")
+			log(msg)
+			// NOTE - Here, we may not want to store the feeds.json file if we couldn't store a logo
+			if InsertImage(feedInfo.Logo) == Failure {
+				log(T("image_insert_fail_err", map[string]string{"Logo": feedInfo.Logo}))
+			}
 			writeFeedsErr := writeFeeds([]Feed{feedInfo})
 			if writeFeedsErr != nil {
-				log("Error writing feeds file")
-				log(writeFeedsErr)
+				log(T("insertion_fail_err"))
 			} else {
-				log("Saved new feeds.json file and inserted it into Freenet")
+				log(T("saved_feeds_file"))
 			}
-			request.W.Write([]byte(T("req_handle_success_rdr")))
 		}
 		if feedInfo.Charset == "" {
 			go pollFeed(feedInfo.Url, nil)
@@ -203,7 +234,8 @@ func followHandler(requests chan SaveFeedRequest) func(http.ResponseWriter, *htt
 			w.Write([]byte(T("invalid_follow_req_rdr")))
 			return
 		}
-		requests <- SaveFeedRequest{feedInfo, w}
+		requests <- SaveFeedRequest{feedInfo}
+		w.Write([]byte(T(FOLLOW_REQ_MSG)))
 	}
 }
 
@@ -241,6 +273,7 @@ func unfollowHandler(w http.ResponseWriter, r *http.Request) {
  * the distributed store being used. Also creates files for distribution in json-files.
  */
 func insertHandler(w http.ResponseWriter, r *http.Request) {
+	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
 	feeds, feedErr := AllFeeds(DBConnection)
 	if feedErr != nil {
 		log("Couldn't get feeds")
@@ -249,8 +282,10 @@ func insertHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	writeFeedsErr := writeFeeds(feeds)
 	if writeFeedsErr != nil {
-		log(writeFeedsErr)
+		log(T("insertion_fail_err"))
 		return
+	} else {
+		log(T("saved_feeds_file"))
 	}
 	for _, feed := range feeds {
 		items, itemsError := GetItems(DBConnection, feed.Url)
@@ -258,13 +293,11 @@ func insertHandler(w http.ResponseWriter, r *http.Request) {
 			log("couldn't get items for " + feed.Url)
 			log(itemsError)
 		} else {
-			log(items)
-			log("items for " + feed.Url)
 			writeItemsErr := writeItems(feed.Url, items)
 			if writeItemsErr != nil {
-				log("could not write items for " + feed.Url)
+				log(T("item_insertion_fail_err", map[string]string{"Url": feed.Url}))
 			} else {
-				log("success!")
+				log(T("item_insertion_success", map[string]string{"Url": feed.Url}))
 			}
 		}
 	}
@@ -284,8 +317,6 @@ func writeFeeds(feeds []Feed) error {
 		"feeds":   feeds,
 	})
 	if marshalError != nil {
-		log("Couldn't marshal array of feeds")
-		log(marshalError)
 		return marshalError
 	}
 	// The bundle inserter expects the "bundle" field to be a string,
@@ -301,8 +332,6 @@ func writeFeeds(feeds []Feed) error {
 		// We don't want to write the data that was sent to the BI. Just the feeds stuff.
 		feedWriteErr := ioutil.WriteFile(FeedsJsonFile, marshalledFeeds, os.ModePerm)
 		if feedWriteErr != nil {
-			log("Couldn't write " + FeedsJsonFile)
-			log(feedWriteErr)
 			return feedWriteErr
 		}
 	} else {
@@ -344,9 +373,10 @@ func writeItems(feedUrl string, items []Item) error {
 		writeErr := writeItemsFile(feedUrl, marshalled)
 		// We don't want to write the data that was sent to the bundle inserter, just the items stuff.
 		if writeErr != nil {
-			log("Couldn't write item")
-			log(writeErr)
+			log(T("insertion_fail_err"))
 			return writeErr
+		} else {
+			log(T("saved_feeds_file"))
 		}
 	} else {
 		log("Could not insert items into Freenet")
