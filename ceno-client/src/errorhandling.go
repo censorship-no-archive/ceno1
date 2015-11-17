@@ -11,7 +11,8 @@ import (
 	"strconv"
 )
 
-const ( // CC errors
+// CC errors
+const (
 	ERR_NO_CONFIG              = 1100
 	ERR_MALFORMED_URL          = 1101
 	ERR_MISSING_VIEW           = 1102
@@ -26,7 +27,8 @@ const ( // CC errors
 	ERR_INVALID_ERROR          = 100
 )
 
-const ( // LCS errors that can be reported to the CC
+// LCS errors that can be reported to the CC
+const (
 	ERR_LCS_MALFORMED_URL  = 2110
 	ERR_LCS_URL_DECODE     = 2112
 	ERR_LCS_WILL_NOT_SERVE = 2120
@@ -36,8 +38,10 @@ const ( // LCS errors that can be reported to the CC
 	ERR_LCS_WAIT_PEERS     = 2301
 )
 
+// An email that can be displayed on pages served by the CC to email CENO devs about a problem
 const contactInfo = "ceno@equalit.ie"
 
+// Types for enumerating, storing state surrounding, and handling errors
 type ErrorCode uint32
 type ErrorState map[string]interface{}
 type ErrorHandler func(ErrorState) bool
@@ -120,6 +124,7 @@ var AutoRefreshingErrorPages = map[ErrorCode]bool{
 /**
  * Prepare and serve the standard error page with relevant information.
  * @param {ErrorState} state - Must contain HTTP request and response objects and error message
+ * @return true if the error page was served successfully
  */
 func serveError(state ErrorState) bool {
 	w := state["responseWriter"].(http.ResponseWriter)
@@ -130,9 +135,16 @@ func serveError(state ErrorState) bool {
 	return true
 }
 
+// We have a number of placeholder functions that could be expanded on to have the CC
+// respond to certain kinds of errors by doing useful things in the background after
+// simply serving an error page.
+// Due to time constraints, we haven't implemented any of these.  No critical functionality
+// depends on them.
+
 /**
  * Download the default configuration file package, validate, and apply before serving an error page
  * @param {ErrorState} state - Must contain HTTP request and response objects and error message
+ * @return true if the error page is served successfully and other background tasks completed okay
  */
 func downloadConfigAndServeError(state ErrorState) bool {
 	// temporary
@@ -142,6 +154,7 @@ func downloadConfigAndServeError(state ErrorState) bool {
 /**
  * Download and save the latest RSS feeds list file and serve an error saying this is happening.
  * @param {ErrorState} state - Must contain HTTP request and response objects and error message
+ * @return true if the error page is served successfully and other background tasks completed okay
  */
 func downloadFeedsFileAndServeError(state ErrorState) bool {
 	// temporary
@@ -151,6 +164,7 @@ func downloadFeedsFileAndServeError(state ErrorState) bool {
 /**
  * Download and save an articles list file and serve an error saying this is happening.
  * @param {ErrorState} state - Must contain HTTP request and response objects and error message
+ * @return true if the error page is served successfully and other background tasks completed okay
  */
 func downloadArticlesFileAndServeError(state ErrorState) bool {
 	// temporary
@@ -160,6 +174,7 @@ func downloadArticlesFileAndServeError(state ErrorState) bool {
 /**
  * Download the default configuration file package, validate, and apply before serving an error page
  * @param {ErrorState} state - Must contain HTTP request and response objects and error message
+ * @return true if the error page is served successfully and other background tasks completed okay
  */
 func handleLCSErrorReport(state ErrorState) bool {
 	// temporary
@@ -169,6 +184,7 @@ func handleLCSErrorReport(state ErrorState) bool {
 /**
  * Download the default configuration file package, validate, and apply before serving an error page
  * @param {ErrorState} state - Must contain HTTP request and response objects and error message
+ * @return true if the error page is served successfully and other background tasks completed okay
  */
 func downloadViewsAndServeError(state ErrorState) bool {
 	// temporary
@@ -178,6 +194,7 @@ func downloadViewsAndServeError(state ErrorState) bool {
 /**
  * Download the default configuration file package, validate, and apply before serving an error page
  * @param {ErrorState} state - Must contain HTTP request and response objects and error message
+ * @return true if the error page is served successfully and other background tasks completed okay
  */
 func showFreenetMonitorAndServeError(state ErrorState) bool {
 	// temporary
@@ -187,6 +204,7 @@ func showFreenetMonitorAndServeError(state ErrorState) bool {
 /**
  * Download the default configuration file package, validate, and apply before serving an error page
  * @param {ErrorState} state - Must contain HTTP request and response objects and error message
+ * @return true if the error page is served successfully and other background tasks completed okay
  */
 func showPeerMonitorAndServeError(state ErrorState) bool {
 	// temporary
@@ -202,6 +220,7 @@ func showPeerMonitorAndServeError(state ErrorState) bool {
  * @param {ErrorCode} errCode - The error code identifying the error that occurred
  * @param {string} errMsg - A message to output with the error page, if any
  * @param {ErrorState} state - State information about the program at the time the error was returned
+ * @return true if the error page is served successfully and other background tasks completed okay
  */
 func HandleCCError(errCode ErrorCode, errMsg string, state ErrorState) bool {
 	if _, hasErrorCode := state["errCode"]; !hasErrorCode {
@@ -218,6 +237,7 @@ func HandleCCError(errCode ErrorCode, errMsg string, state ErrorState) bool {
  * @param {ErrorCode} errCode - The error code identifying the error that occurred
  * @param {string} errMsg - A message to output with the error page, if any
  * @param {ErrorState} state - State information about the program at the time the error was returned
+ * @return true if the error page is served successfully and other background tasks completed okay
  */
 func HandleLCSError(errCode ErrorCode, errMsg string, state ErrorState) bool {
 	if _, hasErrorCode := state["errCode"]; !hasErrorCode {
@@ -232,6 +252,7 @@ func HandleLCSError(errCode ErrorCode, errMsg string, state ErrorState) bool {
 /**
  * Report that an error occurred trying to decode the response from the LCS.
  * @param {ErrorState} state - Must contain error message to send and the URL to send the request to
+ * @return true if the error request was sent successfully
  */
 func ReportDecodeError(state ErrorState) bool {
 	mapping := map[string]interface{}{
@@ -288,6 +309,7 @@ func ExecuteErrorPage(errorCode ErrorCode, errorMsg string, w http.ResponseWrite
  * Determine whether an error code is one internal to the CC.
  * This is the case when it is of the form 1XXX.
  * @param {ErrorCode} errorCode - The code number identifying the error.
+ * @return true if the error code provided belongs to the CC, else false
  */
 func IsClientError(errorCode ErrorCode) bool {
 	return errorCode/1000 == 1
@@ -297,6 +319,7 @@ func IsClientError(errorCode ErrorCode) bool {
  * Determine whether an error code is one sent from the LCS.
  * This is the case when it is of the form 2YYYY.
  * @param {ErrorCode} errorCode - The code number identifying the error.
+ * @return true if the error code provided belongs to the LCS, else false
  */
 func IsCacheServerError(errorCode ErrorCode) bool {
 	return errorCode/1000 == 2

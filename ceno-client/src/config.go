@@ -44,6 +44,7 @@ const (
  * Produce a URL to request a bundle be looked up by the LCS.
  * @param {Config} configuration - The Configuration for the CC
  * @param {string} URL - The URL to request be looked up
+ * @return the URL to request to have the LCS lookup a URL
  */
 func BundleLookupURL(configuration Config, URL string) string {
 	encodedURL := base64.StdEncoding.EncodeToString([]byte(URL))
@@ -54,6 +55,7 @@ func BundleLookupURL(configuration Config, URL string) string {
  * Produce a URL to request a new bundle be made by the RS.
  * @param {Config} configuration - The Configuration for the CC
  * @param {string} URL - The URL to request a bundle be created for
+ * @return the URL to request to have the RS create a new bundle
  */
 func CreateBundleURL(configuration Config, URL string) string {
 	encodedURL := base64.StdEncoding.EncodeToString([]byte(URL))
@@ -63,6 +65,7 @@ func CreateBundleURL(configuration Config, URL string) string {
 /**
  * Produce a URL to send to the LCS to report a response decode error.
  * @param {Config} configuration - The Configuration for the CC
+ * @return the URL to request to report to the LCS that the CC couldn't decode its response
  */
 func DecodeErrReportURL(configuration Config) string {
 	return configuration.CacheServer + LCS_DECODE_ERR
@@ -71,18 +74,20 @@ func DecodeErrReportURL(configuration Config) string {
 // The default config values, hardcoded, to be provided as examples to the user
 // should they be asked to provide configuration information.
 var DefaultConfiguration Config = Config{
-	":3089",
-	":3090",
-	"http://localhost:3091",
-	"http://localhost:3092",
-	"Page not found",
-	path.Join(".", "views", "wait.html"),
+	PortNumber:     ":3089",
+	PortNumberTLS:  ":3090",
+	CacheServer:    "http://localhost:3091",
+	RequestServer:  "http://localhost:3092",
+	ErrorMsg:       "Page not found",
+	PleaseWaitPage: path.Join(".", "views", "wait.html"),
 }
 
 // Functions to verify that each configuration field is well formed.
 
-// Port numbers for the proxy server to run on must be specified in the
-// form ":<number>".
+/**
+ * Validates that a provided port number is of the form ":<port>"
+ * where port is a valid integer in the range 0 < port <= 2^16 - 1
+ */
 func validPortNumber(port string) bool {
 	if len(port) <= 1 {
 		return false
@@ -95,34 +100,44 @@ func validPortNumber(port string) bool {
 	return colonPrefixSupplied && number > 0 && number <= 65535
 }
 
-// Rather than trying to limit the format of the URL for a server and
-// restricting our use cases, we will broadly say that any URL that
-// parses correctly is valid.
+/**
+ * Determines if the cache server's base URL is valid by trying to parse it.
+ */
 func validCacheServer(cacheServer string) bool {
 	URL, err := url.Parse(cacheServer)
 	return err == nil && len(URL.Host) > 0
 }
 
-// Likewise for the request server, we only test that the URL can be parsed.
+/**
+ * Determines if the request server's base URL is valid by trying to parse it.
+ */
 func validRequestServer(requestServer string) bool {
 	URL, err := url.Parse(requestServer)
 	return err == nil && len(URL.Host) > 0
 }
 
-// No expectations are made with regards to the error message provided.
+/**
+ * No expectations exist for error messages, so true is always returned.
+ */
 func validErrorMessage(errMsg string) bool {
 	return true
 }
 
-// We don't want to do too much work verifying that the content of the
-// provided page is valid HTML so we will settle for ensuring the file exists.
+/**
+ * Ensure that the please wait page exists. We'll leave it up to the template
+ * execution function to check whether it's valid HTML.
+ */
 func validPleaseWaitPage(location string) bool {
 	f, err := os.Open(location)
 	defer f.Close()
 	return err == nil
 }
 
-// Try to read a configuration in from a file.
+/**
+ * Try to read a configuration from a file
+ * @param {string} fileName - The full path to the file to try to load; must be JSON
+ * @return a Config instance if the file contained valid data and any error that occurs reading/decoding the file.
+ */
 func ReadConfigFile(fileName string) (Config, error) {
 	file, fopenErr := os.Open(fileName)
 	if fopenErr != nil {
@@ -138,6 +153,7 @@ func ReadConfigFile(fileName string) (Config, error) {
 
 /**
  * Read configuration information from stdin.
+ * @return a valid Config instance
  */
 func GetConfigFromUser() Config {
 	var configuration Config
