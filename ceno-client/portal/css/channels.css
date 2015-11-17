@@ -1,0 +1,13 @@
+div.channel {
+  background-color: rgb(225, 224, 219);
+  border-radius: 16px;
+  margin: 10px;
+  height: 250px;
+}
+
+div.channel * {
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+  line-height: 250px;
+}
