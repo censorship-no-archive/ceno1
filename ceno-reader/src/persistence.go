@@ -8,8 +8,8 @@ package main
 
 import (
 	"database/sql"
-	rss "github.com/jteeuwen/go-pkg-rss"
 	"fmt"
+	rss "github.com/jteeuwen/go-pkg-rss"
 	_ "github.com/mattn/go-sqlite3"
 	"time"
 )
@@ -158,15 +158,10 @@ func GetFeed(db *sql.DB, url string) (Feed, error) {
 	if err1 != nil {
 		return feed, err1
 	}
-	stmt, err2 := tx.Prepare(`select id, url, type, charset, articles, lastPublished, latest
+	rows, err2 := tx.Query(`select id, url, type, charset, articles, lastPublished, latest
                               from feeds where url=?`)
 	if err2 != nil {
 		return feed, err2
-	}
-	defer stmt.Close()
-	rows, err3 := stmt.Query(url)
-	if err3 != nil {
-		return feed, err3
 	}
 	var id, articles int
 	var _type, charset, lastPublished, latest string
@@ -186,14 +181,9 @@ func DeleteFeed(db *sql.DB, url string) error {
 	if err1 != nil {
 		return err1
 	}
-	stmt, err2 := tx.Prepare("delete from feeds where url=?")
+	_, err2 := tx.Exec("delete from feeds where url=?")
 	if err2 != nil {
 		return err2
-	}
-	defer stmt.Close()
-	_, err3 := stmt.Exec(url)
-	if err3 != nil {
-		return err3
 	}
 	tx.Commit()
 	return nil
@@ -250,15 +240,10 @@ func GetItems(db *sql.DB, feedUrl string) ([]Item, error) {
 	if err1 != nil {
 		return items, err1
 	}
-	stmt, err2 := tx.Prepare(`select id, title, url, authors, published
-                              from items where feed_url=?`)
+	rows, err2 := tx.Query(`select id, title, url, authors, published from items where feed_url=?`,
+		feedUrl)
 	if err2 != nil {
 		return items, err2
-	}
-	defer stmt.Close()
-	rows, err3 := stmt.Query(feedUrl)
-	if err3 != nil {
-		return items, err3
 	}
 	for rows.Next() {
 		var id int
@@ -281,14 +266,9 @@ func DeleteItem(db *sql.DB, id int) error {
 	if err1 != nil {
 		return err1
 	}
-	stmt, err2 := tx.Prepare("delete from items where id=?")
+	_, err2 := tx.Exec("delete from items where id=?")
 	if err2 != nil {
 		return err2
-	}
-	defer stmt.Close()
-	_, err3 := stmt.Exec(id)
-	if err3 != nil {
-		return err3
 	}
 	tx.Commit()
 	return nil
