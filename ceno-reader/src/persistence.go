@@ -173,7 +173,7 @@ func DeleteFeed(db *sql.DB, url string) error {
 	if err1 != nil {
 		return err1
 	}
-	_, err2 := tx.Exec("delete from feeds where url=?")
+	_, err2 := tx.Exec("delete from feeds where url=?", url)
 	if err2 != nil {
 		return err2
 	}
