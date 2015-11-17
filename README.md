@@ -209,7 +209,7 @@ npm install
 CENOLANG=<language> npm start
 ```
 
-where `<language>` is to be replaced with a language identifier such as
+where `<language>` is to be replaced with a language identifier such as `en` or `fr`.
 
 ### CENOBRidge Freenet plugin
 
