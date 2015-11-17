@@ -19,7 +19,7 @@ import (
 // Create the table that contains information about RSS/Atom feeds the reader follows
 const createFeedsTable = `create table if not exists feeds(
     id integer primary key,
-    url varchar(255) unique,
+    url varchar(255) unique on conflict ignore,
     type varchar(8),
     charset varchar(64),
     articles integer,
