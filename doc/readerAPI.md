@@ -38,6 +38,9 @@ GET    | /errors   | N/A       | Have the reader write a human-friendly report a
 
 ### Follow
 
+Instruct the RSS reader to subscribe to a new RSS/Atom feed.  From the time this request
+is handled, the reader will periodically poll the source for new items.
+
 Argument | Example                          | Description
 ---------|----------------------------------|-------------
 url      | https://news.ycombinator.com/rss | The URL of an RSS or Atom feed to subscribe to
@@ -59,6 +62,8 @@ http POST :3096/follow url=https://news.ycombinator.com/rss type=RSS
 
 ### Unfollow
 
+Instruct the RSS Reader to unsubscribe from an RSS/Atom feed.
+
 Argument | Example                          | Description
 ---------|----------------------------------|-------------
 url      | https://news.ycombinator.com/rss | The URL of an RSS or Atom feed to unsubscribe from
@@ -79,6 +84,11 @@ http DELETE :3096/unfollow url=https://news.ycombinator.com/rss
 
 ### Insert
 
+Instruct the RSS reader to create a `feeds.json` file as well as one JSON file per feed listing article retrieved by each feed.  Articles listed in the latter set of files will all have already been inserted into Freenet.
+These files are output into the `json-files/` directory, which can be copied
+directly into the `ceno-client/json-files/` directory for distribution of the client.
+The JSON files generated will also be sent to the Bundle Inserter to be inserte in Frenet as well.
+
 **Examples**
 
 curl:
@@ -94,6 +104,8 @@ http POST :3096/insert
 ```
 
 ### Errors
+
+Generate a human-friendly report describing errors that occurred while trying to subscribe to RSS/Atom feeds or parse items retrieved from said feeds, etc.
 
 **Examples**
 

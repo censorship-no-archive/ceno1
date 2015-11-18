@@ -24,13 +24,23 @@ const RSS_READER_HEADER = 'x-rss-reader';
 
 // The format of date-time printed in the logs. A formatted date looks like:
 // Nov 04, 2015 03:02:14:116
-const LOGGING_DATEFORMAT = ("mmm dd, yyyy HH:MM:ss:l")
+const LOGGING_DATEFORMAT = 'mmm dd, yyyy HH:MM:ss:l';
 
+/**
+ * Log a message to the console with the current date and time.
+ * @param {string} msg - The message to output
+ */
 function bs_log(msg) {
   console.log(dateFormat(new Date(), LOGGING_DATEFORMAT) + ' [BUNDLE SERVER] ' + msg);
 }
 
-// POST to the RR to prompt it to accept a completed bundle.
+/**
+ * POST to the RR to prompt it to accept a completed bundle.
+ * @param {object} config - The bundle server configuration, which includes info about the RR
+ * @param {object} data - The body of the request to send to the RR
+ * @param {bool} wasRewritten - Whether the request was rewritten from HTTPS to HTTP
+ * @param {function} cb - A callback to invoke to handle the results of the request
+ */
 function reportCompleteBundle(config, data, wasRewritten, cb) {
   var headers = {};
   headers[REWRITTEN_HEADER] = wasRewritten;
@@ -73,23 +83,6 @@ function requestWasRewritten(request) {
 function requestFromReader(request) {
   var headerValue = request.headers[RSS_READER_HEADER];
   return typeof headerValue !== 'undefined' && headerValue === 'true';
-}
-
-/**
- * An on-original-received handler to strip resources from a document by replacing
- * attributes in particular tags with an empty string.
- * @param {string} tag - The name of the tag to find (e.g. a)
- * @param {string} attr - The attribute to replace the value of (e.g. href)
- */
-function stripResource(tag, attr) {
-  return function (reqFn, originalDoc, url, callback) {
-    var diff = {};
-    b.htmlFinder(originalDoc, tag, attr)(function (value) {
-      console.log('Writing an empty diff for ' + value, 'tag =', tag, 'attr =', attr);
-      diff[value] = '';
-    });
-    callback(null, diff);
-  };
 }
 
 /**
@@ -148,6 +141,11 @@ function makeBundler(url, config, reqFromReader) {
   return bundler;
 }
 
+/**
+ * Creates a request handler that is a closure over the bundle server's Configuration
+ * @param {object} config - The bundle server's configuration
+ * @return a handler callback for http.createServer
+ */
 function handler(config) {
   return function (req, res) {
     var disconnected = false; // A flag set when the request is closed.
