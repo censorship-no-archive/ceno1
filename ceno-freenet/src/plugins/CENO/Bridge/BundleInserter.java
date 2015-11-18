@@ -5,6 +5,8 @@ import java.util.Date;
 import java.util.Hashtable;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.io.FilenameUtils;
+
 import plugins.CENO.Bridge.BundlerInterface.Bundle;
 import plugins.CENO.Common.URLtoUSKTools;
 import freenet.client.InsertException;
@@ -81,9 +83,17 @@ public class BundleInserter {
 			throw new IOException("Bundle content for url " + url + " was empty.");
 		}
 
+		String docName = null;
+		if (url.contains("/")) {
+			String urlFile = url.substring(url.lastIndexOf("/"));
+			if (urlFile != null && !urlFile.isEmpty()) {
+				docName = FilenameUtils.getBaseName(urlFile) + "." + FilenameUtils.getExtension(urlFile);
+			}
+		}
+
 		FreenetURI insertKey = URLtoUSKTools.computeInsertURI(url, CENOBridge.initConfig.getProperty("insertURI"));
 		Logger.normal(BundleInserter.class, "Initiating bundle insertion for URL: " + url);
-		insertBundleManifest(url, insertKey, null, bundle.getContent(), insertCallback);
+		insertBundleManifest(url, insertKey, docName, bundle.getContent(), insertCallback);
 	}
 
 	public static void insertBundleManifest(String url, FreenetURI insertURI, String docName, String content, ClientPutCallback insertCallback) throws IOException, InsertException {

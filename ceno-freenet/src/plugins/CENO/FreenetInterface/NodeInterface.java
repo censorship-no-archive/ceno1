@@ -117,7 +117,7 @@ public class NodeInterface implements FreenetInterface {
 			defName = defaultName;
 		}
 
-		Bucket bucket = HighLevelSimpleClientInterface.getBucketFromString(content);
+		Bucket bucket = HighLevelSimpleClientInterface.getBucketFromString(content, DefaultMIMETypes.guessMIMEType(defName, true));
 
 		HashMap<String, Object> bucketsByName = new HashMap<String, Object>();
 		bucketsByName.put(defName, bucket);
@@ -129,11 +129,8 @@ public class NodeInterface implements FreenetInterface {
 	@Override
 	public boolean insertFreesite(FreenetURI insertURI, String docName, String content, ClientPutCallback insertCallback) throws IOException, InsertException {
 		String mimeType = DefaultMIMETypes.guessMIMEType(docName, true);
-		if(mimeType == null) {
-			mimeType = "text/html";
-		}
 
-		RandomAccessBucket bucket = (RandomAccessBucket) HighLevelSimpleClientInterface.getBucketFromString(content);
+		RandomAccessBucket bucket = (RandomAccessBucket) HighLevelSimpleClientInterface.getBucketFromString(content, mimeType);
 
 		InsertBlock ib = new InsertBlock(bucket, new ClientMetadata(mimeType), insertURI);
 		InsertContext ictx = HighLevelSimpleClientInterface.getInsertContext(true);

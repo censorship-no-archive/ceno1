@@ -108,6 +108,7 @@ public class USKUpdateFetcher {
 		private void fetchNewEdition(FreenetURI uri) {
 			FetchResult fetchResult = null;
 			if (!uri.hasMetaStrings()) {
+				//TODO Replace default.html
 				uri = uri.addMetaStrings(new String[]{"default.html"});
 			}
 			try {
