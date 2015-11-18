@@ -10,3 +10,10 @@ button {
   font-weight: bold !important;
   background-color: #e43624 !important;
 }
+
+.content {
+  height: 100%;
+  width: 80%;
+  margin-left: auto;
+  margin-right: auto;
+}

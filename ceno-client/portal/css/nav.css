@@ -1,21 +1,31 @@
 #mainNav {
   height: 100px;
-  background-color: #f4f4f3;
+  background-color: rgb(236, 237, 237);
 }
 
-#mainNav>img {
+#mainNav img {
+  margin-top: 10px;
   float: left;
 }
 
-#mainNav>ul {
+#mainNav ul {
   height: 100%;
   float: right;
 }
 
 #languageMenu {
-  background-color: lightgrey;
+  background-color: rgb(199, 199, 199);
+  color: white;
 }
 
-#mainNav>ul li {
+#languageMenu:hover {
+  background-color: rgb(199, 199, 199);
+}
+
+#languageMenu a {
+  color: white;
+}
+
+#mainNav ul li {
   height: 100%;
 }

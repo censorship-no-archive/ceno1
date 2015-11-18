@@ -1,10 +1,19 @@
 #breadcrumbsBar {
-  height: 50px;
+  height: 100px;
   background-color: #e43624;
 }
 
-#breadcrumbsBar>span {
+#breadcrumbsBar > .content > span {
   color: white;
-  font-size: 1.2em;
+  font-size: 1.4em;
   font-weight: bold;
+  line-height: 100px;
+}
+
+#breadcrumbsBar + * {
+  margin-top: 130px;
+}
+
+#breadcrumbsBar + .content > h1 {
+  margin-bottom: 50px;
 }

@@ -1,7 +1,15 @@
+.pure-g.channel-row {
+  margin-left: -12px;
+}
+
+.pure-g.channel-row:last-child {
+  margin-right: 0;
+}
+
 div.channel {
   background-color: rgb(225, 224, 219);
   border-radius: 16px;
-  margin: 10px;
+  margin: 12px;
   height: 250px;
 }
 
