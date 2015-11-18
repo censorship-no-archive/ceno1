@@ -1,7 +1,7 @@
 [
   {
     "id": "agent_communication_err",
-    "translation": "Check that all of the components of CENO are running."
+    "translation": "Check that all of the components of CENO are running. You may wish to restart the CENO box entirely."
   },
   {
     "id": "articles_word",
@@ -9,15 +9,11 @@
   },
   {
     "id": "authors_word",
-    "translation": "by"
+    "translation": "written by"
   },
   {
     "id": "bundle_err_cli",
     "translation": "Bundler encountered an error: {{.Message}}"
-  },
-  {
-    "id": "consult_readme_err",
-    "translation": "Refer to the README to find detailed instructions about how to handle the specific error you have been presented with."
   },
   {
     "id": "contact_devs_err",
@@ -29,7 +25,7 @@
   },
   {
     "id": "corrupt_json_err",
-    "translation": "Tried to decode JSON that was found to be corrupt."
+    "translation": "The formatting of the data retrieved was found to not be valid JSON."
   },
   {
     "id": "decode_error_cli",
@@ -37,7 +33,7 @@
   },
   {
     "id": "download_package_err",
-    "translation": "Download the view and config package and consult the README for installation instructions."
+    "translation": "Download the view and config package and unpack its contents into ceno-client/views/.",
   },
   {
     "id": "err_from_lcs_cli",
@@ -53,7 +49,7 @@
   },
   {
     "id": "got_request_msg_cli",
-    "translation": "Got a request for {{.URL}}.  Was rewritten? {{.Rewritten}}"
+    "translation": "Got a request for {{.URL}}.  Was rewritten? {{.Rewritten}}."
   },
   {
     "id": "how_to_default_cfg",
@@ -89,15 +85,15 @@
   },
   {
     "id": "listening_msg_cli",
-    "translation": "CENO proxy server listening for HTTP requests at http://127.0.0.1{{.Port}}"
+    "translation": "CENO proxy server listening for HTTP requests at http://127.0.0.1{{.Port}}."
   },
   {
     "id": "malformed_url_cli",
-    "translation": "Malformed URL {{.URL}}"
+    "translation": "Malformed URL {{.URL}}."
   },
   {
     "id": "malformed_url_err",
-    "translation": "Check that you have typed the URL of the site you want to visit correctly."
+    "translation": "Check that you have entered the URL of the site you want to visit correctly."
   },
   {
     "id": "missing_config_err",
@@ -121,7 +117,7 @@
   },
   {
     "id": "no_config_cli",
-    "translation": "Could not read configuration file at {{.Location}}"
+    "translation": "Could not read configuration file at {{.Location}}."
   },
   {
     "id": "no_feeds_file_err",
@@ -129,11 +125,11 @@
   },
   {
     "id": "no_reach_lcs_cli",
-    "translation": "Could not reach the local cache server to report decode error"
+    "translation": "Could not reach the local cache server to report decode error."
   },
   {
     "id": "please_wait_header_html",
-    "translation": "Your bundle is being prepared"
+    "translation": "Your bundle is being prepared."
   },
   {
     "id": "please_wait_p1_html",
@@ -173,7 +169,7 @@
   },
   {
     "id": "querystring_no_url_cli",
-    "translation": "No URL provided in query string"
+    "translation": "No URL provided in query string."
   },
   {
     "id": "report_html",
@@ -197,7 +193,7 @@
   },
   {
     "id": "url_b64_cli",
-    "translation": "URL provided to /lookup must be base64 encoded"
+    "translation": "URL provided to /lookup must be base64 encoded."
   },
   {
     "id": "what_you_can_do_html",

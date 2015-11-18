@@ -59,7 +59,7 @@ var errorAdvice = map[ErrorCode]string{
 	ERR_CORRUPT_JSON:           "corrupt_json_err",
 	ERR_NO_CONNECT_LCS:         "agent_communication_err",
 	ERR_MALFORMED_LCS_RESPONSE: "contact_devs_err",
-	ERR_FROM_LCS:               "consult_readme_err",
+	ERR_FROM_LCS:               "",
 	ERR_NO_CONNECT_RS:          "agent_communication_err",
 	ERR_MISSING_VIEW:           "download_package_err",
 	ERR_INVALID_ERROR:          "contact_devs_err",
