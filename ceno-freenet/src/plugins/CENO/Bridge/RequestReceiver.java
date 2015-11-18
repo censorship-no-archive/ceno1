@@ -5,7 +5,6 @@ import java.net.MalformedURLException;
 
 import plugins.CENO.Common.URLtoUSKTools;
 import freenet.client.InsertException;
-import freenet.keys.FreenetURI;
 import freenet.support.Logger;
 
 public class RequestReceiver {
@@ -13,12 +12,11 @@ public class RequestReceiver {
 	private RequestReceiver() {
 	}
 	
-	public static void signalReceived(FreenetURI uri) {
-		String[] urlList = new String[]{};
-		RequestReceiver.receiveURLList(urlList);
+	public static void signalReceived(String[] urlList) {
+		RequestReceiver.receivedURLList(urlList);
 	}
 
-	private static void receiveURLList(String[] urlList) {
+	private static void receivedURLList(String[] urlList) {
 		for (String urlRequested : urlList) {
 			try {
 				urlRequested = URLtoUSKTools.validateURL(urlRequested);

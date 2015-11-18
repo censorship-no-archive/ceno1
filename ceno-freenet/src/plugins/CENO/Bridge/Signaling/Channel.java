@@ -2,8 +2,14 @@ package plugins.CENO.Bridge.Signaling;
 
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.util.concurrent.TimeUnit;
 
 import plugins.CENO.Bridge.CENOBridge;
+import plugins.CENO.Bridge.RequestReceiver;
+import plugins.CENO.Client.CENOClient;
+import plugins.CENO.Client.USKUpdateFetcher;
+import freenet.client.FetchException;
+import freenet.client.FetchResult;
 import freenet.client.InsertException;
 import freenet.client.async.ClientContext;
 import freenet.client.async.PersistenceDisabledException;
@@ -66,13 +72,61 @@ public class Channel {
 		USK origUSK = new USK(requestSSK.getRoutingKey(), requestSSK.getCryptoKey(), requestSSK.getExtra(), "", lastKnownEdition);
 		CENOBridge.nodeInterface.subscribeToUSK(origUSK, new ReqCallback());
 	}
-	
+
 	public static class ReqCallback implements USKCallback {
 
 		@Override
 		public void onFoundEdition(long l, USK key, ClientContext context,
 				boolean metadata, short codec, byte[] data,
 				boolean newKnownGood, boolean newSlotToo) {
+			fetchNewRequests(key.getURI().setSuggestedEdition(l));
+		}
+
+		private void fetchNewRequests(FreenetURI uri) {
+			FetchResult fetchResult = null;
+			if (!uri.hasMetaStrings()) {
+				uri = uri.addMetaStrings(new String[]{"default.html"});
+			}
+			try {
+				fetchResult = CENOClient.nodeInterface.fetchURI(uri);
+			} catch (FetchException e) {
+				switch (e.getMode()) {
+				case PERMANENT_REDIRECT :
+					fetchNewRequests(e.newURI);
+					break;
+
+				case ALL_DATA_NOT_FOUND :
+				case DATA_NOT_FOUND :
+					Logger.warning(USKUpdateFetcher.class, 
+							"Found new edition of USK but could not fetch data for USK: " + uri);
+					break;
+
+				case RECENTLY_FAILED :
+					try {
+						Thread.sleep(TimeUnit.MINUTES.toMillis(10));
+					} catch (InterruptedException e1) {
+						// No big deal
+					} finally {
+						fetchNewRequests(uri);
+					}
+					return;
+
+				default:
+					Logger.warning(USKUpdateFetcher.class,
+							"Exception while fetching new edition for USK: " + uri + ", " + e.getMessage());
+					break;
+				}
+				if (e.isDefinitelyFatal()) {
+					Logger.error(USKUpdateFetcher.class,
+							"Fatal error while fetching new edition for USK: " + uri + ", " + e.getMessage());
+					return;
+				}
+			}
+
+			String[] urlList = fetchResult.toString().split("\\r?\\n");
+			RequestReceiver.signalReceived(urlList);
+
+			return;
 		}
 
 		@Override
@@ -86,7 +140,7 @@ public class Channel {
 			// TODO Auto-generated method stub
 			return 0;
 		}
-		
+
 	}
 
 }

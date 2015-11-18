@@ -103,7 +103,7 @@ public class ChannelMaker {
 
 		public ChannelMakerListener(String puzzleAnswer) throws MalformedURLException {
 			this.puzzleAnswer = puzzleAnswer;
-			channelMakingKSK = new FreenetURI("KSK@" + puzzleAnswer);
+			channelMakingKSK = new FreenetURI("KSK@" + this.puzzleAnswer);
 			continueLoop = true;
 		}
 
