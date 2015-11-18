@@ -18,8 +18,8 @@ type Config struct {
 
 // Default confifuration values that can be provided as options to the user.
 var DefaultConfiguration Config = Config{
-	PortNumber: ":3096",
-	BundleServer: "http://127.0.0.1:3094",
+	PortNumber:     ":3096",
+	BundleServer:   "http://127.0.0.1:3094",
 	BundleInserter: "http://127.0.0.1:3095",
 }
 

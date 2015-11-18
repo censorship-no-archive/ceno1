@@ -8,8 +8,8 @@ package main
 
 import (
 	"database/sql"
-	rss "github.com/jteeuwen/go-pkg-rss"
 	"fmt"
+	rss "github.com/jteeuwen/go-pkg-rss"
 	_ "github.com/mattn/go-sqlite3"
 	"time"
 )
@@ -19,7 +19,7 @@ import (
 // Create the table that contains information about RSS/Atom feeds the reader follows
 const createFeedsTable = `create table if not exists feeds(
     id integer primary key,
-    url varchar(255) unique,
+    url varchar(255) unique on conflict ignore,
     type varchar(8),
     charset varchar(64),
     articles integer,
@@ -125,11 +125,7 @@ func SaveFeed(db *sql.DB, feed Feed) error {
  */
 func AllFeeds(db *sql.DB) ([]Feed, error) {
 	var feeds []Feed
-	tx, err1 := db.Begin()
-	if err1 != nil {
-		return feeds, err1
-	}
-	rows, err2 := tx.Query(`select id, url, type, charset, articles, lastPublished, latest
+	rows, err2 := db.Query(`select id, url, type, charset, articles, lastPublished, latest
                             from feeds`)
 	if err2 != nil {
 		return feeds, err2
@@ -154,19 +150,10 @@ func AllFeeds(db *sql.DB) ([]Feed, error) {
  */
 func GetFeed(db *sql.DB, url string) (Feed, error) {
 	var feed Feed
-	tx, err1 := db.Begin()
-	if err1 != nil {
-		return feed, err1
-	}
-	stmt, err2 := tx.Prepare(`select id, url, type, charset, articles, lastPublished, latest
+	rows, err2 := db.Query(`select id, url, type, charset, articles, lastPublished, latest
                               from feeds where url=?`)
 	if err2 != nil {
 		return feed, err2
-	}
-	defer stmt.Close()
-	rows, err3 := stmt.Query(url)
-	if err3 != nil {
-		return feed, err3
 	}
 	var id, articles int
 	var _type, charset, lastPublished, latest string
@@ -186,14 +173,9 @@ func DeleteFeed(db *sql.DB, url string) error {
 	if err1 != nil {
 		return err1
 	}
-	stmt, err2 := tx.Prepare("delete from feeds where url=?")
+	_, err2 := tx.Exec("delete from feeds where url=?", url)
 	if err2 != nil {
 		return err2
-	}
-	defer stmt.Close()
-	_, err3 := stmt.Exec(url)
-	if err3 != nil {
-		return err3
 	}
 	tx.Commit()
 	return nil
@@ -246,19 +228,10 @@ func SaveItem(db *sql.DB, feedUrl string, item *rss.Item) error {
  */
 func GetItems(db *sql.DB, feedUrl string) ([]Item, error) {
 	var items []Item
-	tx, err1 := db.Begin()
-	if err1 != nil {
-		return items, err1
-	}
-	stmt, err2 := tx.Prepare(`select id, title, url, authors, published
-                              from items where feed_url=?`)
+	rows, err2 := db.Query(`select id, title, url, authors, published from items where feed_url=?`,
+		feedUrl)
 	if err2 != nil {
 		return items, err2
-	}
-	defer stmt.Close()
-	rows, err3 := stmt.Query(feedUrl)
-	if err3 != nil {
-		return items, err3
 	}
 	for rows.Next() {
 		var id int
@@ -281,14 +254,9 @@ func DeleteItem(db *sql.DB, id int) error {
 	if err1 != nil {
 		return err1
 	}
-	stmt, err2 := tx.Prepare("delete from items where id=?")
+	_, err2 := tx.Exec("delete from items where id=?")
 	if err2 != nil {
 		return err2
-	}
-	defer stmt.Close()
-	_, err3 := stmt.Exec(id)
-	if err3 != nil {
-		return err3
 	}
 	tx.Commit()
 	return nil
@@ -326,14 +294,10 @@ func SaveError(db *sql.DB, report ErrorReport) error {
  */
 func GetErrors(db *sql.DB) ([]ErrorReport, error) {
 	reports := make([]ErrorReport, 0)
-	tx, err := db.Begin()
-	if err != nil {
-		return reports, err
-	}
 	// Get the relevant rows from the database.
 	// Note that error types and resource types are specified in the database as integers.
 	// That means we do the usual binary operations to find them.
-	rows, queryError := tx.Query(`select id, resource_types, error_types, message from errors`)
+	rows, queryError := db.Query(`select id, resource_types, error_types, message from errors`)
 	if queryError != nil {
 		return reports, queryError
 	}
@@ -346,10 +310,9 @@ func GetErrors(db *sql.DB) ([]ErrorReport, error) {
 		})
 	}
 	rows.Close()
-	_, execError := tx.Exec(`delete from errors`)
+	_, execError := db.Exec(`delete from errors`)
 	if execError != nil {
 		return reports, execError
 	}
-	tx.Commit()
 	return reports, nil
 }
