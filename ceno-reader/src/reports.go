@@ -17,6 +17,7 @@ var errorClassDescriptions map[string]string = map[string]string{
  * @param resourceTypes - A binary-OR list of concerned resources; eg. RssFeed | Article
  * @param errorTypes - A binary-OR list of detected errors; eg. InvalidUrl | NoResponse
  * @param message - An error message to describe what happened
+ * @return an ErrorReport instance containing the provided information about the report
  */
 func NewErrorReport(resourceTypes Resource, errorTypes ErrorClass, message string) ErrorReport {
 	return ErrorReport{-1, resourceTypes, errorTypes, message}
@@ -25,6 +26,7 @@ func NewErrorReport(resourceTypes Resource, errorTypes ErrorClass, message strin
 /**
  * Generate a textual report to describe a list of errors.
  * @param reports - An array of errors to describe
+ * @return a string containing a human-readable report of the errors that have occurred handling feeds
  */
 func WriteReport(reports []ErrorReport) string {
 	reportMsg := ""

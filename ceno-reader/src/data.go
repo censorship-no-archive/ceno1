@@ -41,6 +41,7 @@ var CharsetReaders map[string]xmlx.CharsetFunc = map[string]xmlx.CharsetFunc{
 // Location to write the main JSON file about feeds being followed
 const JSON_FILE_DIR = "json-files"
 
+// The path to the file that lists the feeds followed by the RSS Reader
 var FeedsJsonFile string = path.Join(JSON_FILE_DIR, "feeds.json")
 
 // A special identifier that can be used to find the top-level JSON file listing feeds

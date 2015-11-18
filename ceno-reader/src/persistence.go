@@ -8,16 +8,18 @@ package main
 
 import (
 	"database/sql"
-	rss "github.com/jteeuwen/go-pkg-rss"
-	//"github.com/jteeuwen/go-pkg-xmlx"
 	"fmt"
+	rss "github.com/jteeuwen/go-pkg-rss"
 	_ "github.com/mattn/go-sqlite3"
 	"time"
 )
 
+// SQLite table initialization statements
+
+// Create the table that contains information about RSS/Atom feeds the reader follows
 const createFeedsTable = `create table if not exists feeds(
     id integer primary key,
-    url varchar(255) unique,
+    url varchar(255) unique on conflict ignore,
     type varchar(8),
     charset varchar(64),
     articles integer,
@@ -25,6 +27,7 @@ const createFeedsTable = `create table if not exists feeds(
     latest varchar(255)
 );`
 
+// Create the table that contains information about items received from feeds
 const createItemsTable = `create table if not exists items(
     id integer primary key,
     title varchar(255),
@@ -34,6 +37,10 @@ const createItemsTable = `create table if not exists items(
     published varchar(64)
 );`
 
+// Create a table containing information about errors encountered trying to subscribe
+// to feeds, handling articles, etc.
+// These errors can be retrieved as a report later that can be used to diagnose problems
+// with specific feeds
 const createErrorsTable = `create table if not exists errors(
 	id integer primary key,
 	resource_types integer,
@@ -41,6 +48,7 @@ const createErrorsTable = `create table if not exists errors(
 	message text
 );`
 
+// A list of the tables to try to initialize when the reader starts
 var tableInitializers = []string{
 	createFeedsTable,
 	createItemsTable,
@@ -92,6 +100,7 @@ func InitDBConnection(dbFileName string) (*sql.DB, error) {
  * Persist information about a feed to the storage medium.
  * @param {*sql.DB} db - The database connection to use
  * @param {Feed} feed - Information describing the new feed to save
+ * @return any error that occurs trying to run the query
  */
 func SaveFeed(db *sql.DB, feed Feed) error {
 	tx, err1 := db.Begin()
@@ -112,14 +121,11 @@ func SaveFeed(db *sql.DB, feed Feed) error {
 /**
  * Get a collection of all the feeds subscribed to.
  * @param {*sql.DB} db - The database connection to use
+ * @return the collection of feeds retrieved from the database and any error that occurs
  */
 func AllFeeds(db *sql.DB) ([]Feed, error) {
 	var feeds []Feed
-	tx, err1 := db.Begin()
-	if err1 != nil {
-		return feeds, err1
-	}
-	rows, err2 := tx.Query(`select id, url, type, charset, articles, lastPublished, latest
+	rows, err2 := db.Query(`select id, url, type, charset, articles, lastPublished, latest
                             from feeds`)
 	if err2 != nil {
 		return feeds, err2
@@ -140,22 +146,14 @@ func AllFeeds(db *sql.DB) ([]Feed, error) {
  * Get the basic information about a persisted feed from its URL.
  * @param {*sql.DB} db - The database connection to use
  * @param {string} url - The URL to search for
+ * @return the feed retrieved from the database and any error that occurs
  */
 func GetFeed(db *sql.DB, url string) (Feed, error) {
 	var feed Feed
-	tx, err1 := db.Begin()
-	if err1 != nil {
-		return feed, err1
-	}
-	stmt, err2 := tx.Prepare(`select id, url, type, charset, articles, lastPublished, latest
+	rows, err2 := db.Query(`select id, url, type, charset, articles, lastPublished, latest
                               from feeds where url=?`)
 	if err2 != nil {
 		return feed, err2
-	}
-	defer stmt.Close()
-	rows, err3 := stmt.Query(url)
-	if err3 != nil {
-		return feed, err3
 	}
 	var id, articles int
 	var _type, charset, lastPublished, latest string
@@ -168,20 +166,16 @@ func GetFeed(db *sql.DB, url string) (Feed, error) {
  * Delete a feed by referencing its URL.
  * @param {*sql.DB} db - The database connection to use
  * @param {string} url - The URL of the feed
+ * @return any error that occurs executing the delete statement
  */
 func DeleteFeed(db *sql.DB, url string) error {
 	tx, err1 := db.Begin()
 	if err1 != nil {
 		return err1
 	}
-	stmt, err2 := tx.Prepare("delete from feeds where url=?")
+	_, err2 := tx.Exec("delete from feeds where url=?", url)
 	if err2 != nil {
 		return err2
-	}
-	defer stmt.Close()
-	_, err3 := stmt.Exec(url)
-	if err3 != nil {
-		return err3
 	}
 	tx.Commit()
 	return nil
@@ -192,6 +186,7 @@ func DeleteFeed(db *sql.DB, url string) error {
  * @param {*sql.DB} db - the database connection to use
  * @param {string} feedUrl - The URL of the RSS/Atom feed
  * @param {*rss.Item} item - The item to store the content of
+ * @return any error that occurs saving the item
  */
 func SaveItem(db *sql.DB, feedUrl string, item *rss.Item) error {
 	tx, err1 := db.Begin()
@@ -229,22 +224,14 @@ func SaveItem(db *sql.DB, feedUrl string, item *rss.Item) error {
  * Get the items stored for a particular feed in reference to its URL.
  * @param {*sql.DB} db - the database connection to use
  * @param {string} url - The URL of the feed to get items from
+ * @return the collection of items retrieved from the database and any error that occurs
  */
 func GetItems(db *sql.DB, feedUrl string) ([]Item, error) {
 	var items []Item
-	tx, err1 := db.Begin()
-	if err1 != nil {
-		return items, err1
-	}
-	stmt, err2 := tx.Prepare(`select id, title, url, authors, published
-                              from items where feed_url=?`)
+	rows, err2 := db.Query(`select id, title, url, authors, published from items where feed_url=?`,
+		feedUrl)
 	if err2 != nil {
 		return items, err2
-	}
-	defer stmt.Close()
-	rows, err3 := stmt.Query(feedUrl)
-	if err3 != nil {
-		return items, err3
 	}
 	for rows.Next() {
 		var id int
@@ -260,20 +247,16 @@ func GetItems(db *sql.DB, feedUrl string) ([]Item, error) {
  * Delete a particular item.
  * @param {*sql.DB} db - The database connection to use
  * @param {int} id - The identifier of the item to delete
+ * @return any error that occurs running the delete statement
  */
 func DeleteItem(db *sql.DB, id int) error {
 	tx, err1 := db.Begin()
 	if err1 != nil {
 		return err1
 	}
-	stmt, err2 := tx.Prepare("delete from items where id=?")
+	_, err2 := tx.Exec("delete from items where id=?")
 	if err2 != nil {
 		return err2
-	}
-	defer stmt.Close()
-	_, err3 := stmt.Exec(id)
-	if err3 != nil {
-		return err3
 	}
 	tx.Commit()
 	return nil
@@ -285,6 +268,7 @@ func DeleteItem(db *sql.DB, id int) error {
  * occurs strictly in the CENO Reader codebase. We aren't going to bother doing it in SQL.
  * @param {*sql.DB} db - The database connection to use
  * @param {Errorreport} report - Information about the error that occurred
+ * @return any error that occurs saving the error report information
  */
 func SaveError(db *sql.DB, report ErrorReport) error {
 	tx, err := db.Begin()
@@ -306,17 +290,14 @@ func SaveError(db *sql.DB, report ErrorReport) error {
  * argument to this function.  Once error reports are retrieved from the database,
  * they are deleted since we want to avoid reporting errors twice.
  * @param {*sql.DB} db - The database connection to use
+ * @return the collection of error reports retrieved from the database and any error that occurs
  */
 func GetErrors(db *sql.DB) ([]ErrorReport, error) {
 	reports := make([]ErrorReport, 0)
-	tx, err := db.Begin()
-	if err != nil {
-		return reports, err
-	}
 	// Get the relevant rows from the database.
 	// Note that error types and resource types are specified in the database as integers.
 	// That means we do the usual binary operations to find them.
-	rows, queryError := tx.Query(`select id, resource_types, error_types, message from errors`)
+	rows, queryError := db.Query(`select id, resource_types, error_types, message from errors`)
 	if queryError != nil {
 		return reports, queryError
 	}
@@ -329,10 +310,9 @@ func GetErrors(db *sql.DB) ([]ErrorReport, error) {
 		})
 	}
 	rows.Close()
-	_, execError := tx.Exec(`delete from errors`)
+	_, execError := db.Exec(`delete from errors`)
 	if execError != nil {
 		return reports, execError
 	}
-	tx.Commit()
 	return reports, nil
 }

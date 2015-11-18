@@ -43,6 +43,7 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 	public static Configuration initConfig;
 	private Version version = new Version(Version.PluginType.BRIDGE);
 	private static final String configPath = System.getProperty("user.home") + "/.CENO/bridge.properties";
+	public static final String PORTAL_DOC_NAME = "CENO-RSS";
 
 	public static final String bridgeFreemail = "DEFLECTBridge@ih5ixq57yetjdbrspbtskdp6fjake4rdacziriiefnjkwlvhgw3a.freemail";
 	public static final String clientFreemail = "CENO@54u2ko3lssqgalpvfqbq44gwfquqrejm3itl4rxj5nt7v6mjy22q.freemail";

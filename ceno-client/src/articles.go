@@ -16,6 +16,7 @@ import (
  * JSON files containing information about articles stored in the distributed cache (Freenet)
  * are named like `json-files/<base64(feed's url)>.json`
  * @param feedUrl - The URL of the RSS/Atom feed to retrieve information about articles from
+ * @return the path to the article of interest's respective JSON file on disk
  */
 func articlesFilename(feedUrl string) string {
 	b64FeedUrl := base64.StdEncoding.EncodeToString([]byte(feedUrl))

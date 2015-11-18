@@ -46,7 +46,8 @@ type Result struct {
 
 /**
  * Log the current time and a message
- * @param {interface} msg - The message to be logged
+ * @param {interface{}} msg - The message or value to be logged
+ * @return the same message that is logged to console
  */
 func log(msg interface{}) string {
 	t := strings.Replace(time.Now().Format("Jan 01, 2006 15:04:05.000"), ".", ":", 1)
@@ -59,6 +60,7 @@ func log(msg interface{}) string {
  * Set a header on responses that indicates that the response was served by the CENO client.
  * Useful for checking if the CENO Client is running via an HTTP request.
  * @param {ResponseWriter} w - The ResponseWriter used to serve the current request's response.
+ * @return the modified response writer
  */
 func WriteProxyHeader(w http.ResponseWriter) http.ResponseWriter {
 	w.Header().Add("X-Ceno-Proxy", "yxorP-oneC-X")
@@ -93,6 +95,7 @@ func pleaseWait(URL string, w http.ResponseWriter) {
 /**
  * Request that the LCS start a lookup process for a particular URL.
  * @param {string} lookupURL - The URL to try to find in the distributed cache
+ * @return the result of the lookup with any error code and message or values retrieved
  */
 func Lookup(lookupURL string) Result {
 	response, err := http.Get(BundleLookupURL(Configuration, lookupURL))
@@ -132,6 +135,7 @@ func Lookup(lookupURL string) Result {
  * Request that the RS issue a request to create a new bundle.
  * @param {string} lookupURL - The URL of the site to create a bundle for
  * @param {bool} wasRewritten - True if the requested URL was rewritten from HTTPS to HTTP
+ * @return any error that occurs creating or issuing the request
  */
 func requestNewBundle(lookupURL string, wasRewritten bool) error {
 	// We can ignore the content of the response since it is not used.
@@ -152,6 +156,7 @@ func requestNewBundle(lookupURL string, wasRewritten bool) error {
  * Strip out the S in HTTPS from URLs provided to the CC via the /lookup path.
  * Returns the written URL and a boolean indicating whether the downgrade was made.
  * @param {string} URL - The decoded (from b64) URL being requested
+ * @return the new URL and a bool set to true if a rewrite of http->https occurred
  */
 func stripHttps(URL string) (string, bool) {
 	if strings.Index(URL, "https") != 0 {
@@ -206,7 +211,7 @@ func directHandler(w http.ResponseWriter, r *http.Request) {
 				"URL": stripped,
 			}), ErrorState{"responseWriter": w, "request": r})
 		} else {
-			// Finally we can pass the modified request onto the proxy server.
+			// Finally we can pass the modified request onto the proxy handler.
 			r.URL = newURL
 			proxyHandler(w, r)
 		}
@@ -219,6 +224,7 @@ func directHandler(w http.ResponseWriter, r *http.Request) {
  * @param {string} URL - The URL being requested
  * @param {ResponseWriter} w - The object handling writing responses to the client
  * @param {*Request} r - Information about the request
+ * @return true if the url is well-formed or else false
  */
 func validateURL(URL string, w http.ResponseWriter, r *http.Request) bool {
 	isValid, err := regexp.MatchString(URL_REGEX, URL)

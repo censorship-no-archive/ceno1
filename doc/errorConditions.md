@@ -33,34 +33,26 @@ Error codes consist of four digits where
 
 ## CC
 
-### No configuration file
-
-**Error code: 1100**
+### 1100 - No configuration file
 
 If no configuration file (`config/client.json`) exists, the user should be prompted to enter
 values for each required field.  A default configuration structure should be hardcoded in the
 client (`client.go`) to require fewer editions by the user.  When configuration information
 has been supplied, the values should be written to `config/client.json`.
 
-### Malformed request URL
-
-**Error code: 1101**
+### 1101 - Malformed request URL
 
 In the case that the url supplied is malformed (tested by trying to parse, see
 [net/url.Parse](https://golang.org/pkg/net/url/#Parse),
 the client should immediately serve a page to the user informing them of the error and not
 send any request to the LCS.
 
-### Cannot connect to LCS
-
-**Error code: 1200**
+### 1200 - Cannot connect to LCS
 
 In the case that the client cannot connect to the LCS, an error page should be displayed to the
 user with instructions about how to obtain and start the server.
 
-### Malformed response from LCS
-
-**Error code: 1201**
+### 1201 - Malformed response from LCS
 
 If the LCS responds to a request for a lookup by the CC with data that cannot be parsed into
 a Result structure
@@ -68,142 +60,104 @@ a Result structure
 then the CC should send a new request to the LCS to inform it that it failed to decode the data
 it sent.  Ideally, the LCS would be able to adjust accordingly.
 
-### Error from request to LCS
-
-**Error code: 1202**
+### 1202 - Error from request to LCS
 
 In the case that the LCS encounters an error in its operations, it should send a standard
 operational error response.
 
-### Cannot connect to RS
-
-**Error code: 1203**
+### 1203 - Cannot connect to RS
 
 In the case that the client cannot connect to the RS, an error page should be displayed to the
 user with instructions about how to obtain and start the server.
 
-### Missing view
-
-**Error code: 1102**
+### 1102 - Missing view
 
 In the case that a view (HTML) file is missing, rather than replacing information into the contnet
 of the view, the information should be formatted and served to the user as plain text.
 
 ## LCS
 
-### Malformed URL
-
-**Error code: 2110**
+### 2110 - Malformed URL
 
 Generic error when handler could not process a URL. The LCS will return the error to the agent
 that initiated the request and will not proceed with making lookups for it.
 The message provided will describe the specifics of the problem with the URL.
 
-### URL decode error
-
-**Error code: 2112**
+### 2112 - URL decode error
 
 The URL could not be decoded from base64.
 
-### Will not serve
-
-**Error code: 2120**
+### 2120 - Will not serve
 
 LCS received a request for a resource that it chooses to reject handling.
 
-### Lookup failure
-
-**Error code: 2130**
+### 2130 - Lookup failure
 
 An error occurred during the process of performing a synchronous lookup into the local cache or into the
 distributed cache (e.g. Freenet).
 
-### Internal error
-
-**Error code: 2140**
+### 2140 - Internal error
 
 LCS cannot generate the response the agent that initiated the request is waiting for, because of an
 internal error.
 
-### Waiting for Freenet node
-
-**Error code: 2300**
+### 2300 - Waiting for Freenet node
 
 General error to be returned to CC when there is something wrong with the Freenet node.
 Can occur if the node is still initializing or if it is not connected to enough peers, for example.
 
-### Could not connect to peers
-
-**Error code: 2301**
+### 2301 - Could not connect to peers
 
 The Freenet node could not connect to enough peers for operation.  The user may have to change their
 firewall settings among other things.
 
 ## RS
 
-### Malformed request URL
-
-**Error code: 3111**
+### 3111 - Malformed request URL
 
 In case the request URL is malformed, RS should not continue with the process of forwarding it to the BS
 and respond with this error code to the agent that initiated the request.
 
-### Could not decode URL value
-
-**Error code: 3112**
+### 3112 - Could not decode URL value
 
 Base64 decoding the URL parameter of the request threw an error. RS should not continue with the process
 of forwarding it to the BS, and should instead respond with this error code to the agent that
 initiated this request.
 
-### Will not serve
-
-**Error code: 3115**
+### 3115 - Will not serve
 
 RS should ignore intermediate requests for resources ignited by the browser and not the user, or
 for requests that point to local network resources.
 
-### WebOfTrust Freenet plugin error
-
-**Error code: 3310**
+### 3310 - WebOfTrust Freenet plugin error
 
 General error code for errors of the WebOfTrust plugin or its integration with the CENO plugins.
 Can occur, for example, if the WebOfTrust is not loaded or not responding.
 
-### Freemail Freenet plugin error
-
-**Error code: 3330**
+### 3330 - Freemail Freenet plugin error
 
 General error code for exceptions or malfuntions that originate from the Freenet Freemail plugin.
 Can occur, for example, if the Freemail plugin is not loaded or not responding.
 
-### Sending Freemail over SMTP failed
-
-**Error code: 3410**
+### 3410 - Sending Freemail over SMTP failed
 
 Sending a freemail over SMTP failed. RS will respond to the agent that initiated the request with
 this error code, will not add the domain in the corresponding hash table and will log the incident.
 
 ## RR
 
-### Cannot connect to BS
-
-**Error code: 4200**
+### 4200 - Cannot connect to BS
 
 If the RR cannot connect to the BS to request bundles, an error message should be
 logged in such a way that it is very noticable to the user/admin.
 Can maintain a list of URLs received in Freemail requests until the BS becomes available.
 
-### Timeout during request for bundle
-
-**Error code: 4201**
+### 4201 - Timeout during request for bundle
 
 If a request for a bundle times out, the RR can leave the connection closed. This issue
 is handled by the **RR closes connection** case under **BS**.
 
-### Cannot connect to BI
-
-**Error code: 4202**
+### 4202 - Cannot connect to BI
 
 If the RR cannot connect to the BI to request bundles be stored, it should ping the BI
 periodically and ignore requests to create new bundles until it succeeds in establishing
@@ -211,32 +165,24 @@ a connection to the BI.
 
 ## BS
 
-### Bundling error
-
-**Error code: 5400**
+### 5400 - Bundling error
 
 If the bundling process encounters an error, BS should report it using the
 standard error response format.
 
-### Internet connectivity error
-
-**Error code: 5401**
+### 5401 - Internet connectivity error
 
 The bundle server could not communicate a request to the internet at large.  May be due to a
 misconfigured proxy or network settings.
 
-### Config file not found
-
-**Error code: 5100**
+### 5100 - Config file not found
 
 If no configuration file `config/transport.js` can be found, the user should be prompted to
 enter values for each of the required fields.  A collection of default values should be stored
 to save the user time and also to present valid examples.  Once configuration values are
 provided, they should be written to `config/transport.js`.
 
-### RR closes connection
-
-**Error code: 5200**
+### 5200 - RR closes connection
 
 In case the RR closes the connection to the bundler before the bundling process completes,
 the BS should temporarily store the bundle after it is prepared and send a request to prompt
@@ -244,36 +190,28 @@ the RR to accept the completed bundle.
 
 ## BI
 
-### Agent not initialized
-
-**Error code: 6101**
+### 6101 - Agent not initialized
 
 The bundle inserter is not ready to start handling requests. An agent-specific way of handling
 postponing requests.
 
-### Malformed URL
-
-**Error code: 6102**
+### 6102 - Malformed URL
 
 BI logs that and does not continue the process of insertion
 
-### Node not ready for insertions
-
-**Error code: 6300**
-
-Something is preventing the bundle inserter from inserting bundles into the distributed cache.
-May be able to restart the appropriate plugin.
-
-### Could not insert the bundle
-
-**Error code: 6301**
-
-The insertion process could not start.  The RR could inform the bridge owner or suggest
-checking the configuration.
-
-### Bundle received is malformed
+### 6200 - Bundle received is malformed
 
 **Error code: 6200**
 
 If the bundle received is detected to have an incorrect format or is malformed for some reason,
 the RR may be informed so as to be able to issue a new request to the bundle server.
+
+### 6300 - Node not ready for insertions
+
+Something is preventing the bundle inserter from inserting bundles into the distributed cache.
+May be able to restart the appropriate plugin.
+
+### 6301 - Could not insert the bundle
+
+The insertion process could not start.  The RR could inform the bridge owner or suggest
+checking the configuration.
