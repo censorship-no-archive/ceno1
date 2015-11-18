@@ -1,4 +1,4 @@
-package plugins.CENO.Bridge.Signaling;
+package plugins.CENO.Common;
 
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;

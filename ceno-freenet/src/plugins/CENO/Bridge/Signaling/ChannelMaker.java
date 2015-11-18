@@ -10,12 +10,14 @@ import java.util.concurrent.TimeUnit;
 import plugins.CENO.CENOErrCode;
 import plugins.CENO.CENOException;
 import plugins.CENO.Bridge.CENOBridge;
+import plugins.CENO.Common.Crypto;
 import plugins.CENO.Common.GetSyncCallback;
 import freenet.client.FetchException;
 import freenet.client.FetchException.FetchExceptionMode;
 import freenet.client.InsertException;
 import freenet.client.async.PersistenceDisabledException;
 import freenet.keys.FreenetURI;
+import freenet.support.IllegalBase64Exception;
 import freenet.support.Logger;
 import freenet.support.SimpleFieldSet;
 
@@ -65,7 +67,7 @@ public class ChannelMaker {
 		public void doAnnounce() throws IOException, InsertException {
 			SimpleFieldSet sfs = new SimpleFieldSet(false, true);
 			try {
-				sfs.putOverwrite("asymkey.modulus", Crypto.savePublicKey(pubAsymKey));
+				sfs.putOverwrite("pubkey", Crypto.savePublicKey(pubAsymKey));
 			} catch (GeneralSecurityException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -127,16 +129,20 @@ public class ChannelMaker {
 					if (kskContent != null) {
 						window--;
 						Logger.minor(this, "Congestion window for fetching KSKs without getting Recently Failed exceptions set to: " + window + " minutes");
-						/*
+
+						String decKskContent = null;
 						try {
-							Crypto.decryptMessage(kskContent.asByteArray(), (RSAKeyParameters) asymKeyPair.getPrivate());
-						} catch (InvalidCipherTextException e) {
-							Logger.warning(ChannelMakerListener.class, "Could not get byte array from users' KSK response");
-						} catch (Exception e) {
-							Logger.warning(ChannelMakerListener.class, "Error while decrypting users' KSK response: " + e.getMessage());
+							decKskContent = new String(Crypto.decrypt(kskContent.getBytes("UTF-8"), Crypto.savePrivateKey(asymKeyPair.getPrivate())), "UTF-8");
+						} catch (GeneralSecurityException e) {
+							Logger.error(this, "General Security Exception while decrypting KSK reply from client: " + e.getMessage());
+							continue;
+						} catch (IllegalBase64Exception e) {
+							// Unlikely to happen
+							Logger.error(this, "Could not decode base64 key");
+							continue;
 						}
-						 */
-						SimpleFieldSet sfs = new SimpleFieldSet(kskContent, false, true, true);
+
+						SimpleFieldSet sfs = new SimpleFieldSet(decKskContent, false, true, true);
 						int reqID = sfs.getInt("id", -1);
 						if (reqID > 0 && reqID != lastHandledReq) {
 							Logger.normal(ChannelMakerListener.class, "A client has posted information for establishing a signaling channel with ID: " + reqID);

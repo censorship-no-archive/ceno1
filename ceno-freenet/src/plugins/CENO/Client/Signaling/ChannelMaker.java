@@ -3,9 +3,11 @@ package plugins.CENO.Client.Signaling;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.security.GeneralSecurityException;
 import java.util.concurrent.TimeUnit;
 
 import plugins.CENO.Client.CENOClient;
+import plugins.CENO.Common.Crypto;
 import freenet.client.FetchException;
 import freenet.client.FetchException.FetchExceptionMode;
 import freenet.client.FetchResult;
@@ -13,6 +15,7 @@ import freenet.client.InsertException;
 import freenet.client.async.PersistenceDisabledException;
 import freenet.keys.FreenetURI;
 import freenet.node.FSParseException;
+import freenet.support.IllegalBase64Exception;
 import freenet.support.Logger;
 import freenet.support.SimpleFieldSet;
 
@@ -57,7 +60,7 @@ public class ChannelMaker implements Runnable {
 	public String getSignalSSK() {
 		return signalSSK.toString();
 	}
-	
+
 	public long getLastSynced() {
 		return lastSynced;
 	}
@@ -74,7 +77,7 @@ public class ChannelMaker implements Runnable {
 		if (System.currentTimeMillis() - lastSynced  > TimeUnit.DAYS.toMillis(30)) {
 			return false;
 		}
-		
+
 		if(!canSend()) {
 			return false;
 		}
@@ -116,6 +119,7 @@ public class ChannelMaker implements Runnable {
 		try {
 			bridgeKey = new FreenetURI(CENOClient.getBridgeKey());
 		} catch (MalformedURLException e1) {
+			Logger.error(this, "Could not calculate the bridge key from the configured SSK: " + e1.getMessage());
 			channelStatus = ChannelStatus.fatal;
 			return;
 		}
@@ -136,42 +140,65 @@ public class ChannelMaker implements Runnable {
 				Logger.warning(this, "Exception while retrieving the bridge's signal page: " + e.getMessage());
 			}
 		}
-		SimpleFieldSet sfs;
+		channelStatus = ChannelStatus.gotSignalSSK;
+		SimpleFieldSet sfs = null;
 		String question = null;
+		String pubKey = null;
 		try {
 			sfs = new SimpleFieldSet(new String(bridgeSignalFreesite.asByteArray()), false, true, true);
 			question = sfs.getString("question");
+			pubKey = sfs.getString("pubkey");
 		} catch (IOException e) {
 			Logger.error(this, "IOException while reading the CENO-signaler page");
 		} catch (FSParseException e) {
 			Logger.error(this, "Exception while parsing the SFS of the CENO-signaler");
-		}
-		if (question == null) {
-			// CENO Client won't be able to signal the bridge
-			//TODO Terminate plugin
-			channelStatus = ChannelStatus.failedToSolvePuzzle;
-			return;
+		} finally {
+			if (question == null || pubKey == null) {
+				// CENO Client won't be able to signal the bridge
+				//TODO Terminate plugin
+				channelStatus = ChannelStatus.failedToParseSignalSFS;
+				return;
+			}
 		}
 		channelStatus = ChannelStatus.puzzleSolved;
 		SimpleFieldSet replySfs = new SimpleFieldSet(true);
 		replySfs.put("id", (int) (Math.random() * (Integer.MAX_VALUE * 0.8)));
 		replySfs.putOverwrite("insertURI", signalSSK.toString());
-		//TODO Encrypt singalSSK
+		byte[] encReply = null;
+		try {
+			encReply = Crypto.encrypt(replySfs.toOrderedString().getBytes("UTF-8"), pubKey);
+		} catch (GeneralSecurityException e1) {
+			Logger.error(this, "General security exception while encrypting response to quiz: " + e1.getMessage());
+		} catch (IllegalBase64Exception e1) {
+			Logger.error(this, "Could not base64 decrypt bridge's public key : " + e1.getMessage());
+		} catch (UnsupportedEncodingException e) {
+			Logger.error(this, "UTF-8 Encoding not supported");
+		} finally {
+			if (encReply == null) {
+				channelStatus = ChannelStatus.failedToEncrypt;
+				return;
+			}
+		}
 		FreenetURI insertedKSK = null;
 		try {
-			insertedKSK = CENOClient.nodeInterface.insertSingleChunk(new FreenetURI("KSK@" + question), replySfs.toOrderedString(),
+			insertedKSK = CENOClient.nodeInterface.insertSingleChunk(new FreenetURI("KSK@" + question), new String(encReply, "UTF-8"),
 					CENOClient.nodeInterface.getVoidPutCallback("Inserted private SSK key in the KSK@solution to the puzzle published by the bridge", "Failed to publish KSK@solution"));
 		} catch (UnsupportedEncodingException e) {
+			Logger.error(this, "UTF-8 Encoding not supported");
 			channelStatus = ChannelStatus.failedToPublishKSK;
 		} catch (PersistenceDisabledException e) {
+			Logger.error(this, "Tried to insert KSK reply with persistence, but persistence is disabled: " + e.getMessage());
 			channelStatus = ChannelStatus.failedToPublishKSK;
 		} catch (MalformedURLException e) {
+			Logger.error(this, "Reply KSK is malformed: " + e.getMessage());
 			channelStatus = ChannelStatus.failedToPublishKSK;
 		} catch (InsertException e) {
+			Logger.error(this, "Error while initializing insertion for KSK reply: " + e.getMessage());
 			channelStatus = ChannelStatus.failedToPublishKSK;
-		}
-		if(insertedKSK == null) {
-			return;
+		} finally {
+			if(insertedKSK == null) {
+				return;
+			}
 		}
 		channelStatus = ChannelStatus.publishedKSK;
 		checkChannelEstablished();

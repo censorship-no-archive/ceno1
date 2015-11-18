@@ -7,6 +7,7 @@ public enum ChannelStatus {
 		fatal,
 		failedToGetSignalSSK,
 		gotSignalSSK,
+		failedToParseSignalSFS,
 		failedToSolvePuzzle,
 		puzzleSolved,
 		failedToEncrypt,

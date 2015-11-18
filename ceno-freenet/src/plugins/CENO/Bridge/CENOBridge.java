@@ -15,7 +15,7 @@ import plugins.CENO.CENOL10n;
 import plugins.CENO.Configuration;
 import plugins.CENO.Version;
 import plugins.CENO.Bridge.Signaling.ChannelMaker;
-import plugins.CENO.Bridge.Signaling.Crypto;
+import plugins.CENO.Common.Crypto;
 import plugins.CENO.FreenetInterface.NodeInterface;
 import freenet.keys.FreenetURI;
 import freenet.pluginmanager.FredPlugin;
