@@ -175,14 +175,17 @@ public class HighLevelSimpleClientInterface {
 		return insertURI;
 	}
 
-	static Bucket getBucketFromString(String content) throws IOException {
-		// If the content is an HTML/XML file and there are hidden characters before the <html> opening tag, remove them
+	static Bucket getBucketFromString(String content, String mimeType) throws IOException {
 		int bucketLength, index = 0;
-		if (content.indexOf("<") != 0) {
-			if (content.substring(0, 50).matches("(?ui)[\\s\\S]*\\<(!DOCTYPE)?\\s*(html|\\?xml)[\\s\\S]*")) {
-				//FIXME: Instead of creating a substring, find the index of the byte corresponding to "<" and assign it
-				// to the index variable. indexOf("<") won't work because of multi-byte UTF-8 characters
-				content = content.substring(content.indexOf("<"));
+
+		// If the content is an HTML/XML file and there are hidden characters before the <html> opening tag, remove them
+		if (mimeType.equals("text/html") || mimeType.equals("text/xml") || mimeType.equals("application/xml")) {
+			if (content.indexOf("<") != 0) {
+				if (content.substring(0, 50).matches("(?ui)[\\s\\S]*\\<(!DOCTYPE)?\\s*(html|\\?xml)[\\s\\S]*")) {
+					//FIXME: Instead of creating a substring, find the index of the byte corresponding to "<" and assign it
+					// to the index variable. indexOf("<") won't work because of multi-byte UTF-8 characters
+					content = content.substring(content.indexOf("<"));
+				}
 			}
 		}
 
