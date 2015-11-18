@@ -9,7 +9,7 @@
   },
   {
     "id": "invalid_follow_req_rdr",
-    "translation": "The data you supplied describing the feed you want to follow is not appropriate."
+    "translation": "The data you supplied describing the feed you want to follow is not appropriate.  Please consult the readerAPI.md document."
   },
   {
     "id": "req_handle_success_rdr",
@@ -17,7 +17,7 @@
   },
   {
     "id": "no_config_rdr",
-    "translation": "No well-formatted configuration file could be read from the location {{.Location}}."
+    "translation": "No configuration file could be read from {{.Location}}."
   },
   {
     "id": "invalid_config_rdr",
@@ -37,11 +37,11 @@
   },
   {
     "id": "db_store_error_rdr",
-    "translation": "Could not save or update the database. Error: {{.Error}}"
+    "translation": "Could not update the database. Error: {{.Error}}"
   },
   {
     "id": "not_followed_feed_err",
-    "translation": "Got items from a feed {{.URL}} that is not being followed."
+    "translation": "Got items from the feed at {{.URL}} that is not being followed."
   },
   {
     "id": "invalid_unfollow_req_rdr",
@@ -49,7 +49,7 @@
   },
   {
     "id": "feed_delete_err_rdr",
-    "translation": "Encountered an error deleting feed. Error: {{.Error}}"
+    "translation": "Encountered an error unfollowing the specified feed. Error: {{.Error}}"
   },
   {
     "id": "feed_delete_success_rdr",
@@ -61,7 +61,7 @@
   },
   {
     "id": "insertion_fail_err",
-    "translation": "Failed to insert feeds list into Freenet"
+    "translation": "Failed to insert feeds list into Freenet."
   },
   {
     "id": "bundle_fail_err",
