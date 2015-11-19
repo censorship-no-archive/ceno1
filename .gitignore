@@ -21,6 +21,9 @@ ceno-client/FreenetCENO
 # Integration and feature testing tools
 ceno-client/test/erroringlcs
 
+# Concatenated translated JSON put together by gulp
+ceno-client/locale/all.json
+
 # Concatenated JS and CSS for the portal as well as copies of the views
 ceno-client/static/javascript/main.js
 ceno-client/static/stylesheets/main.css
