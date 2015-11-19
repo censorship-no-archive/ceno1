@@ -34,6 +34,14 @@ function setChannelText(locale) {
   }
 }
 
+// When a language is selected, get its locale and reset the text on the page.
+// TODO - Expand this to work on all pages.
+let languageOptions = document.getElementsByClassName('languageSelect');
+for (let i = 0, len = languageOptions.length; i < len; i++) {
+  let option = languageOptions[i];
+  option.addEventListener('click', () => setChannelText(option.getAttribute('data-language')));
+}
+
 // When the page is loaded, set the content of all the textual fields to the appropriately translated version
 setChannelText('fr');
 
