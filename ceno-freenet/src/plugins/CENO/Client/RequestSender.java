@@ -24,7 +24,7 @@ public class RequestSender {
 	 * Time to wait since a request for a URL was originally received from CC before sending
 	 * a request to the bridge.
 	 */
-	private static final long SHOULD_QUEUE_URL = TimeUnit.MINUTES.toMillis(3);
+	private static final long SHOULD_QUEUE_URL = TimeUnit.MINUTES.toMillis(2);
 
 	/**
 	 * Time to wait before sending a new request for the same URL
@@ -45,7 +45,7 @@ public class RequestSender {
 		this.requestTable = new Hashtable<String, Long>();
 		batchList = new ArrayList<String>();
 		timer = new Timer("BatchRequestTimer", true);
-		timer.schedule(new BatchReqInserter(), SHOULD_INSERT_SIGNAL);
+		timer.schedule(new BatchReqInserter(), 0, TimeUnit.MINUTES.toMillis(3));
 	}
 
 	public static RequestSender getInstance() {

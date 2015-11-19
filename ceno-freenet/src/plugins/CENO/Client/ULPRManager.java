@@ -57,11 +57,7 @@ public class ULPRManager {
 			}
 		}
 
-		public void onResume(ClientContext context)
-				throws ResumeFailedException {
-			// TODO Auto-generated method stub
-			
-		}
+		public void onResume(ClientContext context) throws ResumeFailedException {}
 
 		public RequestClient getRequestClient() {
 			return CENOClient.nodeInterface.getRequestClient();

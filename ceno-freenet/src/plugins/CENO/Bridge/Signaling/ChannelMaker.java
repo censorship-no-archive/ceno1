@@ -117,7 +117,6 @@ public class ChannelMaker {
 			try {
 				int window = 0;
 				while(continueLoop) {
-					// TODO Poll "KSK@puzzleAnswer" and discover insertion SSKs by clients
 					byte[] kskContent = null;
 					GetSyncCallback getSyncCallback = new GetSyncCallback(CENOBridge.nodeInterface.getRequestClient());
 					try {
@@ -128,11 +127,13 @@ public class ChannelMaker {
 						if(e.mode == FetchExceptionMode.RECENTLY_FAILED) {
 							window++;
 						}
-						Logger.minor(ChannelMakerListener.class, "Exception while fetching KSK clients use for making channels: " + e.getShortMessage());
+						Logger.normal(ChannelMakerListener.class, "Exception while fetching KSK clients use for making channels: " + e.getShortMessage());
 					}
 
 					if (kskContent != null) {
-						window--;
+						if (window > 0) {
+							window--;
+						}
 						Logger.minor(this, "Congestion window for fetching KSKs without getting Recently Failed exceptions set to: " + window + " minutes");
 
 						String decKskContent = null;
