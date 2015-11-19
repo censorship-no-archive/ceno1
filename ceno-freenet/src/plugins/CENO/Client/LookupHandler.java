@@ -66,8 +66,9 @@ public class LookupHandler extends AbstractCENOClientHandler {
 
 		// Make a synchronous lookup in the local cache for the bundled version of the URL
 		String localFetchResult = null;
+		byte[] localFetchBytes = null;
 		try {
-			localFetchResult = localCacheLookup(calculatedUSK);
+			localFetchBytes = localCacheLookup(calculatedUSK);
 		} catch (CENOException e) {
 			return returnError(e, clientIsHtml);
 		}
@@ -78,7 +79,8 @@ public class LookupHandler extends AbstractCENOClientHandler {
 		 * Resources of Ultra Light Passive Requests (ULPRs) in the distributed cache, once
 		 * successfully retrieved, are also available in the local cache.
 		 */
-		if (localFetchResult != null) {
+		if (localFetchBytes != null) {
+			localFetchResult = new String(localFetchBytes);
 			if (clientIsHtml) {
 				return localFetchResult;
 			} else {
@@ -157,14 +159,14 @@ public class LookupHandler extends AbstractCENOClientHandler {
 	 * @return the content of the bundle if it is found, <code>null</code>
 	 * otherwise
 	 */
-	private String localCacheLookup(FreenetURI calculatedUSK) throws CENOException {
+	private byte[] localCacheLookup(FreenetURI calculatedUSK) throws CENOException {
 		// Local cache lookups do not support "-1" as the edition of a USK
 		if (calculatedUSK.getSuggestedEdition() < 0) {
 			calculatedUSK = calculatedUSK.setSuggestedEdition(0);
 		}
 
 		GetSyncCallback getSyncCallback = new GetSyncCallback(CENOClient.nodeInterface.getRequestClient());
-		String fetchResult = null;
+		byte[] fetchResult = null;
 		try {
 			CENOClient.nodeInterface.localFetchURI(calculatedUSK, getSyncCallback);
 			fetchResult = getSyncCallback.getResult(45L, TimeUnit.SECONDS);

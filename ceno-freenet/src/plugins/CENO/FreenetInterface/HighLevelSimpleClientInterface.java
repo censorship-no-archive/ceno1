@@ -190,6 +190,19 @@ public class HighLevelSimpleClientInterface {
 		HLSCInterface.node.clientCore.clientContext.start(clientPutter);
 		return uri;
 	}
+	
+	public static FreenetURI insertSingleChunk(FreenetURI uri, byte[] content, ClientPutCallback cb) throws InsertException, PersistenceDisabledException, UnsupportedEncodingException {
+		RandomAccessBucket b = new SimpleReadOnlyArrayBucket(content);
+
+		InsertContext ctx = HLSCInterface.node.clientCore.makeClient((short)0, true, false).getInsertContext(true);
+
+		ClientPutter clientPutter = new ClientPutter(cb, b, uri,
+				null, // Modern ARKs easily fit inside 1KB so should be pure SSKs => no MIME type; this improves fetchability considerably
+				ctx,
+				RequestStarter.INTERACTIVE_PRIORITY_CLASS, false, null, false, HLSCInterface.node.clientCore.clientContext, null, -1L);
+		HLSCInterface.node.clientCore.clientContext.start(clientPutter);
+		return uri;
+	}
 
 	static Bucket getBucketFromString(String content) throws IOException {
 		// If the content is an HTML/XML file and there are hidden characters before the <html> opening tag, remove them

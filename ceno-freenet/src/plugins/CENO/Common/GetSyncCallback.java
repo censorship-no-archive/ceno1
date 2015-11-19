@@ -15,7 +15,7 @@ import freenet.support.io.ResumeFailedException;
 public class GetSyncCallback implements ClientGetCallback {
 	private final CountDownLatch fetchLatch = new CountDownLatch(1);
 	private RequestClient reqClient;
-	private String fetchResult;
+	private byte[] fetchResult;
 	private FetchException fe;
 	
 	public GetSyncCallback(RequestClient reqClient) {
@@ -24,7 +24,7 @@ public class GetSyncCallback implements ClientGetCallback {
 
 	public void onSuccess(FetchResult result, ClientGetter state) {
 		try {
-			fetchResult = new String(result.asByteArray());
+			fetchResult = result.asByteArray();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -37,7 +37,7 @@ public class GetSyncCallback implements ClientGetCallback {
 		fetchLatch.countDown();
 	}
 
-	public String getResult(long timeout, TimeUnit unit) throws FetchException {
+	public byte[] getResult(long timeout, TimeUnit unit) throws FetchException {
 		try {
 			fetchLatch.await(timeout, unit);
 		} catch (InterruptedException e) {

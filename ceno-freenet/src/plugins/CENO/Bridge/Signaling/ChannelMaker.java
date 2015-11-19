@@ -118,7 +118,7 @@ public class ChannelMaker {
 				int window = 0;
 				while(continueLoop) {
 					// TODO Poll "KSK@puzzleAnswer" and discover insertion SSKs by clients
-					String kskContent = null;
+					byte[] kskContent = null;
 					GetSyncCallback getSyncCallback = new GetSyncCallback(CENOBridge.nodeInterface.getRequestClient());
 					try {
 						CENOBridge.nodeInterface.distFetchURI(new FreenetURI(channelMakingKSK.toString() + "-" + subKsk), getSyncCallback);
@@ -137,7 +137,7 @@ public class ChannelMaker {
 
 						String decKskContent = null;
 						try {
-							decKskContent = new String(Crypto.decrypt(kskContent.getBytes("UTF-8"), Crypto.savePrivateKey(asymKeyPair.getPrivate())), "UTF-8");
+							decKskContent = new String(Crypto.decrypt(kskContent, Crypto.savePrivateKey(asymKeyPair.getPrivate())), "UTF-8");
 						} catch (GeneralSecurityException e) {
 							Logger.error(this, "General Security Exception while decrypting KSK reply from client");
 							continue;

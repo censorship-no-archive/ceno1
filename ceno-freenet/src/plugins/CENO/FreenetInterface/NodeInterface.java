@@ -171,6 +171,11 @@ public class NodeInterface implements FreenetInterface {
 	public FreenetURI insertSingleChunk(FreenetURI uri, String content, ClientPutCallback cb) throws InsertException, PersistenceDisabledException, UnsupportedEncodingException {
 		return HighLevelSimpleClientInterface.insertSingleChunk(uri, content, cb);
 	}
+	
+	@Override
+	public FreenetURI insertSingleChunk(FreenetURI uri, byte[] content, ClientPutCallback cb) throws InsertException, PersistenceDisabledException, UnsupportedEncodingException {
+		return HighLevelSimpleClientInterface.insertSingleChunk(uri, content, cb);
+	}
 
 	@Override
 	public NodeConnections getConnections() {

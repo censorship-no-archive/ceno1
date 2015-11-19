@@ -34,6 +34,7 @@ public interface FreenetInterface {
 	Bucket makeBucket(int length) throws IOException;
 	FreenetURI insertManifest(FreenetURI insertURI, HashMap<String, Object> bucketsByName, String defaultName, short priorityClass) throws InsertException;
 	FreenetURI insertSingleChunk(FreenetURI uri, String content, ClientPutCallback cb) throws InsertException, PersistenceDisabledException, UnsupportedEncodingException;
+	FreenetURI insertSingleChunk(FreenetURI uri, byte[] content, ClientPutCallback cb) throws InsertException, PersistenceDisabledException, UnsupportedEncodingException;
 	NodeConnections getConnections();
 	ClientGetCallback getVoidGetCallback(String successMessage, String failureMessage);
 	ClientPutCallback getVoidPutCallback(String successMessage, String failureMessage);

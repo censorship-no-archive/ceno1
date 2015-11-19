@@ -189,17 +189,11 @@ public class ChannelMaker implements Runnable {
 			}
 		}
 		
-		try {
-			insertSubKSK(question, new String(encReply, "UTF-8"),  new int[0]);
-		} catch (UnsupportedEncodingException e) {
-			Logger.error(this, "UTF-8 Encoding not supported");
-			channelStatus = ChannelStatus.failedToPublishKSK;
-		}
-
+		insertSubKSK(question, encReply,  new int[0]);
 		checkChannelEstablished();
 	}
 	
-	private void insertSubKSK(String question, String encReply, int[] prevSubKSK) {
+	private void insertSubKSK(String question, byte[] encReply, int[] prevSubKSK) {
 		FreenetURI insertedKSK = null;
 		int randSubKSK = (int) (Math.random() * MAX_KSK_POLLS);
 		try {
@@ -228,9 +222,10 @@ public class ChannelMaker implements Runnable {
 	
 	private class KSKSolutionPutCallback implements ClientPutCallback {
 		int[] prevSubKSK;
-		String question, encReply;
+		byte[] encReply;
+		String question;
 		
-		public KSKSolutionPutCallback(String question, String encReply, int[] prevSubKSK) {
+		public KSKSolutionPutCallback(String question, byte[] encReply, int[] prevSubKSK) {
 			this.question = question;
 			this.encReply = encReply;
 			this.prevSubKSK = prevSubKSK;
