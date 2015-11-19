@@ -41,6 +41,8 @@ CENO looks for the documents you have requested.
 
 ## Translating
 
+### CENO Client
+
 The CENO Client is using the [go-i18n](https://github.com/nicksnyder/go-i18n) library to handle
 internationalization.  All of the ready-for-translation texts can be found in the
 `ceno-client/translations/` directory contains json files containing an array of objects pairing strings
@@ -94,6 +96,26 @@ $GOPATH/bin/goi18n translations/*.all.json
 
 This will create files `translations/en-us.untranslated.json`, `fr-fr.untranslated.json`, etc...
 
+### CENO portal
+
+Files in the `ceno-client/portal/locale/` directory contain strings that appear on the CENO portal and are all JSON
+files formatted in the way Transifex expects them to be.  Each one is named like `<language>.json` where `<language>`
+is one of `en`, `fr`, etc.  New translations should be placed in a file with an appropriate shorthand name.
+
+When a new language is added, it should be listed in `ceno-client/config/client.json` in the `PortalLanguages` field.
+A human readable `Name` should be provided as well as the `Locale` field which gives the `<language>` prefix of
+the corresponding JSON file.
+
+Once `ceno-client/portal/locale` contains all appropriately named `<language>.json` files and
+`ceno-client/config/client.json` has been modified to include all supplied languages, the language files can be
+automatically merged by running
+
+```bash
+gulp translations
+```
+
+from `ceno-client/` or by running the `build.sh` script again.
+
 ## Translating with Transifex
 
 eQualit.ie relies on [Transifex](https://www.transifex.com/) to translate CENO.  Transifex is very
@@ -108,7 +130,7 @@ however the client is an exception.  Transifex expects JSON files to be of the f
 
 which clearly doesn't match the form goi18n uses. To cope with this, the
 `ceno-client/tools/json-translation.py` script was created.  This script will read all the
-`ceno-client/translations/*.untranslated.json` files and produce a corresponding 
+`ceno-client/translations/*.untranslated.json` files and produce a corresponding
 `ceno-client/translations/*.transifex.json` file for each.
 
 ```
