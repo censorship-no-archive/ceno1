@@ -14,7 +14,7 @@ function setText(elemId, property, locale, stringId) {
   if (elem && LANGUAGES.hasOwnProperty(locale) && LANGUAGES[locale].hasOwnProperty(stringId)) {
     elem[property] = LANGUAGES[locale][stringId];
   } else if (elem && LANGUAGES.en.hasOwnProperty(stringId)) {
-    elem[property] = LANGUAGES['en'][stringId];
+    elem[property] = LANGUAGES.en[stringId];
   } else if (elem) {
     // For debugging purposes only
     elem[property] = 'INVALID STRING ID ' + stringId;

@@ -8,24 +8,48 @@
   float: left;
 }
 
-#mainNav ul {
-  height: 100%;
+#mainMenu {
   float: right;
+  height: 100%;
+}
+
+#mainMenu .pure-menu-children {
+  padding-top: 20px;
+  padding-bottom: 15px;
+  background-color: rgba(160, 160, 160, 0.8);
+}
+
+#mainMenu .pure-menu-children .pure-menu-item a {
+  height: 30px;
+  line-height: 30px;
+  color: white;
+}
+
+#mainMenu .pure-menu-children .pure-menu-item a:hover {
+  background-color: rgba(160, 160, 160, 0.8);
 }
 
 #languageMenu {
+  width: 140px;
   background-color: rgb(199, 199, 199);
+  text-align: center;
+  line-height: 80px;
+}
+
+#languageName {
   color: white;
 }
 
-#languageMenu:hover {
+#languageName:hover {
   background-color: rgb(199, 199, 199);
 }
 
-#languageMenu a {
-  color: white;
+#statusMenuItem {
+  width: 200px;
+  text-align: center;
+  line-height: 80px;
 }
 
-#mainNav ul li {
-  height: 100%;
+#connectionStatus {
+  text-transform: uppercase;
 }
