@@ -12,5 +12,9 @@
   "varstmt": true,
   "eqnull": true,
   "browser": true,
-  "devel": true
+  "devel": true,
+  "sub": true,
+  "globals": {
+    "LANGUAGES": false
+  }
 }

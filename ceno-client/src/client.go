@@ -346,19 +346,26 @@ type LanguageStrings struct {
 	Strings []IdentifiedString
 }
 
-func loadLanguageStrings() ([]LanguageStrings, error) {
+type LanguageStringJSON map[string]map[string]string
+
+func stringifyLanguages(langStrings LanguageStringJSON) string {
+	asBytes, _ := json.Marshal(langStrings)
+	return string(asBytes)
+}
+
+func loadLanguageStrings() ([]LanguageStrings, LanguageStringJSON, error) {
 	// Dear Glob.
-	langStrings := make(map[string]map[string]string)
+	langStrings := make(LanguageStringJSON)
 	decodedStrings := []LanguageStrings{}
 	file, err := os.Open(allJSONPath)
 	if err != nil {
-		return decodedStrings, err
+		return decodedStrings, langStrings, err
 	}
 	defer file.Close()
 	decoder := json.NewDecoder(file)
 	decodeErr := decoder.Decode(&langStrings)
 	if decodeErr != nil {
-		return decodedStrings, decodeErr
+		return decodedStrings, langStrings, decodeErr
 	}
 	// Use the configuration as a guide to explore the merged languages json file and construct
 	// structures containing all the information relevant to the portal page about text.
@@ -375,7 +382,7 @@ func loadLanguageStrings() ([]LanguageStrings, error) {
 		}
 		decodedStrings = append(decodedStrings, languageStrings)
 	}
-	return decodedStrings, nil
+	return decodedStrings, langStrings, nil
 }
 
 func testPortalHandler(w http.ResponseWriter, r *http.Request) {
@@ -397,12 +404,15 @@ func testChannelsHandler(w http.ResponseWriter, r *http.Request) {
 			{"CeNO", "/testportal"},
 			{"Channel Selector", "/testchannels"},
 		}
-		languageStrings, readErr := loadLanguageStrings()
+		languageStrings, langStringsJson, readErr := loadLanguageStrings()
 		if readErr != nil {
 			fmt.Println("Error loading languages")
 			fmt.Println(err)
 		} else {
+			// For the language selection menu
 			module["LanguageStrings"] = languageStrings
+			// For the javascript code that applies strings
+			module["LanguageStringsAsJSON"] = stringifyLanguages(langStringsJson)
 		}
 		t.Execute(w, module)
 	}
