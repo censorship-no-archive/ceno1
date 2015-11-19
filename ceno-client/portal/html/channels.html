@@ -13,7 +13,9 @@
       {{range .Feeds}}
       <div class="pure-u-1-4">
         <div class="channel">
-          <h2><a href="{{.Url}}">{{.Title}}</a></h2>
+          <a href="{{.Url}}">
+            <h2>{{.Title}}</h2>
+          </a>
         </div>
       </div>
       {{end}}

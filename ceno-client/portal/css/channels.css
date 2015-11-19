@@ -19,3 +19,8 @@ div.channel * {
   text-align: center;
   line-height: 250px;
 }
+
+div.channel > a {
+  text-decoration: none;
+  color: black;
+}
