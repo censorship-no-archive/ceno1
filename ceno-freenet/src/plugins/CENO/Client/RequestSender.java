@@ -45,7 +45,7 @@ public class RequestSender {
 		this.requestTable = new Hashtable<String, Long>();
 		batchList = new ArrayList<String>();
 		timer = new Timer("BatchRequestTimer", true);
-		timer.scheduleAtFixedRate(new BatchReqInserter(), 0L, SHOULD_INSERT_SIGNAL);
+		timer.schedule(new BatchReqInserter(), SHOULD_INSERT_SIGNAL);
 	}
 
 	public static RequestSender getInstance() {
@@ -95,17 +95,18 @@ public class RequestSender {
 	}
 
 	private class BatchReqInserter extends TimerTask {
+		public BatchReqInserter() {}
 
 		@Override
 		public void run() {
 			synchronized (newUrlArrived) {
-				if(!newUrlArrived) {
+				if(!newUrlArrived || !CENOClient.channelMaker.canSend()) {
 					return;
 				}
 
 				int batchSize = 0;
-
 				StringBuilder batchListStr = new StringBuilder();
+
 				for (int i = batchList.size(); i > 0; i--) {
 					String url = batchList.get(i);
 					if (shouldSignalBridge(url)) {

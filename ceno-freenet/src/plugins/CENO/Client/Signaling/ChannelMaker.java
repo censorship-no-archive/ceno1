@@ -201,6 +201,7 @@ public class ChannelMaker implements Runnable {
 			}
 		}
 		channelStatus = ChannelStatus.publishedKSK;
+		Logger.normal(this, "Successfully published KSK solution to the bridge");
 		checkChannelEstablished();
 	}
 

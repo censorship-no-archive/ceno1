@@ -61,6 +61,7 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 		initConfig.readProperties();
 
 		String confBridgeKey = initConfig.getProperty("bridgeKey");
+		//TODO Test that the key in the configuration file corresponds to a valid request USK
 		bridgeKey = (confBridgeKey != null && !confBridgeKey.isEmpty()) ? confBridgeKey : BRIDGE_KEY;
 
 		// Initialize RS - Make a new class ChannelManager that handles ChannelMaker
