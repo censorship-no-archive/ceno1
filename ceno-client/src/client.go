@@ -312,6 +312,15 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+/**
+ * PORTAL TESTING STUFF
+ */
+
+type PortalPath struct {
+	PageName string
+	Href     string
+}
+
 func testPortalHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Got request for test portal page")
 	t, _ := template.ParseFiles("./views/index.html", "./views/nav.html", "./views/resources.html", "./views/scripts.html")
@@ -327,6 +336,10 @@ func testChannelsHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 		t.Execute(w, nil)
 	} else {
+		module["Breadcrumbs"] = []PortalPath{
+			{"CeNO", "/testportal"},
+			{"Channel Selector", "/testchannels"},
+		}
 		t.Execute(w, module)
 	}
 }
@@ -336,6 +349,10 @@ func testArticlesHandler(w http.ResponseWriter, r *http.Request) {
 	t, _ := template.ParseFiles("./views/articles.html", "./views/nav.html", "./views/resources.html", "./views/breadcrumbs.html", "./views/scripts.html")
 	t.Execute(w, nil)
 }
+
+/**
+ * END PORTAL TESTING STUFF
+ */
 
 func main() {
 	// Configure the i18n library to use the preferred language set in the CENOLANG environement variable

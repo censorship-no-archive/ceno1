@@ -1,7 +1,11 @@
 {{define "BREADCRUMBS"}}
 <div id="breadcrumbsBar">
   <div class="content">
-    <span>Temporary / Path / Location</span>
+    <span>
+      {{range .Breadcrumbs}}
+      <a href="{{.Href}}">{{.PageName}}</a> /
+      {{end}}
+    </span>
   </div>
 </div>
 {{end}}

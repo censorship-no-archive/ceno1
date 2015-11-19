@@ -10,6 +10,15 @@
   line-height: 100px;
 }
 
+#breadcrumbsBar > .content > span > a {
+  text-decoration: none;
+  color: white;
+}
+
+#breadcrumbsBar > .content > span > a:hover {
+  color: rgb(240, 240, 240);
+}
+
 #breadcrumbsBar + * {
   margin-top: 130px;
 }
