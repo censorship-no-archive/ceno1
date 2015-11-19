@@ -8,10 +8,13 @@
       <li class="pure-menu-item pure-menu-has-children pure-menu-allow-hover" id="languageMenu">
         <a href="#" id="languageName" class="pure-menu-link">ENG</a>
         <ul class="pure-menu-children">
-          <li class="pure-menu-item"><a href="#" class="pure-menu-link">French</a></li>
-          <li class="pure-menu-item"><a href="#" class="pure-menu-link">Spanish</a></li>
-          <li class="pure-menu-item"><a href="#" class="pure-menu-link">Farsi</a></li>
-          <li class="pure-menu-item"><a href="#" class="pure-menu-link">Cantonese</a></li>
+          {{range .LanguageStrings}}
+          <li class="pure-menu-item">
+            <a href="#" class="pure-menu-link languageSelect" data-language="{{.Locale}}">
+              {{.Name}}
+            </a>
+          </li>
+          {{end}}
         </ul>
       </li>
       <li class="pure-menu-item">

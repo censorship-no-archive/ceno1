@@ -321,6 +321,63 @@ type PortalPath struct {
 	Href     string
 }
 
+// Location of the JSON file containing the merged translated strings
+var allJSONPath string = path.Join(".", "locale", "all.json")
+
+/**
+ * ceno-client/locale/all.json contains data formatted like
+{
+ 	"en": {
+		"string1": "content content content"
+	},
+	"fr": {
+		"string1": "french french french"
+	}
+}
+*/
+type IdentifiedString struct {
+	Identifier string
+	Content    string
+}
+
+type LanguageStrings struct {
+	Name    string
+	Locale  string
+	Strings []IdentifiedString
+}
+
+func loadLanguageStrings() ([]LanguageStrings, error) {
+	// Dear Glob.
+	langStrings := make(map[string]map[string]string)
+	decodedStrings := []LanguageStrings{}
+	file, err := os.Open(allJSONPath)
+	if err != nil {
+		return decodedStrings, err
+	}
+	defer file.Close()
+	decoder := json.NewDecoder(file)
+	decodeErr := decoder.Decode(&langStrings)
+	if decodeErr != nil {
+		return decodedStrings, decodeErr
+	}
+	// Use the configuration as a guide to explore the merged languages json file and construct
+	// structures containing all the information relevant to the portal page about text.
+	for _, availableLanguage := range Configuration.PortalLanguages {
+		stringPairs, found := langStrings[availableLanguage.Locale]
+		if !found {
+			continue
+		}
+		languageStrings := LanguageStrings{}
+		languageStrings.Name = availableLanguage.Name
+		languageStrings.Locale = availableLanguage.Locale
+		for identifier, content := range stringPairs {
+			languageStrings.Strings = append(languageStrings.Strings, IdentifiedString{identifier, content})
+		}
+		decodedStrings = append(decodedStrings, languageStrings)
+	}
+	return decodedStrings, nil
+}
+
 func testPortalHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Got request for test portal page")
 	t, _ := template.ParseFiles("./views/index.html", "./views/nav.html", "./views/resources.html", "./views/scripts.html")
@@ -339,6 +396,13 @@ func testChannelsHandler(w http.ResponseWriter, r *http.Request) {
 		module["Breadcrumbs"] = []PortalPath{
 			{"CeNO", "/testportal"},
 			{"Channel Selector", "/testchannels"},
+		}
+		languageStrings, readErr := loadLanguageStrings()
+		if readErr != nil {
+			fmt.Println("Error loading languages")
+			fmt.Println(err)
+		} else {
+			module["LanguageStrings"] = languageStrings
 		}
 		t.Execute(w, module)
 	}
