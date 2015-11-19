@@ -12,14 +12,23 @@ import freenet.client.FetchException;
 import freenet.client.FetchException.FetchExceptionMode;
 import freenet.client.FetchResult;
 import freenet.client.InsertException;
+import freenet.client.InsertException.InsertExceptionMode;
+import freenet.client.async.BaseClientPutter;
+import freenet.client.async.ClientContext;
+import freenet.client.async.ClientPutCallback;
 import freenet.client.async.PersistenceDisabledException;
 import freenet.keys.FreenetURI;
 import freenet.node.FSParseException;
+import freenet.node.RequestClient;
 import freenet.support.IllegalBase64Exception;
 import freenet.support.Logger;
 import freenet.support.SimpleFieldSet;
+import freenet.support.api.Bucket;
+import freenet.support.io.ResumeFailedException;
 
 public class ChannelMaker implements Runnable {
+	private static final int MAX_KSK_POLLS = 10;
+	
 	private FreenetURI signalSSK;
 	private FreenetURI signalSSKpub;
 	private boolean channelEstablished = false;
@@ -179,13 +188,22 @@ public class ChannelMaker implements Runnable {
 				return;
 			}
 		}
-		FreenetURI insertedKSK = null;
+		
 		try {
-			insertedKSK = CENOClient.nodeInterface.insertSingleChunk(new FreenetURI("KSK@" + question), new String(encReply, "UTF-8"),
-					CENOClient.nodeInterface.getVoidPutCallback("Inserted private SSK key in the KSK@solution to the puzzle published by the bridge", "Failed to publish KSK@solution"));
+			insertSubKSK(question, new String(encReply, "UTF-8"),  new int[0]);
 		} catch (UnsupportedEncodingException e) {
 			Logger.error(this, "UTF-8 Encoding not supported");
 			channelStatus = ChannelStatus.failedToPublishKSK;
+		}
+
+		checkChannelEstablished();
+	}
+	
+	private void insertSubKSK(String question, String encReply, int[] prevSubKSK) {
+		FreenetURI insertedKSK = null;
+		int randSubKSK = (int) (Math.random() * MAX_KSK_POLLS);
+		try {
+			insertedKSK = CENOClient.nodeInterface.insertSingleChunk(new FreenetURI("KSK@" + question + "-" + randSubKSK), encReply, new KSKSolutionPutCallback(question, encReply, new int[]{randSubKSK}));
 		} catch (PersistenceDisabledException e) {
 			Logger.error(this, "Tried to insert KSK reply with persistence, but persistence is disabled: " + e.getMessage());
 			channelStatus = ChannelStatus.failedToPublishKSK;
@@ -195,6 +213,9 @@ public class ChannelMaker implements Runnable {
 		} catch (InsertException e) {
 			Logger.error(this, "Error while initializing insertion for KSK reply: " + e.getMessage());
 			channelStatus = ChannelStatus.failedToPublishKSK;
+		} catch (UnsupportedEncodingException e) {
+			Logger.error(this, "UTF-8 Encoding not supported");
+			channelStatus = ChannelStatus.failedToPublishKSK;
 		} finally {
 			if(insertedKSK == null) {
 				return;
@@ -202,7 +223,65 @@ public class ChannelMaker implements Runnable {
 		}
 		channelStatus = ChannelStatus.publishedKSK;
 		Logger.normal(this, "Successfully published KSK solution to the bridge");
-		checkChannelEstablished();
+		return;
+	}
+	
+	private class KSKSolutionPutCallback implements ClientPutCallback {
+		int[] prevSubKSK;
+		String question, encReply;
+		
+		public KSKSolutionPutCallback(String question, String encReply, int[] prevSubKSK) {
+			this.question = question;
+			this.encReply = encReply;
+			this.prevSubKSK = prevSubKSK;
+		}
+
+		@Override
+		public void onResume(ClientContext context) throws ResumeFailedException {}
+
+		@Override
+		public RequestClient getRequestClient() {
+			return CENOClient.nodeInterface.getRequestClient();
+		}
+
+		@Override
+		public void onGeneratedURI(FreenetURI uri, BaseClientPutter state) {}
+
+		@Override
+		public void onGeneratedMetadata(Bucket metadata, BaseClientPutter state) {}
+
+		@Override
+		public void onFetchable(BaseClientPutter state) {}
+
+		@Override
+		public void onSuccess(BaseClientPutter state) {
+			Logger.normal(this,"Inserted private SSK key in the KSK@solution to the puzzle published by the bridge");
+		}
+
+		@Override
+		public void onFailure(InsertException e, BaseClientPutter state) {
+			if (e.getMode() == InsertExceptionMode.COLLISION) {
+				boolean subKSKUsed;
+				int randSubKSK;
+				do {
+					subKSKUsed = false;
+					randSubKSK = (int) (Math.random() * MAX_KSK_POLLS);
+					for (int i = 0; i < prevSubKSK.length ; i++) {
+						if (prevSubKSK[i] == randSubKSK) {
+							subKSKUsed = true;
+							break;
+						}
+					}
+				} while (subKSKUsed);
+				int[] subKSKUsedExt = new int[prevSubKSK.length + 1];
+				System.arraycopy(prevSubKSK,0, subKSKUsedExt, 0, prevSubKSK.length);
+				subKSKUsedExt[prevSubKSK.length] = randSubKSK;
+				insertSubKSK(question, encReply, subKSKUsedExt);
+			} else {
+				Logger.error(this, "Failed to publish KSK@solution: " + e.getMessage());
+			}
+		}
+		
 	}
 
 }

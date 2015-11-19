@@ -27,6 +27,7 @@ public class ChannelMaker {
 	ChannelMakerListener channelListener;
 
 	static final long KSK_POLLING_PAUSE = TimeUnit.MINUTES.toMillis(5);
+	static final int MAX_KSK_POLLS = 10;
 
 	public ChannelMaker(String insertURI, KeyPair asymKeyPair) throws CENOException {
 		this.bridgeInsertURI = insertURI;
@@ -43,10 +44,12 @@ public class ChannelMaker {
 		}
 
 		try {
-			channelListener = new ChannelMakerListener(puzzle.getAnswer());
-			Thread listenerThread = new Thread(channelListener);
-			listenerThread.setName("ChannelListener");
-			listenerThread.start();
+			for (int i = 0; i < MAX_KSK_POLLS; i++) {
+				channelListener = new ChannelMakerListener(puzzle.getAnswer(), i);
+				Thread listenerThread = new Thread(channelListener);
+				listenerThread.setName("ChannelListener-" + i);
+				listenerThread.start();
+			}
 		} catch (MalformedURLException e) {
 			throw new CENOException(CENOErrCode.RR, "Could not start Channel Maker Listener thread.");
 		}
@@ -98,11 +101,13 @@ public class ChannelMaker {
 		private String puzzleAnswer;
 		private FreenetURI channelMakingKSK;
 		private int lastHandledReq = 0;
+		private int subKsk;
 
 		private volatile boolean continueLoop;
 
-		public ChannelMakerListener(String puzzleAnswer) throws MalformedURLException {
+		public ChannelMakerListener(String puzzleAnswer, int subKsk) throws MalformedURLException {
 			this.puzzleAnswer = puzzleAnswer;
+			this.subKsk = subKsk;
 			channelMakingKSK = new FreenetURI("KSK@" + this.puzzleAnswer);
 			continueLoop = true;
 		}
@@ -116,7 +121,7 @@ public class ChannelMaker {
 					String kskContent = null;
 					GetSyncCallback getSyncCallback = new GetSyncCallback(CENOBridge.nodeInterface.getRequestClient());
 					try {
-						CENOBridge.nodeInterface.distFetchURI(channelMakingKSK, getSyncCallback);
+						CENOBridge.nodeInterface.distFetchURI(new FreenetURI(channelMakingKSK.toString() + "-" + subKsk), getSyncCallback);
 						kskContent = getSyncCallback.getResult(10 * KSK_POLLING_PAUSE, TimeUnit.MILLISECONDS);
 					} catch (FetchException e) {
 						// TODO Fine-grain log messages according to FetchException codes
@@ -150,6 +155,7 @@ public class ChannelMaker {
 							lastHandledReq = reqID;
 						}
 					}
+
 					// Pause the looping thread
 					Thread.sleep(KSK_POLLING_PAUSE + TimeUnit.MINUTES.toMillis(window));
 				}
