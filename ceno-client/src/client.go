@@ -327,8 +327,6 @@ func testChannelsHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 		t.Execute(w, nil)
 	} else {
-		fmt.Println("Loaded feeds")
-		fmt.Println(module)
 		t.Execute(w, module)
 	}
 }

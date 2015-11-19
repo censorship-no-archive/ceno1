@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"github.com/nicksnyder/go-i18n/i18n"
 	"html/template"
@@ -37,6 +38,11 @@ func InitModuleWithFeeds() (map[string]interface{}, error) {
 	}
 	if decodeErr != nil {
 		return nil, decodeErr
+	}
+	// Convert the URLs of feeds to the form that the CENO Client can handle directly, when clicked
+	for i, feed := range feedInfo.Feeds {
+		url := feed.Url
+		feedInfo.Feeds[i].Url = "cenosite/" + base64.StdEncoding.EncodeToString([]byte(url))
 	}
 	var err error = nil
 	mapping := make(map[string]interface{})
