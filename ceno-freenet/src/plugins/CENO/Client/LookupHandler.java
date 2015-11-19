@@ -123,12 +123,12 @@ public class LookupHandler extends AbstractCENOClientHandler {
 		}
 
 		// Check whether the request timeout has expired
-		if (RequestSender.shouldSignalBridge(urlParam)) {
+		if (RequestSender.getInstance().shouldSignalBridge(urlParam)) {
 			if (clientIsHtml) {
 				// HTML client cannot signal RS to make requests for bundles to the bridge, so LookupHandler
 				// initiates such a request
 				//boolean isX_CENO_Rewrite = (request.getHeader("X-Ceno-Rewritten") != null) ? true : false;
-				RequestSender.requestFromBridge(urlParam);
+				RequestSender.getInstance().requestFromBridge(urlParam);
 				return printStaticHTMLReplace("resources/requestedFromBridge.html", "[urlRequested]", urlParam);
 			} else {
 				JSONObject jsonResponse = new JSONObject();

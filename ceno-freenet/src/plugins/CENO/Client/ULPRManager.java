@@ -39,6 +39,7 @@ public class ULPRManager {
 		public void onSuccess(FetchResult result, ClientGetter state) {
 			Logger.normal(this, "ULPR completed successfully for URL: " + url);
 			updateULPRStatus(url, ULPRStatus.succeeded);
+			RequestSender.getInstance().removeFromBatch(url);
 		}
 
 		public void onFailure(FetchException e, ClientGetter state) {
@@ -91,7 +92,7 @@ public class ULPRManager {
 		return ulprManager.ulprTable.containsKey(url);
 	}
 
-	private static ULPRStatus getULPRStatus(String url) {
+	public static ULPRStatus getULPRStatus(String url) {
 		return ulprManager.ulprTable.get(url);
 	}
 

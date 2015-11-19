@@ -7,7 +7,6 @@ import java.util.concurrent.TimeUnit;
 import plugins.CENO.Bridge.CENOBridge;
 import plugins.CENO.Bridge.RequestReceiver;
 import plugins.CENO.Client.CENOClient;
-import plugins.CENO.Client.USKUpdateFetcher;
 import freenet.client.FetchException;
 import freenet.client.FetchResult;
 import freenet.client.InsertException;
@@ -68,7 +67,6 @@ public class Channel {
 	}
 
 	public void subscribeToChannelUpdates() throws MalformedURLException {
-		//TODO Subscribe to channel updated and create callback for signaling bundle inserter
 		USK origUSK = new USK(requestSSK.getRoutingKey(), requestSSK.getCryptoKey(), requestSSK.getExtra(), "", lastKnownEdition);
 		CENOBridge.nodeInterface.subscribeToUSK(origUSK, new ReqCallback());
 	}
@@ -97,8 +95,8 @@ public class Channel {
 
 				case ALL_DATA_NOT_FOUND :
 				case DATA_NOT_FOUND :
-					Logger.warning(USKUpdateFetcher.class, 
-							"Found new edition of USK but could not fetch data for USK: " + uri);
+					Logger.warning(Channel.class, 
+							"Found new request from client but could not fetch data for USK: " + uri);
 					break;
 
 				case RECENTLY_FAILED :
@@ -112,19 +110,21 @@ public class Channel {
 					return;
 
 				default:
-					Logger.warning(USKUpdateFetcher.class,
-							"Exception while fetching new edition for USK: " + uri + ", " + e.getMessage());
+					Logger.warning(Channel.class, "Exception while fetching new request from client for USK: " + uri + ", " + e.getMessage());
 					break;
 				}
 				if (e.isDefinitelyFatal()) {
-					Logger.error(USKUpdateFetcher.class,
-							"Fatal error while fetching new edition for USK: " + uri + ", " + e.getMessage());
+					Logger.error(Channel.class, "Fatal error while fetching new request from client for USK: " + uri + ", " + e.getMessage());
 					return;
 				}
 			}
 
-			String[] urlList = fetchResult.toString().split("\\r?\\n");
-			RequestReceiver.signalReceived(urlList);
+			try {
+				String fetchedString = fetchResult.toString();
+				RequestReceiver.signalReceived(fetchedString.split("\\r?\\n"));
+			} catch (NullPointerException e) {
+				Logger.warning(this, "Received new request from client but payload was empty");
+			}
 
 			return;
 		}

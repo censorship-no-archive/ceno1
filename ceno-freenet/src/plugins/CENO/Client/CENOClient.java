@@ -37,7 +37,7 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 	public static Configuration initConfig;
 	private static final String CONFIGPATH = ".CENO/client.properties";
 
-	private ChannelMaker channelMaker;
+	public static ChannelMaker channelMaker;
 	private Thread channelMakerThread;
 
 	// Default bridge key (for the CENO bridge running on Deflect)

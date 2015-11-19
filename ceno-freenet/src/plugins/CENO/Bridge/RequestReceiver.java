@@ -9,8 +9,7 @@ import freenet.support.Logger;
 
 public class RequestReceiver {
 
-	private RequestReceiver() {
-	}
+	private RequestReceiver() {}
 	
 	public static void signalReceived(String[] urlList) {
 		RequestReceiver.receivedURLList(urlList);

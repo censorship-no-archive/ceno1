@@ -91,6 +91,10 @@ public class URLtoUSKTools {
 	 * @throws MalformedURLException if URL parameter is not a valid URL
 	 */
 	public static String validateURL(String urlParam) throws MalformedURLException {
+		if (urlParam == null  || urlParam.isEmpty()) {
+			throw new MalformedURLException("Given URL was empty");
+		}
+		
 		if (urlParam.equalsIgnoreCase(PORTAL_DOC_NAME)) {
 			return PORTAL_DOC_NAME;
 		}
