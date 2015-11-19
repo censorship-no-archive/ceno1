@@ -134,7 +134,7 @@ public class ChannelMaker {
 						try {
 							decKskContent = new String(Crypto.decrypt(kskContent.getBytes("UTF-8"), Crypto.savePrivateKey(asymKeyPair.getPrivate())), "UTF-8");
 						} catch (GeneralSecurityException e) {
-							Logger.error(this, "General Security Exception while decrypting KSK reply from client: " + e.getMessage());
+							Logger.error(this, "General Security Exception while decrypting KSK reply from client");
 							continue;
 						} catch (IllegalBase64Exception e) {
 							// Unlikely to happen

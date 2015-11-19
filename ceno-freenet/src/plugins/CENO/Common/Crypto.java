@@ -25,7 +25,7 @@ public final class Crypto {
 
 	private static final int KEY_SIZE = 4096;
 	private static final String KEY_ALGORITHM = "RSA";
-	private static final String CIPHER_TRANSFORMATION = "RSA/None/OAEPWithSHA1AndMGF1Padding";
+	private static final String CIPHER_TRANSFORMATION = "RSA/None/OAEPWithSHA256AndMGF1Padding";
 	private static final String SECURITY_PROVIDER = "BC";
 
 	private static final SecureRandom srng = new SecureRandom();
@@ -78,7 +78,7 @@ public final class Crypto {
 	}
 
 	public static byte[] encrypt(byte[] msg, String pubKey64) throws GeneralSecurityException, IllegalBase64Exception {
-		if (msg.length > 254) {
+		if (msg.length > KEY_SIZE/8) {
 			throw new GeneralSecurityException("Cannot encrypt payload of that size");
 		}
 
@@ -93,6 +93,7 @@ public final class Crypto {
 		PrivateKey privKey = loadPrivateKey(privKey64);
 		Cipher cipher = Cipher.getInstance(CIPHER_TRANSFORMATION, SECURITY_PROVIDER);
 		cipher.init(Cipher.DECRYPT_MODE, privKey);
+		//TODO Handle BadPaddingException (somebody has tampered with the data) without giving an oracle
 		byte[] plainText = cipher.doFinal(msg);
 		return plainText;
 	}
