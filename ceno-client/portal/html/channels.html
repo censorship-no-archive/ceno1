@@ -10,38 +10,13 @@
   <div class="content">
     <h1>Choose your media channel</h1>
     <div class="pure-g channel-row">
+      {{range .Feeds}}
       <div class="pure-u-1-4">
         <div class="channel">
-          <h2>Al Jezeera</h2>
+          <h2>{{.Title}}</h2>
         </div>
       </div>
-      <div class="pure-u-1-4">
-        <div class="channel">
-          <h2>BBC Farsi</h2>
-        </div>
-      </div>
-      <div class="pure-u-1-4">
-        <div class="channel">
-          <h2>BBC</h2>
-        </div>
-      </div>
-      <div class="pure-u-1-4">
-        <div class="channel">
-          <h2>The Guardian</h2>
-        </div>
-      </div>
-    </div>
-    <div class="pure-g channel-row">
-      <div class="pure-u-1-4">
-        <div class="channel">
-          <h2>The Washington Post</h2>
-        </div>
-      </div>
-      <div class="pure-u-1-4">
-        <div class="channel">
-          <h2>The New York Times</h2>
-        </div>
-      </div>
+      {{end}}
     </div>
   </div>
   {{template "SCRIPTS" . }}

@@ -321,7 +321,16 @@ func testPortalHandler(w http.ResponseWriter, r *http.Request) {
 func testChannelsHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Got request for test channels page")
 	t, _ := template.ParseFiles("./views/channels.html", "./views/nav.html", "./views/resources.html", "./views/breadcrumbs.html", "./views/scripts.html")
-	t.Execute(w, nil)
+	module, err := InitModuleWithFeeds()
+	if err != nil {
+		fmt.Println("Error loading feeds")
+		fmt.Println(err)
+		t.Execute(w, nil)
+	} else {
+		fmt.Println("Loaded feeds")
+		fmt.Println(module)
+		t.Execute(w, module)
+	}
 }
 
 func testArticlesHandler(w http.ResponseWriter, r *http.Request) {
