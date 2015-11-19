@@ -11,15 +11,22 @@ import (
 	"strconv"
 )
 
+// Contains information about languages available to the CENO Portal
+type Language struct {
+	Name   string
+	Locale string
+}
+
 // Configuration struct containing fields required by client to run proxy server
 // and reach other agents it must interact with.
 type Config struct {
-	PortNumber     string
-	PortNumberTLS  string
-	CacheServer    string
-	RequestServer  string
-	ErrorMsg       string
-	PleaseWaitPage string
+	PortNumber      string
+	PortNumberTLS   string
+	CacheServer     string
+	RequestServer   string
+	ErrorMsg        string
+	PleaseWaitPage  string
+	PortalLanguages []Language
 }
 
 // An enum-like set of constants representing whether any of the fields in a
@@ -80,6 +87,9 @@ var DefaultConfiguration Config = Config{
 	RequestServer:  "http://localhost:3092",
 	ErrorMsg:       "Page not found",
 	PleaseWaitPage: path.Join(".", "views", "wait.html"),
+	PortalLanguages: []Language{
+		{"English", "en"},
+	},
 }
 
 // Functions to verify that each configuration field is well formed.
