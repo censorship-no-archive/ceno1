@@ -419,9 +419,35 @@ func testChannelsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func testArticlesHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Got request for test articles page")
+	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
 	t, _ := template.ParseFiles("./views/articles.html", "./views/nav.html", "./views/resources.html", "./views/breadcrumbs.html", "./views/scripts.html")
-	t.Execute(w, nil)
+	// TODO - Get the feed from the URL
+	module, err := InitModuleWithArticles("https://news.ycombinator.com/rss")
+	if err != nil {
+		fmt.Println("Error loading articles")
+		fmt.Println(err)
+		t.Execute(w, nil)
+	} else {
+		module["PublishedWord"] = T("published_word")
+		module["AuthorWord"] = T("authors_word")
+		module["Title"] = "Testing 1 2 3"
+		module["Breadcrumbs"] = []PortalPath{
+			{"CeNO", "/testportal"},
+			{"Channel Selector", "/testchannels"},
+			{"Hacker News", "/testarticles"},
+		}
+		languageStrings, langStringsJson, readErr := loadLanguageStrings()
+		if readErr != nil {
+			fmt.Println("Error loading languages")
+			fmt.Println(err)
+		} else {
+			// For the language selection menu
+			module["LanguageStrings"] = languageStrings
+			// For the javascript code that applies strings
+			module["LanguageStringsAsJSON"] = stringifyLanguages(langStringsJson)
+		}
+		t.Execute(w, module)
+	}
 }
 
 /**

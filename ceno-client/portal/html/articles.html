@@ -7,33 +7,21 @@
 <body>
   {{template "NAV" . }}
   {{template "BREADCRUMBS" . }}
-  <h1>BBC Farsi</h1>
+  <div class="content">
+    <h1>{{.Title}}</h1>
+  </div>
   <hr />
-  <div id="articleListDiv">
-    <h2>BBC Farsi's super important RSS feed</h2>
+  <div class="content" id="articleListDiv">
     <ul id="articleListing">
+      {{range .Articles}}
       <li>
-        <h3 class="articleTitle">Article 1</h3>
-        <p class="articleInfo">Published 10:02pm, Wed 15 October 2015 by Someone Special</p>
+        <h2 class="articleTitle"><a href="{{.Url}}">{{.Title}}</a></h2>
+        <p class="articleInfo">{{.Published}} {{.Authors}}</p>
       </li>
-      <li>
-        <h3 class="articleTitle">Article 2</h3>
-        <p class="articleInfo">Published 10:02pm, Wed 15 October 2015 by Someone Special</p>
-      </li>
-      <li>
-        <h3 class="articleTitle">Article 3</h3>
-        <p class="articleInfo">Published 10:02pm, Wed 15 October 2015 by Someone Special</p>
-      </li>
-      <li>
-        <h3 class="articleTitle">Article 4</h3>
-        <p class="articleInfo">Published 10:02pm, Wed 15 October 2015 by Someone Special</p>
-      </li>
-      <li>
-        <h3 class="articleTitle">Article 5</h3>
-        <p class="articleInfo">Published 10:02pm, Wed 15 October 2015 by Someone Special</p>
-      </li>
+      {{end}}
     </ul>
   </div>
   {{template "SCRIPTS" . }}
+  <script src="cenoresources/javascript/articles.js"></script>
 </body>
 </html>

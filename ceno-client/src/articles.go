@@ -28,7 +28,7 @@ func articlesFilename(feedUrl string) string {
  * @param {string} feedUrl - The URL of the feed to fetch articles from
  * @return a map with a "feeds" key and corresponding array of Feed structs and an optional error
  */
-func initModuleWithArticles(feedUrl string) (map[string]interface{}, error) {
+func InitModuleWithArticles(feedUrl string) (map[string]interface{}, error) {
 	articleInfo := ArticleInfo{}
 	var decodeErr error
 	result := Lookup(feedUrl)
@@ -52,7 +52,8 @@ func initModuleWithArticles(feedUrl string) (map[string]interface{}, error) {
 		return nil, decodeErr
 	}
 	mapping := make(map[string]interface{})
-	mapping["articles"] = articleInfo.Items
+	mapping["Articles"] = articleInfo.Items
+	mapping["Version"] = articleInfo.Version
 	return mapping, nil
 }
 
@@ -66,7 +67,7 @@ func CreateArticlePage(w http.ResponseWriter, r *http.Request) {
 	b64FeedUrl := pathComponents[len(pathComponents)-1]
 	feedUrlBytes, _ := base64.StdEncoding.DecodeString(b64FeedUrl)
 	feedUrl := string(feedUrlBytes)
-	moduleData, articlesErr := initModuleWithArticles(feedUrl)
+	moduleData, articlesErr := InitModuleWithArticles(feedUrl)
 	if articlesErr != nil {
 		HandleCCError(ERR_NO_ARTICLES_FILE, articlesErr.Error(), ErrorState{
 			"responseWriter": w,

@@ -10,3 +10,12 @@
 #articleListing {
   list-style: none;
 }
+
+.articleTitle {
+  font-size: 18px;
+}
+
+#articleListing li h2 a {
+  color: #e43624;
+  text-decoration: none;
+}

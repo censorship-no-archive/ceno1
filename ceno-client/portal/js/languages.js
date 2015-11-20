@@ -44,6 +44,10 @@ function setChannelText(locale) {
   }
 }
 
+function setArticleText(locale) {
+  setLocale(locale);
+}
+
 // When a language is selected, get its locale and reset the text on the page.
 // TODO - Expand this to work on all pages.
 let languageOptions = document.getElementsByClassName('languageSelect');
@@ -66,6 +70,7 @@ function getLocale() {
 return {
   setText,
   setChannelText,
+  setArticleText,
   getLocale
 };
 

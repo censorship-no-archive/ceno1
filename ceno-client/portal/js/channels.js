@@ -1,5 +1,5 @@
 (function () {
 
-languages.setChannelText('fr');
+languages.setArticleText('en');
 
 })();
