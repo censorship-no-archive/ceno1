@@ -1,5 +1,7 @@
-(function () { // START LANGUAGES MODULE
-'use strict';
+let languages = (function () {
+
+// A global variable containing the current locale. Only written to within this module.
+let globalLocale = 'en';
 
 /**
  * Set the text content of a given element to some translated string.
@@ -39,10 +41,24 @@ function setChannelText(locale) {
 let languageOptions = document.getElementsByClassName('languageSelect');
 for (let i = 0, len = languageOptions.length; i < len; i++) {
   let option = languageOptions[i];
-  option.addEventListener('click', () => setChannelText(option.getAttribute('data-language')));
+  option.addEventListener('click', () => {
+    globalLocale = option.getAttribute('data-language');
+    setChannelText(globalLocale);
+  });
 }
 
-// When the page is loaded, set the content of all the textual fields to the appropriately translated version
-setChannelText('fr');
+/**
+ * For use by consumers of this module, get the currently selected locale.
+ * @return {string} the current locale, like 'en' or 'fr'.
+ */
+function getLocale() {
+  return globalLocale;
+}
 
-})(); // END LANGUAGES MODULE
+return {
+  setText,
+  setChannelText,
+  getLocale
+};
+
+})();

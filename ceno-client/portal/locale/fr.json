@@ -7,5 +7,9 @@
   "learnMoreDescription": "Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum",
   "learnMoreButton": "DIS M'EN PLUS",
   "chooseChannel": "Choisissez votre canal de médias",
-  "channelSelector": "Sélecteur de Canal"
+  "channelSelector": "Sélecteur de Canal",
+  "statusConnected": "Connecté",
+  "statusWarning": "Instable",
+  "statusError": "Non-connecté",
+  "statusUnknown": "Non-connecté"
 }

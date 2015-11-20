@@ -25,7 +25,7 @@ ceno-client/test/erroringlcs
 ceno-client/locale/all.json
 
 # Concatenated JS and CSS for the portal as well as copies of the views
-ceno-client/static/javascript/main.js
+ceno-client/static/javascript/*.js
 ceno-client/static/stylesheets/main.css
 ceno-client/views/articles.html
 ceno-client/views/nav.html

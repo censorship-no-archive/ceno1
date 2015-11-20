@@ -15,13 +15,12 @@ gulp.task('lintjs', () =>
     .pipe(jshint.reporter(stylish))
 );
 
-gulp.task('concatjs', () =>
+gulp.task('convertjs', () =>
   gulp.src('./portal/js/*.js')
     .pipe(babel({
       presets: ['es2015']
     }))
-    .pipe(concat('main.js'))
-    .pipe(gulp.dest('./static/javascript/'))
+    .pipe(gulp.dest('./static/javascript'))
 );
 
 gulp.task('concatcss', () =>
@@ -42,8 +41,8 @@ gulp.task('translations', () =>
 );
 
 // Shorthand tasks for applying changes to single resources
-gulp.task('js', ['lintjs', 'concatjs']);
+gulp.task('js', ['lintjs', 'convertjs']);
 gulp.task('css', ['concatcss']);
 gulp.task('html', ['copyhtml']);
 
-gulp.task('build', ['lintjs', 'concatjs', 'concatcss', 'copyhtml', 'translations']);
+gulp.task('build', ['lintjs', 'convertjs', 'concatcss', 'copyhtml', 'translations']);

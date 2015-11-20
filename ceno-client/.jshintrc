@@ -1,4 +1,5 @@
 {
+  "strict": "implied",
   "curly": true,
   "esnext": true,
   "eqeqeq": true,
@@ -14,7 +15,10 @@
   "browser": true,
   "devel": true,
   "sub": true,
+  "module": true,
   "globals": {
-    "LANGUAGES": false
+    "LANGUAGES": false,
+    "languages": false,
+    "navigation": false
   }
 }
