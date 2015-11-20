@@ -13,6 +13,7 @@ let globalLocale = 'en';
  */
 function setText(elemId, property, locale, stringId) {
   let elem = document.getElementById(elemId);
+  console.log(elem);
   if (elem && LANGUAGES.hasOwnProperty(locale) && LANGUAGES[locale].hasOwnProperty(stringId)) {
     elem[property] = LANGUAGES[locale][stringId];
   } else if (elem && LANGUAGES.en.hasOwnProperty(stringId)) {

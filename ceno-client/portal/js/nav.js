@@ -4,6 +4,11 @@ let navigation = (function () {
 const CACHE_SERVER_BASE = 'http://localhost:3091';
 const CACHE_STATUS_ROUTE = '/status';
 
+// Status icons
+const STATUS_ICON_OKAY = 'cenoresources/images/status_okay.png';
+const STATUS_ICON_WARNING = 'cenoresources/images/status_warning.png';
+const STATUS_ICON_ERROR = 'cenoresources/images/status_error.png';
+
 /**
  * Set the status message and icon in the nav of the portal page to inform the user of how well
  * connected they are to the underlying distributed storage system so they know when they can
@@ -11,18 +16,23 @@ const CACHE_STATUS_ROUTE = '/status';
  * @param {string} status - One of either "okay", "warning", or "error" - The connection status
  */
 function setConnectivityStatus(status) {
+  let statusIcon = document.getElementById('statusIcon');
   switch (status) {
   case 'okay':
-    languages.setText('connectionStatus', 'text', languages.getLocale(), 'statusConnected');
+    languages.setText('statusText', 'textContent', languages.getLocale(), 'statusConnected');
+    statusIcon.setAttribute('src', STATUS_ICON_OKAY);
     break;
   case 'warning':
-    languages.setText('connectionStatus', 'text', languages.getLocale(), 'statusWarning');
+    languages.setText('statusText', 'textContent', languages.getLocale(), 'statusWarning');
+    statusIcon.setAttribute('src', STATUS_ICON_WARNING);
     break;
   case 'error':
-    languages.setText('connectionStatus', 'text', languages.getLocale(), 'statusError');
+    languages.setText('statusText', 'textContent', languages.getLocale(), 'statusError');
+    statusIcon.setAttribute('src', STATUS_ICON_ERROR);
     break;
   default:
-    languages.setText('connectionStatus', 'text', languages.getLocale(), 'statusUnknown');
+    languages.setText('statusText', 'textContent', languages.getLocale(), 'statusUnknown');
+    statusIcon.setAttribute('src', STATUS_ICON_ERROR);
   }
 }
 
@@ -49,6 +59,7 @@ function getPeerStatus() {
 }
 
 // Update the connection status every ten seconds.
+setConnectivityStatus('error');
 setInterval(getPeerStatus, 10000);
 
 return {
