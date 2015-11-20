@@ -30,6 +30,10 @@
   background-color: rgba(160, 160, 160, 0.8);
 }
 
+#currentLocale {
+  text-transform: uppercase;
+}
+
 #languageMenu {
   width: 175px;
   background-color: rgb(199, 199, 199);

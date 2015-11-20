@@ -13,7 +13,6 @@ let globalLocale = 'en';
  */
 function setText(elemId, property, locale, stringId) {
   let elem = document.getElementById(elemId);
-  console.log(elem);
   if (elem && LANGUAGES.hasOwnProperty(locale) && LANGUAGES[locale].hasOwnProperty(stringId)) {
     elem[property] = LANGUAGES[locale][stringId];
   } else if (elem && LANGUAGES.en.hasOwnProperty(stringId)) {
@@ -27,11 +26,19 @@ function setText(elemId, property, locale, stringId) {
   return true;
 }
 
+function setLocale(locale) {
+  globalLocale = locale;
+  document.getElementById('currentLocale').textContent = locale;
+  let currentStatus = navigation.getPortalStatus();
+  navigation.setConnectivityStatus(currentStatus);
+}
+
 /**
  * Set all the visible text content on the channel selection page.
  * @param {string} locale - The locale of the language to use, e.g. en or fr
  */
 function setChannelText(locale) {
+  setLocale(locale);
   if (!setText('chooseChannelHeader', 'textContent', locale, 'chooseChannel')) {
     console.log('Could not set "Choose Channel" header text.');
   }

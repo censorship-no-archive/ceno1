@@ -9,6 +9,8 @@ const STATUS_ICON_OKAY = 'cenoresources/images/status_okay.png';
 const STATUS_ICON_WARNING = 'cenoresources/images/status_warning.png';
 const STATUS_ICON_ERROR = 'cenoresources/images/status_error.png';
 
+let globalStatus = 'okay';
+
 /**
  * Set the status message and icon in the nav of the portal page to inform the user of how well
  * connected they are to the underlying distributed storage system so they know when they can
@@ -16,6 +18,7 @@ const STATUS_ICON_ERROR = 'cenoresources/images/status_error.png';
  * @param {string} status - One of either "okay", "warning", or "error" - The connection status
  */
 function setConnectivityStatus(status) {
+  globalStatus = status;
   let statusIcon = document.getElementById('statusIcon');
   switch (status) {
   case 'okay':
@@ -58,12 +61,20 @@ function getPeerStatus() {
   xhr.send();
 }
 
+/**
+ * Get the current connectivity status set in the portal.
+ */
+function getPortalStatus() {
+  return globalStatus;
+}
+
 // Update the connection status every ten seconds.
 setConnectivityStatus('error');
 setInterval(getPeerStatus, 10000);
 
 return {
-  setConnectivityStatus
+  setConnectivityStatus,
+  getPortalStatus,
 };
 
 })();
