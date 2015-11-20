@@ -1,5 +1,5 @@
 #breadcrumbsBar {
-  height: 100px;
+  height: 80px;
   background-color: #e43624;
 }
 
@@ -7,7 +7,7 @@
   color: white;
   font-size: 1.4em;
   font-weight: bold;
-  line-height: 100px;
+  line-height: 80px;
 }
 
 #breadcrumbsBar > .content > span > a {

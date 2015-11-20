@@ -1,11 +1,12 @@
 #mainNav {
-  height: 100px;
+  height: 80px;
   background-color: rgb(236, 237, 237);
 }
 
-#mainNav img {
+#cenoLogoMain {
   margin-top: 10px;
   float: left;
+  height: 60px;
 }
 
 #mainMenu {
@@ -30,10 +31,10 @@
 }
 
 #languageMenu {
-  width: 140px;
+  width: 175px;
   background-color: rgb(199, 199, 199);
   text-align: center;
-  line-height: 80px;
+  line-height: 60px;
 }
 
 #languageName {
@@ -44,12 +45,28 @@
   background-color: rgb(199, 199, 199);
 }
 
-#statusMenuItem {
-  width: 200px;
-  text-align: center;
-  line-height: 80px;
+#languageName > img {
+  height: 25px;
+  display: inline;
+  vertical-align: middle;
+  margin-right: 15px;
+  margin-top: -5px;
 }
 
-#connectionStatus {
+#statusMenuItem {
+  width: 225px;
+  text-align: center;
+  line-height: 60px;
+}
+
+#statusIcon {
+  width: 25px;
+  display: inline;
+  vertical-align: middle;
+  margin-right: 10px;
+  margin-top: -3px;
+}
+
+#statusText {
   text-transform: uppercase;
 }

@@ -6,7 +6,10 @@
     </a>
     <ul class="pure-menu-list" id="mainMenu">
       <li class="pure-menu-item pure-menu-has-children pure-menu-allow-hover" id="languageMenu">
-        <a href="#" id="languageName" class="pure-menu-link">ENG</a>
+        <a href="#" id="languageName" class="pure-menu-link">
+          <img src="cenoresources/images/globe.png" />
+          ENG
+        </a>
         <ul class="pure-menu-children">
           {{range .LanguageStrings}}
           <li class="pure-menu-item">
@@ -18,7 +21,10 @@
         </ul>
       </li>
       <li class="pure-menu-item" id="statusMenuItem">
-        <a href="#" id="connectionStatus" class="pure-menu-link">Connected</a>
+        <a href="#" id="connectionStatus" class="pure-menu-link">
+          <img id="statusIcon" src="cenoresources/images/status_error.png" />
+          <span id="statusText">Not Connected</span>
+        </a>
       </li>
     </ul>
   </div>
