@@ -6,7 +6,6 @@ import java.util.concurrent.TimeUnit;
 
 import plugins.CENO.Bridge.CENOBridge;
 import plugins.CENO.Bridge.RequestReceiver;
-import plugins.CENO.Client.CENOClient;
 import freenet.client.FetchException;
 import freenet.client.FetchResult;
 import freenet.client.InsertException;
@@ -83,11 +82,8 @@ public class Channel {
 
 		private void fetchNewRequests(FreenetURI uri) {
 			FetchResult fetchResult = null;
-			if (!uri.hasMetaStrings()) {
-				uri = uri.addMetaStrings(new String[]{"default.html"});
-			}
 			try {
-				fetchResult = CENOClient.nodeInterface.fetchURI(uri);
+				fetchResult = CENOBridge.nodeInterface.fetchURI(uri);
 			} catch (FetchException e) {
 				switch (e.getMode()) {
 				case PERMANENT_REDIRECT :
