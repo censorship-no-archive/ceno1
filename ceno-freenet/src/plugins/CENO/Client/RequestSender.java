@@ -1,68 +1,124 @@
 package plugins.CENO.Client;
 
-import java.util.Date;
+import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
-import freenet.support.Logger;
+import plugins.CENO.Client.ULPRManager.ULPRStatus;
+import plugins.CENO.Client.Signaling.Channel;
+import plugins.CENO.Common.URLtoUSKTools;
 
 public class RequestSender {
 
-	private static RequestSender requestSender = null;
-	private Hashtable<String, Date> requestTable;
-	private String[] bridgeFreemails;
+	private static volatile RequestSender requestSender = new RequestSender();
+	private Hashtable<String, Long> requestTable;
+	private List<String> batchList;
+	private Timer timer;
+	private Boolean newUrlArrived = false;
 
 	/**
 	 * Time to wait since a request for a URL was originally received from CC before sending
-	 * a freemail to the bridge.
+	 * a request to the bridge.
 	 */
-	private static final long SHOULD_SEND_FREEMAIL = TimeUnit.MINUTES.toMillis(3);
+	private static final long SHOULD_QUEUE_URL = TimeUnit.MINUTES.toMillis(2);
+
 	/**
-	 * Time to wait before sending a new freemail request for the same URL
+	 * Time to wait before sending a new request for the same URL
 	 */
 	private static final long REQUEST_TIMEOUT = TimeUnit.MINUTES.toMillis(40);
 
-	private RequestSender(String[] bridgeFreemails) {
-		this.requestTable = new Hashtable<String, Date>();
-		this.bridgeFreemails = bridgeFreemails;
+	/**
+	 * Maximum size in bytes of a batch request in order to fit within the USK chunk
+	 */
+	private static final long MAX_BATCH_SIZE = 2^10;
+
+	private RequestSender() {
+		this.requestTable = new Hashtable<String, Long>();
+		batchList = new ArrayList<String>();
+		timer = new Timer("BatchRequestTimer", true);
+		timer.schedule(new BatchReqInserter(), 0, TimeUnit.MINUTES.toMillis(3));
 	}
 
-	public static void init(String[] bridgeFreemails) {
-		synchronized (RequestSender.class) {
-			if (requestSender == null) {
-				requestSender = new RequestSender(bridgeFreemails);
+	public static RequestSender getInstance() {
+		return requestSender;
+	}
+
+	public void requestFromBridge(String url) {
+		if (shouldSignalBridge(url)) {
+			synchronized (newUrlArrived) {
+				newUrlArrived = true;
+				addInBatch(url);
+				requestTable.put(url, System.currentTimeMillis() + REQUEST_TIMEOUT - SHOULD_QUEUE_URL);
 			}
 		}
 	}
 
-	public static void requestFromBridge(String url) {
-		if (url == null || url.isEmpty()) {
-			return;
-		}
-
-		if (shouldSendFreemail(url)) {
-			synchronized (requestSender.bridgeFreemails) {
-				if (CENOClient.nodeInterface.sendFreemail(CENOClient.clientFreemail, requestSender.bridgeFreemails, url, "", "CENO")) {	
-					Logger.normal(RequestSender.class, "Sent request to the bridge for URL: " + url);
-				} else {
-					Logger.error(RequestSender.class, "Excpetion while trying to signal Bridge for URL: " + url);
-					return;
-				}
-			}
-			requestSender.requestTable.put(url, new Date(new Date().getTime() + REQUEST_TIMEOUT - SHOULD_SEND_FREEMAIL));
-		}
-	}
-
-	public static boolean shouldSendFreemail(String url) {
-		if (url == null || url.isEmpty()) {
+	public synchronized boolean shouldSignalBridge(String url) {
+		try {
+			URLtoUSKTools.validateURL(url);
+		} catch (MalformedURLException e) {
 			return false;
 		}
 
-		if (!requestSender.requestTable.containsKey(url)) {
-			requestSender.requestTable.put(url, new Date());
+		if (ULPRManager.getULPRStatus(url) == ULPRStatus.succeeded) {
+			return false;
 		}
 
-		return (new Date().getTime() - requestSender.requestTable.get(url).getTime() > SHOULD_SEND_FREEMAIL);
+		if (!requestTable.containsKey(url)) {
+			requestTable.put(url, System.currentTimeMillis());
+		}
+
+		return (System.currentTimeMillis() - requestTable.get(url) > SHOULD_QUEUE_URL);
+	}
+
+	private void addInBatch(String url) {
+		synchronized (batchList) {
+			if (!batchList.contains(url)) {
+				batchList.add(url);
+			}
+		}
+	}
+
+	public void removeFromBatch(String url) {
+		synchronized (batchList) {
+			batchList.remove(url);
+		}
+	}
+
+	private class BatchReqInserter extends TimerTask {
+		public BatchReqInserter() {}
+
+		@Override
+		public void run() {
+			synchronized (newUrlArrived) {
+				if(!newUrlArrived || !CENOClient.channelMaker.canSend()) {
+					return;
+				}
+
+				int batchSize = 0;
+				StringBuilder batchListStr = new StringBuilder();
+
+				for (int i = batchList.size() - 1; i >= 0; i--) {
+					String url = batchList.get(i);
+					if (shouldSignalBridge(url)) {
+						batchSize += url.getBytes().length;
+						if (batchSize <= MAX_BATCH_SIZE) {
+							batchListStr.append(url);
+							batchListStr.append("\n");
+						}
+					}
+				}
+
+				if (Channel.insertBatch(batchListStr.toString())) {
+					newUrlArrived = false;
+				}
+			}
+		}
+
 	}
 
 }

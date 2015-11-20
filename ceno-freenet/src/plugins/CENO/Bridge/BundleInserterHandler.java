@@ -89,8 +89,8 @@ public class BundleInserterHandler extends CENOJettyHandler {
 			writeError(baseRequest, response, "URL failed validation and a bundle will not be inserted for: " + urlParam);
 		}
 
-		if (!CENOBridge.isMasterBridge() && urlParam.equals(CENOBridge.PORTAL_DOC_NAME)) {
-			Logger.normal(this, "Got request to insert CENO-RSS but won't handle since this is not the master bridge");
+		if (!CENOBridge.isMasterBridge() && urlParam.equals(URLtoUSKTools.PORTAL_DOC_NAME)) {
+			Logger.normal(this, "Got request to insert CENO portal feeds but won't handle since this is not the master bridge");
 			writeMessage("Not a Master bridge,  won't insert", baseRequest, response, urlParam);
 			return;
 		}

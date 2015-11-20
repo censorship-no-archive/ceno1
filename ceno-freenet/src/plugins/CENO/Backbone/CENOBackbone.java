@@ -55,13 +55,9 @@ import freenet.support.SimpleFieldSet;
  */
 public class CENOBackbone implements FredPlugin, FredPluginVersioned, FredPluginRealVersioned, FredPluginThreadless {
 
-	private static final Version version = new Version(Version.PluginType.BACKBONE);
-
-	public static final String bridgeIdentityRequestURI = "USK@QfqLw7-BJpGGMnhnJQ3~KkCiciMAsoihBCtSqy6nNbY,-lG83h70XIJ03r4ckdNnsY4zIQ-J8qTqwzSBeIG5q3s,AQACAAE/WebOfTrust/0";
-	public static final String bridgeFreemail = "DEFLECTBridge@ih5ixq57yetjdbrspbtskdp6fjake4rdacziriiefnjkwlvhgw3a.freemail";
-
-	public static final String backboneIdentityInsertURI = "";
-	public static final String backboneFreemail = "deflectbackbone@gpksc2qu27zvrp3md3g7fomwyghewkfbb56plifb5qgszwilgjua.freemail";
+	private static final Version VERSION = new Version(Version.PluginType.BACKBONE);
+	
+	public static final String BRIDGE_KEY = "SSK@mlfLfkZmWIYVpKbsGSzOU~-XuPp~ItUhD8GlESxv8l4,tcB-IHa9c4wpFudoSm0k-iTaiE~INdeQXvcYP2M1Nec,AQACAAE/";
 
 	public static Node node;
 	public static NodeInterface nodeInterface;
@@ -92,10 +88,12 @@ public class CENOBackbone implements FredPlugin, FredPluginVersioned, FredPlugin
 		 * we are using the same Freemail address with multiple backbone nodes, for reaching
 		 * the bridge.
 		 */
-		if (!nodeInterface.setRandomNextMsgNumber(backboneFreemail, bridgeFreemail)) {
+		/*
+		if (!nodeInterface.setRandomNextMsgNumber(BACKBONE_FREEMAIL, BRIDGE_FREEMAIL)) {
 			Logger.error(this, "Could not set a random nextMessageNumber. Freemails will most probably be dropped at the bridge");
 			terminate();
 		}
+		*/
 
 		/* Schedule a thread in order to Send a Freemail to the bridge node with the own node reference.
 		 * First attempt will be in a minute from plugin initialization, and if it fails, there will be
@@ -147,11 +145,11 @@ public class CENOBackbone implements FredPlugin, FredPluginVersioned, FredPlugin
 	}
 
 	public String getVersion() {
-		return version.getVersion();
+		return VERSION.getVersion();
 	}
 
 	public long getRealVersion() {
-		return version.getRealVersion();
+		return VERSION.getRealVersion();
 	}
 
 	public void terminate() {
@@ -164,13 +162,13 @@ public class CENOBackbone implements FredPlugin, FredPluginVersioned, FredPlugin
 	private class RefSender implements Runnable {
 
 		public void run() {
-			if (nodeInterface.sendFreemail(CENOBackbone.backboneFreemail, new String[]{bridgeFreemail}, "addFriend", nodeRefHelper.getNodeRef(), "CENO")) {
+			/*if (nodeInterface.sendFreemail(CENOBackbone.BACKBONE_FREEMAIL, new String[]{BRIDGE_FREEMAIL}, "addFriend", nodeRefHelper.getNodeRef(), "CENO")) {
 				scheduleSend.isDone();
 				scheduledExecutorService.shutdown();
 				Logger.normal(RefSender.class, "Sent Freemail to the bridge with own node reference");
 			} else {
 				Logger.error(RefSender.class, "Failed to send an email with the own node reference to the bridge");
-			}
+			}*/
 		}
 
 	}

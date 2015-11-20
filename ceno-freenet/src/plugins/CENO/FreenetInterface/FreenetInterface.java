@@ -1,6 +1,7 @@
 package plugins.CENO.FreenetInterface;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 
 import plugins.CENO.FreenetInterface.ConnectionOverview.NodeConnections;
@@ -11,6 +12,7 @@ import freenet.client.InsertException;
 import freenet.client.async.ClientGetCallback;
 import freenet.client.async.ClientGetter;
 import freenet.client.async.ClientPutCallback;
+import freenet.client.async.PersistenceDisabledException;
 import freenet.client.async.USKCallback;
 import freenet.keys.FreenetURI;
 import freenet.keys.USK;
@@ -21,6 +23,7 @@ public interface FreenetInterface {
 
 	FetchResult fetchURI(FreenetURI uri) throws FetchException;
 	ClientGetter localFetchURI(FreenetURI uri, ClientGetCallback callback) throws FetchException;
+	ClientGetter distFetchURI(FreenetURI uri, ClientGetCallback callback) throws FetchException;
 	ClientGetter fetchULPR(FreenetURI uri, ClientGetCallback callback) throws FetchException;
 	boolean subscribeToUSK(USK origUSK, USKCallback cb);
 	FreenetURI[] generateKeyPair();
@@ -30,12 +33,9 @@ public interface FreenetInterface {
 	FreenetURI insertBundleManifest(FreenetURI insertURI, String content, String defaultName, ClientPutCallback cb) throws IOException, InsertException;
 	Bucket makeBucket(int length) throws IOException;
 	FreenetURI insertManifest(FreenetURI insertURI, HashMap<String, Object> bucketsByName, String defaultName, short priorityClass) throws InsertException;
+	FreenetURI insertSingleChunk(FreenetURI uri, String content, ClientPutCallback cb) throws InsertException, PersistenceDisabledException, UnsupportedEncodingException;
+	FreenetURI insertSingleChunk(FreenetURI uri, byte[] content, ClientPutCallback cb) throws InsertException, PersistenceDisabledException, UnsupportedEncodingException;
 	NodeConnections getConnections();
-	boolean copyAccprops(String freemailAccount);
-	boolean sendFreemail(String freemailFrom, String freemailTo[], String subject, String content, String password);
-	String[] getUnreadMailsSubject(String freemail, String password, String inboxFolder, boolean shouldDelete);
-	String[] getMailsContentFrom(String freemail, String freemailFrom, String password, String mailFolder);
-	boolean setRandomNextMsgNumber(String freemailAccount, String freemailTo);
-	boolean clearOutboxLog(String freemailAccount, String identityFrom);
-	boolean clearOutboxMessages(String freemailAccount, String freemailTo);
+	ClientGetCallback getVoidGetCallback(String successMessage, String failureMessage);
+	ClientPutCallback getVoidPutCallback(String successMessage, String failureMessage);
 }

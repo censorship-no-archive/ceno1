@@ -1,9 +1,8 @@
 package plugins.CENO.FreenetInterface;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
-
-import org.freenetproject.freemail.wot.ConcurrentWoTConnection;
 
 import plugins.CENO.FreenetInterface.ConnectionOverview.NodeConnections;
 import freenet.client.ClientMetadata;
@@ -14,9 +13,12 @@ import freenet.client.FetchResult;
 import freenet.client.InsertBlock;
 import freenet.client.InsertContext;
 import freenet.client.InsertException;
+import freenet.client.async.BaseClientPutter;
+import freenet.client.async.ClientContext;
 import freenet.client.async.ClientGetCallback;
 import freenet.client.async.ClientGetter;
 import freenet.client.async.ClientPutCallback;
+import freenet.client.async.PersistenceDisabledException;
 import freenet.client.async.USKCallback;
 import freenet.keys.FreenetURI;
 import freenet.keys.InsertableClientSSK;
@@ -25,24 +27,25 @@ import freenet.node.Node;
 import freenet.node.RequestClient;
 import freenet.node.RequestStarter;
 import freenet.pluginmanager.PluginRespirator;
+import freenet.support.Logger;
 import freenet.support.api.Bucket;
 import freenet.support.api.RandomAccessBucket;
+import freenet.support.io.ResumeFailedException;
 
 public class NodeInterface implements FreenetInterface {
 
 	private Node node;
-	private PluginRespirator pr;
-	private FetchContext ULPRFC, localFC;
+	private FetchContext ULPRFC, localFC, distFC;
 	private ConnectionOverview connectionOverview;
-	private ConcurrentWoTConnection wotConnection;
 
 	public NodeInterface(Node node, PluginRespirator pr) {
 		this.node = node;
-		this.pr = pr;
+		new HighLevelSimpleClientInterface(node);
 		this.connectionOverview = new ConnectionOverview(node);
+		initFetchContexts();
 	}
 
-	public void initFetchContexts() {
+	private void initFetchContexts() {
 		// Set up a FetchContext instance for Ultra-lightweight passive requests
 		this.ULPRFC = HighLevelSimpleClientInterface.getFetchContext();
 		this.ULPRFC.canWriteClientCache = true;
@@ -53,6 +56,7 @@ public class NodeInterface implements FreenetInterface {
 		this.ULPRFC.maxTempLength = Long.MAX_VALUE;
 		this.ULPRFC.maxOutputLength = Long.MAX_VALUE;
 
+		// Set up a FetchContext instance for lookup requests in the local cache only
 		this.localFC = HighLevelSimpleClientInterface.getFetchContext();
 		this.localFC.localRequestOnly = true;
 		this.localFC.followRedirects = true;
@@ -60,8 +64,15 @@ public class NodeInterface implements FreenetInterface {
 		this.localFC.maxRecursionLevel = 10;
 		this.localFC.maxTempLength = Long.MAX_VALUE;
 		this.localFC.maxOutputLength = Long.MAX_VALUE;
-
-		wotConnection = new ConcurrentWoTConnection(pr);
+		
+		// Set up a FetchContext instance for lookup requests in the distributed cache only
+		this.distFC = HighLevelSimpleClientInterface.getFetchContext();
+		this.distFC.ignoreStore = true;
+		this.distFC.followRedirects = true;
+		this.distFC.allowSplitfiles = true;
+		this.distFC.maxRecursionLevel = 10;
+		this.distFC.maxTempLength = Long.MAX_VALUE;
+		this.distFC.maxOutputLength = Long.MAX_VALUE;
 	}
 
 	@Override
@@ -72,6 +83,11 @@ public class NodeInterface implements FreenetInterface {
 	@Override
 	public ClientGetter localFetchURI(FreenetURI uri, ClientGetCallback callback) throws FetchException {
 		return HighLevelSimpleClientInterface.fetchURI(uri, Long.MAX_VALUE, callback, localFC);
+	}
+	
+	@Override
+	public ClientGetter distFetchURI(FreenetURI uri, ClientGetCallback callback) throws FetchException {
+		return HighLevelSimpleClientInterface.fetchURI(uri, Long.MAX_VALUE, callback, distFC);
 	}
 
 	@Override
@@ -152,42 +168,100 @@ public class NodeInterface implements FreenetInterface {
 	}
 
 	@Override
+	public FreenetURI insertSingleChunk(FreenetURI uri, String content, ClientPutCallback cb) throws InsertException, PersistenceDisabledException, UnsupportedEncodingException {
+		return HighLevelSimpleClientInterface.insertSingleChunk(uri, content, cb);
+	}
+	
+	@Override
+	public FreenetURI insertSingleChunk(FreenetURI uri, byte[] content, ClientPutCallback cb) throws InsertException, PersistenceDisabledException, UnsupportedEncodingException {
+		return HighLevelSimpleClientInterface.insertSingleChunk(uri, content, cb);
+	}
+
+	@Override
 	public NodeConnections getConnections() {
 		return connectionOverview.getConnections();
 	}
 
 	@Override
-	public boolean sendFreemail(String freemailFrom, String freemailTo[], String subject, String content, String password) {
-		return FreemailAPI.sendFreemail(freemailFrom, freemailTo, subject, content, password);
+	public ClientGetCallback getVoidGetCallback(String successMessage, String failureMessage) {
+		return new VoidGetCallback(successMessage, failureMessage, getRequestClient());
 	}
 
 	@Override
-	public String[] getUnreadMailsSubject(String freemail, String password, String inboxFolder, boolean shouldDelete) {
-		return FreemailAPI.getUnreadMailsSubject(freemail, password, inboxFolder, shouldDelete);
+	public ClientPutCallback getVoidPutCallback(String successMessage, String failureMessage) {
+		return new VoidPutCallback(successMessage, failureMessage, getRequestClient());
 	}
 
-	@Override
-	public String[] getMailsContentFrom(String freemail, String freemailFrom, String password, String mailFolder) {
-		return FreemailAPI.getMailsContentFrom(freemail, freemailFrom, password, mailFolder);
+	private class VoidPutCallback implements ClientPutCallback {
+		String successMessage, failureMessage = null;
+		RequestClient reqClient;
+
+		public VoidPutCallback(String successMessage, String failureMessage, RequestClient reqClient) {
+			this.successMessage = successMessage;
+			this.failureMessage = failureMessage;
+			this.reqClient = reqClient;
+		}
+
+		@Override
+		public void onResume(ClientContext context)	throws ResumeFailedException {
+		}
+
+		@Override
+		public RequestClient getRequestClient() {
+			return reqClient;
+		}
+
+		@Override
+		public void onGeneratedURI(FreenetURI uri, BaseClientPutter state) {
+		}
+
+		@Override
+		public void onGeneratedMetadata(Bucket metadata, BaseClientPutter state) {
+		}
+
+		@Override
+		public void onFetchable(BaseClientPutter state) {
+		}
+
+		@Override
+		public void onSuccess(BaseClientPutter state) {
+			Logger.normal(this, successMessage);
+		}
+
+		@Override
+		public void onFailure(InsertException e, BaseClientPutter state) {
+			Logger.error(this, failureMessage + ": " + e.getMessage());
+		}
+
 	}
 
-	@Override
-	public boolean copyAccprops(String freemailAccount) {
-		return FreemailAPI.copyAccprops(freemailAccount);
-	}
+	private class VoidGetCallback implements ClientGetCallback {
+		String successMessage, failureMessage = null;
+		RequestClient reqClient;
 
-	@Override
-	public boolean setRandomNextMsgNumber(String freemailAccount, String freemailTo) {
-		return FreemailAPI.setRandomNextMsgNumber(freemailAccount, freemailTo);
-	}
+		public VoidGetCallback(String successMessage, String failureMessage, RequestClient reqClient) {
+			this.successMessage = successMessage;
+			this.failureMessage = failureMessage;
+		}
 
-	@Override
-	public boolean clearOutboxLog(String freemailAccount, String identityFrom) {
-		return FreemailAPI.clearOutboxLog(freemailAccount, identityFrom);
-	}
+		@Override
+		public void onResume(ClientContext context) throws ResumeFailedException {
+		}
 
-	@Override
-	public boolean clearOutboxMessages(String freemailAccount, String freemailTo) {
-		return FreemailAPI.clearOutboxMessages(freemailAccount, freemailTo);
+		@Override
+		public RequestClient getRequestClient() {
+			return reqClient;
+		}
+
+		@Override
+		public void onSuccess(FetchResult result, ClientGetter state) {
+			Logger.normal(this, successMessage);
+		}
+
+		@Override
+		public void onFailure(FetchException e, ClientGetter state) {
+			Logger.error(this, failureMessage + ": " + e.getMessage());
+		}
+
 	}
 }

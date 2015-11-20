@@ -1,4 +1,4 @@
-package plugins.CENO.FreenetInterface;
+package Legacy.plugins.CENO.FreenetInterface;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
