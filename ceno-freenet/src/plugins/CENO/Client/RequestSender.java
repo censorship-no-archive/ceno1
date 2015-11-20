@@ -8,7 +8,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
-import plugins.CENO.Client.ULPRManager.ULPRStatus;
 import plugins.CENO.Client.Signaling.Channel;
 import plugins.CENO.Common.URLtoUSKTools;
 
@@ -34,13 +33,20 @@ public class RequestSender {
 	/**
 	 * Maximum size in bytes of a batch request in order to fit within the USK chunk
 	 */
-	private static final long MAX_BATCH_SIZE = 2^10;
+	private static final long MAX_BATCH_SIZE = 1024;
 
 	private RequestSender() {
 		this.requestTable = new Hashtable<String, Long>();
 		batchList = new ArrayList<String>();
 		timer = new Timer("BatchRequestTimer", true);
 		timer.schedule(new BatchReqInserter(), 0, TimeUnit.MINUTES.toMillis(3));
+	}
+
+	public void stopTimerTasks() {
+		if (timer != null) {
+			timer.cancel();
+			timer.purge();
+		}
 	}
 
 	public static RequestSender getInstance() {
@@ -58,21 +64,18 @@ public class RequestSender {
 	}
 
 	public synchronized boolean shouldSignalBridge(String url) {
+		String urlValidated = null;
 		try {
-			URLtoUSKTools.validateURL(url);
+			urlValidated = URLtoUSKTools.validateURL(url);
 		} catch (MalformedURLException e) {
 			return false;
 		}
 
-		if (ULPRManager.getULPRStatus(url) == ULPRStatus.succeeded) {
-			return false;
-		}
-
-		if (!requestTable.containsKey(url)) {
+		if (!requestTable.containsKey(urlValidated)) {
 			requestTable.put(url, System.currentTimeMillis());
 		}
 
-		return (System.currentTimeMillis() - requestTable.get(url) > SHOULD_QUEUE_URL);
+		return (System.currentTimeMillis() - requestTable.get(urlValidated) > SHOULD_QUEUE_URL);
 	}
 
 	private void addInBatch(String url) {
@@ -104,21 +107,23 @@ public class RequestSender {
 
 				for (int i = batchList.size() - 1; i >= 0; i--) {
 					String url = batchList.get(i);
-					if (shouldSignalBridge(url)) {
-						batchSize += url.getBytes().length;
-						if (batchSize <= MAX_BATCH_SIZE) {
-							batchListStr.append(url);
-							batchListStr.append("\n");
-						}
+					batchSize += url.getBytes().length;
+					if (batchSize < MAX_BATCH_SIZE) {
+						batchListStr.append(url);
+						batchListStr.append("\n");
 					}
 				}
 
-				if (Channel.insertBatch(batchListStr.toString())) {
+				String batchReq = batchListStr.toString();
+				if (batchReq.isEmpty()) {
+					return;
+				}
+
+				if (Channel.insertBatch(batchReq)) {
 					newUrlArrived = false;
 				}
 			}
 		}
 
 	}
-
 }

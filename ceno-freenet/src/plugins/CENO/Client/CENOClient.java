@@ -106,11 +106,13 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 			initConfig.setProperty("lastSynced", String.valueOf(channelMaker.getLastSynced()));
 			initConfig.storeProperties();
 		}
-		*/
-		
+		 */
+
 		if(channelMakerThread != null) {
 			channelMakerThread.interrupt();
 		}
+
+		RequestSender.getInstance().stopTimerTasks();
 
 		//TODO Release ULPRs' resources
 		Logger.normal(this, PLUGIN_NAME + " terminated.");
