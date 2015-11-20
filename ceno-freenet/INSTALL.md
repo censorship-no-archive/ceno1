@@ -11,7 +11,8 @@
   7. Head back to the `Configuration > Plugins` page.
   8. Copy `USK@kWKE67nhHNp6C-lgD5QtpL5qnIgmsnM6B5i7xxJGXIQ,UhZYJ2R6egIAjdMGAQbsjPcos1~CIJ~CbUKjpuUlwXA,AQACAAE/CENO-plugin/-1/CENO.jar` at the text box right below the `Add an Unofficial Plugin` header and click `Load`.
   9. Make sure CENO has been successfully loaded, by finding the corresponding row in the `Plugins currently loaded` list.
-  10. Start the CENOClient, configure appropriately your browser to use it as a proxy, and surf anonymously the Web evading censorship.
+  10. Visit `Freemail`. You should be able to see CENO in the list of accounts. If not, create a new account for the CENO identity with the password `CENO`.
+  11. Start the CENOClient, configure appropriately your browser to use it as a proxy, and surf anonymously the Web evading censorship.
 
 
 ### What is CENO?

@@ -1,8 +1,9 @@
 package plugins.CENO.Client;
 
 import plugins.CENO.CENOL10n;
+import plugins.CENO.Configuration;
 import plugins.CENO.Version;
-import plugins.CENO.FreenetInterface.HighLevelSimpleClientInterface;
+import plugins.CENO.Client.Signaling.ChannelMaker;
 import plugins.CENO.FreenetInterface.NodeInterface;
 import freenet.pluginmanager.FredPlugin;
 import freenet.pluginmanager.FredPluginHTTP;
@@ -11,7 +12,6 @@ import freenet.pluginmanager.FredPluginThreadless;
 import freenet.pluginmanager.FredPluginVersioned;
 import freenet.pluginmanager.PluginHTTPException;
 import freenet.pluginmanager.PluginRespirator;
-import freenet.support.Base64;
 import freenet.support.Logger;
 import freenet.support.api.HTTPRequest;
 
@@ -25,25 +25,23 @@ import freenet.support.api.HTTPRequest;
 public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRealVersioned, FredPluginHTTP, FredPluginThreadless {
 
 	// Interface objects with fred
-	private static HighLevelSimpleClientInterface client;
 	public static NodeInterface nodeInterface;
 	private static final ClientHandler clientHandler = new ClientHandler();
+	private static String bridgeKey;
 
 	// Plugin-specific configuration
-	public static final String pluginUri = "/plugins/plugins.CENO.CENO";
-	public static final String pluginName = "CENO";
-	private static final Version version = new Version(Version.PluginType.CLIENT);
+	public static final String PLUGIN_URI = "/plugins/plugins.CENO.CENO";
+	public static final String PLUGIN_NAME = "CENO";
+	private static final Version VERSION = new Version(Version.PluginType.CLIENT);
 
-	public static final String PORTAL_DOC_NAME = "CENO-RSS";
-	public static final String B64_PORTAL_DOC_NAME = Base64.encodeStandardUTF8(PORTAL_DOC_NAME);
+	public static Configuration initConfig;
+	private static final String CONFIGPATH = ".CENO/client.properties";
 
-	// Bridge and freemail-specific constants
-	public static final String bridgeKey = "SSK@mlfLfkZmWIYVpKbsGSzOU~-XuPp~ItUhD8GlESxv8l4,tcB-IHa9c4wpFudoSm0k-iTaiE~INdeQXvcYP2M1Nec,AQACAAE/";
-	public static final String bridgeIdentityRequestURI = "USK@QfqLw7-BJpGGMnhnJQ3~KkCiciMAsoihBCtSqy6nNbY,-lG83h70XIJ03r4ckdNnsY4zIQ-J8qTqwzSBeIG5q3s,AQACAAE/WebOfTrust/0";
-	public static final String bridgeFreemail = "DEFLECTBridge@ih5ixq57yetjdbrspbtskdp6fjake4rdacziriiefnjkwlvhgw3a.freemail";
+	public static ChannelMaker channelMaker;
+	private Thread channelMakerThread;
 
-	public static final String clientIdentityInsertURI = "USK@SNS-BKGDFS4ciG3HV6o5MQjvIdCDn9G8DfIeIK~7kBQ,WMeRYMzx2tQHM~O8UWglUmBnjIhp~bh8xue-6g2pmps,AQECAAE/WebOfTrust/0";
-	public static final String clientFreemail = "CENO@54u2ko3lssqgalpvfqbq44gwfquqrejm3itl4rxj5nt7v6mjy22q.freemail";
+	// Default bridge key (for the CENO bridge running on Deflect)
+	public static final String BRIDGE_KEY = "SSK@mlfLfkZmWIYVpKbsGSzOU~-XuPp~ItUhD8GlESxv8l4,tcB-IHa9c4wpFudoSm0k-iTaiE~INdeQXvcYP2M1Nec,AQACAAE/";
 
 	/**
 	 * {@inheritDoc}
@@ -52,19 +50,25 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 	public void runPlugin(PluginRespirator pr)
 	{
 		// Initialize interfaces with Freenet node
-		client = new HighLevelSimpleClientInterface(pr.getNode());
+		//TODO initialized within NodeInterface, do not expose HLSC but only via nodeInterface
 		nodeInterface = new NodeInterface(pr.getNode(), pr);
 		CENOL10n.getInstance().setLanguageFromEnvVar("CENOLANG");
 
 		// Initialize LCS
-		nodeInterface.initFetchContexts();
 		ULPRManager.init();
 
-		// Initialize RS
-		RequestSender.init(new String[]{bridgeFreemail});
-		nodeInterface.copyAccprops(clientFreemail);
-		nodeInterface.setRandomNextMsgNumber(clientFreemail, bridgeFreemail);
-		
+		initConfig = new Configuration(CONFIGPATH);
+		initConfig.readProperties();
+
+		String confBridgeKey = initConfig.getProperty("bridgeKey");
+		//TODO Test that the key in the configuration file corresponds to a valid request USK
+		bridgeKey = (confBridgeKey != null && !confBridgeKey.isEmpty()) ? confBridgeKey : BRIDGE_KEY;
+
+		// Initialize RS - Make a new class ChannelManager that handles ChannelMaker
+		channelMaker = new ChannelMaker(initConfig.getProperty("signalSSK"), Long.parseLong(initConfig.getProperty("lastSynced", "0")));
+
+		channelMakerThread = new Thread(channelMaker);
+		channelMakerThread.start();
 		// Subscribe to updates of the CENO Portal feeds.json
 		USKUpdateFetcher.subscribeToBridgeFeeds();
 	}
@@ -74,7 +78,7 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 	 */
 	@Override
 	public String getVersion() {
-		return version.getVersion();
+		return VERSION.getVersion();
 	}
 
 	/**
@@ -82,7 +86,11 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 	 */
 	@Override
 	public long getRealVersion() {
-		return version.getRealVersion();
+		return VERSION.getRealVersion();
+	}
+
+	public static String getBridgeKey() {
+		return bridgeKey;
 	}
 
 	/**
@@ -91,10 +99,21 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 	@Override
 	public void terminate()
 	{
-		// Clear the CENO client freemail outbox directory
-		nodeInterface.clearOutboxMessages(clientFreemail, bridgeFreemail);
+		/* Do not save the signalSSK before we have implemented the functionality
+		   at the bridge that saves and retrieves them from a file
+		if(channelMaker != null && channelMaker.canSend()) {
+			initConfig.setProperty("signalSSK", channelMaker.getSignalSSK());
+			initConfig.setProperty("lastSynced", String.valueOf(channelMaker.getLastSynced()));
+			initConfig.storeProperties();
+		}
+		*/
+		
+		if(channelMakerThread != null) {
+			channelMakerThread.interrupt();
+		}
+
 		//TODO Release ULPRs' resources
-		Logger.normal(this, pluginName + " terminated.");
+		Logger.normal(this, PLUGIN_NAME + " terminated.");
 	}
 
 	@Override

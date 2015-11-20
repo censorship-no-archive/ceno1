@@ -1,8 +1,6 @@
 #! /bin/bash
 
 # This script will create a CENO all-in-one box ready for distribution
-# If the -p (plugins) flag is enabled, the bundle will include a build of CENO
-# client, Freemail and WebOfTrust plugins with the latest local modifications.
 #
 # This CENOBOx bundle includes:
 #  * A Freenet node, preloaded with the WebOfTrust, Freemail and CENO plugins,
@@ -146,27 +144,12 @@ echo "Building CENO client and Backbone Freenet plugins"
 cd ../ceno-freenet
 ant dist > /dev/null
 cp dist/CENO.jar $CENOBOXPATH/ceno-debug/
-cp dist/CENOBackbone.jar $CENOBOXPATH/ceno-debug/
-cp dist/CENOBridge.jar $CENOBOXPATH/ceno-debug/
+cp dist/CENOBackbone.jar $CENOBOXPATH/ceno-backbone/
+cp dist/CENOBridge.jar $CENOBOXPATH/ceno-bridge/
 cd $CENOBOXPATH
-
-echo "Building WebOfTrust plugin"
-cd ceno-debug/plugin-WebOfTrust
-ant dist > /dev/null
-cp dist/WebOfTrust.jar $CENOBOXPATH/ceno-debug
-cd $CENOBOXPATH
-
-echo "Building Freemail plugin"
-cd ceno-debug/plugin-Freemail
-ant dist > /dev/null
-cp dist/Freemail.jar $CENOBOXPATH/ceno-debug
-cd $CENOBOXPATH
-
-cp -r ceno-debug/{CENOBackbone.jar,WebOfTrust.jar,Freemail.jar} CENOBackbone/
-cp -r ceno-debug/{CENOBridge.jar,WebOfTrust.jar,Freemail.jar} CENOBridge/
 
 if [[ $PLUGINS == 1 ]]; then
-  cp -r ceno-debug/{CENO.jar,WebOfTrust.jar,Freemail.jar} CENOBox/
+  cp -r ceno-debug/CENO.jar CENOBox/
   cp ceno-debug/freenet-client.ini CENOBox/freenet.ini
 fi
 

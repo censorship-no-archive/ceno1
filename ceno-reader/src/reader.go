@@ -20,6 +20,7 @@ import (
 /**
  * Log the current time and a message
  * @param {interface} msg - The message to be logged
+ * @return the same string that is logged to the console
  */
 func log(msg interface{}) string {
 	t := strings.Replace(time.Now().Format("Jan 01, 2006 15:04:05.000"), ".", ":", 1)
@@ -173,6 +174,7 @@ func followFeeds(requests chan SaveFeedRequest) {
  * Write a file listing items that have been inserted into Freenet
  * @param feedUrl - The URL of the feed from which the items were served
  * @param marshalledItems - The marshalled information about items to write
+ * @return any error that occurs writing to the appropriate file
  */
 func writeItemsFile(feedUrl string, marshalledItems []byte) error {
 	filename := base64.StdEncoding.EncodeToString([]byte(feedUrl)) + ".json"
@@ -273,6 +275,7 @@ func insertHandler(w http.ResponseWriter, r *http.Request) {
  * Try to insert JSON containing this information to Freenet and, only if that succeeds,
  * write the JSON to a file for distribution with the client.
  * @param feeds - Information about the feeds being followed
+ * @return any error that occurs writing the appropriate file
  */
 func writeFeeds(feeds []Feed) error {
 	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
@@ -315,6 +318,7 @@ func writeFeeds(feeds []Feed) error {
  * write teh JSON to a file for distribution with the client.
  * @param feedUrl - The URL of the feed from which the items were received
  * @param items - Information about the items being followed
+ * @return any error that occurs writing information about the items provided
  */
 func writeItems(feedUrl string, items []Item) error {
 	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)

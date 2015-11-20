@@ -7,6 +7,7 @@ import net.minidev.json.JSONObject;
 import plugins.CENO.CENOErrCode;
 import plugins.CENO.CENOException;
 import plugins.CENO.Client.ULPRManager.ULPRStatus;
+import plugins.CENO.Common.GetSyncCallback;
 import plugins.CENO.Common.URLtoUSKTools;
 import plugins.CENO.FreenetInterface.ConnectionOverview.NodeConnections;
 import freenet.client.FetchException;
@@ -58,15 +59,16 @@ public class LookupHandler extends AbstractCENOClientHandler {
 		// Calculate the retrieval address of the inserted bundle for this URL
 		FreenetURI calculatedUSK = null;
 		try {
-			calculatedUSK = URLtoUSKTools.computeUSKfromURL(urlParam, CENOClient.bridgeKey);
+			calculatedUSK = URLtoUSKTools.computeUSKfromURL(urlParam, CENOClient.getBridgeKey());
 		} catch (Exception e) {
 			return returnError(new CENOException(CENOErrCode.LCS_HANDLER_URL_INVALID), clientIsHtml);
 		}
 
 		// Make a synchronous lookup in the local cache for the bundled version of the URL
 		String localFetchResult = null;
+		byte[] localFetchBytes = null;
 		try {
-			localFetchResult = localCacheLookup(calculatedUSK);
+			localFetchBytes = localCacheLookup(calculatedUSK);
 		} catch (CENOException e) {
 			return returnError(e, clientIsHtml);
 		}
@@ -77,7 +79,8 @@ public class LookupHandler extends AbstractCENOClientHandler {
 		 * Resources of Ultra Light Passive Requests (ULPRs) in the distributed cache, once
 		 * successfully retrieved, are also available in the local cache.
 		 */
-		if (localFetchResult != null) {
+		if (localFetchBytes != null) {
+			localFetchResult = new String(localFetchBytes);
 			if (clientIsHtml) {
 				return localFetchResult;
 			} else {
@@ -122,12 +125,12 @@ public class LookupHandler extends AbstractCENOClientHandler {
 		}
 
 		// Check whether the request timeout has expired
-		if (RequestSender.shouldSendFreemail(urlParam)) {
+		if (RequestSender.getInstance().shouldSignalBridge(urlParam)) {
 			if (clientIsHtml) {
 				// HTML client cannot signal RS to make requests for bundles to the bridge, so LookupHandler
 				// initiates such a request
 				//boolean isX_CENO_Rewrite = (request.getHeader("X-Ceno-Rewritten") != null) ? true : false;
-				RequestSender.requestFromBridge(urlParam);
+				RequestSender.getInstance().requestFromBridge(urlParam);
 				return printStaticHTMLReplace("resources/requestedFromBridge.html", "[urlRequested]", urlParam);
 			} else {
 				JSONObject jsonResponse = new JSONObject();
@@ -156,14 +159,14 @@ public class LookupHandler extends AbstractCENOClientHandler {
 	 * @return the content of the bundle if it is found, <code>null</code>
 	 * otherwise
 	 */
-	private String localCacheLookup(FreenetURI calculatedUSK) throws CENOException {
+	private byte[] localCacheLookup(FreenetURI calculatedUSK) throws CENOException {
 		// Local cache lookups do not support "-1" as the edition of a USK
 		if (calculatedUSK.getSuggestedEdition() < 0) {
 			calculatedUSK = calculatedUSK.setSuggestedEdition(0);
 		}
 
-		ClientGetSyncCallback getSyncCallback = new ClientGetSyncCallback();
-		String fetchResult = null;
+		GetSyncCallback getSyncCallback = new GetSyncCallback(CENOClient.nodeInterface.getRequestClient());
+		byte[] fetchResult = null;
 		try {
 			CENOClient.nodeInterface.localFetchURI(calculatedUSK, getSyncCallback);
 			fetchResult = getSyncCallback.getResult(45L, TimeUnit.SECONDS);

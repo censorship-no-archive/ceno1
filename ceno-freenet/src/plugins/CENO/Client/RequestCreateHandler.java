@@ -49,7 +49,7 @@ public class RequestCreateHandler extends AbstractCENOClientHandler {
 		}
 		
 		//boolean isX_CENO_Rewrite = (request.getHeader("X-Ceno-Rewritten") != null) ? true : false;
-		RequestSender.requestFromBridge(urlParam);
+		RequestSender.getInstance().requestFromBridge(urlParam);
 		
 		return "okay";
 	}
