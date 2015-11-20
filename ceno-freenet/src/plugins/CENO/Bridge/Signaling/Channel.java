@@ -54,7 +54,8 @@ public class Channel {
 
 	public void publishSyn() {
 		try {
-			CENOBridge.nodeInterface.insertSingleChunk(new FreenetURI(insertSSK), Long.toString(System.currentTimeMillis()), CENOBridge.nodeInterface.getVoidPutCallback("" +
+			FreenetURI synURI = new FreenetURI("USK", "syn", insertSSK.getRoutingKey(), insertSSK.getCryptoKey(), insertSSK.getExtra());
+			CENOBridge.nodeInterface.insertSingleChunk(synURI, Long.toString(System.currentTimeMillis()), CENOBridge.nodeInterface.getVoidPutCallback("" +
 					"Successfully inserted syn response to signalSSK ",
 					"Failed to insert syn response to signalSSK " + insertSSK));
 		} catch (UnsupportedEncodingException e) {
@@ -67,7 +68,7 @@ public class Channel {
 	}
 
 	public void subscribeToChannelUpdates() throws MalformedURLException {
-		USK origUSK = new USK(requestSSK.getRoutingKey(), requestSSK.getCryptoKey(), requestSSK.getExtra(), "", lastKnownEdition);
+		USK origUSK = new USK(requestSSK.getRoutingKey(), requestSSK.getCryptoKey(), requestSSK.getExtra(), "req", lastKnownEdition);
 		CENOBridge.nodeInterface.subscribeToUSK(origUSK, new ReqCallback());
 	}
 

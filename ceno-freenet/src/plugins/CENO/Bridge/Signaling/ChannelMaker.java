@@ -27,7 +27,7 @@ public class ChannelMaker {
 	ChannelMakerListener channelListener;
 
 	static final long KSK_POLLING_PAUSE = TimeUnit.MINUTES.toMillis(5);
-	static final int MAX_KSK_POLLS = 10;
+	static final int MAX_KSK_POLLS = 20;
 
 	public ChannelMaker(String insertURI, KeyPair asymKeyPair) throws CENOException {
 		this.bridgeInsertURI = insertURI;
@@ -53,6 +53,7 @@ public class ChannelMaker {
 		} catch (MalformedURLException e) {
 			throw new CENOException(CENOErrCode.RR, "Could not start Channel Maker Listener thread.");
 		}
+		//TODO Once >5 of slots are taken, start a new thread/do a new announcement
 	}
 
 	private class ChannelMakerAnnouncer {

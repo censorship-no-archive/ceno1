@@ -99,11 +99,14 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 	@Override
 	public void terminate()
 	{
+		/* Do not save the signalSSK before we have implemented the functionality
+		   at the bridge that saves and retrieves them from a file
 		if(channelMaker != null && channelMaker.canSend()) {
 			initConfig.setProperty("signalSSK", channelMaker.getSignalSSK());
 			initConfig.setProperty("lastSynced", String.valueOf(channelMaker.getLastSynced()));
 			initConfig.storeProperties();
 		}
+		*/
 		
 		if(channelMakerThread != null) {
 			channelMakerThread.interrupt();

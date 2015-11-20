@@ -16,7 +16,9 @@ public class Channel {
 		}
 
 		try {
-			CENOClient.nodeInterface.insertSingleChunk(new FreenetURI(CENOClient.channelMaker.getSignalSSK()), string,
+			FreenetURI signalSSK = new FreenetURI(CENOClient.channelMaker.getSignalSSK());
+			FreenetURI reqURI = new FreenetURI("USK", "req",signalSSK.getRoutingKey(), signalSSK.getCryptoKey(), signalSSK.getExtra());
+			CENOClient.nodeInterface.insertSingleChunk(reqURI, string,
 					CENOClient.nodeInterface.getVoidPutCallback("Inserted request batch in the channel", "Failed to insert request batch"));
 		} catch (UnsupportedEncodingException e) {
 			return false;

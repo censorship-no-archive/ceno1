@@ -32,11 +32,6 @@ public class RequestSender {
 	private static final long REQUEST_TIMEOUT = TimeUnit.MINUTES.toMillis(40);
 
 	/**
-	 * Time to wait before inserting a batch of requests in the Channel
-	 */
-	private static final long SHOULD_INSERT_SIGNAL = TimeUnit.MINUTES.toMillis(3);
-
-	/**
 	 * Maximum size in bytes of a batch request in order to fit within the USK chunk
 	 */
 	private static final long MAX_BATCH_SIZE = 2^10;
@@ -107,7 +102,7 @@ public class RequestSender {
 				int batchSize = 0;
 				StringBuilder batchListStr = new StringBuilder();
 
-				for (int i = batchList.size(); i > 0; i--) {
+				for (int i = batchList.size() - 1; i > 0; i--) {
 					String url = batchList.get(i);
 					if (shouldSignalBridge(url)) {
 						batchSize += url.getBytes().length;

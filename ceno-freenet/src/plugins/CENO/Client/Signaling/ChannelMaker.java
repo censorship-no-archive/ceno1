@@ -27,7 +27,7 @@ import freenet.support.api.Bucket;
 import freenet.support.io.ResumeFailedException;
 
 public class ChannelMaker implements Runnable {
-	private static final int MAX_KSK_POLLS = 10;
+	private static final int MAX_KSK_POLLS = 20;
 	
 	private FreenetURI signalSSK;
 	private FreenetURI signalSSKpub;
@@ -45,24 +45,28 @@ public class ChannelMaker implements Runnable {
 			if (signalSSKString != null) {
 				this.signalSSK = new FreenetURI(signalSSKString);
 				this.signalSSKpub = this.signalSSK.deriveRequestURIFromInsertURI();
-				channelStatus = ChannelStatus.waitingForSyn;
-			} else {
-				FreenetURI newKeyPair[] = CENOClient.nodeInterface.generateKeyPair();
-				this.signalSSK = newKeyPair[0];
-				this.signalSSKpub = newKeyPair[1];
+				channelStatus = ChannelStatus.publishedKSK;
+				return;
 			}
 		} catch (MalformedURLException e) {
-			this.channelStatus = ChannelStatus.fatal;
+			Logger.error(this, "signalSSK read from configuration is not a valid Freenet key");
+		} finally {
+			FreenetURI newKeyPair[] = CENOClient.nodeInterface.generateKeyPair();
+			this.signalSSK = newKeyPair[0];
+			this.signalSSKpub = newKeyPair[1];
+			this.channelStatus = ChannelStatus.starting;
 		}
 	}
 
 	@Override
 	public void run() {
-		if(!checkChannelEstablished()) {
+		if (!checkChannelEstablished()) {
 			if(ChannelStatus.isFatalStatus(channelStatus)) {
 				return;
 			}
 			establishChannel();
+		} else if (ChannelStatus.sentPrivUSK(channelStatus)) {
+			waitForSyn();
 		}
 	}
 
@@ -87,10 +91,14 @@ public class ChannelMaker implements Runnable {
 			return false;
 		}
 
-		if(!canSend()) {
-			return false;
+		if(ChannelStatus.sentPrivUSK(channelStatus)) {
+			return true;
 		}
 
+		return channelEstablished;
+	}
+	
+	private boolean waitForSyn() {
 		FreenetURI synURI = new FreenetURI("USK", "syn", signalSSKpub.getRoutingKey(), signalSSKpub.getCryptoKey(), signalSSKpub.getExtra());
 		FetchResult fetchResult = null;
 		while(!channelEstablished) {
@@ -100,13 +108,16 @@ public class ChannelMaker implements Runnable {
 				if(e.getMode() == FetchExceptionMode.PERMANENT_REDIRECT) {
 					synURI = e.newURI;
 				} else if(e.isDNF() || e.isFatal()) {
-					break;
+					try {
+						Thread.sleep(TimeUnit.MINUTES.toMillis(5));
+					} catch (InterruptedException e1) {}
+					continue;
 				}
 			}
 			if(fetchResult != null) {
 				try {
 					Long synDate = Long.parseLong(new String(fetchResult.asByteArray()));
-					if(System.currentTimeMillis() - synDate > TimeUnit.DAYS.toMillis(25)) {
+					if (System.currentTimeMillis() - synDate > TimeUnit.DAYS.toMillis(25)) {
 						establishChannel();
 						break;
 					}
@@ -190,7 +201,7 @@ public class ChannelMaker implements Runnable {
 		}
 		
 		insertSubKSK(question, encReply,  new int[0]);
-		checkChannelEstablished();
+		waitForSyn();
 	}
 	
 	private void insertSubKSK(String question, byte[] encReply, int[] prevSubKSK) {
@@ -216,7 +227,7 @@ public class ChannelMaker implements Runnable {
 			}
 		}
 		channelStatus = ChannelStatus.publishedKSK;
-		Logger.normal(this, "Successfully published KSK solution to the bridge");
+		Logger.normal(this, "Started publishing to KSK solution to the bridge slot " + randSubKSK);
 		return;
 	}
 	
