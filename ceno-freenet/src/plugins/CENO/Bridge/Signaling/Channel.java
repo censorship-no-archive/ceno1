@@ -1,5 +1,6 @@
 package plugins.CENO.Bridge.Signaling;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.util.concurrent.TimeUnit;
@@ -117,10 +118,14 @@ public class Channel {
 			}
 
 			try {
-				String fetchedString = fetchResult.toString();
+				String fetchedString = new String(fetchResult.asByteArray(), "UTF-8");
 				RequestReceiver.signalReceived(fetchedString.split("\\r?\\n"));
 			} catch (NullPointerException e) {
 				Logger.warning(this, "Received new request from client but payload was empty");
+			} catch (UnsupportedEncodingException e) {
+				Logger.error(this, "UTF-8 is not supported");
+			} catch (IOException e) {
+				Logger.warning(this, "IOException while parsing batch request from client");
 			}
 
 			return;

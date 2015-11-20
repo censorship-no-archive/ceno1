@@ -102,7 +102,7 @@ public class RequestSender {
 				int batchSize = 0;
 				StringBuilder batchListStr = new StringBuilder();
 
-				for (int i = batchList.size() - 1; i > 0; i--) {
+				for (int i = batchList.size() - 1; i >= 0; i--) {
 					String url = batchList.get(i);
 					if (shouldSignalBridge(url)) {
 						batchSize += url.getBytes().length;

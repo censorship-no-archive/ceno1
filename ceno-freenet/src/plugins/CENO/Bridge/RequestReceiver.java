@@ -36,7 +36,6 @@ public class RequestReceiver {
 			} catch (InsertException e) {
 				Logger.error(BundleInserter.class, "Could not insert the bundle for the URL: " + urlRequested 
 						+ " Error: " + e.getMessage());
-
 			}
 		}
 	}
