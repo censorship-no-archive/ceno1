@@ -1,3 +1,5 @@
+(function () {
+
 // Addresses of the agents the portal page needs to communicate with.
 const CENO_CLIENT_BASE = 'http://localhost:3090';
 
@@ -35,3 +37,7 @@ if (urlInputForm) {
     urlInputForm.addEventListener('submit', encodeLookupUrl);
   }
 }
+
+languages.setIndexText('en');
+
+})();

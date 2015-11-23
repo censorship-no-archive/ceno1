@@ -388,7 +388,18 @@ func loadLanguageStrings() ([]LanguageStrings, LanguageStringJSON, error) {
 func testPortalHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Got request for test portal page")
 	t, _ := template.ParseFiles("./views/index.html", "./views/nav.html", "./views/resources.html", "./views/scripts.html")
-	t.Execute(w, nil)
+	module := map[string]interface{}{}
+	languageStrings, langStringsJson, readErr := loadLanguageStrings()
+	if readErr != nil {
+		fmt.Println("Error loading language")
+		fmt.Println(readErr)
+	} else {
+		// For the language selection menu
+		module["LanguageStrings"] = languageStrings
+		// For the javascript code that applies strings
+		module["LanguageStringsAsJSON"] = stringifyLanguages(langStringsJson)
+	}
+	t.Execute(w, module)
 }
 
 func testChannelsHandler(w http.ResponseWriter, r *http.Request) {

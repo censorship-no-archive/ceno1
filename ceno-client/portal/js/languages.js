@@ -44,7 +44,20 @@ function setChannelText(locale) {
   }
 }
 
+/**
+ * The articles page doesn't have any preset content, so we just set the global locale when
+ * a new language is selected.
+ * @param {string} locale - The locale of the language to use, e.g. en or fr
+ */
 function setArticleText(locale) {
+  setLocale(locale);
+}
+
+/**
+ * Set all the visible text content on the main/index/home page of the portal.
+ * @param {string} locale - The locale of the language to use, e.g. en or fr
+ */
+function setIndexText(locale) {
   setLocale(locale);
 }
 
@@ -71,6 +84,7 @@ return {
   setText,
   setChannelText,
   setArticleText,
+  setIndexText,
   getLocale
 };
 
