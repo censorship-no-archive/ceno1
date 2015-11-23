@@ -12,12 +12,10 @@ import net.minidev.json.parser.ParseException;
 
 import org.eclipse.jetty.server.Request;
 
-import plugins.CENO.Bridge.BundleInserter.InsertCallback;
 import plugins.CENO.Bridge.BundlerInterface.Bundle;
 import plugins.CENO.Common.CENOJettyHandler;
 import plugins.CENO.Common.URLtoUSKTools;
 import freenet.client.InsertException;
-import freenet.client.async.BaseClientPutter;
 import freenet.support.Logger;
 
 /* ------------------------------------------------------------ */
@@ -30,26 +28,6 @@ import freenet.support.Logger;
  * Upon successful insertion, the handler replies with "stored".
  */
 public class BundleInserterHandler extends CENOJettyHandler {
-
-	public class HandlerInsertCallback extends InsertCallback {
-
-		public HandlerInsertCallback(String url) {
-			super(url);
-		}
-
-		@Override
-		public void onSuccess(BaseClientPutter state) {
-			super.onSuccess(state);
-			Logger.normal(this, "Successfully inserted bundle for URL: " + url);
-		}
-
-		@Override
-		public void onFailure(InsertException e, BaseClientPutter state) {
-			super.onFailure(e, state);
-			Logger.error(this, "Failed to insert bundle for URL: " + url);
-		}
-
-	}
 
 	public void handle(String target,Request baseRequest,HttpServletRequest request,HttpServletResponse response)
 			throws IOException, ServletException {
@@ -109,7 +87,7 @@ public class BundleInserterHandler extends CENOJettyHandler {
 		}
 
 		try {
-			BundleInserter.insertBundle(urlParam, bundle, new HandlerInsertCallback(urlParam));
+			BundleInserter.getInstance().insertBundle(urlParam, bundle);
 		} catch (InsertException e) {
 			writeError(baseRequest, response, "Error during insertion for URL: " + urlParam + " Error: " + e.getMessage());
 		} catch (IOException e) {
