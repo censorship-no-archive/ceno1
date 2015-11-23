@@ -21,6 +21,31 @@
   font-size: 0.8em;
 }
 
+#indexUrlSearch {
+  height: 36px;
+  width: 88%;
+  border: 1.5px solid rgb(105, 161, 250);
+  padding-left: 15px;
+  font-size: 1.3em;
+}
+
+/* Style the placeholder text in the index URL search */
+
+::-webkit-input-placeholder { /* WebKit, Blink, Edge */
+  color: rgb(205, 205, 205);
+}
+:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+  color: rgb(205, 205, 205);
+  opacity:  1;
+}
+::-moz-placeholder { /* Mozilla Firefox 19+ */
+  color: rgb(205, 205, 205);
+  opacity:  1;
+}
+:-ms-input-placeholder { /* Internet Explorer 10-11 */
+  color: rgb(205, 205, 205);
+}
+
 .indexJump {
   border-radius: 24px;
   background-color: rgb(225, 224, 219);
@@ -30,11 +55,11 @@
 }
 
 .indexJump.large {
-  height: 200px;
+  height: 240px;
 }
 
 .indexJump button {
-  margin-bottom: 20px;
+  margin-top: 15px;
 }
 
 .iconContainer {
