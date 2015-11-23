@@ -5,7 +5,6 @@ let gulp = require('gulp');
 let jshint = require('gulp-jshint');
 let stylish = require('jshint-stylish');
 let concat = require('gulp-concat');
-let csslint = require('gulp-csslint');
 let babel = require('gulp-babel');
 let jsoncombine = require('gulp-jsoncombine');
 
