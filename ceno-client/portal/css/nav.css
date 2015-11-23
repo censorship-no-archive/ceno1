@@ -40,6 +40,8 @@
 
 #currentLocale {
   text-transform: uppercase;
+  color: white;
+  font-weight: 550;
 }
 
 #languageMenu {
@@ -88,4 +90,6 @@
 
 #statusText {
   text-transform: uppercase;
+  color: rgb(157, 157, 157);
+  font-weight: 550;
 }
