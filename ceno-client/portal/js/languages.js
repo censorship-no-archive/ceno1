@@ -71,6 +71,9 @@ function setIndexText(locale) {
   if (!setText('requestSiteHeader', 'textContent', locale, 'requestSite')) {
     console.log('Could not set "Request a Site" header text.');
   }
+  if (!setText('indexUrlSearch', 'placeholder', locale, 'enterUrl')) {
+    console.log('Could not set "Enter a URL" input placeholder text.');
+  }
   if (!setText('learnCENOHeader', 'textContent', locale, 'learnMore')) {
     console.log('Could not set "Learn More" Header text.');
   }
