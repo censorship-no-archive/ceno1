@@ -17,6 +17,7 @@ button {
   font-weight: bold !important;
   background-color: #e43624 !important;
   font-family: 'Lato';
+  text-transform: uppercase;
 }
 
 input {
