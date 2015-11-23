@@ -20,6 +20,10 @@
   background-color: rgba(160, 160, 160, 0.8);
 }
 
+#mainMenu .pure-menu-children .pure-menu-item:hover {
+  background-color: rgba(160, 160, 160, 0.8);
+}
+
 #mainMenu .pure-menu-children .pure-menu-item a {
   height: 30px;
   line-height: 30px;
@@ -27,7 +31,11 @@
 }
 
 #mainMenu .pure-menu-children .pure-menu-item a:hover {
-  background-color: rgba(160, 160, 160, 0.8);
+  background-color: inherit;
+}
+
+#mainMenu .pure-menu-children .pure-menu-item a:focus {
+  background-color: inherit;
 }
 
 #currentLocale {
@@ -46,6 +54,10 @@
 }
 
 #languageName:hover {
+  background-color: rgb(199, 199, 199);
+}
+
+#languageName:focus {
   background-color: rgb(199, 199, 199);
 }
 
