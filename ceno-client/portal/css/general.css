@@ -1,10 +1,12 @@
 body {
   background-color: #eeedea;
   color: rgb(74, 74, 74);
+  font-family: 'Lato';
 }
 
 p, a, h1, h2, h3, h4, h5, h6, span, div {
   color: rgb(74, 74, 74);
+  font-family: 'Lato';
 }
 
 button {
@@ -14,6 +16,11 @@ button {
   font-size: 1.15em;
   font-weight: bold !important;
   background-color: #e43624 !important;
+  font-family: 'Lato';
+}
+
+input {
+  font-family: 'Lato';
 }
 
 hr {
