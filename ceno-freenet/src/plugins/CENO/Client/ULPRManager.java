@@ -39,6 +39,7 @@ public class ULPRManager {
 		public void onSuccess(FetchResult result, ClientGetter state) {
 			Logger.normal(this, "ULPR completed successfully for URL: " + url);
 			updateULPRStatus(url, ULPRStatus.succeeded);
+			RequestSender.getInstance().removeFromBatch(url);
 		}
 
 		public void onFailure(FetchException e, ClientGetter state) {
@@ -56,11 +57,7 @@ public class ULPRManager {
 			}
 		}
 
-		public void onResume(ClientContext context)
-				throws ResumeFailedException {
-			// TODO Auto-generated method stub
-			
-		}
+		public void onResume(ClientContext context) throws ResumeFailedException {}
 
 		public RequestClient getRequestClient() {
 			return CENOClient.nodeInterface.getRequestClient();
@@ -91,7 +88,7 @@ public class ULPRManager {
 		return ulprManager.ulprTable.containsKey(url);
 	}
 
-	private static ULPRStatus getULPRStatus(String url) {
+	public static ULPRStatus getULPRStatus(String url) {
 		return ulprManager.ulprTable.get(url);
 	}
 
@@ -108,7 +105,7 @@ public class ULPRManager {
 		updateULPRStatus(url, ULPRStatus.starting);
 		FreenetURI calculatedUSK = null;
 		try {
-			calculatedUSK = URLtoUSKTools.computeUSKfromURL(url, CENOClient.bridgeKey);
+			calculatedUSK = URLtoUSKTools.computeUSKfromURL(url, CENOClient.getBridgeKey());
 		} catch (Exception e) {
 			Logger.error(this, "Could not calculate USK for URL: " + url);
 			updateULPRStatus(url, ULPRStatus.couldNotStart);

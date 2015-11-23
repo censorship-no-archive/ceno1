@@ -51,7 +51,10 @@ public class CENOL10n implements FredPluginBaseL10n {
 	 * setting the language
 	 */
 	public void setLanguageFromEnvVar(String envVar) {
-		setLanguage(getLanguageFromEnvVar(envVar));
+		LANGUAGE lang = getLanguageFromEnvVar(envVar);
+		if (lang != l10n.getBase().getSelectedLanguage() && lang != LANGUAGE.UNLISTED) {
+			setLanguage(lang);
+		}
 	}
 
 	/**

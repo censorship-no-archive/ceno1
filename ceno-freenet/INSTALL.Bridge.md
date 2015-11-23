@@ -129,7 +129,7 @@ another tool.
   11. Make sure CENOBridge has been successfully loaded, by finding the corresponding row in the
    `Plugins currently loaded` list.
   12. You might want to make sure that all of the agents are up and running, and their processes are not children of
-  your current shell. Now you are ready to serve requests for bundles from clients. Start by publishing your public
+  your current shell. Now you are ready to serve requests for bundles from clients. Start by publishing a CENO.jar build that is using your public
   SSK key, your WebOfTrust identity request URI and your Freemail. Building a CENOBox that will use your Insertion
   Authority by default is also an option.
   13. Finally, in order to increase the speed of insertions and of discovery of requests from clients, you can spin

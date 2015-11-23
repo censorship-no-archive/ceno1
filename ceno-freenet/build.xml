@@ -16,9 +16,9 @@
 	<property name="jetty-serverlet.location" value="lib/javax.servlet-api-3.1.0.jar"/>
 	<property name="jetty-all.location" value="lib/jetty-all-9.2.6.v20141205.jar"/>
 	<property name="json-smart.location" location="lib/json-smart-1.2.jar"/>
-	<property name="sun-mail.location" location="lib/mail.jar"/>
 	<property name="apache-commonsvalidator.location" location="lib/commons-validator-1.4.1.jar"/>
 	<property name="apache-commonscompress.location" location="lib/commons-compress-1.9.jar"/>
+	<property name="bouncy-castle.location" location="lib/bcprov-jdk15on-152.jar"/>
 
 
 	<available file="src/plugins/CENO/Version.java" property="version.present"/>
@@ -65,15 +65,15 @@
 		<tstamp/>
 
 		<!-- FIXME: remove the debug and replace with optimize -->
-		<javac srcdir="src/" destdir="${build}" debug="on" optimize="on" source="${source-version}">
+		<javac srcdir="src/plugins/CENO" destdir="${build}" debug="on" optimize="on" source="${source-version}">
 			<classpath>
 				<pathelement location="${freenet-cvs-snapshot.location}"/>
 				<pathelement location="${jetty-all.location}"/>
 				<pathelement location="${jetty-serverlet.location}"/>
 				<pathelement location="${json-smart.location}"/>
-				<pathelement location="${sun-mail.location}"/>
 				<pathelement location="${apache-commonsvalidator.location}" />
 				<pathelement location="${apache-commonscompress.location}" />
+				<pathelement location="${bouncy-castle.location}" />
 			</classpath>
 			<include name="**/*.java"/>
 			<exclude name="**/*Test.java"/>
@@ -85,10 +85,9 @@
 		<!-- Create the time stamp -->
 		<tstamp/>
 
-		<javac srcdir="src/" destdir="${build-gcj}" compiler="gcj" debug="on" optimize="on" source="${source-version}">
+		<javac srcdir="src/plugins/CENO" destdir="${build-gcj}" compiler="gcj" debug="on" optimize="on" source="${source-version}">
 			<classpath>
 				<pathelement location="${freenet-cvs-snapshot.location}"/>
-				<pathelement location="${sun-mail.location}"/>
 			</classpath>
 			<include name="**/*.java"/>
 			<exclude name="**/*Test.java"/>
@@ -150,7 +149,6 @@
 				<exclude name="plugins/CENO/Backbone/**"/>
 			</fileset>
 			<zipfileset src="${json-smart.location}" />
-			<zipfileset src="${sun-mail.location}" />
 			<zipfileset src="${apache-commonsvalidator.location}" excludes="META-INF/" />
 			<zipfileset src="${apache-commonscompress.location}" excludes="META-INF/" />
 		</jar>
@@ -166,11 +164,10 @@
 			<zipfileset src="${jetty-all.location}" />
 			<zipfileset src="${jetty-serverlet.location}" />
 			<zipfileset src="${json-smart.location}" />
-			<zipfileset src="${sun-mail.location}" excludes="META-INF/" />
 			<zipfileset src="${apache-commonsvalidator.location}" excludes="META-INF/" />
 			<zipfileset src="${apache-commonscompress.location}" excludes="META-INF/" />
 		</jar>
-		
+
 		<jar jarfile="${dist}/CENOBackbone.jar" duplicate="fail">
 			<manifest>
 				<attribute name="Plugin-Main-Class" value="plugins.CENO.Backbone.CENOBackbone"/>
@@ -180,10 +177,9 @@
 				<exclude name="plugins/CENO/Bridge/**"/>
 			</fileset>
 			<zipfileset src="${apache-commonscompress.location}" />
-			<zipfileset src="${sun-mail.location}" excludes="META-INF/LICENSE.txt" />
 		</jar>
 	</target>
-	
+
 	<!-- ================================================== -->
 	<target name="dist-gcj" depends="clean,compile-gcj,copyresources,junit"
 		description="generate the distribution" >
@@ -222,4 +218,3 @@
 	</target>
 
 </project>
-

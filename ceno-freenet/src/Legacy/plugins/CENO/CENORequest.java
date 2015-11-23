@@ -1,4 +1,4 @@
-package plugins.CENO;
+package Legacy.plugins.CENO;
 
 import java.util.EnumSet;
 

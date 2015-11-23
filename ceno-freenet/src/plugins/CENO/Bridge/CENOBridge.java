@@ -1,26 +1,32 @@
 package plugins.CENO.Bridge;
 
+import java.io.UnsupportedEncodingException;
+import java.security.GeneralSecurityException;
+import java.security.KeyPair;
+import java.security.Security;
+
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 
+import plugins.CENO.CENOException;
 import plugins.CENO.CENOL10n;
 import plugins.CENO.Configuration;
 import plugins.CENO.Version;
-import plugins.CENO.FreenetInterface.HighLevelSimpleClientInterface;
+import plugins.CENO.Bridge.Signaling.ChannelMaker;
+import plugins.CENO.Common.Crypto;
 import plugins.CENO.FreenetInterface.NodeInterface;
 import freenet.keys.FreenetURI;
 import freenet.pluginmanager.FredPlugin;
 import freenet.pluginmanager.FredPluginRealVersioned;
 import freenet.pluginmanager.FredPluginVersioned;
 import freenet.pluginmanager.PluginRespirator;
+import freenet.support.IllegalBase64Exception;
 import freenet.support.Logger;
 
 
 public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRealVersioned {
-
-	private PluginRespirator pluginRespirator;
 
 	public static final Integer cacheLookupPort = 3091;
 	public static final Integer requestReceiverPort = 3093;
@@ -31,38 +37,29 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 	private Server cenoHttpServer;
 
 	// Interface objects with fred
-	private HighLevelSimpleClientInterface client;
 	public static NodeInterface nodeInterface;
-	private RequestReceiver reqReceiver;
+	ChannelMaker channelMaker;
+
 	private static boolean isMasterBridge = false;
 	private static boolean isSignalBridge = false;
 
 	// Plugin-specific configuration
-	public static final String pluginUri = "/plugins/plugins.CENO.CENOBridge";
-	public static final String pluginName = "CENOBridge";
+	public static final String PLUGIN_URI = "/plugins/plugins.CENO.CENOBridge";
+	public static final String PLUGIN_NAME = "CENOBridge";
 	public static Configuration initConfig;
-	private Version version = new Version(Version.PluginType.BRIDGE);
-	private static final String configPath = System.getProperty("user.home") + "/.CENO/bridge.properties";
-	public static final String PORTAL_DOC_NAME = "CENO-RSS";
+	private static final Version VERSION = new Version(Version.PluginType.BRIDGE);
+	private static final String CONFIGPATH = ".CENO/bridge.properties";
 
-	public static final String bridgeFreemail = "DEFLECTBridge@ih5ixq57yetjdbrspbtskdp6fjake4rdacziriiefnjkwlvhgw3a.freemail";
-	public static final String clientFreemail = "CENO@54u2ko3lssqgalpvfqbq44gwfquqrejm3itl4rxj5nt7v6mjy22q.freemail";
-	public static final String clientIdentityRequestURI = "USK@7ymlO2uUoGAt9SwDDnDWLCkIkSzaJr5G6etn~vmJxrU,WMeRYMzx2tQHM~O8UWglUmBnjIhp~bh8xue-6g2pmps,AQACAAE/WebOfTrust/0";
-
-	public static final String backboneIdentityRequestURI = "USK@M9UhahTX81i-bB7N8rmWwY5LKKEPfPWgoewNLNkLMmg,IqlCA047XPFoBhxb4gU7YbHWEUV-9iz9mJblXO~w9Zk,AQACAAE/WebOfTrust/0";
-	public static final String backboneFreemail = "deflectbackbone@gpksc2qu27zvrp3md3g7fomwyghewkfbb56plifb5qgszwilgjua.freemail";
+	public static final String ANNOUNCER_PATH = "CENO-signaler";
 
 	public void runPlugin(PluginRespirator pr)
 	{
-		// Initialize interfaces with fred
-		pluginRespirator = pr;
-		client = new HighLevelSimpleClientInterface(pluginRespirator.getNode(), pluginRespirator.getHLSimpleClient());
-		nodeInterface = new NodeInterface(pluginRespirator.getNode(), pluginRespirator);
-		nodeInterface.initFetchContexts();
+		// Initialize interfaces with Freenet node
+		nodeInterface = new NodeInterface(pr.getNode(), pr);
 		CENOL10n.getInstance().setLanguageFromEnvVar("CENOLANG");
 
 		// Read properties of the configuration file
-		initConfig = new Configuration(configPath);
+		initConfig = new Configuration(CONFIGPATH);
 		initConfig.readProperties();
 		// If CENO has no private key for inserting freesites,
 		// generate a new key pair and store it in the configuration file
@@ -72,6 +69,32 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 			initConfig.setProperty("insertURI", keyPair[0].toString());
 			initConfig.setProperty("requestURI", keyPair[1].toString());
 			initConfig.storeProperties();
+		}
+
+		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+		// Read RSA keypair and modulus from configuration file or, if not available, create a new one
+		KeyPair asymKeyPair = null;
+		try {
+			if (!Crypto.isValidKeypair(initConfig.getProperty("asymkey.pubKey"), initConfig.getProperty("asymkey.privKey"))) {
+				Logger.warning(this, "CENOBridge will generate a new RSA key pair for the decentralized signaling. This might take a while");
+				asymKeyPair = Crypto.generateAsymKey();
+				initConfig.setProperty("asymkey.pubKey", Crypto.savePublicKey(asymKeyPair.getPublic()));
+				initConfig.setProperty("asymkey.privKey", Crypto.savePrivateKey(asymKeyPair.getPrivate()));
+				initConfig.storeProperties();
+			} else {
+				asymKeyPair = new KeyPair(Crypto.loadPublicKey(initConfig.getProperty("asymkey.pubKey")), Crypto.loadPrivateKey(initConfig.getProperty("asymkey.privKey")));
+				Logger.normal(this, "Found RSA key in configuration file");
+			}
+		} catch (UnsupportedEncodingException e) {
+			Logger.error(this, "Unsupported Encoding Exception during RSA key validation: " + e.getMessage());
+		} catch (GeneralSecurityException e) {
+			Logger.error(this, "General Security Exception: " + e.getMessage());
+		} catch (IllegalBase64Exception e) {
+			Logger.error(this, "Failed to base64 encode/decode: " + e.getMessage());
+		} finally {
+			if (asymKeyPair == null) {
+				terminate();
+			}
 		}
 
 		String confIsMasterBridge = initConfig.getProperty("isMasterBridge");
@@ -84,14 +107,12 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 
 		if (confIsSingalBridge != null && confIsSingalBridge.equals("true")) {
 			isSignalBridge = true;
-		}
-
-		if (isSignalBridge) {
-			nodeInterface.clearOutboxLog(bridgeFreemail, clientFreemail);
-			// Initialize RequestReceiver
-			reqReceiver = new RequestReceiver(new String[]{bridgeFreemail});
-			// Start a thread for polling for new freemails
-			reqReceiver.loopFreemailBoxes();
+			try {
+				channelMaker = new ChannelMaker(initConfig.getProperty("insertURI"), asymKeyPair);
+			} catch (CENOException e) {
+				Logger.error(this, "Could not start decentralized signaling channel maker");
+				terminate();
+			}
 		}
 
 		// Configure CENO's jetty embedded server
@@ -109,6 +130,8 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 		} catch (Exception ex) {
 			Logger.error(this, "HTTP Server terminated abnormally");
 			Logger.error(this, ex.getMessage());
+			terminate();
+			return;
 		}
 	}
 
@@ -159,11 +182,11 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 	}
 
 	public String getVersion() {
-		return version.getVersion();
+		return VERSION.getVersion();
 	}
 
 	public long getRealVersion() {
-		return version.getRealVersion();
+		return VERSION.getRealVersion();
 	}
 
 	public static boolean isMasterBridge() {
@@ -176,10 +199,9 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 	 */
 	public void terminate()
 	{
-		// Stop the thread that is polling for freemails
-		if (isSignalBridge) {
-			reqReceiver.stopLooping();
-			nodeInterface.clearOutboxLog(bridgeFreemail, clientFreemail);
+		// Stop the thread that is polling for new channel requests
+		if (isSignalBridge && channelMaker != null) {
+			channelMaker.stopListener();
 		}
 
 		// Stop cenoHttpServer and unbind ports
@@ -192,7 +214,7 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 			}
 		}
 
-		Logger.normal(this, pluginName + " terminated.");
+		Logger.normal(this, PLUGIN_NAME + " terminated.");
 	}
 
 }
