@@ -59,6 +59,37 @@ function setArticleText(locale) {
  */
 function setIndexText(locale) {
   setLocale(locale);
+  if (!setText('whatNextHeader', 'textContent', locale, 'whatNext')) {
+    console.log('Could not set "What Next" header text.');
+  }
+  if (!setText('browseChannelsHeader', 'textContent', locale, 'browseChannels')) {
+    console.log('Could not set "Browse Channels" header text.');
+  }
+  if (!setText('browseChannelsParagraph', 'textContent', locale, 'browseChannelsDescription')) {
+    console.log('Could not set "Browse Channels" paragraph text.');
+  }
+  if (!setText('requestSiteHeader', 'textContent', locale, 'requestSite')) {
+    console.log('Could not set "Request a Site" header text.');
+  }
+  if (!setText('learnCENOHeader', 'textContent', locale, 'learnMore')) {
+    console.log('Could not set "Learn More" Header text.');
+  }
+  if (!setText('learnCENOParagraph', 'textContent', locale, 'learnMoreDescription')) {
+    console.log('Could not set "Learn More" paragraph text.');
+  }
+  if (!setText('tellMeMore', 'textContent', locale, 'learnMoreButton')) {
+    console.log('Could not set "Learn More" button text.');
+  }
+}
+
+/**
+ * A helper function to set the text on whatever page we're on.
+ * @param {string} locale - The locale of the language to use, e.g. en or fr
+ */
+function setPortalText(locale) {
+  setIndexText(locale);
+  setChannelText(locale);
+  setArticleText(locale);
 }
 
 // When a language is selected, get its locale and reset the text on the page.
@@ -68,7 +99,7 @@ for (let i = 0, len = languageOptions.length; i < len; i++) {
   let option = languageOptions[i];
   option.addEventListener('click', () => {
     globalLocale = option.getAttribute('data-language');
-    setChannelText(globalLocale);
+    setPortalText(globalLocale);
   });
 }
 
