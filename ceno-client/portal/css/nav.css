@@ -51,6 +51,9 @@
 
 #languageName {
   color: white;
+  height: 100%;
+  padding: 0;
+  line-height: 80px;
 }
 
 #languageName:hover {
