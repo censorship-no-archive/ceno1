@@ -3,6 +3,10 @@
   margin-bottom: 100px;
 }
 
+#mainCartoon + .content {
+  width: 60%;
+}
+
 #whatNextHeader {
   margin-bottom: 80px;
 }
@@ -17,10 +21,35 @@
   font-size: 0.8em;
 }
 
-div.indexJump {
+.indexJump {
   border-radius: 24px;
   background-color: rgb(225, 224, 219);
-  min-height: 200px;
+  min-height: 150px;
   padding: 20px;
   margin: 0 0 40px 0;
+}
+
+.indexJump.large {
+  height: 200px;
+}
+
+.indexJump button {
+  margin-bottom: 20px;
+}
+
+.iconContainer {
+  float: left;
+  width: 20%;
+}
+
+.iconContainer > img {
+  width: 100px;
+  position: absolute;
+  margin-top: 20px;
+  margin-left: 20px;
+}
+
+.sectionInfo {
+  float: right;
+  width: 79%;
 }
