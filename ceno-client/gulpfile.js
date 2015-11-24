@@ -1,5 +1,3 @@
-'use strict';
-
 var fs = require('fs');
 var gulp = require('gulp');
 var jshint = require('gulp-jshint');
@@ -9,34 +7,36 @@ var babel = require('gulp-babel');
 var jsoncombine = require('gulp-jsoncombine');
 
 gulp.task('lintjs', function() {
-  gulp.src('./portal/js/*.js')
+  return gulp.src('./portal/js/*.js')
     .pipe(jshint('.jshintrc'))
-    .pipe(jshint.reporter(stylish))
+    .pipe(jshint.reporter(stylish));
 });
 
 gulp.task('convertjs', function() {
-  gulp.src('./portal/js/*.js')
+  return gulp.src('./portal/js/*.js')
     .pipe(babel({
       presets: ['es2015']
     }))
-    .pipe(gulp.dest('./static/javascript'))
+    .pipe(gulp.dest('./static/javascript'));
 });
 
 gulp.task('concatcss', function() {
-  gulp.src('./portal/css/*.css')
+  return gulp.src('./portal/css/*.css')
     .pipe(concat('main.css'))
-    .pipe(gulp.dest('./static/stylesheets/'))
+    .pipe(gulp.dest('./static/stylesheets/'));
 });
 
 gulp.task('copyhtml', function() {
-  gulp.src('./portal/html/*.html')
-    .pipe(gulp.dest('./views/'))
+  return gulp.src('./portal/html/*.html')
+    .pipe(gulp.dest('./views/'));
 });
 
 gulp.task('translations', function() {
-  gulp.src('./portal/locale/*.json')
-    .pipe(jsoncombine('all.json', function(data) {new Buffer(JSON.stringify(data))}))
-    .pipe(gulp.dest('./locale/'))
+  return gulp.src('./portal/locale/*.json')
+    .pipe(jsoncombine('all.json', function(data) {
+      return new Buffer(JSON.stringify(data));
+    }))
+    .pipe(gulp.dest('./locale/'));
 });
 
 // Shorthand tasks for applying changes to single resources
