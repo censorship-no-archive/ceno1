@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CENO Portal</title>
+  {{template "RESOURCES" . }}
+</head>
+<body>
+  {{template "NAV" . }}
+  {{template "BREADCRUMBS" .}}
+  <div class="content">
+    <h1 id="chooseChannelHeader">Choose your media channel</h1>
+    <div class="pure-g channel-row">
+      {{range .Feeds}}
+      <div class="pure-u-1-4">
+        <div class="channel">
+          <a href="{{.Url}}">
+            <h2>{{.Title}}</h2>
+          </a>
+        </div>
+      </div>
+      {{end}}
+    </div>
+  </div>
+  {{template "SCRIPTS" . }}
+  <script src="cenoresources/javascript/channels.js"></script>
+</body>
+</html>

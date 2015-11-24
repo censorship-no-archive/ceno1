@@ -1,0 +1,95 @@
+#mainNav {
+  height: 80px;
+  background-color: rgb(236, 237, 237);
+}
+
+#cenoLogoMain {
+  margin-top: 10px;
+  float: left;
+  height: 60px;
+}
+
+#mainMenu {
+  float: right;
+  height: 100%;
+}
+
+#mainMenu .pure-menu-children {
+  padding-top: 20px;
+  padding-bottom: 15px;
+  background-color: rgba(144, 143, 143, 0.7);
+}
+
+#mainMenu .pure-menu-children .pure-menu-item:hover {
+  background-color: rgba(160, 160, 160, 0.8);
+}
+
+#mainMenu .pure-menu-children .pure-menu-item a {
+  height: 30px;
+  line-height: 30px;
+  color: white;
+}
+
+#mainMenu .pure-menu-children .pure-menu-item a:hover {
+  background-color: inherit;
+}
+
+#mainMenu .pure-menu-children .pure-menu-item a:focus {
+  background-color: inherit;
+}
+
+#currentLocale {
+  text-transform: uppercase;
+  color: white;
+  font-weight: 550;
+}
+
+#languageMenu {
+  width: 175px;
+  background-color: rgb(199, 199, 199);
+  text-align: center;
+  line-height: 60px;
+}
+
+#languageName {
+  color: white;
+  height: 100%;
+  padding: 0;
+  line-height: 80px;
+}
+
+#languageName:hover {
+  background-color: rgb(199, 199, 199);
+}
+
+#languageName:focus {
+  background-color: rgb(199, 199, 199);
+}
+
+#languageName > img {
+  height: 25px;
+  display: inline;
+  vertical-align: middle;
+  margin-right: 15px;
+  margin-top: -5px;
+}
+
+#statusMenuItem {
+  width: 225px;
+  text-align: center;
+  line-height: 60px;
+}
+
+#statusIcon {
+  width: 25px;
+  display: inline;
+  vertical-align: middle;
+  margin-right: 10px;
+  margin-top: -3px;
+}
+
+#statusText {
+  text-transform: uppercase;
+  color: rgb(157, 157, 157);
+  font-weight: 550;
+}

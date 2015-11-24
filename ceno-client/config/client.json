@@ -3,5 +3,47 @@
   "CacheServer": "http://127.0.0.1:8888/plugins/plugins.CENO.Client.CENOClient",
   "RequestServer": "http://127.0.0.1:8888/plugins/plugins.CENO.Client.CENOClient",
   "ErrorMsg": "Page not found",
-  "PleaseWaitPage": "views/wait.html"
+  "PleaseWaitPage": "views/wait.html",
+  "PortalLanguages": [
+    {
+      "Name": "English",
+      "Locale": "en"
+    },
+    {
+      "Name": "français",
+      "Locale": "fr"
+    },
+    {
+      "Name": "العربية",
+      "Locale": "ar"
+    },
+    {
+      "Name": "中文",
+      "Locale": "cn"
+    },
+    {
+      "Name": "ελληνικά",
+      "Locale": "el"
+    },
+    {
+      "Name": "italiano",
+      "Locale": "it"
+    },
+    {
+      "Name": "فارسی",
+      "Locale": "fa"
+    },
+    {
+      "Name": "português",
+      "Locale": "pt"
+    },
+    {
+      "Name": "Русский",
+      "Locale": "ru"
+    },
+    {
+      "Name": "Español",
+      "Locale": "es"
+    }
+  ]
 }

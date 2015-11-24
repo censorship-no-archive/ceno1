@@ -1,0 +1,23 @@
+#articleListDiv h3 {
+  font-size: 1.15em;
+  color: #e43624;
+}
+
+#articleListing {
+  list-style: none;
+  float: right;
+}
+
+.articleTitle {
+  font-size: 18px;
+  text-align: right;
+}
+
+.articleInfo {
+  text-align: right;
+}
+
+#articleListing li h2 a {
+  color: #e43624;
+  text-decoration: none;
+}

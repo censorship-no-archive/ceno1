@@ -1,0 +1,28 @@
+#breadcrumbsBar {
+  height: 80px;
+  background-color: #e43624;
+}
+
+#breadcrumbsBar > .content > span {
+  color: white;
+  font-size: 1.4em;
+  font-weight: bold;
+  line-height: 80px;
+}
+
+#breadcrumbsBar > .content > span > a {
+  text-decoration: none;
+  color: rgb(236, 237, 237);
+}
+
+#breadcrumbsBar > .content > span > a:hover {
+  color: rgb(240, 240, 240);
+}
+
+#breadcrumbsBar + * {
+  margin-top: 110px;
+}
+
+#breadcrumbsBar + .content > h1 {
+  margin-bottom: 50px;
+}

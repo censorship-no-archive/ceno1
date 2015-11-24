@@ -20,8 +20,10 @@ const FeedsJsonFile string = "CENO-RSS"
  */
 type Feed struct {
 	Id            int
+	Title         string `json:"title"`
 	Url           string `json:"url"`
 	Type          string `json:"type"`
+	TextDirection string `json:"text"`
 	Charset       string `json:"charset"`
 	Articles      int    `json:"articles"`
 	LastPublished string `json:"lastPublished"`
