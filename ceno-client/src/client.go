@@ -312,6 +312,159 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+/**
+ * PORTAL TESTING STUFF
+ */
+
+type PortalPath struct {
+	PageName string
+	Href     string
+}
+
+// Location of the JSON file containing the merged translated strings
+var allJSONPath string = path.Join(".", "locale", "all.json")
+
+/**
+ * ceno-client/locale/all.json contains data formatted like
+{
+ 	"en": {
+		"string1": "content content content"
+	},
+	"fr": {
+		"string1": "french french french"
+	}
+}
+*/
+type IdentifiedString struct {
+	Identifier string
+	Content    string
+}
+
+type LanguageStrings struct {
+	Name    string
+	Locale  string
+	Strings []IdentifiedString
+}
+
+type LanguageStringJSON map[string]map[string]string
+
+func stringifyLanguages(langStrings LanguageStringJSON) string {
+	asBytes, _ := json.Marshal(langStrings)
+	return string(asBytes)
+}
+
+func loadLanguageStrings() ([]LanguageStrings, LanguageStringJSON, error) {
+	// Dear Glob.
+	langStrings := make(LanguageStringJSON)
+	decodedStrings := []LanguageStrings{}
+	file, err := os.Open(allJSONPath)
+	if err != nil {
+		return decodedStrings, langStrings, err
+	}
+	defer file.Close()
+	decoder := json.NewDecoder(file)
+	decodeErr := decoder.Decode(&langStrings)
+	if decodeErr != nil {
+		return decodedStrings, langStrings, decodeErr
+	}
+	// Use the configuration as a guide to explore the merged languages json file and construct
+	// structures containing all the information relevant to the portal page about text.
+	for _, availableLanguage := range Configuration.PortalLanguages {
+		stringPairs, found := langStrings[availableLanguage.Locale]
+		if !found {
+			continue
+		}
+		languageStrings := LanguageStrings{}
+		languageStrings.Name = availableLanguage.Name
+		languageStrings.Locale = availableLanguage.Locale
+		for identifier, content := range stringPairs {
+			languageStrings.Strings = append(languageStrings.Strings, IdentifiedString{identifier, content})
+		}
+		decodedStrings = append(decodedStrings, languageStrings)
+	}
+	return decodedStrings, langStrings, nil
+}
+
+func testPortalHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Got request for test portal page")
+	t, _ := template.ParseFiles("./views/index.html", "./views/nav.html", "./views/resources.html", "./views/scripts.html")
+	module := map[string]interface{}{}
+	languageStrings, langStringsJson, readErr := loadLanguageStrings()
+	if readErr != nil {
+		fmt.Println("Error loading language")
+		fmt.Println(readErr)
+	} else {
+		// For the language selection menu
+		module["LanguageStrings"] = languageStrings
+		// For the javascript code that applies strings
+		module["LanguageStringsAsJSON"] = stringifyLanguages(langStringsJson)
+	}
+	t.Execute(w, module)
+}
+
+func testChannelsHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Got request for test channels page")
+	t, _ := template.ParseFiles("./views/channels.html", "./views/nav.html", "./views/resources.html", "./views/breadcrumbs.html", "./views/scripts.html")
+	module, err := InitModuleWithFeeds()
+	if err != nil {
+		fmt.Println("Error loading feeds")
+		fmt.Println(err)
+		t.Execute(w, nil)
+	} else {
+		module["Breadcrumbs"] = []PortalPath{
+			{"CeNO", "/testportal"},
+			{"Channel Selector", "/testchannels"},
+		}
+		languageStrings, langStringsJson, readErr := loadLanguageStrings()
+		if readErr != nil {
+			fmt.Println("Error loading languages")
+			fmt.Println(err)
+		} else {
+			// For the language selection menu
+			module["LanguageStrings"] = languageStrings
+			// For the javascript code that applies strings
+			module["LanguageStringsAsJSON"] = stringifyLanguages(langStringsJson)
+		}
+		t.Execute(w, module)
+	}
+}
+
+func testArticlesHandler(w http.ResponseWriter, r *http.Request) {
+	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
+	t, _ := template.ParseFiles("./views/articles.html", "./views/nav.html", "./views/resources.html", "./views/breadcrumbs.html", "./views/scripts.html")
+	// TODO - Get the feed from the URL
+	module, err := InitModuleWithArticles("https://news.ycombinator.com/rss")
+	if err != nil {
+		fmt.Println("Error loading articles")
+		fmt.Println(err)
+		t.Execute(w, nil)
+	} else {
+		module["PublishedWord"] = T("published_word")
+		module["AuthorWord"] = T("authors_word")
+		module["Title"] = "Testing 1 2 3"
+		module["Breadcrumbs"] = []PortalPath{
+			{"CeNO", "/testportal"},
+			{"Channel Selector", "/testchannels"},
+			{"Hacker News", "/testarticles"},
+		}
+		languageStrings, langStringsJson, readErr := loadLanguageStrings()
+		if readErr != nil {
+			fmt.Println("Error loading languages")
+			fmt.Println(err)
+		} else {
+			// For the language selection menu
+			module["LanguageStrings"] = languageStrings
+			// For the javascript code that applies strings
+			module["LanguageStringsAsJSON"] = stringifyLanguages(langStringsJson)
+		}
+		t.Execute(w, module)
+	}
+}
+
+/**
+ * END PORTAL TESTING STUFF
+ */
+
 func main() {
 	// Configure the i18n library to use the preferred language set in the CENOLANG environement variable
 	setLanguage := os.Getenv("CENOLANG")
@@ -333,6 +486,9 @@ func main() {
 		http.StripPrefix("/cenoresources/", http.FileServer(http.Dir("./static"))))
 	http.HandleFunc("/lookup", directHandler)
 	http.HandleFunc("/portal", CreatePortalPage)
+	http.HandleFunc("/testportal", testPortalHandler)
+	http.HandleFunc("/testchannels", testChannelsHandler)
+	http.HandleFunc("/testarticles", testArticlesHandler)
 	http.HandleFunc("/cenosite/", CreateArticlePage)
 	http.HandleFunc("/", proxyHandler)
 	log(T("listening_msg_cli", map[string]interface{}{"Port": Configuration.PortNumber}))

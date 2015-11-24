@@ -1,0 +1,41 @@
+body {
+  background-color: #eeedea;
+  color: rgb(74, 74, 74);
+  font-family: 'Lato';
+}
+
+p, a, h1, h2, h3, h4, h5, h6, span, div {
+  color: rgb(74, 74, 74);
+  font-family: 'Lato';
+}
+
+button {
+  width: 220px;
+  height: 64px;
+  color: white !important;
+  font-size: 1.15em;
+  font-weight: bold !important;
+  background-color: #e43624 !important;
+  font-family: 'Lato';
+  text-transform: uppercase;
+}
+
+input {
+  font-family: 'Lato';
+}
+
+hr {
+  height: 2px;
+  color: rgb(205, 205, 205);
+  background-color: rgb(205, 205, 205);
+  margin-bottom: 80px;
+  margin-top: 80px;
+  border: none;
+}
+
+.content {
+  height: 100%;
+  width: 80%;
+  margin-left: auto;
+  margin-right: auto;
+}

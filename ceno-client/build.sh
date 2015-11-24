@@ -31,6 +31,18 @@ echo "  * erroringlcs - LCS that always serves an error for testing auto-refresh
 cd ..
 
 echo ""
+echo "Preparing CENO Portal."
+which gulp > /dev/null
+if [ $? -ne 0 ]; then
+    echo "*  Installing the gulp build tool."
+    npm install -g gulp
+fi
+echo "*  Installing any missing dependencies."
+npm install
+echo "*  Building resources."
+gulp build
+echo ""
+
 go build $SOURCE_FILES
 COMPILE_STATUS=$?
 if [ $COMPILE_STATUS -eq 0 ]; then

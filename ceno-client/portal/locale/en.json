@@ -1,0 +1,16 @@
+{
+  "whatNext": "What do you want to do now?",
+  "browseChannels": "Browse CeNO channels",
+  "browseChannelsDescription": "CENO comes loaded with tons of content from various sources so that you are to start reading available content right away or while you wait for other websites to load.",
+  "requestSite": "Request a website",
+  "enterUrl": "Enter URL",
+  "learnMore": "Learn more about CeNO",
+  "learnMoreDescription": "CENO makes accessng censored contenteasy and reliable. It exfiltrates website requests using an anonymous transport layer and stores documents in networks such as Freenet, making it available to all CENO users.",
+  "learnMoreButton": "Tell me more",
+  "chooseChannel": "Choose your media channel",
+  "channelSelector": "Channel Selector",
+  "statusConnected": "Connected",
+  "statusWarning": "Unstable",
+  "statusError": "Not connected",
+  "statusUnknown": "Not connceted"
+}
