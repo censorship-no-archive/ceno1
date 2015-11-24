@@ -1,43 +1,43 @@
 'use strict';
 
-let fs = require('fs');
-let gulp = require('gulp');
-let jshint = require('gulp-jshint');
-let stylish = require('jshint-stylish');
-let concat = require('gulp-concat');
-let babel = require('gulp-babel');
-let jsoncombine = require('gulp-jsoncombine');
+var fs = require('fs');
+var gulp = require('gulp');
+var jshint = require('gulp-jshint');
+var stylish = require('jshint-stylish');
+var concat = require('gulp-concat');
+var babel = require('gulp-babel');
+var jsoncombine = require('gulp-jsoncombine');
 
-gulp.task('lintjs', () =>
+gulp.task('lintjs', function() {
   gulp.src('./portal/js/*.js')
     .pipe(jshint('.jshintrc'))
     .pipe(jshint.reporter(stylish))
-);
+});
 
-gulp.task('convertjs', () =>
+gulp.task('convertjs', function() {
   gulp.src('./portal/js/*.js')
     .pipe(babel({
       presets: ['es2015']
     }))
     .pipe(gulp.dest('./static/javascript'))
-);
+});
 
-gulp.task('concatcss', () =>
+gulp.task('concatcss', function() {
   gulp.src('./portal/css/*.css')
     .pipe(concat('main.css'))
     .pipe(gulp.dest('./static/stylesheets/'))
-);
+});
 
-gulp.task('copyhtml', () =>
+gulp.task('copyhtml', function() {
   gulp.src('./portal/html/*.html')
     .pipe(gulp.dest('./views/'))
-);
+});
 
-gulp.task('translations', () =>
+gulp.task('translations', function() {
   gulp.src('./portal/locale/*.json')
-    .pipe(jsoncombine('all.json', (data) => new Buffer(JSON.stringify(data))))
+    .pipe(jsoncombine('all.json', function(data) {new Buffer(JSON.stringify(data))}))
     .pipe(gulp.dest('./locale/'))
-);
+});
 
 // Shorthand tasks for applying changes to single resources
 gulp.task('js', ['lintjs', 'convertjs']);
