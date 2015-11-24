@@ -95,8 +95,7 @@ function requestFromReader(request) {
  * @return {Bundler} A bundler object that will fetch the requested resource
  */
 function makeBundler(url, config, reqFromReader) {
-  console.log('Making bundler for ' + url);
-  console.log('Request is from RSS Reader?', reqFromReader);
+  bs_log('Making bundler for ' + url);
   var bundler = new b.Bundler(url);
   if (config.useProxy) {
     bundler.on('originalRequest', b.proxyTo(config.proxyAddress));
@@ -107,7 +106,7 @@ function makeBundler(url, config, reqFromReader) {
     bundler.on('resourceRequest', b.spoofHeaders({'User-Agent': config.userAgent}));
   }
   if (reqFromReader) {
-    console.log('Making a readable page.');
+    bs_log('Making a readability-mode page.');
     bundler.on('originalReceived', function (requestFn, originalDoc, url, callback) {
       var diff = {};
       makeReadable(originalDoc, {charset: 'utf-8'}, function (err, article, meta) {
@@ -149,7 +148,8 @@ function makeBundler(url, config, reqFromReader) {
 function handler(config) {
   return function (req, res) {
     var disconnected = false; // A flag set when the request is closed.
-    var requestedUrl = constructRequestUrl(req.url, requestWasRewritten(req));
+    var wasRewritten = requestWasRewritten(req);
+    var requestedUrl = constructRequestUrl(req.url, wasRewritten);
 
     req.on('close', function () {
       disconnected = true;
