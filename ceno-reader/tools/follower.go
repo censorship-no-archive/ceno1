@@ -14,6 +14,7 @@ import (
     "io/ioutil"
     "net/http"
     "time"
+    "strconv"
 )
 
 const FOLLOW_URL string = "http://localhost:3096/follow"
@@ -44,8 +45,8 @@ func sendFollowRequest(feedUrl string) {
 }
 
 func main() {
-    if len(os.Args) != 2 {
-        fmt.Printf("Usage: %s <sources.list>\n", os.Args[0])
+    if len(os.Args) != 3 {
+        fmt.Printf("Usage: %s <sources.list> <minutes to sleep between requests>\n", os.Args[0])
         return
     }
     contentBytes, err := ioutil.ReadFile(os.Args[1])
@@ -54,13 +55,19 @@ func main() {
         fmt.Println(err)
         return
     }
+    minutes, convertErr := strconv.Atoi(os.Args[2])
+    if convertErr != nil {
+      fmt.Println("The second argument must be an integer, the number of minutes to sleep between follow requests.")
+      fmt.Println(convertErr)
+      return
+    }
     lines := strings.Split(string(contentBytes), "\n")
     for _, line := range lines {
         if len(line) > 0 {
             fmt.Println("\nFollowing " + line)
             sendFollowRequest(line)
             // Add some rate limiting in there so we don't choke the database
-            <-time.After(6 * time.Second)
+            <-time.After(time.Duration(minutes) * time.Minute)
         }
     }
 }
