@@ -18,7 +18,7 @@
 	<property name="json-smart.location" location="lib/json-smart-1.2.jar"/>
 	<property name="apache-commonsvalidator.location" location="lib/commons-validator-1.4.1.jar"/>
 	<property name="apache-commonscompress.location" location="lib/commons-compress-1.9.jar"/>
-	<property name="bouncy-castle.location" location="lib/bcprov-jdk15on-152.jar"/>
+	<property name="bouncy-castle.location" location="../fred/lib/bcprov-jdk15on-152.jar"/>
 
 
 	<available file="src/plugins/CENO/Version.java" property="version.present"/>
