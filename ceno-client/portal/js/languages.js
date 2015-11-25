@@ -59,6 +59,12 @@ function setArticleText(locale) {
  */
 function setIndexText(locale) {
   setLocale(locale);
+  if (!setText('noMoreSurveillanceText', 'textContent', locale, 'noMoreSurveillance')) {
+    console.log('Could not set "No More Surveillance" text.');
+  }
+  if (!setText('noMoreCensorshipText', 'textContent', locale, 'noMoreCensorship')) {
+    console.log('Could not set "No More Censorship" text.');
+  }
   if (!setText('whatNextHeader', 'textContent', locale, 'whatNext')) {
     console.log('Could not set "What Next" header text.');
   }

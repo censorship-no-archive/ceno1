@@ -1,6 +1,22 @@
+#mainIntroText {
+  background-color: white;
+  position: absolute;
+  margin-top: 40px;
+  margin-left: 80px;
+}
+
+#mainIntroText p {
+  font-weight: 700;
+  font-size: 46px;
+  color: rgb(228, 54, 36);
+  font-family: "Lato";
+  margin: 3px;
+  text-transform: uppercase;
+}
+
 #mainCartoon {
   width: 100%;
-  margin-bottom: 100px;
+  margin-bottom: 60px;
 }
 
 #mainCartoon + .content {
@@ -8,7 +24,7 @@
 }
 
 #whatNextHeader {
-  margin-bottom: 80px;
+  margin-bottom: 40px;
 }
 
 #footer {
@@ -48,7 +64,7 @@
 
 .indexJump {
   border-radius: 24px;
-  background-color: rgb(225, 224, 219);
+  background-color: rgb(238, 237, 234);
   min-height: 150px;
   padding: 20px;
   margin: 0 0 40px 0;
@@ -64,7 +80,7 @@
 
 .iconContainer {
   float: left;
-  width: 20%;
+  width: 24%;
 }
 
 .iconContainer > img {
@@ -76,5 +92,5 @@
 
 .sectionInfo {
   float: right;
-  width: 79%;
+  width: 75%;
 }
