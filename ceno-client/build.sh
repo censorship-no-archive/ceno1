@@ -4,8 +4,7 @@ SOURCE_FILES="src/client.go \
     src/errorhandling.go \
     src/config.go \
     src/data.go \
-    src/portal.go \
-    src/articles.go"
+    src/portal.go"
 
 echo "Formatting go files."
 for file in `ls src/*.go`; do
