@@ -3,8 +3,8 @@
 # This script should not be run with superuser rights
 if [ "X`id -u`" = "X0" ]
 then
-    echo "Do not run this script as root."
-    exit 1
+  echo "Do not run this script as root."
+  exit 1
 fi
 
 getEnvLang() {
@@ -38,50 +38,63 @@ noRunningProcess() {
 browserExists() {
   if command -v $1 >/dev/null 2>&1
   then
-      return 0
+    return 0
   else
-      return 1
+    return 1
   fi
 }
 
 startChromeProfile() {
   $1 --use-temporary-user-data-dir --load-extension=$(pwd)/browser-extensions/ceno-chrome \
---no-first-run --new-window --disable-java --disable-metrics --no-default-browser-check $2 &> /dev/null &
+  --no-first-run --new-window --disable-java --disable-metrics --no-default-browser-check $2 &> /dev/null &
 }
 
 startBrowser() {
   portal=http://localhost:3090/portal
   extInstaller=./ceno-client/views/extension-en-us.html
 
-  # Open a browser window with the CENO profiles, including the plugin
-  for chromecmd in chrome chromium-browser chromium google-chrome
-  do
-    if browserExists $chromecmd
-    then
-      if noRunningProcess "$chromecmd"
-      then
-        startChromeProfile "$chromecmd" $portal
-        return
-      else
-        chromeFound=$chromecmd
-      fi
-    fi
-  done
+  case "$(uname -s)" in
 
-  if browserExists firefox
-  then
-    firefox -no-remote -private-window -profile "browser-profiles/firefox" $extInstaller &> /dev/null &
-  else
-    if [ -z "$chromeFound" ]
-    then
-      echo "None of the supported browsers is installed in your machine."
-      echo "Please install Chrome or Firefox and execute this script again."
-      exit 2
-    else
-      echo "Please close the" $chromeFound "window and run this script again"
-      exit 3
-    fi
-  fi
+    Darwin)
+      echo "This script cannot open a browser window in OS X"
+      echo "Please read the documentation for further instructions on how"
+      echo "to load the CENO Router extension to your browser"
+      return
+      ;;
+
+    Linux)
+      # Open a browser window with the CENO profiles, including the plugin
+      for chromecmd in chrome chromium-browser chromium google-chrome
+      do
+        if browserExists $chromecmd
+        then
+          if noRunningProcess "$chromecmd"
+          then
+            startChromeProfile "$chromecmd" $portal
+            return
+          else
+            chromeFound=$chromecmd
+          fi
+        fi
+      done
+
+      if browserExists firefox
+      then
+        firefox -no-remote -private-window -profile "browser-profiles/firefox" $extInstaller &> /dev/null &
+      fi
+
+      if [ -z "$chromeFound" ]
+      then
+        echo "None of the supported browsers is installed in your machine"
+        echo "Please install Chrome or Firefox and execute this script again"
+        exit 2
+      else
+        echo "Please close the" $chromeFound "window and run this script again"
+        exit 3
+      fi
+      ;;
+
+  esac
 }
 
 startCENOClient() {
@@ -106,8 +119,8 @@ startCENO() {
 
   startCENOClient
 
-  echo "You are ready to use CENO."
-  echo "Remember that you are covered by CENO only when the CENO Router plugin is loaded in your browser."
+  echo "You are ready to use CENO"
+  echo "Remember that you are covered by CENO only when the CENO Router plugin is loaded in your browser"
 }
 
 
