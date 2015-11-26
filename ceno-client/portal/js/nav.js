@@ -5,9 +5,9 @@ const CACHE_SERVER_BASE = 'http://localhost:3091';
 const CACHE_STATUS_ROUTE = '/status';
 
 // Status icons
-const STATUS_ICON_OKAY = 'cenoresources/images/status_okay.png';
-const STATUS_ICON_WARNING = 'cenoresources/images/status_warning.png';
-const STATUS_ICON_ERROR = 'cenoresources/images/status_error.png';
+const STATUS_ICON_OKAY = '/cenoresources/images/status_okay.png';
+const STATUS_ICON_WARNING = '/cenoresources/images/status_warning.png';
+const STATUS_ICON_ERROR = '/cenoresources/images/status_error.png';
 
 let globalStatus = 'okay';
 

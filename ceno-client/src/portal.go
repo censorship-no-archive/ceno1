@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"strings"
 )
 
 type PortalPath struct {
@@ -213,8 +214,11 @@ func PortalChannelsHandler(w http.ResponseWriter, r *http.Request) {
 func PortalArticlesHandler(w http.ResponseWriter, r *http.Request) {
 	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
 	t, _ := template.ParseFiles("./views/articles.html", "./views/nav.html", "./views/resources.html", "./views/breadcrumbs.html", "./views/scripts.html")
-	// TODO - Get the feed from the URL
-	module, err := InitModuleWithArticles("https://news.ycombinator.com/rss")
+	pathComponents := strings.Split(r.URL.Path, "/")
+	b64FeedUrl := pathComponents[len(pathComponents)-1]
+	feedUrlBytes, _ := base64.StdEncoding.DecodeString(b64FeedUrl)
+	feedUrl := string(feedUrlBytes)
+	module, err := InitModuleWithArticles(feedUrl)
 	if err != nil {
 		fmt.Println("Error loading articles")
 		fmt.Println(err)
