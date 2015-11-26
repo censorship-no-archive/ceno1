@@ -210,5 +210,9 @@
   {
     "id": "feed_not_found",
     "translation": "No articles exist for {{.FeedUrl}}"
+  },
+  {
+    "id": "channel_selector",
+    "translation": "Channel Selector"
   }
 ]

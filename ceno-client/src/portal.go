@@ -226,14 +226,15 @@ func PortalIndexHandler(w http.ResponseWriter, r *http.Request) {
 
 func PortalChannelsHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Got request for test channels page")
+	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
 	t, _ := template.ParseFiles("./views/channels.html", "./views/nav.html", "./views/resources.html", "./views/breadcrumbs.html", "./views/scripts.html")
 	module, err := InitModuleWithFeeds()
 	if err != nil {
 		t.Execute(w, nil)
 	} else {
 		module["Breadcrumbs"] = []PortalPath{
-			{"CeNO", "/testportal"},
-			{"Channel Selector", "/testchannels"},
+			{"CeNO", "/portal"},
+			{T("channel_selector"), "/channels"},
 		}
 		languageStrings, langStringsJson, readErr := loadLanguageStrings()
 		if readErr != nil {
@@ -261,9 +262,9 @@ func PortalArticlesHandler(w http.ResponseWriter, r *http.Request) {
 		module["PublishedWord"] = T("published_word")
 		module["AuthorWord"] = T("authors_word")
 		module["Breadcrumbs"] = []PortalPath{
-			{"CeNO", "/testportal"},
-			{"Channel Selector", "/testchannels"},
-			{"Hacker News", "/testarticles"},
+			{"CeNO", "/portal"},
+			{T("channel_selector"), "/channels"},
+			{module["Title"].(string), r.URL.String()},
 		}
 		languageStrings, langStringsJson, readErr := loadLanguageStrings()
 		if readErr != nil {
