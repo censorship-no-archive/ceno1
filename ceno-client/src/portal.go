@@ -57,6 +57,21 @@ func articlesFilename(feedUrl string) string {
 }
 
 /**
+ * Convert a URL like /cenosite/<base64(url)> to just the contained url.
+ * @param feedUrl - A portal-internal URL for a feed
+ * @return the original feed's URL and any error that occurs parsing it out
+ */
+func getFeedUrl(feedUrl string) (string, error) {
+	parts := strings.Split(feedUrl, "/")
+	b64FeedUrl := parts[len(parts)-1]
+	decoded, decodeErr := base64.StdEncoding.DecodeString(b64FeedUrl)
+	if decodeErr != nil {
+		return "", decodeErr
+	}
+	return string(decoded), nil
+}
+
+/**
  * Get information about feeds to be injected into the portal page.
  * @return a map with a "feeds" key and corresponding array of Feed structs and an optional error
  */
@@ -102,19 +117,23 @@ func InitModuleWithFeeds() (map[string]interface{}, error) {
  * @return a map with a "feeds" key and corresponding array of Feed structs and an optional error
  */
 func InitModuleWithArticles(feedUrl string) (map[string]interface{}, error) {
+	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
 	articleInfo := ArticleInfo{}
 	var decodeErr error
 	result := Lookup(feedUrl)
 	if result.Complete && result.Found {
+		fmt.Println("Lookup is complete")
 		// Serve whatever the LCS gave us as the most recent articles list for
 		// the feed we want to see.
 		decoder := json.NewDecoder(bytes.NewReader([]byte(result.Bundle)))
 		decodeErr = decoder.Decode(&articleInfo)
 	} else {
+		fmt.Println("Lookup is not complete")
 		// Before the first complete lookup, serve from the files
 		// distributed with the client.
 		articleInfoFile, openErr := os.Open(articlesFilename(feedUrl))
 		if openErr != nil {
+			fmt.Println("Got file open error", openErr.Error())
 			return nil, openErr
 		}
 		defer articleInfoFile.Close()
@@ -122,9 +141,31 @@ func InitModuleWithArticles(feedUrl string) (map[string]interface{}, error) {
 		decodeErr = decoder.Decode(&articleInfo)
 	}
 	if decodeErr != nil {
+		fmt.Println("Got decode error", decodeErr.Error())
 		return nil, decodeErr
 	}
 	mapping := make(map[string]interface{})
+	// We want to get the feed's title to display on the articles page, however we cannot simply
+	// scan through the feeds.json file on disk, because we might be serving from what the LCS is giving us.
+	feedsModule, feedErr := InitModuleWithFeeds()
+	if feedErr != nil {
+		return nil, feedErr
+	}
+	mapping["Title"] = T("feed_not_found", map[string]string{"FeedUrl": feedUrl})
+	fmt.Println("Trying to find title for feed with url", feedUrl)
+	for _, feed := range feedsModule["Feeds"].([]Feed) {
+		actualFeedUrl, urlErr := getFeedUrl(feed.Url)
+		if urlErr != nil {
+			continue
+		}
+		if actualFeedUrl == feedUrl {
+			// We will always find a title eventually unless the user messed up and accidentally changed the
+			// feed url in the address bar.
+			fmt.Println("Found feed with title", feed.Title)
+			mapping["Title"] = feed.Title
+			break
+		}
+	}
 	mapping["Articles"] = articleInfo.Items
 	mapping["Version"] = articleInfo.Version
 	return mapping, nil
@@ -173,7 +214,6 @@ func PortalIndexHandler(w http.ResponseWriter, r *http.Request) {
 	module := map[string]interface{}{}
 	languageStrings, langStringsJson, readErr := loadLanguageStrings()
 	if readErr != nil {
-		fmt.Println("Error loading language")
 		fmt.Println(readErr)
 	} else {
 		// For the language selection menu
@@ -189,8 +229,6 @@ func PortalChannelsHandler(w http.ResponseWriter, r *http.Request) {
 	t, _ := template.ParseFiles("./views/channels.html", "./views/nav.html", "./views/resources.html", "./views/breadcrumbs.html", "./views/scripts.html")
 	module, err := InitModuleWithFeeds()
 	if err != nil {
-		fmt.Println("Error loading feeds")
-		fmt.Println(err)
 		t.Execute(w, nil)
 	} else {
 		module["Breadcrumbs"] = []PortalPath{
@@ -199,8 +237,6 @@ func PortalChannelsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		languageStrings, langStringsJson, readErr := loadLanguageStrings()
 		if readErr != nil {
-			fmt.Println("Error loading languages")
-			fmt.Println(err)
 		} else {
 			// For the language selection menu
 			module["LanguageStrings"] = languageStrings
@@ -220,13 +256,10 @@ func PortalArticlesHandler(w http.ResponseWriter, r *http.Request) {
 	feedUrl := string(feedUrlBytes)
 	module, err := InitModuleWithArticles(feedUrl)
 	if err != nil {
-		fmt.Println("Error loading articles")
-		fmt.Println(err)
 		t.Execute(w, nil)
 	} else {
 		module["PublishedWord"] = T("published_word")
 		module["AuthorWord"] = T("authors_word")
-		module["Title"] = "Testing 1 2 3"
 		module["Breadcrumbs"] = []PortalPath{
 			{"CeNO", "/testportal"},
 			{"Channel Selector", "/testchannels"},
@@ -234,8 +267,6 @@ func PortalArticlesHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		languageStrings, langStringsJson, readErr := loadLanguageStrings()
 		if readErr != nil {
-			fmt.Println("Error loading languages")
-			fmt.Println(err)
 		} else {
 			// For the language selection menu
 			module["LanguageStrings"] = languageStrings
