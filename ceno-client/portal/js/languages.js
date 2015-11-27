@@ -106,6 +106,13 @@ function setIndexText(locale) {
   if (!setText('tellMeMore', 'textContent', locale, 'learnMoreButton')) {
     console.log('Could not set "Learn More" button text.');
   }
+  // Set the text for all of the paragraphs in the "About CENO" overlay.
+  for (let i = 1; LANGUAGES[locale].hasOwnProperty('overlayParagraph' + i); i++) {
+    let id = 'overlayParagraph' + i;
+    if (!setText(id, 'textContent', locale, id)) {
+      console.log('Could not set the paragraph text for ' + id);
+    }
+  }
 }
 
 /**
