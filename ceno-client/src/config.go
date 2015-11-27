@@ -89,7 +89,7 @@ var DefaultConfiguration Config = Config{
 	ErrorMsg:       "Page not found",
 	PleaseWaitPage: path.Join(".", "views", "wait.html"),
 	PortalLanguages: []Language{
-		{"English", "en"},
+		{"English", "en", "rtl"},
 	},
 }
 

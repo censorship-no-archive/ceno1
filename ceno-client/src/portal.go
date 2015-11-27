@@ -42,10 +42,10 @@ type IdentifiedString struct {
 }
 
 type LanguageStrings struct {
-	Name    	string
-	Locale  	string
+	Name      string
+	Locale    string
 	Direction string
-	Strings []IdentifiedString
+	Strings   []IdentifiedString
 }
 
 type LanguageStringJSON map[string]map[string]string
@@ -212,7 +212,7 @@ func loadLanguageStrings() ([]LanguageStrings, LanguageStringJSON, error) {
 		decodedStrings = append(decodedStrings, languageStrings)
 		// Set a special key in the JSON representation of our translated string pairs to the configured
 		// direction that language should be displayed in.
-		langStrings[TEXT_DIRECTION_KEY] = availableLanguage.Direction
+		langStrings[availableLanguage.Locale][TEXT_DIRECTION_KEY] = availableLanguage.Direction
 	}
 	return decodedStrings, langStrings, nil
 }
