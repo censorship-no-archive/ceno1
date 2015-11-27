@@ -23,6 +23,15 @@
   margin-bottom: 50px;
 }
 
+#overlayFooter {
+  margin-top: 20px;
+}
+
+#overlayFooter button {
+  margin-left: auto;
+  margin-right: auto;
+}
+
 #mainIntroText {
   background-color: white;
   position: absolute;

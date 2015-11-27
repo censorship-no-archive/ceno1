@@ -47,17 +47,11 @@ tellMeMoreButton.addEventListener('click', () => {
   overlay.style.display = 'block';
 });
 
-// When any part of the overlay outside the content section is clicked, hide it.
-overlay.addEventListener('click', () => {
+// Attach a handler to the close overlay button.
+let closeOverlayButton = document.getElementById('closeOverlayButton');
+closeOverlayButton.addEventListener('click', () => {
   overlay.style.display = 'none';
-});
-let overlayChildren = overlay.children;
-for (let i = 0, len = overlayChildren.length; i < len; i++) {
-  let child = overlayChildren[i];
-  if (child.addEventListener) {
-    child.addEventListener('click', (e) => e.preventDefault());
-  }
-}
+})
 
 overlay.style.display = 'none';
 languages.setIndexText('en');
