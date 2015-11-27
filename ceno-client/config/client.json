@@ -7,43 +7,53 @@
   "PortalLanguages": [
     {
       "Name": "English",
-      "Locale": "en"
+      "Locale": "en",
+      "Direction": "LTR"
     },
     {
       "Name": "Français",
-      "Locale": "fr"
+      "Locale": "fr",
+      "Direction": "LTR"
     },
     {
       "Name": "العربية",
-      "Locale": "ar"
+      "Locale": "ar",
+      "Direction": "RTL"
     },
     {
       "Name": "中文",
-      "Locale": "cn"
+      "Locale": "cn",
+      "Direction": "LTR"
     },
     {
       "Name": "ελληνικά",
-      "Locale": "el"
+      "Locale": "el",
+      "Direction": "LTR"
     },
     {
       "Name": "italiano",
-      "Locale": "it"
+      "Locale": "it",
+      "Direction": "LTR"
     },
     {
       "Name": "فارسی",
-      "Locale": "fa"
+      "Locale": "fa",
+      "Direction": "RTL"
     },
     {
       "Name": "português",
-      "Locale": "pt"
+      "Locale": "pt",
+      "Direction": "LTR"
     },
     {
       "Name": "Русский",
-      "Locale": "ru"
+      "Locale": "ru",
+      "Direction": "LTR"
     },
     {
       "Name": "Español",
-      "Locale": "es"
+      "Locale": "es",
+      "Direction": "LTR"
     }
   ]
 }

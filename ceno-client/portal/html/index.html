@@ -7,20 +7,20 @@
 <body>
   {{template "NAV" . }}
   <div id="mainIntroText">
-    <p id="noMoreSurveillanceText"></p>
-    <p id="noMoreCensorshipText"></p>
+    <p id="noMoreSurveillanceText" class="directionToggles"></p>
+    <p id="noMoreCensorshipText" class="directionToggles"></p>
   </div>
   <img id="mainCartoon" src="/cenoresources/images/cartoon.jpg" />
   <div class="content">
-    <h1 id="whatNextHeader"></h1>
+    <h1 id="whatNextHeader" class="directionToggles"></h1>
     <a href="/channels">
       <div class="indexJump">
         <div class="iconContainer">
           <img src="/cenoresources/images/ceno_channels_icon.png" />
         </div>
         <div class="sectionInfo">
-          <h2 id="browseChannelsHeader"></h2>
-          <p id="browseChannelsParagraph">
+          <h2 id="browseChannelsHeader" class="directionToggles"></h2>
+          <p id="browseChannelsParagraph" class="directionToggles">
           </p>
         </div>
       </div>
@@ -30,7 +30,7 @@
         <img src="/cenoresources/images/ceno_url_icon.png" />
       </div>
       <div class="sectionInfo">
-        <h2 id="requestSiteHeader"></h2>
+        <h2 id="requestSiteHeader" class="directionToggles"></h2>
         <form method="get" action="/lookup" name="lookupForm" id="lookupForm">
           <input type="text" placeholder="Enter URL" id="indexUrlSearch" />
           <input type="submit" style="display: none;" id="submitLookupForm" />
@@ -42,14 +42,14 @@
         <img src="/cenoresources/images/ceno_info_icon.png" />
       </div>
       <div class="sectionInfo">
-        <h2 id="learnCENOHeader"></h2>
-        <p id="learnCENOParagraph">
+        <h2 id="learnCENOHeader" class="directionToggles"></h2>
+        <p id="learnCENOParagraph" class="directionToggles">
         </p>
-        <button class="pure-button" id="tellMeMore"></button>
+        <button class="pure-button directionToggles" id="tellMeMore"></button>
       </div>
     </div>
     <div id="footer">
-      <p id="cartoonCredit">
+      <p id="cartoonCredit" class="directionToggles">
         Cartoon: <span style="font-style: italic;">Internet And Censorship</span>, © Chappette in "International Herald Tribune", May 10, 2005
       </p>
     </div>

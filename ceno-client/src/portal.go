@@ -18,6 +18,10 @@ type PortalPath struct {
 	Href     string
 }
 
+// A special key to store the direction a language should be displayed in along with the
+// identified key pairs
+const TEXT_DIRECTION_KEY = "_direction_"
+
 // Location of the JSON file containing the merged translated strings
 var allJSONPath string = path.Join(".", "locale", "all.json")
 
@@ -38,8 +42,9 @@ type IdentifiedString struct {
 }
 
 type LanguageStrings struct {
-	Name    string
-	Locale  string
+	Name    	string
+	Locale  	string
+	Direction string
 	Strings []IdentifiedString
 }
 
@@ -200,10 +205,14 @@ func loadLanguageStrings() ([]LanguageStrings, LanguageStringJSON, error) {
 		languageStrings := LanguageStrings{}
 		languageStrings.Name = availableLanguage.Name
 		languageStrings.Locale = availableLanguage.Locale
+		languageStrings.Direction = availableLanguage.Direction
 		for identifier, content := range stringPairs {
 			languageStrings.Strings = append(languageStrings.Strings, IdentifiedString{identifier, content})
 		}
 		decodedStrings = append(decodedStrings, languageStrings)
+		// Set a special key in the JSON representation of our translated string pairs to the configured
+		// direction that language should be displayed in.
+		langStrings[TEXT_DIRECTION_KEY] = availableLanguage.Direction
 	}
 	return decodedStrings, langStrings, nil
 }

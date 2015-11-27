@@ -11,9 +11,9 @@
     <h1>{{.Title}}</h1>
   </div>
   <div class="content" id="articleListDiv">
-    <ul id="articleListing">
+    <ul id="articleListing" class="directionToggles">
       {{range .Articles}}
-      <li>
+      <li class="directionToggles">
         <h2 class="articleTitle"><a href="{{.Url}}">{{.Title}}</a></h2>
         <p class="articleInfo">{{.Published}} &nbsp;|&nbsp; {{.Authors}}</p>
       </li>

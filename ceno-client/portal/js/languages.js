@@ -3,6 +3,15 @@ let languages = (function () {
 // A global variable containing the current locale. Only written to within this module.
 let globalLocale = 'en';
 
+// A global variable containing the current text direction to enforce on portal-specific content.
+// Only written to within this module.
+let globalTextDirection 'ltr';
+
+// A special key that's added by the CENO Client to the standard id: string key-pair values in
+// LANGUAGES.  The value LANGUAGES[TEXT_DIRECTION_KEY] will always be either 'ltr' or 'rtl'
+// unless someone messes up the config/client.json file.
+const TEXT_DIRECTION_KEY = '_direction_';
+
 /**
  * Set the text content of a given element to some translated string.
  * @param {string} elemId - The id attribute of the element to access
@@ -31,6 +40,13 @@ function setLocale(locale) {
   document.getElementById('currentLocale').textContent = locale;
   let currentStatus = navigation.getPortalStatus();
   navigation.setConnectivityStatus(currentStatus);
+  globalTextDirection = LANGUAGES[TEXT_DIRECTION_KEY];
+  // On every page, elements that can have the text direction changed will have the
+  // class "directionToggles".
+  let portalTexts = document.getElementsByClassName('directionToggles');
+  for (let i = 0, len = portalTexts.length; i < len; i++) {
+    portalTexts[i].setAttribute('direction', globalTextDirection);
+  }
 }
 
 /**
@@ -120,12 +136,21 @@ function getLocale() {
   return globalLocale;
 }
 
+/**
+ * For use by consumers of this module. Get the currently set text direction.
+ * @return {string} the current text direction. Either 'ltr' or 'rtl'.
+ */
+function getTextDirection() {
+  return globalTextDirection.toLowerCase();
+}
+
 return {
   setText,
   setChannelText,
   setArticleText,
   setIndexText,
-  getLocale
+  getLocale,
+  getTextDirection,
 };
 
 })();
