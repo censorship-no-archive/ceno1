@@ -48,8 +48,8 @@ browserExists() {
 
 startChromeProfile() {
   # Open a Chrome window with the CENO Router extension preloaded
-  $1 --use-temporary-user-data-dir --load-extension=$(pwd)/browser-extensions/ceno-chrome \
-  --no-first-run --new-window --disable-java --disable-metrics --no-default-browser-check $2 &> /dev/null &
+  $1 --use-temporary-user-data-dir --load-extension=$(pwd)/browser-extensions/ceno-chrome --disable-translate \
+  --no-first-run --disable-java --disable-metrics --no-default-browser-check $2 &> /dev/null &
 }
 
 startBrowser() {
@@ -86,6 +86,7 @@ startBrowser() {
       if browserExists firefox
       then
         firefox -no-remote -private-window -profile "browser-profiles/firefox" $extInstaller &> /dev/null &
+        return
       fi
 
       if [ -z "$chromeFound" ]
