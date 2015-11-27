@@ -38,6 +38,15 @@ if (urlInputForm) {
   }
 }
 
+// Attach an event handler to the Tell Me More button to show an overlay with more information
+// about CENO when the button is clicked.
+let tellMeMoreButton = document.getElementById('tellMeMore');
+tellMeMoreButton.addEventListener('click', function () {
+  let overlay = document.getElementById('cenoInfoOverlay');
+  // The display property will be "none" while the overlay is not visible.
+  overlay.style.display = '';
+});
+
 languages.setIndexText('en');
 
 })();
