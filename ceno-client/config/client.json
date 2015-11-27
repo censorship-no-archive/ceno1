@@ -8,52 +8,52 @@
     {
       "Name": "English",
       "Locale": "en",
-      "Direction": "LTR"
+      "Direction": "ltr"
     },
     {
       "Name": "Français",
       "Locale": "fr",
-      "Direction": "LTR"
+      "Direction": "ltr"
     },
     {
       "Name": "العربية",
       "Locale": "ar",
-      "Direction": "RTL"
+      "Direction": "rtl"
     },
     {
       "Name": "中文",
       "Locale": "cn",
-      "Direction": "LTR"
+      "Direction": "ltr"
     },
     {
       "Name": "ελληνικά",
       "Locale": "el",
-      "Direction": "LTR"
+      "Direction": "ltr"
     },
     {
       "Name": "italiano",
       "Locale": "it",
-      "Direction": "LTR"
+      "Direction": "ltr"
     },
     {
       "Name": "فارسی",
       "Locale": "fa",
-      "Direction": "RTL"
+      "Direction": "rtl"
     },
     {
       "Name": "português",
       "Locale": "pt",
-      "Direction": "LTR"
+      "Direction": "ltr"
     },
     {
       "Name": "Русский",
       "Locale": "ru",
-      "Direction": "LTR"
+      "Direction": "ltr"
     },
     {
       "Name": "Español",
       "Locale": "es",
-      "Direction": "LTR"
+      "Direction": "ltr"
     }
   ]
 }
