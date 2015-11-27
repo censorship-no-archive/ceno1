@@ -45,8 +45,17 @@ const (
 const (
 	LCS_LOOKUP     = "/lookup"
 	LCS_DECODE_ERR = "/error/decode"
+	LCS_STATUS     = "/status"
 	RS_CREATE      = "/create"
 )
+
+/**
+ * Produce a URL to request status from the LCS.
+ * @return the URL to request status from the LCS
+ */
+func StatusCheckURL(configuration Config) string {
+	return configuration.CacheServer + LCS_STATUS
+}
 
 /**
  * Produce a URL to request a bundle be looked up by the LCS.
