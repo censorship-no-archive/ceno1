@@ -254,11 +254,11 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 			"responseWriter": w,
 			"request":        r,
 		})
-	}
-
-	_, err = io.Copy(w, response.Body)
-	if err := response.Body.Close(); err != nil {
-		log(T("unable_close_response_body ") + err.Error())
+	} else { //no error for now
+		_, err = io.Copy(w, response.Body)
+		if err := response.Body.Close(); err != nil {
+			log(T("unable_close_response_body: ") + err.Error())
+		}
 	}
 
 }
@@ -377,6 +377,7 @@ func main() {
 	http.Handle("/cenoresources/",
 		http.StripPrefix("/cenoresources/", http.FileServer(http.Dir("./static"))))
 	http.HandleFunc("/lookup", directHandler)
+	http.HandleFunc("/status", statusHandler)
 	http.HandleFunc("/portal", PortalIndexHandler)
 	http.HandleFunc("/channels", PortalChannelsHandler)
 	http.HandleFunc("/cenosite/", PortalArticlesHandler)
