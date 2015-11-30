@@ -109,25 +109,31 @@ function makeBundler(url, config, reqFromReader) {
     bs_log('Making a readability-mode page.');
     bundler.on('originalReceived', function (requestFn, originalDoc, url, callback) {
       var diff = {};
-      makeReadable(originalDoc, {charset: 'utf-8'}, function (err, article, meta) {
-        // Let's assume we're dealing with RTL text, for simplicity
-        // TODO - Find a way to switch this on/off
-        if (err) {
-          var message = _t.__('Error: %s', err.message);
-          bs_log(message);
-          diff[originalDoc] = message;
-        } else {
-          var content = '<html dir="rtl"><head><meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/></head>';
-          if (article.content.slice(0, 6) !== '<body>') {
-            content += '<body>' + article.content + '</body></html>';
+      // Wrap the whole call to the readability-mode library in a try block
+      try {
+        makeReadable(originalDoc, {charset: 'utf-8'}, function (err, article, meta) {
+          // Let's assume we're dealing with RTL text, for simplicity
+          // TODO - Find a way to switch this on/off
+          if (err) {
+            var message = _t.__('Error: %s', err.message);
+            bs_log(message);
+            diff[originalDoc] = message;
           } else {
-            content += article.content + '</html>';
+            var content = '<html dir="rtl"><head><meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/></head>';
+            if (article.content.slice(0, 6) !== '<body>') {
+              content += '<body>' + article.content + '</body></html>';
+            } else {
+              content += article.content + '</html>';
+            }
+            diff[originalDoc] = content;
+            article.close();
           }
-          diff[originalDoc] = content;
-          article.close();
-        }
-        callback(null, diff);
-      });
+          callback(null, diff);
+        });
+      // Now, in case the library encounters some exception, we can just pass the exception on as an error like usual.
+      } catch (ex) {
+        callback(ex, null);
+      }
     });
     bundler.on('originalReceived', b.replaceImages);
   } else {
