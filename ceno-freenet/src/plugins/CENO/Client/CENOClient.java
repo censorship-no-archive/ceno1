@@ -1,10 +1,13 @@
 package plugins.CENO.Client;
 
+import java.net.MalformedURLException;
+
 import plugins.CENO.CENOL10n;
 import plugins.CENO.Configuration;
 import plugins.CENO.Version;
 import plugins.CENO.Client.Signaling.ChannelMaker;
 import plugins.CENO.FreenetInterface.NodeInterface;
+import freenet.keys.FreenetURI;
 import freenet.pluginmanager.FredPlugin;
 import freenet.pluginmanager.FredPluginHTTP;
 import freenet.pluginmanager.FredPluginRealVersioned;
@@ -61,9 +64,19 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 		initConfig.readProperties();
 
 		String confBridgeKey = initConfig.getProperty("bridgeKey");
-		//TODO Test that the key in the configuration file corresponds to a valid request USK
-		bridgeKey = (confBridgeKey != null && !confBridgeKey.isEmpty()) ? confBridgeKey : BRIDGE_KEY;
-
+		try {
+			FreenetURI bridgeURI = new FreenetURI(confBridgeKey);
+			if (!bridgeURI.isSSK()) {
+				throw new MalformedURLException();
+			}
+			bridgeKey = confBridgeKey;
+		} catch (MalformedURLException e) {
+			bridgeKey = BRIDGE_KEY;
+		} catch (NullPointerException e) {
+			bridgeKey = BRIDGE_KEY;
+		}
+		Logger.normal(this, "CENO will make requests to the bridge with key: " + bridgeKey);
+		
 		// Initialize RS - Make a new class ChannelManager that handles ChannelMaker
 		channelMaker = new ChannelMaker(initConfig.getProperty("signalSSK"), Long.parseLong(initConfig.getProperty("lastSynced", "0")));
 

@@ -206,5 +206,13 @@
   {
     "id": "you_asked_for_html",
     "translation": "You asked for "
+  },
+  {
+    "id": "feed_not_found",
+    "translation": "No articles exist for {{.FeedUrl}}"
+  },
+  {
+    "id": "channel_selector",
+    "translation": "Channel Selector"
   }
 ]

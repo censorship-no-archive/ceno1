@@ -1,5 +1,5 @@
-body {
-  background-color: #eeedea;
+html, body {
+  background-color: rgb(245, 245, 245);
   color: rgb(74, 74, 74);
   font-family: 'Lato';
 }
@@ -7,6 +7,14 @@ body {
 p, a, h1, h2, h3, h4, h5, h6, span, div {
   color: rgb(74, 74, 74);
   font-family: 'Lato';
+}
+
+p {
+  font-size: 18px;
+}
+
+h1, h2 {
+  font-size: 24px;
 }
 
 button {

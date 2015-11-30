@@ -13,8 +13,9 @@ import (
 
 // Contains information about languages available to the CENO Portal
 type Language struct {
-	Name   string
-	Locale string
+	Name      string
+	Locale    string
+	Direction string
 }
 
 // Configuration struct containing fields required by client to run proxy server
@@ -88,7 +89,7 @@ var DefaultConfiguration Config = Config{
 	ErrorMsg:       "Page not found",
 	PleaseWaitPage: path.Join(".", "views", "wait.html"),
 	PortalLanguages: []Language{
-		{"English", "en"},
+		{"English", "en", "rtl"},
 	},
 }
 

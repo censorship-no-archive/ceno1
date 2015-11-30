@@ -1,0 +1,18 @@
+{
+  "noMoreSurveillance": "لا مزيد من المراقبة",
+  "noMoreCensorship": "لا مزيد من الرقابة",
+  "whatNext": "ماذا تريد ان تفعل الآن",
+  "browseChannels": "تصفح القنوات",
+  "browseChannelsDescription": "CENO  تأتي محملة بأطنان من المحتوى من مصادر مختلفة بحيث أنك لبدء قراءة المحتوى المتاح على الفور أو أثناء انتظارك لمواقع أخرى لتحميل.",
+  "requestSite": "طلب موقع على شبكة الانترنت",
+  "enterUrl": "URL إدخال",
+  "learnMore": "تعلم المزيد عن CENO",
+  "learnMoreDescription": "CENO  يجعل الوصول إلى المحتوى رقابة سهلة وموثوق بها. ذلك exfiltrates طلبات موقع باستخدام طبقة النقل مجهولة المصدر ومخازن الوثائق في الشبكات مثل فرينيت، مما يجعلها متاحة لجميع المستخدمين CENO.",
+  "learnMoreButton": "اخبرني المزيد",
+  "chooseChannel": "اختيار قناة إعلامية",
+  "channelSelector": "قناة محدد",
+  "statusConnected": "متصل",
+  "statusWarning": "غير مستقرة",
+  "statusError": "غير متصل",
+  "statusUnknown": "غير متصل"
+}

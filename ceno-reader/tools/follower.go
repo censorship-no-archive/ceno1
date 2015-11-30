@@ -14,13 +14,15 @@ import (
     "io/ioutil"
     "net/http"
     "time"
+    "strconv"
 )
 
 const FOLLOW_URL string = "http://localhost:3096/follow"
 
-func sendFollowRequest(feedUrl string) {
+func sendFollowRequest(feedUrl, title string) {
     marshalled, _ := json.Marshal(map[string]string{
         "url": feedUrl,
+        "title": title,
     })
     reader := bytes.NewReader(marshalled)
     request, err := http.NewRequest("POST", FOLLOW_URL, reader)
@@ -44,8 +46,8 @@ func sendFollowRequest(feedUrl string) {
 }
 
 func main() {
-    if len(os.Args) != 2 {
-        fmt.Printf("Usage: %s <sources.list>\n", os.Args[0])
+    if len(os.Args) != 3 {
+        fmt.Printf("Usage: %s <sources.list> <minutes to sleep between requests>\n", os.Args[0])
         return
     }
     contentBytes, err := ioutil.ReadFile(os.Args[1])
@@ -54,13 +56,26 @@ func main() {
         fmt.Println(err)
         return
     }
+    minutes, convertErr := strconv.Atoi(os.Args[2])
+    if convertErr != nil {
+      fmt.Println("The second argument must be an integer, the number of minutes to sleep between follow requests.")
+      fmt.Println(convertErr)
+      return
+    }
     lines := strings.Split(string(contentBytes), "\n")
     for _, line := range lines {
         if len(line) > 0 {
-            fmt.Println("\nFollowing " + line)
-            sendFollowRequest(line)
+            parts := strings.Split(line, " ")
+            if len(parts) == 1 {
+              fmt.Println("Could not create a follow request for", parts[0])
+              fmt.Println("Each line in the sources file should contain a URL and a title. E.g. http://site.com site")
+              continue
+            }
+            title := strings.Join(parts[1:], " ")
+            fmt.Printf("\nFollowing %s\nTitle: %s\n", parts[0], title)
+            sendFollowRequest(parts[0], title)
             // Add some rate limiting in there so we don't choke the database
-            <-time.After(6 * time.Second)
+            <-time.After(time.Duration(minutes) * time.Minute)
         }
     }
 }

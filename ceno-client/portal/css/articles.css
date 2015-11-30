@@ -5,16 +5,20 @@
 
 #articleListing {
   list-style: none;
-  float: right;
+  padding: 0;
+}
+
+#articleListing li {
+  margin-bottom: 40px;
 }
 
 .articleTitle {
   font-size: 18px;
-  text-align: right;
+  margin: 0 0 5px 0;
 }
 
 .articleInfo {
-  text-align: right;
+  margin: 0 0 5px 0;
 }
 
 #articleListing li h2 a {

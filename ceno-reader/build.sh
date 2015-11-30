@@ -46,6 +46,27 @@ go test
 cd ..
 
 echo ""
-go build $MOCK_BUNDLE_SERVER_SOURCES && echo "Compiled mock bundle server successfully."
-go build $MOCK_BUNDLE_INSERTER_SOURCES && echo "Compiled mock bundle inserter successfully."
-go build $SOURCE_FILES && echo "Compiled reader successfully."
+go build tools/follower.go
+if [ $? -eq 0 ]; then
+    echo "[SUCCESS] Compiled follower tool."
+else
+    echo "[FAILURE] Could not compile the follower tool."
+fi
+go build $MOCK_BUNDLE_SERVER_SOURCES
+if [ $? -eq 0 ]; then
+    echo "[SUCCESS] Compiled mock bundle server."
+else
+    echo "[FAILURE] Could not compile mock bundle server."
+fi
+go build $MOCK_BUNDLE_INSERTER_SOURCES
+if [ $? -eq 0 ]; then
+    echo "[SUCCESS] Compiled mock bundle inserter."
+else
+    echo "[FAILURE] Could not compile mock bundle inserter."
+fi
+go build $SOURCE_FILES
+if [ $? -eq 0 ]; then
+    echo "[SUCCESS] Compiled reader."
+else
+    echo "[FAILURE] Could not compile reader."
+fi

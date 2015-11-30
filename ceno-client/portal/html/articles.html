@@ -8,20 +8,19 @@
   {{template "NAV" . }}
   {{template "BREADCRUMBS" . }}
   <div class="content">
-    <h1>{{.Title}}</h1>
+    <h1 class="directionToggles">{{.Title}}</h1>
   </div>
-  <hr />
   <div class="content" id="articleListDiv">
-    <ul id="articleListing">
+    <ul id="articleListing" class="directionToggles">
       {{range .Articles}}
-      <li>
+      <li class="directionToggles">
         <h2 class="articleTitle"><a href="{{.Url}}">{{.Title}}</a></h2>
-        <p class="articleInfo">{{.Published}} {{.Authors}}</p>
+        <p class="articleInfo">{{.Published}} &nbsp;|&nbsp; {{.Authors}}</p>
       </li>
       {{end}}
     </ul>
   </div>
   {{template "SCRIPTS" . }}
-  <script src="cenoresources/javascript/articles.js"></script>
+  <script src="/cenoresources/javascript/articles.js"></script>
 </body>
 </html>

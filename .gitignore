@@ -35,6 +35,7 @@ ceno-client/views/channels.html
 ceno-client/views/breadcrumbs.html
 ceno-client/views/resources.html
 ceno-client/views/scripts.html
+ceno-client/views/overlay.html
 
 # Compiled CENO reader service and mock servers
 ceno-reader/reader

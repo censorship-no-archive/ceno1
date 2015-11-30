@@ -3,6 +3,15 @@ let languages = (function () {
 // A global variable containing the current locale. Only written to within this module.
 let globalLocale = 'en';
 
+// A global variable containing the current text direction to enforce on portal-specific content.
+// Only written to within this module.
+let globalTextDirection = 'ltr';
+
+// A special key that's added by the CENO Client to the standard id: string key-pair values in
+// LANGUAGES.  The value LANGUAGES[TEXT_DIRECTION_KEY] will always be either 'ltr' or 'rtl'
+// unless someone messes up the config/client.json file.
+const TEXT_DIRECTION_KEY = '_direction_';
+
 /**
  * Set the text content of a given element to some translated string.
  * @param {string} elemId - The id attribute of the element to access
@@ -31,6 +40,14 @@ function setLocale(locale) {
   document.getElementById('currentLocale').textContent = locale;
   let currentStatus = navigation.getPortalStatus();
   navigation.setConnectivityStatus(currentStatus);
+  globalTextDirection = LANGUAGES[locale][TEXT_DIRECTION_KEY];
+  // On every page, elements that can have the text direction changed will have the
+  // class "directionToggles".
+  let portalTexts = document.getElementsByClassName('directionToggles');
+  console.log('Setting text directions to ' + globalTextDirection);
+  for (let i = 0, len = portalTexts.length; i < len; i++) {
+    portalTexts[i].style.direction = globalTextDirection;
+  }
 }
 
 /**
@@ -59,6 +76,12 @@ function setArticleText(locale) {
  */
 function setIndexText(locale) {
   setLocale(locale);
+  if (!setText('noMoreSurveillanceText', 'textContent', locale, 'noMoreSurveillance')) {
+    console.log('Could not set "No More Surveillance" text.');
+  }
+  if (!setText('noMoreCensorshipText', 'textContent', locale, 'noMoreCensorship')) {
+    console.log('Could not set "No More Censorship" text.');
+  }
   if (!setText('whatNextHeader', 'textContent', locale, 'whatNext')) {
     console.log('Could not set "What Next" header text.');
   }
@@ -82,6 +105,16 @@ function setIndexText(locale) {
   }
   if (!setText('tellMeMore', 'textContent', locale, 'learnMoreButton')) {
     console.log('Could not set "Learn More" button text.');
+  }
+  if (!setText('closeOverlayButton', 'textContent', locale, 'closeText')) {
+    console.log('Could not set the "Close Overlay" button text.');
+  }
+  // Set the text for all of the paragraphs in the "About CENO" overlay.
+  for (let i = 1; LANGUAGES[locale].hasOwnProperty('overlayParagraph' + i); i++) {
+    let id = 'overlayParagraph' + i;
+    if (!setText(id, 'textContent', locale, id)) {
+      console.log('Could not set the paragraph text for ' + id);
+    }
   }
 }
 
@@ -114,12 +147,21 @@ function getLocale() {
   return globalLocale;
 }
 
+/**
+ * For use by consumers of this module. Get the currently set text direction.
+ * @return {string} the current text direction. Either 'ltr' or 'rtl'.
+ */
+function getTextDirection() {
+  return globalTextDirection.toLowerCase();
+}
+
 return {
   setText,
   setChannelText,
   setArticleText,
   setIndexText,
-  getLocale
+  getLocale,
+  getTextDirection,
 };
 
 })();

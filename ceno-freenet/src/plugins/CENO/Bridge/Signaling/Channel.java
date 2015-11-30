@@ -3,7 +3,6 @@ package plugins.CENO.Bridge.Signaling;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
-import java.util.concurrent.TimeUnit;
 
 import plugins.CENO.Bridge.CENOBridge;
 import plugins.CENO.Bridge.RequestReceiver;
@@ -11,11 +10,13 @@ import freenet.client.FetchException;
 import freenet.client.FetchResult;
 import freenet.client.InsertException;
 import freenet.client.async.ClientContext;
+import freenet.client.async.ClientGetCallback;
+import freenet.client.async.ClientGetter;
 import freenet.client.async.PersistenceDisabledException;
-import freenet.client.async.USKCallback;
 import freenet.keys.FreenetURI;
-import freenet.keys.USK;
+import freenet.node.RequestClient;
 import freenet.support.Logger;
+import freenet.support.io.ResumeFailedException;
 
 public class Channel {
 	private FreenetURI insertSSK, requestSSK;
@@ -68,57 +69,24 @@ public class Channel {
 	}
 
 	public void subscribeToChannelUpdates() throws MalformedURLException {
-		USK origUSK = new USK(requestSSK.getRoutingKey(), requestSSK.getCryptoKey(), requestSSK.getExtra(), "req", lastKnownEdition);
-		CENOBridge.nodeInterface.subscribeToUSK(origUSK, new ReqCallback());
+		FreenetURI origUSK = new FreenetURI(requestSSK.getRoutingKey(), requestSSK.getCryptoKey(), requestSSK.getExtra(), "req", lastKnownEdition);
+		try {
+			CENOBridge.nodeInterface.fetchULPR(origUSK, new ReqCallback(origUSK));
+		} catch (FetchException e) {
+			Logger.error(this, "FetchException while starting ULPR for a signalling channel: " + e.getMessage());
+		}
 	}
 
-	public static class ReqCallback implements USKCallback {
+	public static class ReqCallback implements ClientGetCallback {
+		private FreenetURI uri;
 
-		@Override
-		public void onFoundEdition(long l, USK key, ClientContext context,
-				boolean metadata, short codec, byte[] data,
-				boolean newKnownGood, boolean newSlotToo) {
-			fetchNewRequests(key.getURI().setSuggestedEdition(l));
+		public ReqCallback(FreenetURI uri) {
+			this.uri = uri;
 		}
 
-		private void fetchNewRequests(FreenetURI uri) {
-			FetchResult fetchResult = null;
+		private void fetchNewRequests(FetchResult result) {
 			try {
-				fetchResult = CENOBridge.nodeInterface.fetchURI(uri);
-			} catch (FetchException e) {
-				switch (e.getMode()) {
-				case PERMANENT_REDIRECT :
-					fetchNewRequests(e.newURI);
-					break;
-
-				case ALL_DATA_NOT_FOUND :
-				case DATA_NOT_FOUND :
-					Logger.warning(Channel.class, 
-							"Found new request from client but could not fetch data for USK: " + uri);
-					break;
-
-				case RECENTLY_FAILED :
-					try {
-						Thread.sleep(TimeUnit.MINUTES.toMillis(10));
-					} catch (InterruptedException e1) {
-						// No big deal
-					} finally {
-						fetchNewRequests(uri);
-					}
-					return;
-
-				default:
-					Logger.warning(Channel.class, "Exception while fetching new request from client for USK: " + uri + ", " + e.getMessage());
-					break;
-				}
-				if (e.isDefinitelyFatal()) {
-					Logger.error(Channel.class, "Fatal error while fetching new request from client for USK: " + uri + ", " + e.getMessage());
-					return;
-				}
-			}
-
-			try {
-				String fetchedString = new String(fetchResult.asByteArray(), "UTF-8");
+				String fetchedString = new String(result.asByteArray(), "UTF-8");
 				RequestReceiver.signalReceived(fetchedString.split("\\r?\\n"));
 			} catch (NullPointerException e) {
 				Logger.warning(this, "Received new request from client but payload was empty");
@@ -128,19 +96,55 @@ public class Channel {
 				Logger.warning(this, "IOException while parsing batch request from client");
 			}
 
+			FreenetURI nextURI = uri.setSuggestedEdition(uri.getEdition() + 1);
+			try {
+				CENOBridge.nodeInterface.fetchULPR(nextURI, new ReqCallback(nextURI));
+			} catch (FetchException e) {
+				Logger.error(this, "FetchException while starting ULPR for next edition of a signalling channel: " + e.getMessage());
+			}
+
 			return;
 		}
 
 		@Override
-		public short getPollingPriorityNormal() {
-			// TODO Auto-generated method stub
-			return 0;
+		public void onResume(ClientContext context) throws ResumeFailedException {
 		}
 
 		@Override
-		public short getPollingPriorityProgress() {
-			// TODO Auto-generated method stub
-			return 0;
+		public RequestClient getRequestClient() {
+			return CENOBridge.nodeInterface.getRequestClient();
+		}
+
+		@Override
+		public void onSuccess(FetchResult result, ClientGetter state) {
+			fetchNewRequests(result);
+		}
+
+		@Override
+		public void onFailure(FetchException e, ClientGetter state) {
+			switch (e.getMode()) {
+			case PERMANENT_REDIRECT :
+				try {
+					CENOBridge.nodeInterface.fetchULPR(e.newURI, new ReqCallback(e.newURI));
+				} catch (FetchException e1) {
+					Logger.error(this, "FetchException while starting ULPR for new edition of a signalling channel: " + e1.getMessage());
+				}
+				break;
+
+			case ALL_DATA_NOT_FOUND :
+			case DATA_NOT_FOUND :
+				Logger.warning(Channel.class, 
+						"Found new request from client but could not fetch data for USK: " + uri);
+				break;
+
+			default:
+				Logger.warning(Channel.class, "Exception while fetching new request from client for USK: " + uri + ", " + e.getMessage());
+				break;
+			}
+
+			if (e.isDefinitelyFatal()) {
+				Logger.error(Channel.class, "Fatal error while fetching new request from client for USK: " + uri + ", " + e.getMessage());
+			}
 		}
 
 	}
