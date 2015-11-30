@@ -6,17 +6,6 @@
 </head>
 <body>
   {{template "NAV" . }}
-  <div id="cenoInfoOverlay">
-    <div class="content">
-      <div class="content">
-        <img src="/cenoresources/images/logo_ceno.png" />
-        {{template "OVERLAY" . }}
-        <div id="overlayFooter">
-          <button id="closeOverlayButton" class="pure-button directionToggles"></button>
-        </div>
-      </div>
-    </div>
-  </div>
   <div id="mainIntroText">
     <p id="noMoreSurveillanceText" class="directionToggles"></p>
     <p id="noMoreCensorshipText" class="directionToggles"></p>
@@ -56,7 +45,7 @@
         <h2 id="learnCENOHeader" class="directionToggles"></h2>
         <p id="learnCENOParagraph" class="directionToggles">
         </p>
-        <button class="pure-button directionToggles" id="tellMeMore"></button>
+        <a href="/about"><button class="pure-button directionToggles" id="tellMeMore"></button></a>
       </div>
     </div>
     <div id="footer">
