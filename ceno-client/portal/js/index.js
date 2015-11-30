@@ -51,7 +51,7 @@ tellMeMoreButton.addEventListener('click', () => {
 let closeOverlayButton = document.getElementById('closeOverlayButton');
 closeOverlayButton.addEventListener('click', () => {
   overlay.style.display = 'none';
-})
+});
 
 overlay.style.display = 'none';
 languages.setIndexText('en');

@@ -214,5 +214,9 @@
   {
     "id": "channel_selector",
     "translation": "Channel Selector"
+  },
+  {
+    "id": "about",
+    "translation": "About CeNO"
   }
 ]

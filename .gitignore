@@ -26,16 +26,8 @@ ceno-client/locale/all.json
 
 # Concatenated JS and CSS for the portal as well as copies of the views
 ceno-client/static/javascript/*.js
-ceno-client/static/javascript/languages.js
-ceno-client/static/stylesheets/main.css
-ceno-client/views/articles.html
-ceno-client/views/nav.html
-ceno-client/views/index.html
-ceno-client/views/channels.html
-ceno-client/views/breadcrumbs.html
-ceno-client/views/resources.html
-ceno-client/views/scripts.html
-ceno-client/views/overlay.html
+ceno-client/static/stylesheets/*.css
+ceno-client/views/*.html
 
 # Compiled CENO reader service and mock servers
 ceno-reader/reader

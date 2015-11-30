@@ -109,9 +109,12 @@ function setIndexText(locale) {
   if (!setText('closeOverlayButton', 'textContent', locale, 'closeText')) {
     console.log('Could not set the "Close Overlay" button text.');
   }
-  // Set the text for all of the paragraphs in the "About CENO" overlay.
-  for (let i = 1; LANGUAGES[locale].hasOwnProperty('overlayParagraph' + i); i++) {
-    let id = 'overlayParagraph' + i;
+}
+
+function setAboutText(locale) {
+  // Set the text for all of the paragraphs in the "About CENO" page.
+  for (let i = 1; LANGUAGES[locale].hasOwnProperty('aboutParagraph' + i); i++) {
+    let id = 'aboutParagraph' + i;
     if (!setText(id, 'textContent', locale, id)) {
       console.log('Could not set the paragraph text for ' + id);
     }
@@ -160,6 +163,7 @@ return {
   setChannelText,
   setArticleText,
   setIndexText,
+  setAboutText,
   getLocale,
   getTextDirection,
 };
