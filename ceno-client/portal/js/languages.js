@@ -113,6 +113,7 @@ function setIndexText(locale) {
 
 function setAboutText(locale) {
   // Set the text for all of the paragraphs in the "About CENO" page.
+  setLocale(locale);
   for (let i = 1; LANGUAGES[locale].hasOwnProperty('aboutParagraph' + i); i++) {
     let id = 'aboutParagraph' + i;
     if (!setText(id, 'textContent', locale, id)) {
