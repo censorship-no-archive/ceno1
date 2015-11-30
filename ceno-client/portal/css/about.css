@@ -2,6 +2,10 @@
     padding-bottom: 100px;
 }
 
+#aboutCenoContent h2 {
+    margin-top: 40px;
+}
+
 #aboutCenoContent a {
     color: rgb(228, 54, 36);
     text-decoration: none;
