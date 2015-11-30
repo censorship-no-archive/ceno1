@@ -1,0 +1,9 @@
+#aboutCenoContent {
+    padding-bottom: 100px;
+}
+
+#aboutCenoContent a {
+    color: rgb(228, 54, 36);
+    text-decoration: none;
+    font-size: 18px;
+}
