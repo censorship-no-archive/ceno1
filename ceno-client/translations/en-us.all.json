@@ -33,7 +33,7 @@
   },
   {
     "id": "download_package_err",
-    "translation": "Download the view and config package and unpack its contents into ceno-client/views/.",
+    "translation": "Download the view and config package and unpack its contents into ceno-client/views/."
   },
   {
     "id": "err_from_lcs_cli",
