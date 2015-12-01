@@ -154,6 +154,7 @@ function setPortalText(locale) {
   setIndexText(locale);
   setChannelText(locale);
   setArticleText(locale);
+  setAboutText(locale);
 }
 
 // When a language is selected, get its locale and reset the text on the page.
