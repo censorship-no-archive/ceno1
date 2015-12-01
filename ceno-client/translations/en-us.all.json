@@ -1,5 +1,9 @@
 [
   {
+    "id": "about",
+    "translation": "About CeNO"
+  },
+  {
     "id": "agent_communication_err",
     "translation": "Check that all of the components of CENO are running. You may wish to restart the CENO box entirely."
   },
@@ -14,6 +18,10 @@
   {
     "id": "bundle_err_cli",
     "translation": "Bundler encountered an error: {{.Message}}"
+  },
+  {
+    "id": "channel_selector",
+    "translation": "Channel Selector"
   },
   {
     "id": "contact_devs_err",
@@ -46,6 +54,10 @@
   {
     "id": "error_we_got_html",
     "translation": "Here's the error we got: "
+  },
+  {
+    "id": "feed_not_found",
+    "translation": "No articles exist for {{.FeedUrl}}"
   },
   {
     "id": "got_request_msg_cli",
@@ -202,17 +214,5 @@
   {
     "id": "you_asked_for_html",
     "translation": "You asked for "
-  },
-  {
-    "id": "feed_not_found",
-    "translation": "No articles exist for {{.FeedUrl}}"
-  },
-  {
-    "id": "channel_selector",
-    "translation": "Channel Selector"
-  },
-  {
-    "id": "about",
-    "translation": "About CeNO"
   }
 ]
