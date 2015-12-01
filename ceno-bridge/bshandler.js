@@ -95,8 +95,7 @@ function requestFromReader(request) {
  * @return {Bundler} A bundler object that will fetch the requested resource
  */
 function makeBundler(url, config, reqFromReader) {
-  console.log('Making bundler for ' + url);
-  console.log('Request is from RSS Reader?', reqFromReader);
+  bs_log('Making bundler for ' + url);
   var bundler = new b.Bundler(url);
   if (config.useProxy) {
     bundler.on('originalRequest', b.proxyTo(config.proxyAddress));
@@ -107,28 +106,34 @@ function makeBundler(url, config, reqFromReader) {
     bundler.on('resourceRequest', b.spoofHeaders({'User-Agent': config.userAgent}));
   }
   if (reqFromReader) {
-    console.log('Making a readable page.');
+    bs_log('Making a readability-mode page.');
     bundler.on('originalReceived', function (requestFn, originalDoc, url, callback) {
       var diff = {};
-      makeReadable(originalDoc, {charset: 'utf-8'}, function (err, article, meta) {
-        // Let's assume we're dealing with RTL text, for simplicity
-        // TODO - Find a way to switch this on/off
-        if (err) {
-          var message = _t.__('Error: %s', err.message);
-          bs_log(message);
-          diff[originalDoc] = message;
-        } else {
-          var content = '<html dir="rtl"><head><meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/></head>';
-          if (article.content.slice(0, 6) !== '<body>') {
-            content += '<body>' + article.content + '</body></html>';
+      // Wrap the whole call to the readability-mode library in a try block
+      try {
+        makeReadable(originalDoc, {charset: 'utf-8'}, function (err, article, meta) {
+          // Let's assume we're dealing with RTL text, for simplicity
+          // TODO - Find a way to switch this on/off
+          if (err) {
+            var message = _t.__('Error: %s', err.message);
+            bs_log(message);
+            diff[originalDoc] = message;
           } else {
-            content += article.content + '</html>';
+            var content = '<html dir="rtl"><head><meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/></head>';
+            if (article.content.slice(0, 6) !== '<body>') {
+              content += '<body>' + article.content + '</body></html>';
+            } else {
+              content += article.content + '</html>';
+            }
+            diff[originalDoc] = content;
+            article.close();
           }
-          diff[originalDoc] = content;
-          article.close();
-        }
-        callback(null, diff);
-      });
+          callback(null, diff);
+        });
+      // Now, in case the library encounters some exception, we can just pass the exception on as an error like usual.
+      } catch (ex) {
+        callback(ex, null);
+      }
     });
     bundler.on('originalReceived', b.replaceImages);
   } else {
@@ -149,7 +154,8 @@ function makeBundler(url, config, reqFromReader) {
 function handler(config) {
   return function (req, res) {
     var disconnected = false; // A flag set when the request is closed.
-    var requestedUrl = constructRequestUrl(req.url, requestWasRewritten(req));
+    var wasRewritten = requestWasRewritten(req);
+    var requestedUrl = constructRequestUrl(req.url, wasRewritten);
 
     req.on('close', function () {
       disconnected = true;
