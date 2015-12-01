@@ -90,21 +90,7 @@ div#stack {
     var url = document.getElementById('url').innerHTML;
     window.location.href = url;
   });
-  // Deobfuscate our mailto link.
-  var coded = 'lvWc@v3qXLV6.Vv';
-  var key = 'VByXZlI9sEOnkfuGQbA4Lx1UwgWdRqMrpe8zmoTFK7Y53tNivja0cCHPhJS26D';
-  var shift = coded.length;
-  var link = '';
-  for (var i = 0, len = coded.length; i < len; i++) {
-    var ltr;
-    if (key.indexOf(coded.charAt(i)) === -1) {
-      ltr = coded.charAt(i);
-      link += ltr;
-    } else {
-      ltr = (key.indexOf(coded.charAt(i)) - shift + key.length) % key.length;
-      link += key.charAt(i);
-    }
-  }
+  var link = 'ceno@equalit.ie';
   document.getElementById('reportAnchor').setAttribute('href', 'mailto:"' + link + '"');
   </script>
 </body>
