@@ -35,6 +35,8 @@ inserted into the distributed storage system in use as soon as they get started.
 |   \---en.json = The original, English key-value string pairs Transifex can handle.
 ```
 
+All of the code relevant to serving the Portal from the CENO Client is located in `ceno-client/src/portal.go`.
+
 ## Prerequisites
 
 Building the CENO Client requires [Golang 1.5.1](https://golang.org/dl/) (and hopefully later versions will work
