@@ -12,6 +12,9 @@ let globalTextDirection = 'ltr';
 // unless someone messes up the config/client.json file.
 const TEXT_DIRECTION_KEY = '_direction_';
 
+// The endpoint to send POST requests to in order to set the locale in the client.
+const SET_LOCALE_ENDPOINT = 'http://localhost:3090/locale';
+
 /**
  * Set the text content of a given element to some translated string.
  * @param {string} elemId - The id attribute of the element to access
@@ -157,14 +160,43 @@ function setPortalText(locale) {
   setAboutText(locale);
 }
 
-// When a language is selected, get its locale and reset the text on the page.
-// TODO - Expand this to work on all pages.
+/**
+ * Inform the CENO Client that the locale has changed so that it can remember the new
+ * value and set the global CURRENT_LOCALE value every time a page is loaded.
+ * @param {string} locale - The new locale to use, e.g. en or fr
+ */
+function setClientLocale(locale) {
+  let xhr = new XMLHttpRequest();
+  xhr.open('POST', SET_LOCALE_ENDPOINT, true);
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.onload = () => {
+    if (xhr.status === 200) { // OK
+      let response = JSON.parse(xhr.responseText);
+      if (response.success) {
+        console.log('Successfully set locale to ' + locale);
+      } else {
+        console.log('Error: ' + response.error);
+      }
+    } else {
+      console.log('Error setting locale. Status ' + xhr.status);
+    }
+  };
+  xhr.onerror = () => console.log('Error setting locale.');
+  xhr.send(JSON.stringify({
+    locale: locale
+  }));
+}
+
+// When a language is selected, get its locale, reset the text on the page to contain the
+// strings translated for the selected locale, and inform the CENO Client what locale to switch
+// to so that it will be automatically set on every page we visit afterwards.
 let languageOptions = document.getElementsByClassName('languageSelect');
 for (let i = 0, len = languageOptions.length; i < len; i++) {
   let option = languageOptions[i];
   option.addEventListener('click', () => {
     globalLocale = option.getAttribute('data-language');
     setPortalText(globalLocale);
+    setClientLocale(globalLocale);
   });
 }
 
