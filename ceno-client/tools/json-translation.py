@@ -67,7 +67,7 @@ def convert_to_transifex():
 
 
 def convert_from_transifex():
-  '''Convert translated files .transifex.json from transifex's format to goi18n's format .untranslation.json'''
+  '''Convert translated files .transifex.json from transifex's format to goi18n's format .untranslated.json'''
   to_convert = [fn for fn in os.listdir(BASE_DIR) if is_transifex(fn)]
   for filename in to_convert:
     print('Converting', filename)
