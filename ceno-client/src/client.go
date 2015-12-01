@@ -332,6 +332,7 @@ func main() {
 	http.Handle("/cenoresources/",
 		http.StripPrefix("/cenoresources/", http.FileServer(http.Dir("./static"))))
 	http.HandleFunc("/lookup", directHandler)
+	http.HandleFunc("/locale", PortalLocaleHandler)
 	http.HandleFunc("/about", PortalAboutHandler)
 	http.HandleFunc("/portal", PortalIndexHandler)
 	http.HandleFunc("/channels", PortalChannelsHandler)
