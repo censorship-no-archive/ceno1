@@ -1,5 +1,5 @@
 (function () {
 
-languages.setAboutText('en');
+languages.setAboutText(CURRENT_LOCALE);
 
 })();

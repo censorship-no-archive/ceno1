@@ -38,6 +38,6 @@ if (urlInputForm) {
   }
 }
 
-languages.setIndexText('en');
+languages.setIndexText(CURRENT_LOCALE);
 
 })();
