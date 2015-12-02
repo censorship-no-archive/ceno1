@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/nicksnyder/go-i18n/i18n"
 	"html/template"
+	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -220,6 +221,50 @@ func directHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 /**
+ * Handle requests of the form `http://127.0.0.1:3090/status`
+ * In turn CeNo client will make /status request to the LCS
+ * @param {ResponseWriter} w - The object used to handle writing responses to the client
+ * @param {*Request} r - Information about the request
+ */
+func statusHandler(w http.ResponseWriter, r *http.Request) {
+	log("Got request to check status of LCS")
+	status_path := r.URL.Path
+	T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
+	//sanity check
+	if status_path != "/status" {
+		HandleCCError(ERR_MALFORMED_STATUS_CHECK, T("bad_status_check_string"), ErrorState{
+			"responseWriter": w,
+			"request":        r,
+		})
+	}
+
+	// Finally we request the status from LCS
+	response, err := http.Get(StatusCheckURL(Configuration))
+	if err != nil {
+		log(T("error_cli", map[string]interface{}{
+			"Message": err.Error(),
+		}))
+		HandleCCError(ERR_NO_CONNECT_LCS, T(err.Error()), ErrorState{
+			"responseWriter": w,
+			"request":        r,
+		})
+	} else if response == nil || response.StatusCode != 200 {
+		errMsg := T("lcs_not_ready_cli")
+		log(errMsg)
+		HandleCCError(ERR_NO_CONNECT_LCS, errMsg, ErrorState{
+			"responseWriter": w,
+			"request":        r,
+		})
+	} else { //no error for now
+		_, err = io.Copy(w, response.Body)
+		if err := response.Body.Close(); err != nil {
+			log(T("unable_close_response_body: ") + err.Error())
+		}
+	}
+
+}
+
+/**
  * Check if a provided URL is well-formed.  If not, serve an error page.
  * This call terminates requests when the return value is false (i.e. invalid URL).
  * @param {string} URL - The URL being requested
@@ -333,6 +378,7 @@ func main() {
 	http.Handle("/cenoresources/",
 		http.StripPrefix("/cenoresources/", http.FileServer(http.Dir("./static"))))
 	http.HandleFunc("/lookup", directHandler)
+	http.HandleFunc("/status", statusHandler)
 	http.HandleFunc("/about", PortalAboutHandler)
 	http.HandleFunc("/portal", PortalIndexHandler)
 	http.HandleFunc("/channels", PortalChannelsHandler)
