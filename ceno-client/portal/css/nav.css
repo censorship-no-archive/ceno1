@@ -1,12 +1,13 @@
 #mainNav {
   height: 80px;
   background-color: rgb(236, 237, 237);
+  padding-left: 80px;
 }
 
 #cenoLogoMain {
   margin-top: 20px;
   float: left;
-  height: 42px;
+  height: 38px;
 }
 
 #mainMenu {

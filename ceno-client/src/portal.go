@@ -286,3 +286,24 @@ func PortalArticlesHandler(w http.ResponseWriter, r *http.Request) {
 		t.Execute(w, module)
 	}
 }
+
+func PortalAboutHandler(w http.ResponseWriter, r *http.Request) {
+	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
+	t, _ := template.ParseFiles("./views/about.html", "./views/nav.html", "./views/resources.html", "./views/breadcrumbs.html", "./views/scripts.html", "./views/aboutceno.html")
+	module := make(map[string]interface{})
+	module["Breadcrumbs"] = []PortalPath{
+		{"CeNO", "/portal"},
+		{T("about"), "/about"},
+	}
+	languageStrings, langJson, readErr := loadLanguageStrings()
+	if readErr != nil {
+		fmt.Println("Error reading language data")
+		fmt.Println(readErr)
+	} else {
+		// For the language selection menu
+		module["LanguageStrings"] = languageStrings
+		// For the Javascript code that applies strings
+		module["LanguageStringsAsJSON"] = stringifyLanguages(langJson)
+	}
+	t.Execute(w, module)
+}

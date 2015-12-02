@@ -96,11 +96,6 @@
     "translation": "Wait a minute or two before making your request again."
   },
   {
-    "id": "unable_close_response_body",
-    "translation": "LCS did not serve a complete response."
-  },
-    
-  {
     "id": "listening_msg_cli",
     "translation": "CENO proxy server listening for HTTP requests at http://127.0.0.1{{.Port}}."
   },
@@ -111,10 +106,6 @@
   {
     "id": "malformed_url_err",
     "translation": "Check that you have entered the URL of the site you want to visit correctly."
-  },
-  {
-    "id": "bad_status_string_err",
-    "translation": "Status check should be /status"
   },
   {
     "id": "missing_config_err",

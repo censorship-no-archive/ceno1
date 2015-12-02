@@ -27,6 +27,7 @@ getEnvLang() {
 }
 
 noRunningProcess() {
+  # Check if a process of the given program is running
   if ps ax | grep -v grep | grep $1 > /dev/null
   then
     return 1
@@ -36,6 +37,7 @@ noRunningProcess() {
 }
 
 browserExists() {
+  # Check if a browser command is available in $PATH
   if command -v $1 >/dev/null 2>&1
   then
     return 0
@@ -45,11 +47,14 @@ browserExists() {
 }
 
 startChromeProfile() {
-  $1 --use-temporary-user-data-dir --load-extension=$(pwd)/browser-extensions/ceno-chrome \
-  --no-first-run --new-window --disable-java --disable-metrics --no-default-browser-check $2 &> /dev/null &
+  # Open a Chrome window with the CENO Router extension preloaded
+  $1 --use-temporary-user-data-dir --load-extension=$(pwd)/browser-extensions/ceno-chrome --disable-translate \
+  --no-first-run --disable-java --disable-metrics --no-default-browser-check $2 &> /dev/null &
 }
 
 startBrowser() {
+  # Start a browser window that will point to the CENO portal and will forward
+  # requests for URLs to the CENO agents
   portal=http://localhost:3090/portal
   extInstaller=./ceno-client/views/extension-en-us.html
 
@@ -81,6 +86,7 @@ startBrowser() {
       if browserExists firefox
       then
         firefox -no-remote -private-window -profile "browser-profiles/firefox" $extInstaller &> /dev/null &
+        return
       fi
 
       if [ -z "$chromeFound" ]
@@ -126,6 +132,7 @@ startCENO() {
 
 case "$1" in
   'stop')
+    # Stop CENO agents, if running
     ./run.sh stop
     if [ -f ceno-client/CENOClient.pid ]
     then
@@ -140,10 +147,12 @@ case "$1" in
     ;;
 
   'browser')
+    # Open CENO Portal in a browser window with the CENO Router extension
     startBrowser
     ;;
 
   'client')
+    # Start the CENO Client proxy agent
     CENOLANG=$(getEnvLang)
     export CENOLANG
     echo "CENO language set to" $CENOLANG
@@ -151,13 +160,26 @@ case "$1" in
     ;;
 
   'terminal')
+    # Start CENO agents that do not have a graphical user interface
     CENOLANG=$(getEnvLang)
     export CENOLANG
     echo "CENO language set to" $CENOLANG
     startCENO
     ;;
 
+  'help'|'--help'|'-h')
+    # Print usage of the CENO.sh script
+    echo -e "Usage:\n$0 [mode] \n"
+    echo "Available modes:"
+    echo -e "\tstart:\t\t(Default mode) Starts all client agents and opens a new browser window with the CENO portal"
+    echo -e "\tbrowser:\tOpens CENO Portal on a new browser window and loads the CENO Router extension"
+    echo -e "\tterminal:\tStarts agents that do not have a graphical user interface. Useful if you are planning to run CENO on a remote machine"
+    echo -e "\tclient:\t\tStarts the CENO Client proxy agent (default port :3090)"
+    echo -e "\tstop:\t\tStops all CENO client agents"
+    ;;
+
   *)
+    # Default: Start CENO agents
     startBrowser
     CENOLANG=$(getEnvLang)
     export CENOLANG

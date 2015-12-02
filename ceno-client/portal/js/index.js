@@ -13,6 +13,12 @@ const CLIENT_LOOKUP_ROUTE = '/lookup';
  * @return {string} the URL to request from the CENO client
  */
 function lookupUrl(siteUrl) {
+  if (siteUrl.indexOf("https://") !== 0 && siteUrl.indexOf("http://") !== 0) {
+    // Prepend the HTTP scheme to the URL to avoid confusing the CENO client, which expects URLs
+    // to start with either http:// or https://.  We simply use HTTP since the browser extension
+    // would rewrite it from https to http anyway.
+    siteUrl = 'http://' + siteUrl;
+  }
   return `${CENO_CLIENT_BASE}${CLIENT_LOOKUP_ROUTE}?url=${btoa(siteUrl)}`;
 }
 
@@ -38,28 +44,6 @@ if (urlInputForm) {
   }
 }
 
-// Attach an event handler to the Tell Me More button to show an overlay with more information
-// about CENO when the button is clicked.
-let tellMeMoreButton = document.getElementById('tellMeMore');
-let overlay = document.getElementById('cenoInfoOverlay');
-tellMeMoreButton.addEventListener('click', () => {
-  // The display property will be "none" while the overlay is not visible.
-  overlay.style.display = 'block';
-});
-
-// When any part of the overlay outside the content section is clicked, hide it.
-overlay.addEventListener('click', () => {
-  overlay.style.display = 'none';
-});
-let overlayChildren = overlay.children;
-for (let i = 0, len = overlayChildren.length; i < len; i++) {
-  let child = overlayChildren[i];
-  if (child.addEventListener) {
-    child.addEventListener('click', (e) => e.preventDefault());
-  }
-}
-
-overlay.style.display = 'none';
 languages.setIndexText('en');
 
 })();

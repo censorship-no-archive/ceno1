@@ -106,11 +106,42 @@ function setIndexText(locale) {
   if (!setText('tellMeMore', 'textContent', locale, 'learnMoreButton')) {
     console.log('Could not set "Learn More" button text.');
   }
-  // Set the text for all of the paragraphs in the "About CENO" overlay.
-  for (let i = 1; LANGUAGES[locale].hasOwnProperty('overlayParagraph' + i); i++) {
-    let id = 'overlayParagraph' + i;
+  if (!setText('closeOverlayButton', 'textContent', locale, 'closeText')) {
+    console.log('Could not set the "Close Overlay" button text.');
+  }
+}
+
+function setAboutText(locale) {
+  setLocale(locale);
+  // Set the main header for the about page
+  if (!setText('aboutHeaderMain', 'textContent', locale, 'about')) {
+    console.log('Couldn\'t set the main header on the about page.');
+  }
+  // Set the text for all of the paragraphs and headers in the "About CENO" page.
+  for (let i = 1; LANGUAGES[locale].hasOwnProperty('aboutHeader' + i); i++) {
+    let id = 'aboutHeader' + i;
+    if (!setText(id, 'textContent', locale, id)) {
+      console.log('Could not set the header text for ' + id);
+    }
+  }
+  for (let i = 1; LANGUAGES[locale].hasOwnProperty('aboutParagraph' + i); i++) {
+    let id = 'aboutParagraph' + i;
+    console.log('Trying to set text for ' + id);
     if (!setText(id, 'textContent', locale, id)) {
       console.log('Could not set the paragraph text for ' + id);
+    }
+  }
+  // Set the text for the headers and paragraphs in the security Q&A section
+  for (let i = 1; LANGUAGES[locale].hasOwnProperty('securitySubHeader' + i); i++) {
+    let id = 'securitySubHeader' + i;
+    if (!setText(id, 'textContent', locale, id)) {
+      console.log('Could not set the header text for ' + id);
+    }
+  }
+  for (let i = 1; LANGUAGES[locale].hasOwnProperty('securitySubParagraph' + i); i++) {
+    let id = 'securitySubParagraph' + i;
+    if (!setText(id, 'textContent', locale, id)) {
+      console.log('Could not set the paragraphtext for ' + id);
     }
   }
 }
@@ -157,6 +188,7 @@ return {
   setChannelText,
   setArticleText,
   setIndexText,
+  setAboutText,
   getLocale,
   getTextDirection,
 };

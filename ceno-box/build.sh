@@ -3,8 +3,7 @@
 # This script will create a CENO all-in-one box ready for distribution
 #
 # This CENOBOx bundle includes:
-#  * A Freenet node, preloaded with the WebOfTrust, Freemail and CENO plugins,
-#    as well as preconfigured with the CENO Client identity. Unless -p flag
+#  * A Freenet node, preloaded with the CENO client plugin. Unless -p flag
 #    was enabled, the plguins will be downloaded from Freenet. Opennet is
 #    enabled by default, meaning that your node will try to connect to seed
 #    nodes once it gets started.
@@ -13,6 +12,9 @@
 #  * A Firefox profile that forwards all traffic to the CENOClient proxy.
 #  * A plugin for chrome (CENO Router) that will rewrite HTTPS requests
 #    to HTTP ones.
+#  * A script that automates the process of running CENO
+#
+#  Similar distribution bundles will be generated for Bridge and Backbone nodes
 
 
 # Parse options to check if DEBUG mode is enabled
@@ -140,7 +142,7 @@ cp -rL ceno-backbone/* CENOBackbone
 cp -rL ceno-bridge/* CENOBridge
 
 # Build CENO client and Backbone Freenet plugins
-echo "Building CENO client and Backbone Freenet plugins"
+echo "Building CENO Freenet plugins"
 cd ../ceno-freenet
 ant dist > /dev/null
 cp dist/CENO.jar $CENOBOXPATH/ceno-debug/
