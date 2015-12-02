@@ -75,8 +75,9 @@ func WriteProxyHeader(w http.ResponseWriter) http.ResponseWriter {
  */
 func pleaseWait(URL string, w http.ResponseWriter) {
 	T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
-	t, err := template.ParseFiles(path.Join(".", "views", "wait.html"))
-	if err != nil {
+	t, templateErr := template.ParseFiles(path.Join(".", "views", "wait.html"))
+	// Check if the URL is already pointing to a lookup URL and, if not, format it as such.
+	if templateErr != nil {
 		w.Header().Set("Content-Type", "text/plain")
 		w.Write([]byte(T("please_wait_txt")))
 	} else {

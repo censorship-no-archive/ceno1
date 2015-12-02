@@ -13,6 +13,12 @@ const CLIENT_LOOKUP_ROUTE = '/lookup';
  * @return {string} the URL to request from the CENO client
  */
 function lookupUrl(siteUrl) {
+  if (siteUrl.indexOf("https://") !== 0 && siteUrl.indexOf("http://") !== 0) {
+    // Prepend the HTTP scheme to the URL to avoid confusing the CENO client, which expects URLs
+    // to start with either http:// or https://.  We simply use HTTP since the browser extension
+    // would rewrite it from https to http anyway.
+    siteUrl = 'http://' + siteUrl;
+  }
   return `${CENO_CLIENT_BASE}${CLIENT_LOOKUP_ROUTE}?url=${btoa(siteUrl)}`;
 }
 
