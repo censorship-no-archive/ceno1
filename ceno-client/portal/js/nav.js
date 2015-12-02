@@ -1,8 +1,8 @@
 let navigation = (function () {
 
 // Location of the cache server to get connection status from.
-const CACHE_SERVER_BASE = 'http://localhost:3091';
-const CACHE_STATUS_ROUTE = '/status';
+const CENO_CLIENT_BASE = 'http://localhost:3090';
+const STATUS_ROUTE = '/status';
 
 // Status icons
 const STATUS_ICON_OKAY = '/cenoresources/images/status_okay.png';
@@ -45,7 +45,7 @@ function setConnectivityStatus(status) {
  */
 function getPeerStatus() {
   let xhr = new XMLHttpRequest();
-  xhr.open('GET', `${CACHE_SERVER_BASE}${CACHE_STATUS_ROUTE}`, true);
+  xhr.open('GET', `${CENO_CLIENT_BASE}${STATUS_ROUTE}`, true);
   xhr.addEventListener('error', () => setConnectivityStatus('unknown'));
   xhr.addEventListener('load', () => {
     try {

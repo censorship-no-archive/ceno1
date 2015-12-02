@@ -228,33 +228,17 @@ func directHandler(w http.ResponseWriter, r *http.Request) {
  */
 func statusHandler(w http.ResponseWriter, r *http.Request) {
 	log("Got request to check status of LCS")
-	status_path := r.URL.Path
 	T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
-	//sanity check
-	if status_path != "/status" {
-		HandleCCError(ERR_MALFORMED_STATUS_CHECK, T("bad_status_check_string"), ErrorState{
-			"responseWriter": w,
-			"request":        r,
-		})
-	}
-
-	// Finally we request the status from LCS
 	response, err := http.Get(StatusCheckURL(Configuration))
+	w.Header().Set("Content-Type", "application/json")
 	if err != nil {
-		log(T("error_cli", map[string]interface{}{
-			"Message": err.Error(),
-		}))
-		HandleCCError(ERR_NO_CONNECT_LCS, T(err.Error()), ErrorState{
-			"responseWriter": w,
-			"request":        r,
-		})
+		errMsg := T("lcs_not_ready_cli")
+		log(errMsg)
+		w.Write([]byte(`{"status": "error", "message": "` + errMsg + `"}`))
 	} else if response == nil || response.StatusCode != 200 {
 		errMsg := T("lcs_not_ready_cli")
 		log(errMsg)
-		HandleCCError(ERR_NO_CONNECT_LCS, errMsg, ErrorState{
-			"responseWriter": w,
-			"request":        r,
-		})
+		w.Write([]byte(`{"status": "error", "message": "` + errMsg + `"}`))
 	} else { //no error for now
 		_, err = io.Copy(w, response.Body)
 		if err := response.Body.Close(); err != nil {
@@ -375,10 +359,10 @@ func main() {
 		Configuration = conf
 	}
 	// Create an HTTP proxy server
+	http.HandleFunc("/status", statusHandler)
 	http.Handle("/cenoresources/",
 		http.StripPrefix("/cenoresources/", http.FileServer(http.Dir("./static"))))
 	http.HandleFunc("/lookup", directHandler)
-	http.HandleFunc("/status", statusHandler)
 	http.HandleFunc("/about", PortalAboutHandler)
 	http.HandleFunc("/portal", PortalIndexHandler)
 	http.HandleFunc("/channels", PortalChannelsHandler)
