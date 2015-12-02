@@ -231,7 +231,7 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 	T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
 	//sanity check
 	if status_path != "/status" {
-		HandleCCError(ERR_MALFORMED_STATUS_CHECK, T("bad_status_check_string"), ErrorState{
+		HandleCCError(ERR_MALFORMED_STATUS_CHECK, T("bad_status_string_err"), ErrorState{
 			"responseWriter": w,
 			"request":        r,
 		})
