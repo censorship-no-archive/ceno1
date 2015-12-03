@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/nicksnyder/go-i18n/i18n"
 	"html/template"
+	"io"
 	"net/http"
 	"os"
 	"path"
@@ -346,4 +347,32 @@ func PortalLocaleHandler(w http.ResponseWriter, r *http.Request) {
 		CurrentLocale = requestData.Locale
 		w.Write([]byte(`{"success": true}`))
 	}
+}
+
+/**
+ * Handle requests of the form `http://127.0.0.1:3090/status`
+ * In turn CeNo client will make /status request to the LCS
+ * @param {ResponseWriter} w - The object used to handle writing responses to the client
+ * @param {*Request} r - Information about the request
+ */
+func StatusHandler(w http.ResponseWriter, r *http.Request) {
+	log("Got request to check status of LCS")
+	T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
+	response, err := http.Get(StatusCheckURL(Configuration))
+	w.Header().Set("Content-Type", "application/json")
+	if err != nil {
+		errMsg := T("lcs_not_ready_cli")
+		log(errMsg)
+		w.Write([]byte(`{"status": "error", "message": "` + errMsg + `"}`))
+	} else if response == nil || response.StatusCode != 200 {
+		errMsg := T("lcs_not_ready_cli")
+		log(errMsg)
+		w.Write([]byte(`{"status": "error", "message": "` + errMsg + `"}`))
+	} else { //no error for now
+		_, err = io.Copy(w, response.Body)
+		if err := response.Body.Close(); err != nil {
+			log(T("unable_close_response_body: ") + err.Error())
+		}
+	}
+
 }
