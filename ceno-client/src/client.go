@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/nicksnyder/go-i18n/i18n"
 	"html/template"
-	"io"
 	"net/http"
 	"net/url"
 	"os"

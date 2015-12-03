@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/nicksnyder/go-i18n/i18n"
 	"html/template"
-	"io"
 	"net/http"
 	"os"
 	"path"
@@ -16,6 +15,9 @@ import (
 
 // A global variable set by the handler for the POST /locale route
 var CurrentLocale string = "en"
+
+// A global variable set by the handler for the GET /status route
+var CurrentConnection string = "error"
 
 type PortalPath struct {
 	PageName string
@@ -349,6 +351,15 @@ func PortalLocaleHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// If errors occur, they'll use the error fields the rest of the CC is used to seeing.
+// This is what happens when you build stuff while you learn a new language.
+type StatusResponse struct {
+	Status       string `json:"status"`
+	Message      string `json:"message"`
+	ErrorCode    int    `json:"ErrCode"`
+	ErrorMessage string `json:"ErrMsg"`
+}
+
 /**
  * Handle requests of the form `http://127.0.0.1:3090/status`
  * In turn CeNo client will make /status request to the LCS
@@ -369,9 +380,18 @@ func StatusHandler(w http.ResponseWriter, r *http.Request) {
 		log(errMsg)
 		w.Write([]byte(`{"status": "error", "message": "` + errMsg + `"}`))
 	} else { //no error for now
-		_, err = io.Copy(w, response.Body)
-		if err := response.Body.Close(); err != nil {
-			log(T("unable_close_response_body: ") + err.Error())
+		defer response.Body.Close()
+		// Store the connection status for use in other pages.
+		status := StatusResponse{}
+		decoder := json.NewDecoder(response.Body)
+		decodeErr := decoder.Decode(&status)
+		if decodeErr != nil {
+			CurrentConnection = "error"
+			w.Write([]byte(`{"status": "error"}`))
+		} else {
+			CurrentConnection = status.Status
+			bytes, _ := json.Marshal(status)
+			w.Write(bytes)
 		}
 	}
 
