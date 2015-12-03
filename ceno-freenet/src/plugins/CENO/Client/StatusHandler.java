@@ -37,7 +37,7 @@ public class StatusHandler extends AbstractCENOClientHandler {
 		}
 		
 		StatusHandler.noPeersTimer = null;
-		return returnStatus("ok", "Freenet node connected to " + nodeConnections.getCurrent() + " peers");
+		return returnStatus("okay", "Freenet node connected to " + nodeConnections.getCurrent() + " peers");
 	}
 
 	@Override
