@@ -16,6 +16,10 @@
     "translation": "written by"
   },
   {
+    "id": "bad_status_string_err",
+    "translation": "Status check should be /status"
+  },
+  {
     "id": "bundle_err_cli",
     "translation": "Bundler encountered an error: {{.Message}}"
   },
@@ -120,6 +124,10 @@
     "translation": "more"
   },
   {
+    "id": "no_articles_advice",
+    "translation": "Wait for the file to become available. You may want to browse another channel in the meantime."
+  },
+  {
     "id": "no_articles_file_err",
     "translation": "No article listing file could be found for the feed you tried to access."
   },
@@ -194,6 +202,10 @@
   {
     "id": "rs_addr_cfg",
     "translation": "Address of the request server (RS) [{{.Default}}]: "
+  },
+  {
+    "id": "unable_close_response_body",
+    "translation": "LCS did not serve a complete response."
   },
   {
     "id": "undisc_page_errmsg_cfg",

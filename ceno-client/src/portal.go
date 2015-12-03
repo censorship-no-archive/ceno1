@@ -276,7 +276,10 @@ func PortalArticlesHandler(w http.ResponseWriter, r *http.Request) {
 	feedUrl := string(feedUrlBytes)
 	module, err := InitModuleWithArticles(feedUrl)
 	if err != nil {
-		t.Execute(w, nil)
+		HandleCCError(ERR_NO_ARTICLES_FILE, T("no_articles_file_err"), ErrorState{
+			"responseWriter": w,
+			"request":        r,
+		})
 	} else {
 		module["PublishedWord"] = T("published_word")
 		module["AuthorWord"] = T("authors_word")
