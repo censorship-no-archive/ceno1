@@ -237,6 +237,7 @@ func PortalIndexHandler(w http.ResponseWriter, r *http.Request) {
 		module["LanguageStringsAsJSON"] = stringifyLanguages(langStringsJson)
 	}
 	module["CurrentLocale"] = CurrentLocale
+	module["CurrentConnection"] = CurrentConnection
 	t.Execute(w, module)
 }
 
@@ -261,6 +262,7 @@ func PortalChannelsHandler(w http.ResponseWriter, r *http.Request) {
 			module["LanguageStringsAsJSON"] = stringifyLanguages(langStringsJson)
 		}
 		module["CurrentLocale"] = CurrentLocale
+		module["CurrentConnection"] = CurrentConnection
 		t.Execute(w, module)
 	}
 }
@@ -292,6 +294,7 @@ func PortalArticlesHandler(w http.ResponseWriter, r *http.Request) {
 			module["LanguageStringsAsJSON"] = stringifyLanguages(langStringsJson)
 		}
 		module["CurrentLocale"] = CurrentLocale
+		module["CurrentConnection"] = CurrentConnection
 		t.Execute(w, module)
 	}
 }
@@ -315,6 +318,7 @@ func PortalAboutHandler(w http.ResponseWriter, r *http.Request) {
 		module["LanguageStringsAsJSON"] = stringifyLanguages(langJson)
 	}
 	module["CurrentLocale"] = CurrentLocale
+	module["CurrentConnection"] = CurrentConnection
 	t.Execute(w, module)
 }
 
