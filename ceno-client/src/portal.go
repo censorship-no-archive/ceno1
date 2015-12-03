@@ -13,6 +13,9 @@ import (
 	"strings"
 )
 
+// A global variable set by the handler for the POST /locale route
+var CurrentLocale string = "en"
+
 type PortalPath struct {
 	PageName string
 	Href     string
@@ -230,6 +233,7 @@ func PortalIndexHandler(w http.ResponseWriter, r *http.Request) {
 		// For the javascript code that applies strings
 		module["LanguageStringsAsJSON"] = stringifyLanguages(langStringsJson)
 	}
+	module["CurrentLocale"] = CurrentLocale
 	t.Execute(w, module)
 }
 
@@ -253,6 +257,7 @@ func PortalChannelsHandler(w http.ResponseWriter, r *http.Request) {
 			// For the javascript code that applies strings
 			module["LanguageStringsAsJSON"] = stringifyLanguages(langStringsJson)
 		}
+		module["CurrentLocale"] = CurrentLocale
 		t.Execute(w, module)
 	}
 }
@@ -283,6 +288,7 @@ func PortalArticlesHandler(w http.ResponseWriter, r *http.Request) {
 			// For the javascript code that applies strings
 			module["LanguageStringsAsJSON"] = stringifyLanguages(langStringsJson)
 		}
+		module["CurrentLocale"] = CurrentLocale
 		t.Execute(w, module)
 	}
 }
@@ -305,5 +311,39 @@ func PortalAboutHandler(w http.ResponseWriter, r *http.Request) {
 		// For the Javascript code that applies strings
 		module["LanguageStringsAsJSON"] = stringifyLanguages(langJson)
 	}
+	module["CurrentLocale"] = CurrentLocale
 	t.Execute(w, module)
+}
+
+type SetLocaleRequest struct {
+	Locale string `json:"locale"`
+}
+
+func PortalLocaleHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	// We'll write error messages but only really use them for debugging purposes on the client side.
+	if r.Method != "POST" {
+		w.Write([]byte(`{"success": false, "error": "Only post requests accepted to the /locale route."}`))
+		return
+	}
+	requestData := SetLocaleRequest{}
+	decoder := json.NewDecoder(r.Body)
+	decodeErr := decoder.Decode(&requestData)
+	if decodeErr != nil {
+		w.Write([]byte(`{"success": false, "error": "` + decodeErr.Error() + `"}`))
+		return
+	}
+	localeIsSupported := false
+	for _, supportedLanguage := range Configuration.PortalLanguages {
+		if requestData.Locale == supportedLanguage.Locale {
+			localeIsSupported = true
+			break
+		}
+	}
+	if !localeIsSupported {
+		w.Write([]byte(`{"success": false, "error": "Unsupported locale ` + requestData.Locale + `."}`))
+	} else {
+		CurrentLocale = requestData.Locale
+		w.Write([]byte(`{"success": true}`))
+	}
 }

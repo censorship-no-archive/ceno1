@@ -18,6 +18,7 @@
   "module": true,
   "globals": {
     "LANGUAGES": false,
+    "CURRENT_LOCALE": false,
     "languages": false,
     "navigation": false
   }
