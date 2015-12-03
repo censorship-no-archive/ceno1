@@ -16,6 +16,10 @@
     "translation": "written by"
   },
   {
+    "id": "bad_status_string_err",
+    "translation": "Status check should be /status"
+  },
+  {
     "id": "bundle_err_cli",
     "translation": "Bundler encountered an error: {{.Message}}"
   },
@@ -96,11 +100,6 @@
     "translation": "Wait a minute or two before making your request again."
   },
   {
-    "id": "unable_close_response_body",
-    "translation": "LCS did not serve a complete response."
-  },
-    
-  {
     "id": "listening_msg_cli",
     "translation": "CENO proxy server listening for HTTP requests at http://127.0.0.1{{.Port}}."
   },
@@ -113,10 +112,6 @@
     "translation": "Check that you have entered the URL of the site you want to visit correctly."
   },
   {
-    "id": "bad_status_string_err",
-    "translation": "Status check should be /status"
-  },
-  {
     "id": "missing_config_err",
     "translation": "A configuration file for the client could not be found."
   },
@@ -127,6 +122,10 @@
   {
     "id": "more_word",
     "translation": "more"
+  },
+  {
+    "id": "no_articles_advice",
+    "translation": "Wait for the file to become available. You may want to browse another channel in the meantime."
   },
   {
     "id": "no_articles_file_err",
@@ -203,6 +202,10 @@
   {
     "id": "rs_addr_cfg",
     "translation": "Address of the request server (RS) [{{.Default}}]: "
+  },
+  {
+    "id": "unable_close_response_body",
+    "translation": "LCS did not serve a complete response."
   },
   {
     "id": "undisc_page_errmsg_cfg",
