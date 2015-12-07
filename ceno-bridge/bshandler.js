@@ -97,6 +97,17 @@ function requestFromReader(request) {
 function makeBundler(url, config, reqFromReader) {
   bs_log('Making bundler for ' + url);
   var bundler = new b.Bundler(url);
+
+  bundler.on('originalRequest', function (options, callback) {
+    options.strictSSL = config.strictSSL;
+    callback(null, options);
+  });
+
+  bundler.on('resourceRequest', function (options, callback, $, response) {
+    options.strictSSL = config.strictSSL;
+    callback(null, options);
+  });
+
   if (config.useProxy) {
     bundler.on('originalRequest', b.proxyTo(config.proxyAddress));
     bundler.on('resourceRequest', b.proxyTo(config.proxyAddress));
