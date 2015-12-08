@@ -10,6 +10,8 @@ import java.util.concurrent.TimeUnit;
 import plugins.CENO.CENOErrCode;
 import plugins.CENO.CENOException;
 import plugins.CENO.Bridge.CENOBridge;
+import plugins.CENO.Bridge.BridgeDatabase;
+import plugins.CENO.Bridge.SQLiteJDBC;
 import plugins.CENO.Common.Crypto;
 import plugins.CENO.Common.GetSyncCallback;
 import freenet.client.FetchException;
@@ -24,14 +26,16 @@ import freenet.support.SimpleFieldSet;
 public class ChannelMaker {
 	private String bridgeInsertURI;
 	private KeyPair asymKeyPair;
+    BridgeDatabase bridgeDatabase;
 	ChannelMakerListener channelListener;
 
 	static final long KSK_POLLING_PAUSE = TimeUnit.MINUTES.toMillis(5);
 	static final int MAX_KSK_POLLS = 20;
 
-	public ChannelMaker(String insertURI, KeyPair asymKeyPair) throws CENOException {
+	public ChannelMaker(String insertURI, KeyPair asymKeyPair, BridgeDatabase bridgeDatabase) throws CENOException {
 		this.bridgeInsertURI = insertURI;
 		this.asymKeyPair = asymKeyPair;
+        this.bridgeDatabase = bridgeDatabase;
 
 		Puzzle puzzle = new Puzzle();
 		try {
@@ -42,6 +46,9 @@ public class ChannelMaker {
 		} catch (InsertException e) {
 			throw new CENOException(CENOErrCode.RR, "Could not insert channel announcer page");
 		}
+
+        //Add the channels currently stored in the database
+        ChannelManager.getInstance().addChannels(bridgeDatabase.retrieveChannels());
 
 		try {
 			for (int i = 0; i < MAX_KSK_POLLS; i++) {
@@ -155,6 +162,15 @@ public class ChannelMaker {
 							Logger.normal(ChannelMakerListener.class, "A client has posted information for establishing a signaling channel with ID: " + reqID);
 							ChannelManager.getInstance().addChannel(sfs);
 							lastHandledReq = reqID;
+
+                            try {
+                                bridgeDatabase.storeChannel(decKskContent, null);
+                            } catch (Exception e) {
+                                Logger.error(this, "unable to store new channel in the database");
+                                continue;
+                                
+                            }
+
 						}
 					}
 

@@ -14,6 +14,8 @@ import plugins.CENO.CENOException;
 import plugins.CENO.CENOL10n;
 import plugins.CENO.Configuration;
 import plugins.CENO.Version;
+import plugins.CENO.Bridge.BridgeDatabase;
+
 import plugins.CENO.Bridge.Signaling.ChannelMaker;
 import plugins.CENO.Common.Crypto;
 import plugins.CENO.FreenetInterface.NodeInterface;
@@ -38,6 +40,7 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 
 	// Interface objects with fred
 	public static NodeInterface nodeInterface;
+    BridgeDatabase bridgeDatabase;
 	ChannelMaker channelMaker;
 
 	private static boolean isMasterBridge = false;
@@ -49,6 +52,7 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 	public static Configuration initConfig;
 	private static final Version VERSION = new Version(Version.PluginType.BRIDGE);
 	private static final String CONFIGPATH = ".CENO/bridge.properties";
+	private static final String DBPATH = ".CENO/bridge.db";
 
 	public static final String ANNOUNCER_PATH = "CENO-signaler";
 
@@ -107,8 +111,20 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 
 		if (confIsSingalBridge != null && confIsSingalBridge.equals("true")) {
 			isSignalBridge = true;
+
+            String confBridgeDB = initConfig.getProperty("bridgeDB");
+            if (confBridgeDB == null) {
+                confBridgeDB = DBPATH;
+            }
+            try {
+                bridgeDatabase = new BridgeDatabase(DBPATH);
+            } catch (CENOException e) {
+				Logger.error(this, "Could not open bridge database");
+				terminate();
+            }
+            
 			try {
-				channelMaker = new ChannelMaker(initConfig.getProperty("insertURI"), asymKeyPair);
+				channelMaker = new ChannelMaker(initConfig.getProperty("insertURI"), asymKeyPair, bridgeDatabase);
 			} catch (CENOException e) {
 				Logger.error(this, "Could not start decentralized signaling channel maker");
 				terminate();

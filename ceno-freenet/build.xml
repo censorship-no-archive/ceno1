@@ -19,11 +19,10 @@
 	<property name="apache-commonsvalidator.location" location="lib/commons-validator-1.4.1.jar"/>
 	<property name="apache-commonscompress.location" location="lib/commons-compress-1.9.jar"/>
 	<property name="bouncy-castle.location" location="../fred/lib/bcprov-jdk15on-152.jar"/>
-
+    <property name="sqlite.location" location="/usr/share/java/sqlite.jar"/>
 
 	<available file="src/plugins/CENO/Version.java" property="version.present"/>
 	<available file="${junit.location}" property="junit.present"/>
-
 
 	<!-- ================================================== -->
 	<target name="mkdir" description="Create the build directory structure used by compile">
@@ -43,7 +42,7 @@
 		</copy>
 	</target>
 
-
+    
 	<!-- ================================================== -->
 	<target name="setver">
 		<!-- Update the Version file -->
@@ -65,7 +64,7 @@
 		<tstamp/>
 
 		<!-- FIXME: remove the debug and replace with optimize -->
-		<javac srcdir="src/plugins/CENO" destdir="${build}" debug="on" optimize="on" source="${source-version}">
+		<javac srcdir="src/plugins/CENO" destdir="${build}" debug="on" optimize="on" source="${source-version}" includeantruntime="false">
 			<classpath>
 				<pathelement location="${freenet-cvs-snapshot.location}"/>
 				<pathelement location="${jetty-all.location}"/>
@@ -74,6 +73,8 @@
 				<pathelement location="${apache-commonsvalidator.location}" />
 				<pathelement location="${apache-commonscompress.location}" />
 				<pathelement location="${bouncy-castle.location}" />
+                <pathelement location="${sqlite.location}" />
+
 			</classpath>
 			<include name="**/*.java"/>
 			<exclude name="**/*Test.java"/>
@@ -99,7 +100,7 @@
 
 	<!-- ================================================== -->
 	<target name="unit-build" depends="compile" if="junit.present" unless="skip_tests">
-		<javac srcdir="src/" destdir="${build-test}" debug="on" optimize="on" source="1.5">
+		<javac srcdir="src/" destdir="${build-test}" debug="on" optimize="on" source="1.5" includeantruntime="false">
 			<classpath>
 				<pathelement path="${build}"/>
 				<!-- <pathelement location="${freenet-ext.location}"/> -->
