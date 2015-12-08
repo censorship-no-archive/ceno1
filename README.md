@@ -164,7 +164,7 @@ Detailed instructions for building the client can be found [here](https://github
 
 Download the following dependencies:
   * [fred](https://github.com/freenet/fred-staging) and build it following the
-[official instructions](https://github.com/freenet/fred/blob/next/README.building.md)
+[official instructions](https://github.com/freenet/fred/blob/master/README.building.md)
   * [freenet-ext](https://downloads.freenetproject.org/latest/freenet-ext.jar)
 or build them from [the source code](https://github.com/freenet/contrib)
   * [JUnit4](https://github.com/junit-team/junit/wiki/Download-and-Install)

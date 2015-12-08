@@ -1,12 +1,12 @@
 # RSS and CENO
 
-The CENO Reader component exists to provide CENO with an automatic system for making preselected 
+The CENO Reader component exists to provide CENO with an automatic system for making preselected
 content available to users as soon as possible.  The CENO Reader can subscribe to RSS feeds,
 and will insert bundles of articles received from feeds into a distributed storage automatically.
 
 ## CENO Front Page
 
-To provide CENO users with a portal to the content stored in the distributed store, 
+To provide CENO users with a portal to the content stored in the distributed store,
 the Reader module creates and inserts into Freenet a web page that provides links to other CENO
 pages in Freenet.  This first page is referred to as the CENO Front Page or sometimes a "portal".
 It provides links to pages listing articles from the various RSS feeds that the Reader is following.
@@ -45,5 +45,5 @@ The existing bundler server will be used to produce bundles for articles and the
 bundle inserter will be used to insert articles and the Front and Feed pages into Freenet.
 You can learn more about each of those services on the respective directories on Github for the
 
-1. [Bundle Server](https://github.com/equalitie/ceno/tree/next/ceno-bridge)
-2. [Bundle Inserter](https://github.com/equalitie/ceno/tree/next/ceno-freenet)
+1. [Bundle Server](https://github.com/equalitie/ceno/tree/master/ceno-bridge)
+2. [Bundle Inserter](https://github.com/equalitie/ceno/tree/master/ceno-freenet)
