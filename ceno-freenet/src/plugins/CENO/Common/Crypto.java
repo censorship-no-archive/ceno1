@@ -89,13 +89,17 @@ public final class Crypto {
 		return cipherText;
 	}
 
-	public static byte[] decrypt(byte[] msg, String privKey64) throws GeneralSecurityException, IllegalBase64Exception {
-		PrivateKey privKey = loadPrivateKey(privKey64);
+	public static byte[] decrypt(byte[] msg, PrivateKey privKey) throws GeneralSecurityException {
 		Cipher cipher = Cipher.getInstance(CIPHER_TRANSFORMATION, SECURITY_PROVIDER);
 		cipher.init(Cipher.DECRYPT_MODE, privKey);
 		//TODO Handle BadPaddingException (somebody has tampered with the data) without giving an oracle
 		byte[] plainText = cipher.doFinal(msg);
 		return plainText;
+	}
+
+	public static byte[] decrypt(byte[] msg, String privKey64) throws GeneralSecurityException, IllegalBase64Exception {
+		PrivateKey privKey = loadPrivateKey(privKey64);
+		return decrypt(msg, privKey);
 	}
 
 	public static boolean isValidKeypair(KeyPair keyPair) throws GeneralSecurityException, IllegalBase64Exception, UnsupportedEncodingException {
