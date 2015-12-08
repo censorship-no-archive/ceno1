@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import freenet.node.FSParseException;
+import freenet.support.Logger;
 import freenet.support.SimpleFieldSet;
 
 public class ChannelManager {
@@ -38,6 +39,17 @@ public class ChannelManager {
 			for (Channel channel : extraChannelsList) {
 				extraChannelsList.add(channel);
 			}
+		}
+	}
+	
+	public void addChannel(String signalSSK) {
+		Channel channel;
+		try {
+			channel = new Channel(signalSSK);
+			addChannel(channel);
+		} catch (MalformedURLException e) {
+			Logger.warning(this, "Could not subscribe to SSK during channel creation for key: " + signalSSK);
+			return;
 		}
 	}
 

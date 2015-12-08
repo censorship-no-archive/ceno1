@@ -101,7 +101,6 @@ public class ChannelMaker {
 	private class ChannelMakerListener implements Runnable {
 		private String puzzleAnswer;
 		private FreenetURI channelMakingKSK;
-		private int lastHandledReq = 0;
 		private int subKsk;
 
 		private volatile boolean continueLoop;
@@ -149,13 +148,9 @@ public class ChannelMaker {
 							continue;
 						}
 
-						SimpleFieldSet sfs = new SimpleFieldSet(decKskContent, false, true, true);
-						int reqID = sfs.getInt("id", -1);
-						if (reqID > 0 && reqID != lastHandledReq) {
-							Logger.normal(ChannelMakerListener.class, "A client has posted information for establishing a signaling channel with ID: " + reqID);
-							ChannelManager.getInstance().addChannel(sfs);
-							lastHandledReq = reqID;
-						}
+						Logger.normal(ChannelMakerListener.class, "A client has posted information for establishing a signaling channel");
+						ChannelManager.getInstance().addChannel(decKskContent);
+						continueLoop = false;
 					}
 
 					// Pause the looping thread
@@ -164,7 +159,8 @@ public class ChannelMaker {
 			} catch (InterruptedException e) {
 				continueLoop = false;
 			} catch (IOException e) {
-				// TODO Log this
+				Logger.warning(this, "IOException while trying to create channel from KSK response");
+				continueLoop = false;
 			}
 		}
 
