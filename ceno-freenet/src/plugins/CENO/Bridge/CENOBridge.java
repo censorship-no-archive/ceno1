@@ -1,5 +1,6 @@
 package plugins.CENO.Bridge;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
@@ -17,6 +18,7 @@ import plugins.CENO.Version;
 import plugins.CENO.Bridge.Signaling.ChannelMaker;
 import plugins.CENO.Common.Crypto;
 import plugins.CENO.FreenetInterface.NodeInterface;
+import freenet.client.InsertException;
 import freenet.keys.FreenetURI;
 import freenet.pluginmanager.FredPlugin;
 import freenet.pluginmanager.FredPluginRealVersioned;
@@ -94,6 +96,7 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 		} finally {
 			if (asymKeyPair == null) {
 				terminate();
+				return;
 			}
 		}
 
@@ -109,9 +112,23 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 			isSignalBridge = true;
 			try {
 				channelMaker = new ChannelMaker(initConfig.getProperty("insertURI"), asymKeyPair);
-			} catch (CENOException e) {
-				Logger.error(this, "Could not start decentralized signaling channel maker");
+				channelMaker.publishNewPuzzle();
+			} catch (IOException e) {
+				Logger.error(this, "Could not start channel listener for the given insertURI: " + e.getMessage());
 				terminate();
+				return;
+			} catch (InsertException e) {
+				Logger.error(this, "Could not start announcement channel insertion for the given insertURI: " + e.getMessage());
+				terminate();
+				return;
+			} catch (GeneralSecurityException e) {
+				Logger.error(this, "The given public RSA key is invalid");
+				terminate();
+				return;
+			} catch (CENOException e) {
+				Logger.error(this, "Could not start decentralized signaling channel maker: " + e.getMessage());
+				terminate();
+				return;
 			}
 		}
 
@@ -201,7 +218,7 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 	{
 		// Stop the thread that is polling for new channel requests
 		if (isSignalBridge && channelMaker != null) {
-			channelMaker.stopListener();
+			channelMaker.stopListeners();
 		}
 
 		// Stop cenoHttpServer and unbind ports
