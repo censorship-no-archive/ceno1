@@ -242,6 +242,7 @@ public class NodeInterface implements FreenetInterface {
 		public VoidGetCallback(String successMessage, String failureMessage, RequestClient reqClient) {
 			this.successMessage = successMessage;
 			this.failureMessage = failureMessage;
+			this.reqClient = reqClient;
 		}
 
 		@Override

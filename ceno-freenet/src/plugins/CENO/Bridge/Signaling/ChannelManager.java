@@ -39,7 +39,7 @@ public class ChannelManager {
 			}
 		}
 	}
-	
+
 	public void addChannel(String signalSSK) {
 		Channel channel;
 		try {

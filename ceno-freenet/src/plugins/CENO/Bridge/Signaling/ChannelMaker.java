@@ -16,7 +16,7 @@ public class ChannelMaker {
 
 	private String bridgeInsertURI;
 	private KeyPair asymKeyPair;
-	private ChannelMakerListener[] channelListeners = new ChannelMakerListener[20];
+	private ChannelMakerListener[] channelListeners = new ChannelMakerListener[MAX_KSK_SLOTS];
 
 	public ChannelMaker(String insertURI, KeyPair asymKeyPair) throws CENOException, IOException, InsertException, GeneralSecurityException {
 		this.bridgeInsertURI = insertURI;
