@@ -69,7 +69,7 @@ function getPortalStatus() {
 }
 
 // Update the connection status every ten seconds.
-setConnectivityStatus('error');
+getPeerStatus();
 setInterval(getPeerStatus, 10000);
 
 return {

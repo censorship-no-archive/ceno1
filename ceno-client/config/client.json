@@ -1,10 +1,7 @@
 {
   "PortNumber": ":3090",
-
   "CacheServer": "http://127.0.0.1:8888/plugins/plugins.CENO.Client.CENOClient",
   "RequestServer": "http://127.0.0.1:8888/plugins/plugins.CENO.Client.CENOClient",
-  "TestCacheServer": "http://127.0.0.1:3091",
-  "TestRequestServer": "http://127.0.0.1:3091",
   "ErrorMsg": "Page not found",
   "PleaseWaitPage": "views/wait.html",
   "PortalLanguages": [
