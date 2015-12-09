@@ -164,4 +164,8 @@ public class URLtoUSKTools {
 		return urlParam;
 	}
 
+	public static FreenetURI getPortalFeedsUSK(String requestURI) throws MalformedURLException {
+		return computeUSKfromURL(PORTAL_DOC_NAME, requestURI);
+	}
+
 }
