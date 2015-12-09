@@ -109,6 +109,8 @@ var lcsErrorHandlers = map[ErrorCode]func(ErrorState) bool{
 // depending on the error being served, automatically refresh itself the same way
 // that wait.html does.
 var AutoRefreshingErrorPages = map[ErrorCode]bool{
+	ERR_NO_FEEDS_FILE:          true,
+	ERR_NO_ARTICLES_FILE:       true,
 	ERR_NO_CONNECT_LCS:         true,
 	ERR_MALFORMED_LCS_RESPONSE: true,
 	ERR_FROM_LCS:               true,
