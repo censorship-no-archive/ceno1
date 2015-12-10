@@ -9,6 +9,7 @@ import freenet.client.ClientMetadata;
 import freenet.client.DefaultMIMETypes;
 import freenet.client.FetchContext;
 import freenet.client.FetchException;
+import freenet.client.FetchException.FetchExceptionMode;
 import freenet.client.FetchResult;
 import freenet.client.InsertBlock;
 import freenet.client.InsertContext;
@@ -64,7 +65,7 @@ public class NodeInterface implements FreenetInterface {
 		this.localFC.maxRecursionLevel = 10;
 		this.localFC.maxTempLength = Long.MAX_VALUE;
 		this.localFC.maxOutputLength = Long.MAX_VALUE;
-		
+
 		// Set up a FetchContext instance for lookup requests in the distributed cache only
 		this.distFC = HighLevelSimpleClientInterface.getFetchContext();
 		this.distFC.ignoreStore = true;
@@ -84,7 +85,7 @@ public class NodeInterface implements FreenetInterface {
 	public ClientGetter localFetchURI(FreenetURI uri, ClientGetCallback callback) throws FetchException {
 		return HighLevelSimpleClientInterface.fetchURI(uri, Long.MAX_VALUE, callback, localFC);
 	}
-	
+
 	@Override
 	public ClientGetter distFetchURI(FreenetURI uri, ClientGetCallback callback) throws FetchException {
 		return HighLevelSimpleClientInterface.fetchURI(uri, Long.MAX_VALUE, callback, distFC);
@@ -171,7 +172,7 @@ public class NodeInterface implements FreenetInterface {
 	public FreenetURI insertSingleChunk(FreenetURI uri, String content, ClientPutCallback cb) throws InsertException, PersistenceDisabledException, UnsupportedEncodingException {
 		return HighLevelSimpleClientInterface.insertSingleChunk(uri, content, cb);
 	}
-	
+
 	@Override
 	public FreenetURI insertSingleChunk(FreenetURI uri, byte[] content, ClientPutCallback cb) throws InsertException, PersistenceDisabledException, UnsupportedEncodingException {
 		return HighLevelSimpleClientInterface.insertSingleChunk(uri, content, cb);
@@ -183,8 +184,8 @@ public class NodeInterface implements FreenetInterface {
 	}
 
 	@Override
-	public ClientGetCallback getVoidGetCallback(String successMessage, String failureMessage) {
-		return new VoidGetCallback(successMessage, failureMessage, getRequestClient());
+	public ClientGetCallback getVoidGetCallback(String successMessage, String failureMessage, NewURICallback onNewURI) {
+		return new VoidGetCallback(successMessage, failureMessage, getRequestClient(), onNewURI);
 	}
 
 	@Override
@@ -238,11 +239,13 @@ public class NodeInterface implements FreenetInterface {
 	private class VoidGetCallback implements ClientGetCallback {
 		String successMessage, failureMessage = null;
 		RequestClient reqClient;
+		NewURICallback onNewURI;
 
-		public VoidGetCallback(String successMessage, String failureMessage, RequestClient reqClient) {
+		public VoidGetCallback(String successMessage, String failureMessage, RequestClient reqClient, NewURICallback onNewURI) {
 			this.successMessage = successMessage;
 			this.failureMessage = failureMessage;
 			this.reqClient = reqClient;
+			this.onNewURI = onNewURI;
 		}
 
 		@Override
@@ -261,8 +264,20 @@ public class NodeInterface implements FreenetInterface {
 
 		@Override
 		public void onFailure(FetchException e, ClientGetter state) {
+			if (e.getMode() == FetchExceptionMode.PERMANENT_REDIRECT) {
+				try {
+					onNewURI.handleNewURI(e.newURI, successMessage, failureMessage);
+					return;
+				} catch (FetchException e1) {
+					Logger.error(this, "Permanent redirect but fetchexception: "  +e1.getMessage());
+				}
+			}
 			Logger.error(this, failureMessage + ": " + e.getMessage());
 		}
 
+	}
+
+	public interface NewURICallback {
+		void handleNewURI(FreenetURI newURI, String successMessage, String failureMessage) throws FetchException;
 	}
 }

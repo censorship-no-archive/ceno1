@@ -5,6 +5,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 
 import plugins.CENO.FreenetInterface.ConnectionOverview.NodeConnections;
+import plugins.CENO.FreenetInterface.NodeInterface.NewURICallback;
 import freenet.client.FetchException;
 import freenet.client.FetchResult;
 import freenet.client.InsertBlock;
@@ -36,6 +37,6 @@ public interface FreenetInterface {
 	FreenetURI insertSingleChunk(FreenetURI uri, String content, ClientPutCallback cb) throws InsertException, PersistenceDisabledException, UnsupportedEncodingException;
 	FreenetURI insertSingleChunk(FreenetURI uri, byte[] content, ClientPutCallback cb) throws InsertException, PersistenceDisabledException, UnsupportedEncodingException;
 	NodeConnections getConnections();
-	ClientGetCallback getVoidGetCallback(String successMessage, String failureMessage);
+	ClientGetCallback getVoidGetCallback(String successMessage, String failureMessage, NewURICallback onNewURI);
 	ClientPutCallback getVoidPutCallback(String successMessage, String failureMessage);
 }

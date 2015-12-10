@@ -8,7 +8,6 @@ import plugins.CENO.Version;
 import plugins.CENO.Client.Signaling.ChannelMaker;
 import plugins.CENO.Common.URLtoUSKTools;
 import plugins.CENO.FreenetInterface.NodeInterface;
-import freenet.client.FetchException;
 import freenet.keys.FreenetURI;
 import freenet.pluginmanager.FredPlugin;
 import freenet.pluginmanager.FredPluginHTTP;
@@ -78,7 +77,7 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 			bridgeKey = BRIDGE_KEY;
 		}
 		Logger.normal(this, "CENO will make requests to the bridge with key: " + bridgeKey);
-		
+
 		// Initialize RS - Make a new class ChannelManager that handles ChannelMaker
 		channelMaker = new ChannelMaker(initConfig.getProperty("signalSSK"), Long.parseLong(initConfig.getProperty("lastSynced", "0")));
 
@@ -86,12 +85,12 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 		channelMakerThread.start();
 		// Subscribe to updates of the CENO Portal feeds.json
 		try {
-			nodeInterface.distFetchURI(URLtoUSKTools.getPortalFeedsUSK(BRIDGE_KEY), nodeInterface.getVoidGetCallback("Fetched CENO Portal feeds.json from the distributed cache",
-					"Failed to fetch feeds.json from the distributed cache"));
+			DistFetchHelper.fetchDist(URLtoUSKTools.getPortalFeedsUSK(BRIDGE_KEY), "Fetched CENO Portal feeds.json from the distributed cache",
+					"Failed to fetch feeds.json from the distributed cache");
 		} catch (MalformedURLException e) {
-			Logger.error(this, "MalformedURLException while trying to fetch CENO Portal feeds.json: " + e.getMessage());
-		} catch (FetchException e) {
-			Logger.normal(this, "FetchException while trying to fetch CENO Portal feeds.json: " + e.getMessage());
+			 Logger.error(this, "MalformedURLException while trying to fetch CENO Portal feeds.json: " + e.getMessage());
+			 terminate();
+			 return;
 		}
 		USKUpdateFetcher.subscribeToBridgeFeeds();
 	}
