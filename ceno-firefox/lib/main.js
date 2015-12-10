@@ -49,7 +49,7 @@ const SETTING_HOMEPAGE = 'browser.startup.homepage';
  * @param {string} url - The orginal URL to request
  */
 function directLookupURL(url, rewritten) {
-  let b64url = base64.encode(url, 'utf-8');
+  let b64url = base64.encode(url, 'utf-8').replace(/\+/g, '-').replace(/\//g, '_');
   return 'http://' + CENO_ADDR + ':' + CENO_PORT + '/lookup?url=' + b64url + '&rewritten=' + rewritten;
 }
 
@@ -119,7 +119,7 @@ function ensureProxyIsRunning(callback) {
     url: 'http://localhost:3090/',
     onComplete: function (response) {
       let value = response.headers[CENO_HEADER];
-      callback(typeof value !== 'undefined' && 
+      callback(typeof value !== 'undefined' &&
                value !== null &&
                value === CENO_HEADER_VALUE);
     }
