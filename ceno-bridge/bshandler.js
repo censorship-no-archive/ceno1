@@ -2,6 +2,7 @@ var fs = require('fs');
 var qs = require('querystring');
 var url = require('url');
 var dateFormat = require('dateformat');
+var URLSafeBase64 = require('urlsafe-base64');
 
 var makeReadable = require('node-readability');
 var request = require('request');
@@ -60,7 +61,7 @@ function reportCompleteBundle(config, data, wasRewritten, cb) {
  */
 function constructRequestUrl(reqUrl, wasRewritten) {
   var newUrl = qs.parse(url.parse(reqUrl).query).url;
-  newUrl = (new Buffer(newUrl, 'base64')).toString();
+  newUrl = URLSafeBase64.encode(newUrl);
   newUrl = wasRewritten ? newUrl.replace('http://', 'https://') : newUrl;
   return newUrl;
 }

@@ -47,7 +47,7 @@ func reportBundleCreation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	b64Url := b64Urls[0]
-	reqUrlBytes, err := base64.StdEncoding.DecodeString(b64Url)
+	reqUrlBytes, err := base64.URLEncoding.DecodeString(b64Url)
 	if err != nil {
 		fmt.Println("Could not base64-decode provided URL")
 		http.Error(w, "Could not base64-decode provided URL", BAD_REQUEST)

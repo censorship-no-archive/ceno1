@@ -189,7 +189,7 @@ func directHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	// Decode the URL so we can save effort by just passing the modified request to
 	// the proxyHandler function from here.
-	decodedBytes, err := base64.StdEncoding.DecodeString(URLS[0])
+	decodedBytes, err := base64.URLEncoding.DecodeString(URLS[0])
 	if err != nil {
 		HandleCCError(ERR_MALFORMED_URL, T("url_b64_cli"), ErrorState{
 			"responseWriter": w,

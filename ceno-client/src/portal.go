@@ -63,7 +63,7 @@ type LanguageStringJSON map[string]map[string]string
  * @return the path to the article of interest's respective JSON file on disk
  */
 func articlesFilename(feedUrl string) string {
-	b64FeedUrl := base64.StdEncoding.EncodeToString([]byte(feedUrl))
+	b64FeedUrl := base64.URLEncoding.EncodeToString([]byte(feedUrl))
 	return path.Join(".", "json-files", b64FeedUrl+".json")
 }
 
@@ -75,7 +75,7 @@ func articlesFilename(feedUrl string) string {
 func getFeedUrl(feedUrl string) (string, error) {
 	parts := strings.Split(feedUrl, "/")
 	b64FeedUrl := parts[len(parts)-1]
-	decoded, decodeErr := base64.StdEncoding.DecodeString(b64FeedUrl)
+	decoded, decodeErr := base64.URLEncoding.DecodeString(b64FeedUrl)
 	if decodeErr != nil {
 		return "", decodeErr
 	}
@@ -113,7 +113,7 @@ func InitModuleWithFeeds() (map[string]interface{}, error) {
 	// Convert the URLs of feeds to the form that the CENO Client can handle directly, when clicked
 	for i, feed := range feedInfo.Feeds {
 		url := feed.Url
-		feedInfo.Feeds[i].Url = "cenosite/" + base64.StdEncoding.EncodeToString([]byte(url))
+		feedInfo.Feeds[i].Url = "cenosite/" + base64.URLEncoding.EncodeToString([]byte(url))
 	}
 	var err error = nil
 	mapping := make(map[string]interface{})
@@ -272,7 +272,7 @@ func PortalArticlesHandler(w http.ResponseWriter, r *http.Request) {
 	t, _ := template.ParseFiles("./views/articles.html", "./views/nav.html", "./views/resources.html", "./views/breadcrumbs.html", "./views/scripts.html")
 	pathComponents := strings.Split(r.URL.Path, "/")
 	b64FeedUrl := pathComponents[len(pathComponents)-1]
-	feedUrlBytes, _ := base64.StdEncoding.DecodeString(b64FeedUrl)
+	feedUrlBytes, _ := base64.URLEncoding.DecodeString(b64FeedUrl)
 	feedUrl := string(feedUrlBytes)
 	module, err := InitModuleWithArticles(feedUrl)
 	if err != nil {
