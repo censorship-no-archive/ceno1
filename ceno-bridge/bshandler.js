@@ -61,7 +61,7 @@ function reportCompleteBundle(config, data, wasRewritten, cb) {
  */
 function constructRequestUrl(reqUrl, wasRewritten) {
   var newUrl = qs.parse(url.parse(reqUrl).query).url;
-  newUrl = URLSafeBase64.encode(newUrl);
+  newUrl = URLSafeBase64.decode(newUrl).toString("utf8");
   newUrl = wasRewritten ? newUrl.replace('http://', 'https://') : newUrl;
   return newUrl;
 }
