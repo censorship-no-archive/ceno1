@@ -10,12 +10,13 @@ let http = require('http');
 let fs = require('fs');
 let querystring = require('querystring');
 let makeRequest = require('request');
+let URLSafeBase64 = require('urlsafe-base64');
 let bshandler = require('../bshandler');
 
 const CONTROL_PAGE = './demo/views/index.html';
 
 function bundlerUrl(url) {
-  let b64Url = (new Buffer(url)).toString('base64');
+  let b64Url = URLSafeBase64.encode(url);
   let base = 'http://localhost:3094/lookup?url=';
   return base + b64Url;
 }
