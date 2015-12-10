@@ -177,7 +177,7 @@ func followFeeds(requests chan SaveFeedRequest) {
  * @return any error that occurs writing to the appropriate file
  */
 func writeItemsFile(feedUrl string, marshalledItems []byte) error {
-	filename := base64.StdEncoding.EncodeToString([]byte(feedUrl)) + ".json"
+	filename := base64.URLEncoding.EncodeToString([]byte(feedUrl)) + ".json"
 	location := path.Join(JSON_FILE_DIR, filename)
 	return ioutil.WriteFile(location, marshalledItems, os.ModePerm)
 }
