@@ -24,7 +24,9 @@ you are encouraged to think carefully about the risks that you face.
 New users are advised to use the CENOBox, an all-in-one bundle that includes a
 preconfigured version of all the client-side components. You can download the
 latest release for your operating system from [here](https://github.com/equalitie/ceno/releases/latest).
-We currently distribute CENOBox for Linux and Mac OS X.
+We currently distribute CENOBox for Linux and Mac OS X. You need to have either
+Firefox or Chrome/Chromium installed on your machine, as well as a Java
+Runtime Environment (in Debian/Ubuntu we recommend the `default-jre` package).
 
 ### CENOBox in Linux and Mac OS X
 
