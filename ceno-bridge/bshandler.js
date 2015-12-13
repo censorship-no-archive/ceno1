@@ -66,6 +66,19 @@ function constructRequestUrl(reqUrl, wasRewritten) {
 }
 
 /**
+ * Check the query for direction field and if it exists extract and returns it
+ * allowed values are rtl and ltr
+ * @param {string} reqUrl - The value of `req.url`
+ * @return {string} the value of direction field if it contains permited values
+ *                  otherwise returns empty string
+ */
+function retrieveDirection(reqUrl) {
+  var direction = qs.parse(url.parse(reqUrl).query).direction;
+  direction = (direction === 'rtl' || direction === 'ltr') ? direction : "";
+  return direction;
+}
+
+/**
  * Determine if the URL being requested was rewritten from HTTPS to HTTP
  * @param {IncomingMessage} request - The client's request
  * @return {bool} True if the rewritten header is set to 'true' else false
@@ -92,9 +105,14 @@ function requestFromReader(request) {
  * @param {string} url - The URL to fetch
  * @param {object} config - The configuration options for the bundle server
  * @param {bool} reqfromReader - Whether the request comes from the RSS reader or not
+ * @param enforcedDirection - the direction being enforced after readability is applied (RSS reader request only)
  * @return {Bundler} A bundler object that will fetch the requested resource
  */
-function makeBundler(url, config, reqFromReader) {
+function makeBundler(url, config, reqFromReader, enforcedDirection) {
+
+    //backward compatible default value
+    enforcedDirection = ((typeof enforcedDirection !== 'undefined') && ((enforcedDirection === 'ltr') || (enforcedDirection === 'rtl')))  ? enforcedDirection : "";
+
   bs_log('Making bundler for ' + url);
   var bundler = new b.Bundler(url);
 
@@ -130,7 +148,15 @@ function makeBundler(url, config, reqFromReader) {
             bs_log(message);
             diff[originalDoc] = message;
           } else {
-            var content = '<html dir="rtl"><head><meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/></head>';
+              //we only enforce direction in readibility mode
+              //deciding about direction
+              var direction_tag = ""
+              if (enforcedDirection === "ltr") {
+                  direction_tag = ' dir="ltr"';
+              } else if (enforcedDirection === "rtl") {
+                  direction_tag = ' dir="rtl"';
+              }
+              var content = '<html' + direction_tag +'><head><meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/></head>';
             if (article.content.slice(0, 6) !== '<body>') {
               content += '<body>' + article.content + '</body></html>';
             } else {
@@ -174,7 +200,7 @@ function handler(config) {
     });
     res.writeHead(200, {'Content-Type': 'application/json'});
 
-    var bundler = makeBundler(requestedUrl, config, requestFromReader(req));
+    var bundler = makeBundler(requestedUrl, config, requestFromReader(req), retrieveDirection(req.url));
     bundler.bundle(function (err, bundle) {
       if (err) {
         if (!disconnected) {

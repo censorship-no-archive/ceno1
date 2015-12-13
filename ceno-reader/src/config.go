@@ -14,6 +14,8 @@ type Config struct {
 	PortNumber     string // The port to run on, e.g. ":3095"
 	BundleServer   string // The location of the Bundle Server
 	BundleInserter string // The location of the Bundle Inserter
+	InsertionPause int    // Number of seconds the reader needs to pause before inserting next item on the list
+	// this is to avoid making the inserter out of memory
 }
 
 // Default confifuration values that can be provided as options to the user.
@@ -21,6 +23,7 @@ var DefaultConfiguration Config = Config{
 	PortNumber:     ":3096",
 	BundleServer:   "http://127.0.0.1:3094",
 	BundleInserter: "http://127.0.0.1:3095",
+	InsertionPause: 600,
 }
 
 /**
