@@ -1,18 +1,5 @@
 #! /usr/bin/env sh
 
-if [ $# -gt 0 ]; then
-  if [ ! -d go ]; then
-    git clone https://go.googlesource.com/go
-  fi
-    cd go
-    git checkout go1.5.1
-    cd src
-    echo "Building go for " $1 "..."
-    GOOS=${1%/*} GOARCH=${1#*/} ./make.bash --no-clean > /dev/null
-    cd ../../
-    GOPATH=$(pwd)/go
-fi
-
 SOURCE_FILES="src/client.go \
     src/errorhandling.go \
     src/config.go \
@@ -35,4 +22,14 @@ cd translations
 $GOPATH/bin/goi18n *.all.json *.untranslated.json
 cd ..
 
-go build $SOURCE_FILES && echo "Compiled client successfully."
+if [ $# -gt 0 ]; then
+  for platform in $@
+  do
+    echo "Building CENO Client for" $platform"..."
+    GOOS=${platform%_*} GOARCH=${platform#*_} go build $SOURCE_FILES
+    mv client CENOClient_$platform
+  done
+fi
+
+go build $SOURCE_FILES
+echo "Compiled client successfully."

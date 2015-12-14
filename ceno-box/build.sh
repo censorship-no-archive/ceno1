@@ -3,6 +3,8 @@
 # This script will create a CENO all-in-one box ready for distribution
 # If the -p (plugins) flag is enabled, the bundle will include a build of CENO
 # client, Freemail and WebOfTrust plugins with the latest local modifications.
+# If the -m (multi-platform) flag is enabled, the script will generate a
+# distributable for each of the platforms we want to support.
 #
 # This CENOBOx bundle includes:
 #  * A Freenet node, preloaded with the WebOfTrust, Freemail and CENO plugins,
@@ -16,13 +18,15 @@
 #  * A plugin for chrome (CENO Router) that will rewrite HTTPS requests
 #    to HTTP ones.
 
-
 # Parse options to check if DEBUG mode is enabled
-while getopts "p" OPTION
+while getopts "pm" OPTION
 do
   case $OPTION in
     p)
       PLUGINS=1
+      ;;
+    m)
+      PLATFORMS=(darwin_amd64 linux_386 linux_amd64 linux_arm)
       ;;
   esac
 done
@@ -76,8 +80,7 @@ if [ -a client ]; then
   rm client
 fi
 
-echo
-GOROOT_BOOTSTRAP=$(which go)  sh ./build.sh darwin/386 darwin/amd64 linux/386 linux/amd64 linux/arm windows/386 windows/amd64
+GOPATH=$HOME sh ./build.sh "${PLATFORMS[@]}"
 cd $CENOBOXPATH
 echo
 
@@ -153,7 +156,16 @@ if [[ $PLUGINS == 1 ]]; then
   cp ceno-debug/freenet-backbone.ini CENOBackbone/freenet.ini
 fi
 
-echo "Creating the distribution zips"
+echo
+for platform in ${PLATFORMS[@]}
+do
+  echo "Creating distributable for" $platform"..."
+  cp ceno-client/CENOClient_$platform CENOBox/ceno-client/CENOClient
+  zip -rq CENOBox_$platform.zip CENOBox/
+  zip -rq CENOBackbone_$platform.zip CENOBackbone/
+done
+
+echo "Creating the distribution zips for the host system"
 zip -rq CENOBox.zip CENOBox/
 zip -rq CENOBackbone.zip CENOBackbone/
 
