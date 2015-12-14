@@ -225,7 +225,7 @@ func loadLanguageStrings() ([]LanguageStrings, LanguageStringJSON, error) {
 
 func PortalIndexHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Got request for test portal page")
-	t, _ := template.ParseFiles("./views/index.html", "./views/nav.html", "./views/resources.html", "./views/scripts.html", "./views/overlay.html")
+	t, _ := template.ParseFiles("./views/index.html", "./views/nav.html", "./views/resources.html", "./views/scripts.html")
 	module := map[string]interface{}{}
 	languageStrings, langStringsJson, readErr := loadLanguageStrings()
 	if readErr != nil {
