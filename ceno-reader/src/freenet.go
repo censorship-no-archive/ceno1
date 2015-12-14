@@ -64,10 +64,14 @@ func InsertFreenet(bundleData []byte) RequestStatus {
  * Retrieve a bundle for a site from the Bundle Server by sending a GET
  * request to /?url=<base64(url)>
  * @param url - The URL of the page to have bundled.
+ * @param direction - rtl/ltr to be enforced by readability
  */
 func GetBundle(url string) ([]byte, RequestStatus) {
-	b64Url := base64.URLEncoding.EncodeToString([]byte(url))
+	b64Url := base64.StdEncoding.EncodeToString([]byte(url))
 	bundleUrl := Configuration.BundleServer + "/?url=" + b64Url
+	if direction != "" {
+		bundleUrl += "&direction=" + direction
+	}
 	request, reqErr := http.NewRequest("GET", bundleUrl, nil)
 	if reqErr != nil {
 		fmt.Println("Failed to create request")

@@ -14,6 +14,8 @@ type Config struct {
 	PortNumber     string // The port to run on, e.g. ":3095"
 	BundleServer   string // The location of the Bundle Server
 	BundleInserter string // The location of the Bundle Inserter
+	InsertionPause int    // Number of seconds the reader needs to pause before inserting next item on the list
+	// this is to avoid making the inserter out of memory
 }
 
 // Default confifuration values that can be provided as options to the user.
@@ -21,6 +23,7 @@ var DefaultConfiguration Config = Config{
 	PortNumber:     ":3096",
 	BundleServer:   "http://127.0.0.1:3094",
 	BundleInserter: "http://127.0.0.1:3095",
+	InsertionPause: 240,
 }
 
 /**
@@ -81,6 +84,15 @@ func validBundleInserter(biaddr string) bool {
 }
 
 /**
+ * Determines whether an insertionPause is a valid second value
+ * @param {int64} insertionPause - The insertionPause in seconds
+ * @return true the insertionPause is a valid value
+ */
+func validInsertionPause(insertionPause int) bool {
+	return insertionPause > 0
+}
+
+/**
  * Read a configuration for the reader from a file.
  * @param {string} location - The location of the configuration file
  * @return a Config instance if the configuration file exists and any error that occurs
@@ -106,5 +118,6 @@ func ReadConfigFile(location string) (Config, error) {
 func ValidConfiguration(configuration Config) bool {
 	return validPortNumber(configuration.PortNumber) &&
 		validBundleServer(configuration.BundleServer) &&
-		validBundleInserter(configuration.BundleInserter)
+		validBundleInserter(configuration.BundleInserter) &&
+		validInsertionPause(configuration.InsertionPause)
 }

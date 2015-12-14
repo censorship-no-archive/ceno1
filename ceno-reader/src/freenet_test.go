@@ -97,7 +97,7 @@ func TestGetBundle(t *testing.T) {
 	t.Logf("Set config for bundle serter to %s\n", Configuration.BundleServer)
 	defer testServer.Close()
 	testUrl := "https://news.ycombinator.com"
-	bundleData, reqStatus := GetBundle(testUrl)
+	bundleData, reqStatus := GetBundle(testUrl, "ltr")
 	if reqStatus == Failure {
 		t.Error("Request was met with failure.")
 	} else {

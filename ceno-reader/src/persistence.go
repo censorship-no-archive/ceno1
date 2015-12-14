@@ -25,7 +25,8 @@ const createFeedsTable = `create table if not exists feeds(
     articles integer,
     lastPublished varchar(64),
     latest varchar(255),
-		title varchar(255)
+	title varchar(255),
+	direction varchar(64)
 );`
 
 // Create the table that contains information about items received from feeds
@@ -109,9 +110,9 @@ func SaveFeed(db *sql.DB, feed Feed) error {
 		return err1
 	}
 	_, err2 := tx.Exec(`
-        insert into feeds(url, type, charset, articles, lastPublished, latest, title)
-        values(?,?,?,?,?,?,?)`,
-		feed.Url, feed.Type, feed.Charset, feed.Articles, feed.LastPublished, feed.Latest, feed.Title)
+        insert into feeds(url, type, charset, articles, lastPublished, latest, title, direction)
+        values(?,?,?,?,?,?,?,?)`,
+		feed.Url, feed.Type, feed.Charset, feed.Articles, feed.LastPublished, feed.Latest, feed.Title, feed.Direction)
 	if err2 != nil {
 		return err2
 	}
@@ -126,18 +127,18 @@ func SaveFeed(db *sql.DB, feed Feed) error {
  */
 func AllFeeds(db *sql.DB) ([]Feed, error) {
 	var feeds []Feed
-	rows, err2 := db.Query(`select id, url, type, charset, articles, lastPublished, latest, title
+	rows, err2 := db.Query(`select id, url, type, charset, articles, lastPublished, latest, title, direction
                             from feeds`)
 	if err2 != nil {
 		return feeds, err2
 	}
 	for rows.Next() {
-		var url, _type, charset, lastPublished, latest, title string
+		var url, _type, charset, lastPublished, latest, title, direction string
 		var id, articles int
-		rows.Scan(&id, &url, &_type, &charset, &articles, &lastPublished, &latest, &title)
+		rows.Scan(&id, &url, &_type, &charset, &articles, &lastPublished, &latest, &title, &direction)
 		fmt.Printf("Found feed %s with %d articles. Last published %s on %s.\n",
 			url, articles, latest, lastPublished)
-		feeds = append(feeds, Feed{id, url, _type, charset, articles, lastPublished, latest, title})
+		feeds = append(feeds, Feed{id, url, _type, charset, articles, lastPublished, latest, title, direction})
 	}
 	rows.Close()
 	return feeds, nil
@@ -151,16 +152,16 @@ func AllFeeds(db *sql.DB) ([]Feed, error) {
  */
 func GetFeed(db *sql.DB, url string) (Feed, error) {
 	var feed Feed
-	rows, err2 := db.Query(`select id, url, type, charset, articles, lastPublished, latest, title
-                              from feeds where url=?`)
+	var id, articles int
+	var _type, charset, lastPublished, latest, title, direction string
+	log("reading feed info from database")
+	err2 := db.QueryRow(`select id, url, type, charset, articles, lastPublished, latest, title, direction from feeds where url=?`, url).Scan(&id, &url, &_type, &charset, &articles, &lastPublished, &latest, &title, &direction)
 	if err2 != nil {
+		log("Failed to retrieve feed info from the db")
 		return feed, err2
 	}
-	var id, articles int
-	var _type, charset, lastPublished, latest, title string
-	rows.Scan(&id, &url, &_type, &charset, &articles, &lastPublished, &latest, &title)
-	rows.Close()
-	return Feed{id, url, _type, charset, articles, lastPublished, latest, title}, nil
+	log("feed info: " + url + " " + title + " " + direction)
+	return Feed{id, url, _type, charset, articles, lastPublished, latest, title, direction}, nil
 }
 
 /**
