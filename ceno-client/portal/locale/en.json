@@ -2,6 +2,7 @@
   "noMoreSurveillance": "No to surveillance",
   "noMoreCensorship": "No to censorship",
   "whatNext": "What do you want to do now?",
+  "waitForConnect": "Please wait for CENO to connect before browsing",
   "browseChannels": "Browse CeNO channels",
   "browseChannelsDescription": "CENO comes loaded with content from various media sources. You can start reading them right away or while you wait for other websites to load.",
   "requestSite": "Request a website",
