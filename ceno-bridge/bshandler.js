@@ -110,8 +110,8 @@ function requestFromReader(request) {
  */
 function makeBundler(url, config, reqFromReader, enforcedDirection) {
 
-    //backward compatible default value
-    enforcedDirection = ((typeof enforcedDirection !== 'undefined') && ((enforcedDirection === 'ltr') || (enforcedDirection === 'rtl')))  ? enforcedDirection : "";
+  //backward compatible default value
+  enforcedDirection = ((typeof enforcedDirection !== 'undefined') && ((enforcedDirection === 'ltr') || (enforcedDirection === 'rtl')))  ? enforcedDirection : "";
 
   bs_log('Making bundler for ' + url);
   var bundler = new b.Bundler(url);
@@ -148,15 +148,16 @@ function makeBundler(url, config, reqFromReader, enforcedDirection) {
             bs_log(message);
             diff[originalDoc] = message;
           } else {
-              //we only enforce direction in readibility mode
-              //deciding about direction
-              var direction_tag = ""
-              if (enforcedDirection === "ltr") {
-                  direction_tag = ' dir="ltr"';
-              } else if (enforcedDirection === "rtl") {
-                  direction_tag = ' dir="rtl"';
-              }
-              var content = '<html' + direction_tag +'><head><meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/></head>';
+            //we only enforce direction in readibility mode
+            //deciding about direction
+            var direction_tag = ""
+            if (enforcedDirection === "ltr") {
+              direction_tag = ' dir="ltr"';
+            } else if (enforcedDirection === "rtl") {
+              bs_log("Bundle is RTL");
+              direction_tag = ' dir="rtl"';
+            }
+            var content = '<html' + direction_tag +'><head><meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/></head>';
             if (article.content.slice(0, 6) !== '<body>') {
               content += '<body>' + article.content + '</body></html>';
             } else {
@@ -167,7 +168,7 @@ function makeBundler(url, config, reqFromReader, enforcedDirection) {
           }
           callback(null, diff);
         });
-      // Now, in case the library encounters some exception, we can just pass the exception on as an error like usual.
+        // Now, in case the library encounters some exception, we can just pass the exception on as an error like usual.
       } catch (ex) {
         callback(ex, null);
       }

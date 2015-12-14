@@ -17,6 +17,8 @@ import (
 	"time"
 )
 
+var insertionPause int
+
 /**
  * Log the current time and a message
  * @param {interface} msg - The message to be logged
@@ -88,9 +90,9 @@ func itemFeedHandler(feed *rss.Feed, channel *rss.Channel, newItems []*rss.Item)
 		}
 
 		// Add some rate limiting in there so we don't choke the database
-		<-time.After(time.Duration(Configuration.InsertionPause) * time.Second)
-
+		time.Sleep(time.Duration(insertionPause) * time.Second)
 	}
+
 	items, itemsError := GetItems(DBConnection, feed.Url)
 	if itemsError != nil {
 		log("couldn't get items for " + feed.Url)
@@ -405,6 +407,7 @@ func main() {
 	} else {
 		Configuration = conf
 	}
+	insertionPause = Configuration.InsertionPause
 	// Establish a connection to the database
 	var dbErr error
 	DBConnection, dbErr = InitDBConnection(DB_FILENAME)
