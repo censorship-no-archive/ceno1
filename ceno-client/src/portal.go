@@ -304,7 +304,7 @@ func PortalArticlesHandler(w http.ResponseWriter, r *http.Request) {
 
 func PortalAboutHandler(w http.ResponseWriter, r *http.Request) {
 	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
-	t, _ := template.ParseFiles("./views/about.html", "./views/nav.html", "./views/resources.html", "./views/breadcrumbs.html", "./views/scripts.html", "./views/aboutceno.html")
+	t, _ := template.ParseFiles("./views/about.html", "./views/nav.html", "./views/resources.html", "./views/breadcrumbs.html", "./views/scripts.html")
 	module := make(map[string]interface{})
 	module["Breadcrumbs"] = []PortalPath{
 		{"CeNO", "/portal"},
