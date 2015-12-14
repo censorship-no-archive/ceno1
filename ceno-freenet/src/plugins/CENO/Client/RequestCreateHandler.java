@@ -6,7 +6,6 @@ import plugins.CENO.CENOErrCode;
 import plugins.CENO.CENOException;
 import plugins.CENO.Common.URLtoUSKTools;
 import freenet.pluginmanager.PluginHTTPException;
-import freenet.support.Base64;
 import freenet.support.IllegalBase64Exception;
 import freenet.support.api.HTTPRequest;
 
@@ -36,7 +35,7 @@ public class RequestCreateHandler extends AbstractCENOClientHandler {
 
 		// Base64 Decode the URL parameter
 		try {
-			urlParam = Base64.decodeUTF8(urlParam);
+			urlParam = URLtoUSKTools.b64DecSafe(urlParam);
 		} catch (IllegalBase64Exception e) {
 			return returnError(new CENOException(CENOErrCode.LCS_HANDLER_URL_DECODE), clientIsHtml);
 		}

@@ -14,9 +14,10 @@ import org.apache.commons.validator.routines.UrlValidator;
 import freenet.client.InsertException;
 import freenet.keys.FreenetURI;
 import freenet.support.Base64;
+import freenet.support.IllegalBase64Exception;
 
 public class URLtoUSKTools {
-	
+
 	public static final String PORTAL_DOC_NAME = "CENO-RSS";
 
 	public static Map<String, String> splitURL(String requestPath) throws MalformedURLException {
@@ -65,15 +66,15 @@ public class URLtoUSKTools {
 		//TODO Once insertions with manifests that point to previous inserted files under the same domain
 		// are implemented, remove Base64 encoding and use USKs in the format:
 		// USK@{bridge public key, decryption key, encryption settings}/{domain}/{version}/{extra Path}
-		
-		String computedKey = requestURI.replaceFirst("SSK", "USK") + Base64.encodeStandardUTF8(requestPath) + "/-1/";
+
+		String computedKey = requestURI.replaceFirst("SSK", "USK") + b64EncSafe(requestPath) + "/-1/";
 
 		return new FreenetURI(computedKey);
 	}
 
 	public static FreenetURI computeInsertURI(String domain, String insertURI) throws MalformedURLException {
 		FreenetURI insertURIconfig = new FreenetURI(insertURI);
-		FreenetURI result = new FreenetURI("USK", Base64.encodeStandardUTF8(domain), insertURIconfig.getRoutingKey(), insertURIconfig.getCryptoKey(), insertURIconfig.getExtra());
+		FreenetURI result = new FreenetURI("USK", b64EncSafe(domain), insertURIconfig.getRoutingKey(), insertURIconfig.getCryptoKey(), insertURIconfig.getExtra());
 
 		try {
 			result.checkInsertURI();
@@ -94,16 +95,16 @@ public class URLtoUSKTools {
 		if (urlParam == null  || urlParam.isEmpty()) {
 			throw new MalformedURLException("Given URL was empty");
 		}
-		
+
 		if (urlParam.equalsIgnoreCase(PORTAL_DOC_NAME)) {
 			return PORTAL_DOC_NAME;
 		}
-		
+
 		// Won't serve favicons
 		if (urlParam.endsWith("favicon.ico")) {
 			throw new MalformedURLException("Won't serve favicons");
 		}
-		
+
 		// Remove preceding slash
 		urlParam = urlParam.replaceFirst("^/", "");
 
@@ -122,7 +123,7 @@ public class URLtoUSKTools {
 		if (Pattern.matches(".*://.*", urlParam)) {
 			throw new MalformedURLException("Unsupported protocol");
 		}
-		
+
 		// If the url ends with slashes, remove them
 		urlParam = urlParam.replaceAll("/+$", "");
 
@@ -162,6 +163,28 @@ public class URLtoUSKTools {
 		}
 
 		return urlParam;
+	}
+
+	public static FreenetURI getPortalFeedsUSK(String requestURI) throws MalformedURLException {
+		return computeUSKfromURL(PORTAL_DOC_NAME, requestURI);
+	}
+
+	/**
+	 * Base64 encodes the given UTF-8 String, so that is URL and File safe (RFC4648 section 5)
+	 * @param in 
+	 * @return
+	 */
+	public static String b64EncSafe(String in) {
+		return Base64.encodeStandardUTF8(in).replace("+", "-").replace("/", "_");
+	}
+
+	/**
+	 * Decodes the given base64url (RFC4648 section 5) to a UTF-8 String
+	 * @param in 
+	 * @return
+	 */
+	public static String b64DecSafe(String in) throws IllegalBase64Exception {
+		return Base64.decodeUTF8(in.replace("-", "+").replace("_", "/"));
 	}
 
 }

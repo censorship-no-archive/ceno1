@@ -42,6 +42,15 @@ echo "*  Building resources."
 gulp build
 echo ""
 
+if [ $# -gt 0 ]; then
+  for platform in $@
+  do
+    echo "Building CENO Client for" $platform"..."
+    GOOS=${platform%_*} GOARCH=${platform#*_} go build $SOURCE_FILES
+    mv client CENOClient_$platform
+  done
+fi
+
 go build $SOURCE_FILES
 COMPILE_STATUS=$?
 if [ $COMPILE_STATUS -eq 0 ]; then

@@ -19,6 +19,8 @@
     "gulp-concat": "latest",
     "gulp-jshint": "latest",
     "gulp-jsoncombine": "latest",
-    "jshint-stylish": "latest"
+    "jshint": "latest",
+    "jshint-stylish": "latest",
+    "urlsafe-base64": "latest"
   }
 }

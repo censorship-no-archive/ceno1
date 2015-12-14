@@ -66,7 +66,7 @@ func InsertFreenet(bundleData []byte) RequestStatus {
  * @param url - The URL of the page to have bundled.
  * @param direction - rtl/ltr to be enforced by readability
  */
-func GetBundle(url string, direction string) ([]byte, RequestStatus) {
+func GetBundle(url string) ([]byte, RequestStatus) {
 	b64Url := base64.StdEncoding.EncodeToString([]byte(url))
 	bundleUrl := Configuration.BundleServer + "/?url=" + b64Url
 	if direction != "" {

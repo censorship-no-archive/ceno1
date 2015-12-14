@@ -6,7 +6,6 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import freenet.support.Base64;
 import net.minidev.json.JSONObject;
 import net.minidev.json.JSONValue;
 import net.minidev.json.parser.ParseException;
@@ -54,7 +53,7 @@ public class Bundle {
 	}
 
 	private void doRequest() throws IOException, ParseException {
-		uri = Base64.encodeStandardUTF8("http://" + URLtoUSKTools.validateURL(uri));
+		uri = URLtoUSKTools.b64EncSafe("http://" + URLtoUSKTools.validateURL(uri));
 		URL url = new URL("http", "127.0.0.1", CENOBridge.bundleServerPort, "/?url=" + uri);
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 

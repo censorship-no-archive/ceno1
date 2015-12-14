@@ -24,7 +24,9 @@ you are encouraged to think carefully about the risks that you face.
 New users are advised to use the CENOBox, an all-in-one bundle that includes a
 preconfigured version of all the client-side components. You can download the
 latest release for your operating system from [here](https://github.com/equalitie/ceno/releases/latest).
-We currently distribute CENOBox for Linux and Mac OS X.
+We currently distribute CENOBox for Linux and Mac OS X. You need to have either
+Firefox or Chrome/Chromium installed on your machine, as well as a Java
+Runtime Environment (in Debian/Ubuntu we recommend the `default-jre` package).
 
 ### CENOBox in Linux and Mac OS X
 
@@ -164,7 +166,7 @@ Detailed instructions for building the client can be found [here](https://github
 
 Download the following dependencies:
   * [fred](https://github.com/freenet/fred-staging) and build it following the
-[official instructions](https://github.com/freenet/fred/blob/next/README.building.md)
+[official instructions](https://github.com/freenet/fred/blob/master/README.building.md)
   * [freenet-ext](https://downloads.freenetproject.org/latest/freenet-ext.jar)
 or build them from [the source code](https://github.com/freenet/contrib)
   * [JUnit4](https://github.com/junit-team/junit/wiki/Download-and-Install)

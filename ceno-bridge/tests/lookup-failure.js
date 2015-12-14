@@ -7,6 +7,7 @@ var path = require('path');
 var http = require('http');
 var should = require('should');
 var request = require('request');
+var URLSafeBase64 = require('urlsafe-base64');
 var handler = require('../bshandler');
 
 describe('bundler-server', function () {
@@ -23,7 +24,7 @@ describe('bundler-server', function () {
 
   it('should respond to lookup requests with a bundle, created date, and url field', function (done) {
     // Recall that URLS must be base64-encoded.
-    var url = (new Buffer('https://news.ycombinator.com')).toString('base64');
+    var url = URLSafeBase64.encode('https://news.ycombinator.com');
     request('http://localhost:' + this.config.port + '/lookup?url=' + url,
       function (err, response, body) {
         should.not.exist(err);

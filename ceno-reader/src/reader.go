@@ -160,7 +160,13 @@ func followFeeds(requests chan SaveFeedRequest) {
 			return
 		} else {
 			log("Saved")
-			writeFeedsErr := writeFeeds([]Feed{feedInfo})
+			feeds, feedErr := AllFeeds(DBConnection)
+			if feedErr != nil {
+				log("Couldn't get feeds")
+				log(feedErr)
+				return
+			}
+			writeFeedsErr := writeFeeds(feeds)
 			if writeFeedsErr != nil {
 				log("Error writing feeds file")
 				log(writeFeedsErr)
@@ -189,7 +195,7 @@ func followFeeds(requests chan SaveFeedRequest) {
  * @return any error that occurs writing to the appropriate file
  */
 func writeItemsFile(feedUrl string, marshalledItems []byte) error {
-	filename := base64.StdEncoding.EncodeToString([]byte(feedUrl)) + ".json"
+	filename := base64.URLEncoding.EncodeToString([]byte(feedUrl)) + ".json"
 	location := path.Join(JSON_FILE_DIR, filename)
 	return ioutil.WriteFile(location, marshalledItems, os.ModePerm)
 }

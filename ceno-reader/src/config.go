@@ -33,7 +33,7 @@ var DefaultConfiguration Config = Config{
  * @return the URL that can be requested to have the BS create a bundle
  */
 func BundleGetURL(configuration Config, URL string) string {
-	encodedURL := base64.StdEncoding.EncodeToString([]byte(URL))
+	encodedURL := base64.URLEncoding.EncodeToString([]byte(URL))
 	return configuration.BundleServer + "/?url=" + encodedURL
 }
 

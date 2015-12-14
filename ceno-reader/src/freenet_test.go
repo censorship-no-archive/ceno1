@@ -69,7 +69,7 @@ func TestGetBundle(t *testing.T) {
 			t.Error("No `url` key found in query string")
 		}
 		b64Url := urls[0]
-		decodedUrl, decodeErr := base64.StdEncoding.DecodeString(b64Url)
+		decodedUrl, decodeErr := base64.URLEncoding.DecodeString(b64Url)
 		strUrl := string(decodedUrl)
 		if decodeErr != nil {
 			lastErrMsg = "URL parameter not b64 encoded properly"
