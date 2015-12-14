@@ -1,0 +1,6 @@
+translations/*.untranslated.json
+go/
+articles.debug
+test/erroringlcs
+CENOClient_*
+*.exe
