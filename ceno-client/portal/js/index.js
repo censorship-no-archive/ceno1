@@ -44,6 +44,17 @@ if (urlInputForm) {
   }
 }
 
-languages.setIndexText('en');
+languages.setIndexText(CURRENT_LOCALE);
+
+function showWaitMessage() {
+  if (navigation.getPortalStatus() !== 'okay') {
+    let whatNextHeader = document.getElementById('whatNextHeader');
+    whatNextHeader.classList.add('hidden');
+    let waitForConnect = document.getElementById('waitForConnect');
+    waitForConnect.classList.remove('hidden');
+  }
+}
+
+window.setTimeout(showWaitMessage, 500);
 
 })();

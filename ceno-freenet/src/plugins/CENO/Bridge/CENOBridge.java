@@ -1,5 +1,6 @@
 package plugins.CENO.Bridge;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
@@ -19,6 +20,7 @@ import plugins.CENO.Bridge.BridgeDatabase;
 import plugins.CENO.Bridge.Signaling.ChannelMaker;
 import plugins.CENO.Common.Crypto;
 import plugins.CENO.FreenetInterface.NodeInterface;
+import freenet.client.InsertException;
 import freenet.keys.FreenetURI;
 import freenet.pluginmanager.FredPlugin;
 import freenet.pluginmanager.FredPluginRealVersioned;
@@ -40,7 +42,7 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 
 	// Interface objects with fred
 	public static NodeInterface nodeInterface;
-    BridgeDatabase bridgeDatabase;
+	BridgeDatabase bridgeDatabase;
 	ChannelMaker channelMaker;
 
 	private static boolean isMasterBridge = false;
@@ -75,59 +77,72 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 			initConfig.storeProperties();
 		}
 
-		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-		// Read RSA keypair and modulus from configuration file or, if not available, create a new one
-		KeyPair asymKeyPair = null;
-		try {
-			if (!Crypto.isValidKeypair(initConfig.getProperty("asymkey.pubKey"), initConfig.getProperty("asymkey.privKey"))) {
-				Logger.warning(this, "CENOBridge will generate a new RSA key pair for the decentralized signaling. This might take a while");
-				asymKeyPair = Crypto.generateAsymKey();
-				initConfig.setProperty("asymkey.pubKey", Crypto.savePublicKey(asymKeyPair.getPublic()));
-				initConfig.setProperty("asymkey.privKey", Crypto.savePrivateKey(asymKeyPair.getPrivate()));
-				initConfig.storeProperties();
-			} else {
-				asymKeyPair = new KeyPair(Crypto.loadPublicKey(initConfig.getProperty("asymkey.pubKey")), Crypto.loadPrivateKey(initConfig.getProperty("asymkey.privKey")));
-				Logger.normal(this, "Found RSA key in configuration file");
-			}
-		} catch (UnsupportedEncodingException e) {
-			Logger.error(this, "Unsupported Encoding Exception during RSA key validation: " + e.getMessage());
-		} catch (GeneralSecurityException e) {
-			Logger.error(this, "General Security Exception: " + e.getMessage());
-		} catch (IllegalBase64Exception e) {
-			Logger.error(this, "Failed to base64 encode/decode: " + e.getMessage());
-		} finally {
-			if (asymKeyPair == null) {
-				terminate();
-			}
-		}
-
 		String confIsMasterBridge = initConfig.getProperty("isMasterBridge");
-
 		if (confIsMasterBridge != null && confIsMasterBridge.equals("true")) {
 			isMasterBridge = true;
 		}
 
 		String confIsSingalBridge = initConfig.getProperty("isSignalBridge");
-
 		if (confIsSingalBridge != null && confIsSingalBridge.equals("true")) {
 			isSignalBridge = true;
 
-            String confBridgeDB = initConfig.getProperty("bridgeDB");
-            if (confBridgeDB == null) {
-                confBridgeDB = DBPATH;
-            }
-            try {
-                bridgeDatabase = new BridgeDatabase(DBPATH);
-            } catch (CENOException e) {
+			Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+			// Read RSA keypair and modulus from configuration file or, if not available, create a new one
+			KeyPair asymKeyPair = null;
+			try {
+				if (!Crypto.isValidKeypair(initConfig.getProperty("asymkey.pubKey"), initConfig.getProperty("asymkey.privKey"))) {
+					Logger.warning(this, "CENOBridge will generate a new RSA key pair for the decentralized signaling. This might take a while");
+					asymKeyPair = Crypto.generateAsymKey();
+					initConfig.setProperty("asymkey.pubKey", Crypto.savePublicKey(asymKeyPair.getPublic()));
+					initConfig.setProperty("asymkey.privKey", Crypto.savePrivateKey(asymKeyPair.getPrivate()));
+					initConfig.storeProperties();
+				} else {
+					asymKeyPair = new KeyPair(Crypto.loadPublicKey(initConfig.getProperty("asymkey.pubKey")), Crypto.loadPrivateKey(initConfig.getProperty("asymkey.privKey")));
+					Logger.normal(this, "Found RSA key in configuration file");
+				}
+			} catch (UnsupportedEncodingException e) {
+				Logger.error(this, "Unsupported Encoding Exception during RSA key validation: " + e.getMessage());
+			} catch (GeneralSecurityException e) {
+				Logger.error(this, "General Security Exception: " + e.getMessage());
+			} catch (IllegalBase64Exception e) {
+				Logger.error(this, "Failed to base64 encode/decode: " + e.getMessage());
+			} finally {
+				if (asymKeyPair == null) {
+					terminate();
+					return;
+				}
+			}
+
+			String confBridgeDB = initConfig.getProperty("bridgeDB");
+			if (confBridgeDB == null) {
+				confBridgeDB = DBPATH;
+			}
+			try {
+				bridgeDatabase = new BridgeDatabase(DBPATH);
+			} catch (CENOException e) {
 				Logger.error(this, "Could not open bridge database");
 				terminate();
-            }
-            
+			}
+
 			try {
-				channelMaker = new ChannelMaker(initConfig.getProperty("insertURI"), asymKeyPair, bridgeDatabase);
-			} catch (CENOException e) {
-				Logger.error(this, "Could not start decentralized signaling channel maker");
+				channelMaker = new ChannelMaker(initConfig.getProperty("insertURI"), asymKeyPair);
+				channelMaker.publishNewPuzzle();
+			} catch (IOException e) {
+				Logger.error(this, "Could not start channel listener for the given insertURI: " + e.getMessage());
 				terminate();
+				return;
+			} catch (InsertException e) {
+				Logger.error(this, "Could not start announcement channel insertion for the given insertURI: " + e.getMessage());
+				terminate();
+				return;
+			} catch (GeneralSecurityException e) {
+				Logger.error(this, "The given public RSA key is invalid");
+				terminate();
+				return;
+			} catch (CENOException e) {
+				Logger.error(this, "Could not start decentralized signaling channel maker: " + e.getMessage());
+				terminate();
+				return;
 			}
 		}
 
@@ -217,7 +232,7 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 	{
 		// Stop the thread that is polling for new channel requests
 		if (isSignalBridge && channelMaker != null) {
-			channelMaker.stopListener();
+			channelMaker.stopListeners();
 		}
 
 		// Stop cenoHttpServer and unbind ports

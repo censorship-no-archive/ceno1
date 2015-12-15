@@ -69,7 +69,7 @@ func TestGetBundle(t *testing.T) {
 			t.Error("No `url` key found in query string")
 		}
 		b64Url := urls[0]
-		decodedUrl, decodeErr := base64.StdEncoding.DecodeString(b64Url)
+		decodedUrl, decodeErr := base64.URLEncoding.DecodeString(b64Url)
 		strUrl := string(decodedUrl)
 		if decodeErr != nil {
 			lastErrMsg = "URL parameter not b64 encoded properly"
@@ -97,7 +97,7 @@ func TestGetBundle(t *testing.T) {
 	t.Logf("Set config for bundle serter to %s\n", Configuration.BundleServer)
 	defer testServer.Close()
 	testUrl := "https://news.ycombinator.com"
-	bundleData, reqStatus := GetBundle(testUrl)
+	bundleData, reqStatus := GetBundle(testUrl, "ltr")
 	if reqStatus == Failure {
 		t.Error("Request was met with failure.")
 	} else {

@@ -13,6 +13,12 @@ import (
 	"strings"
 )
 
+// A global variable set by the handler for the POST /locale route
+var CurrentLocale string = "en"
+
+// A global variable set by the handler for the GET /status route
+var CurrentConnection string = "error"
+
 type PortalPath struct {
 	PageName string
 	Href     string
@@ -57,7 +63,7 @@ type LanguageStringJSON map[string]map[string]string
  * @return the path to the article of interest's respective JSON file on disk
  */
 func articlesFilename(feedUrl string) string {
-	b64FeedUrl := base64.StdEncoding.EncodeToString([]byte(feedUrl))
+	b64FeedUrl := base64.URLEncoding.EncodeToString([]byte(feedUrl))
 	return path.Join(".", "json-files", b64FeedUrl+".json")
 }
 
@@ -69,7 +75,7 @@ func articlesFilename(feedUrl string) string {
 func getFeedUrl(feedUrl string) (string, error) {
 	parts := strings.Split(feedUrl, "/")
 	b64FeedUrl := parts[len(parts)-1]
-	decoded, decodeErr := base64.StdEncoding.DecodeString(b64FeedUrl)
+	decoded, decodeErr := base64.URLEncoding.DecodeString(b64FeedUrl)
 	if decodeErr != nil {
 		return "", decodeErr
 	}
@@ -107,7 +113,7 @@ func InitModuleWithFeeds() (map[string]interface{}, error) {
 	// Convert the URLs of feeds to the form that the CENO Client can handle directly, when clicked
 	for i, feed := range feedInfo.Feeds {
 		url := feed.Url
-		feedInfo.Feeds[i].Url = "cenosite/" + base64.StdEncoding.EncodeToString([]byte(url))
+		feedInfo.Feeds[i].Url = "cenosite/" + base64.URLEncoding.EncodeToString([]byte(url))
 	}
 	var err error = nil
 	mapping := make(map[string]interface{})
@@ -219,7 +225,7 @@ func loadLanguageStrings() ([]LanguageStrings, LanguageStringJSON, error) {
 
 func PortalIndexHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Got request for test portal page")
-	t, _ := template.ParseFiles("./views/index.html", "./views/nav.html", "./views/resources.html", "./views/scripts.html", "./views/overlay.html")
+	t, _ := template.ParseFiles("./views/index.html", "./views/nav.html", "./views/resources.html", "./views/scripts.html")
 	module := map[string]interface{}{}
 	languageStrings, langStringsJson, readErr := loadLanguageStrings()
 	if readErr != nil {
@@ -230,6 +236,8 @@ func PortalIndexHandler(w http.ResponseWriter, r *http.Request) {
 		// For the javascript code that applies strings
 		module["LanguageStringsAsJSON"] = stringifyLanguages(langStringsJson)
 	}
+	module["CurrentLocale"] = CurrentLocale
+	module["CurrentConnection"] = CurrentConnection
 	t.Execute(w, module)
 }
 
@@ -253,6 +261,8 @@ func PortalChannelsHandler(w http.ResponseWriter, r *http.Request) {
 			// For the javascript code that applies strings
 			module["LanguageStringsAsJSON"] = stringifyLanguages(langStringsJson)
 		}
+		module["CurrentLocale"] = CurrentLocale
+		module["CurrentConnection"] = CurrentConnection
 		t.Execute(w, module)
 	}
 }
@@ -262,11 +272,14 @@ func PortalArticlesHandler(w http.ResponseWriter, r *http.Request) {
 	t, _ := template.ParseFiles("./views/articles.html", "./views/nav.html", "./views/resources.html", "./views/breadcrumbs.html", "./views/scripts.html")
 	pathComponents := strings.Split(r.URL.Path, "/")
 	b64FeedUrl := pathComponents[len(pathComponents)-1]
-	feedUrlBytes, _ := base64.StdEncoding.DecodeString(b64FeedUrl)
+	feedUrlBytes, _ := base64.URLEncoding.DecodeString(b64FeedUrl)
 	feedUrl := string(feedUrlBytes)
 	module, err := InitModuleWithArticles(feedUrl)
 	if err != nil {
-		t.Execute(w, nil)
+		HandleCCError(ERR_NO_ARTICLES_FILE, T("no_articles_file_err"), ErrorState{
+			"responseWriter": w,
+			"request":        r,
+		})
 	} else {
 		module["PublishedWord"] = T("published_word")
 		module["AuthorWord"] = T("authors_word")
@@ -283,13 +296,15 @@ func PortalArticlesHandler(w http.ResponseWriter, r *http.Request) {
 			// For the javascript code that applies strings
 			module["LanguageStringsAsJSON"] = stringifyLanguages(langStringsJson)
 		}
+		module["CurrentLocale"] = CurrentLocale
+		module["CurrentConnection"] = CurrentConnection
 		t.Execute(w, module)
 	}
 }
 
 func PortalAboutHandler(w http.ResponseWriter, r *http.Request) {
 	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
-	t, _ := template.ParseFiles("./views/about.html", "./views/nav.html", "./views/resources.html", "./views/breadcrumbs.html", "./views/scripts.html", "./views/aboutceno.html")
+	t, _ := template.ParseFiles("./views/about.html", "./views/nav.html", "./views/resources.html", "./views/breadcrumbs.html", "./views/scripts.html")
 	module := make(map[string]interface{})
 	module["Breadcrumbs"] = []PortalPath{
 		{"CeNO", "/portal"},
@@ -305,5 +320,86 @@ func PortalAboutHandler(w http.ResponseWriter, r *http.Request) {
 		// For the Javascript code that applies strings
 		module["LanguageStringsAsJSON"] = stringifyLanguages(langJson)
 	}
+	module["CurrentLocale"] = CurrentLocale
+	module["CurrentConnection"] = CurrentConnection
 	t.Execute(w, module)
+}
+
+type SetLocaleRequest struct {
+	Locale string `json:"locale"`
+}
+
+func PortalLocaleHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	// We'll write error messages but only really use them for debugging purposes on the client side.
+	if r.Method != "POST" {
+		w.Write([]byte(`{"success": false, "error": "Only post requests accepted to the /locale route."}`))
+		return
+	}
+	requestData := SetLocaleRequest{}
+	decoder := json.NewDecoder(r.Body)
+	decodeErr := decoder.Decode(&requestData)
+	if decodeErr != nil {
+		w.Write([]byte(`{"success": false, "error": "` + decodeErr.Error() + `"}`))
+		return
+	}
+	localeIsSupported := false
+	for _, supportedLanguage := range Configuration.PortalLanguages {
+		if requestData.Locale == supportedLanguage.Locale {
+			localeIsSupported = true
+			break
+		}
+	}
+	if !localeIsSupported {
+		w.Write([]byte(`{"success": false, "error": "Unsupported locale ` + requestData.Locale + `."}`))
+	} else {
+		CurrentLocale = requestData.Locale
+		w.Write([]byte(`{"success": true}`))
+	}
+}
+
+// If errors occur, they'll use the error fields the rest of the CC is used to seeing.
+// This is what happens when you build stuff while you learn a new language.
+type StatusResponse struct {
+	Status       string `json:"status"`
+	Message      string `json:"message"`
+	ErrorCode    int    `json:"ErrCode"`
+	ErrorMessage string `json:"ErrMsg"`
+}
+
+/**
+ * Handle requests of the form `http://127.0.0.1:3090/status`
+ * In turn CeNo client will make /status request to the LCS
+ * @param {ResponseWriter} w - The object used to handle writing responses to the client
+ * @param {*Request} r - Information about the request
+ */
+func StatusHandler(w http.ResponseWriter, r *http.Request) {
+	log("Got request to check status of LCS")
+	T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
+	response, err := http.Get(StatusCheckURL(Configuration))
+	w.Header().Set("Content-Type", "application/json")
+	if err != nil {
+		errMsg := T("lcs_not_ready_cli")
+		log(errMsg)
+		w.Write([]byte(`{"status": "error", "message": "` + errMsg + `"}`))
+	} else if response == nil || response.StatusCode != 200 {
+		errMsg := T("lcs_not_ready_cli")
+		log(errMsg)
+		w.Write([]byte(`{"status": "error", "message": "` + errMsg + `"}`))
+	} else { //no error for now
+		defer response.Body.Close()
+		// Store the connection status for use in other pages.
+		status := StatusResponse{}
+		decoder := json.NewDecoder(response.Body)
+		decodeErr := decoder.Decode(&status)
+		if decodeErr != nil {
+			CurrentConnection = "error"
+			w.Write([]byte(`{"status": "error"}`))
+		} else {
+			CurrentConnection = status.Status
+			bytes, _ := json.Marshal(status)
+			w.Write(bytes)
+		}
+	}
+
 }

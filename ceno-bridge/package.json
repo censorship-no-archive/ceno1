@@ -15,7 +15,8 @@
     "equalitie-bundler": "1.1.4",
     "i18n": "latest",
     "node-readability": "latest",
-    "dateformat": "latest"
+    "dateformat": "latest",
+    "urlsafe-base64": "latest"
   },
   "devDependencies": {
     "should": "latest",

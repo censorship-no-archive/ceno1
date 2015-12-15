@@ -64,7 +64,7 @@ func StatusCheckURL(configuration Config) string {
  * @return the URL to request to have the LCS lookup a URL
  */
 func BundleLookupURL(configuration Config, URL string) string {
-	encodedURL := base64.StdEncoding.EncodeToString([]byte(URL))
+	encodedURL := base64.URLEncoding.EncodeToString([]byte(URL))
 	return configuration.CacheServer + LCS_LOOKUP + "?url=" + encodedURL
 }
 
@@ -75,7 +75,7 @@ func BundleLookupURL(configuration Config, URL string) string {
  * @return the URL to request to have the RS create a new bundle
  */
 func CreateBundleURL(configuration Config, URL string) string {
-	encodedURL := base64.StdEncoding.EncodeToString([]byte(URL))
+	encodedURL := base64.URLEncoding.EncodeToString([]byte(URL))
 	return configuration.RequestServer + RS_CREATE + "?url=" + encodedURL
 }
 

@@ -107,6 +107,7 @@ type Feed struct {
 	LastPublished string `json:"lastPublished"`
 	Latest        string `json:"latest"`
 	Title         string `json:"title"`
+	Direction     string `json:"direction"`
 }
 
 /**

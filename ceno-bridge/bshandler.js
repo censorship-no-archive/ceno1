@@ -2,6 +2,7 @@ var fs = require('fs');
 var qs = require('querystring');
 var url = require('url');
 var dateFormat = require('dateformat');
+var URLSafeBase64 = require('urlsafe-base64');
 
 var makeReadable = require('node-readability');
 var request = require('request');
@@ -60,9 +61,22 @@ function reportCompleteBundle(config, data, wasRewritten, cb) {
  */
 function constructRequestUrl(reqUrl, wasRewritten) {
   var newUrl = qs.parse(url.parse(reqUrl).query).url;
-  newUrl = (new Buffer(newUrl, 'base64')).toString();
+  newUrl = URLSafeBase64.decode(newUrl).toString("utf8");
   newUrl = wasRewritten ? newUrl.replace('http://', 'https://') : newUrl;
   return newUrl;
+}
+
+/**
+ * Check the query for direction field and if it exists extract and returns it
+ * allowed values are rtl and ltr
+ * @param {string} reqUrl - The value of `req.url`
+ * @return {string} the value of direction field if it contains permited values
+ *                  otherwise returns empty string
+ */
+function retrieveDirection(reqUrl) {
+  var direction = qs.parse(url.parse(reqUrl).query).direction;
+  direction = (direction === 'rtl' || direction === 'ltr') ? direction : "";
+  return direction;
 }
 
 /**
@@ -92,11 +106,27 @@ function requestFromReader(request) {
  * @param {string} url - The URL to fetch
  * @param {object} config - The configuration options for the bundle server
  * @param {bool} reqfromReader - Whether the request comes from the RSS reader or not
+ * @param enforcedDirection - the direction being enforced after readability is applied (RSS reader request only)
  * @return {Bundler} A bundler object that will fetch the requested resource
  */
-function makeBundler(url, config, reqFromReader) {
+function makeBundler(url, config, reqFromReader, enforcedDirection) {
+
+  //backward compatible default value
+  enforcedDirection = ((typeof enforcedDirection !== 'undefined') && ((enforcedDirection === 'ltr') || (enforcedDirection === 'rtl')))  ? enforcedDirection : "";
+
   bs_log('Making bundler for ' + url);
   var bundler = new b.Bundler(url);
+
+  bundler.on('originalRequest', function (options, callback) {
+    options.strictSSL = config.strictSSL;
+    callback(null, options);
+  });
+
+  bundler.on('resourceRequest', function (options, callback, $, response) {
+    options.strictSSL = config.strictSSL;
+    callback(null, options);
+  });
+
   if (config.useProxy) {
     bundler.on('originalRequest', b.proxyTo(config.proxyAddress));
     bundler.on('resourceRequest', b.proxyTo(config.proxyAddress));
@@ -119,7 +149,16 @@ function makeBundler(url, config, reqFromReader) {
             bs_log(message);
             diff[originalDoc] = message;
           } else {
-            var content = '<html dir="rtl"><head><meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/></head>';
+            //we only enforce direction in readibility mode
+            //deciding about direction
+            var direction_tag = ""
+            if (enforcedDirection === "ltr") {
+              direction_tag = ' dir="ltr"';
+            } else if (enforcedDirection === "rtl") {
+              bs_log("Bundle is RTL");
+              direction_tag = ' dir="rtl"';
+            }
+            var content = '<html' + direction_tag +'><head><meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/></head>';
             if (article.content.slice(0, 6) !== '<body>') {
               content += '<body>' + article.content + '</body></html>';
             } else {
@@ -130,7 +169,7 @@ function makeBundler(url, config, reqFromReader) {
           }
           callback(null, diff);
         });
-      // Now, in case the library encounters some exception, we can just pass the exception on as an error like usual.
+        // Now, in case the library encounters some exception, we can just pass the exception on as an error like usual.
       } catch (ex) {
         callback(ex, null);
       }
@@ -163,7 +202,7 @@ function handler(config) {
     });
     res.writeHead(200, {'Content-Type': 'application/json'});
 
-    var bundler = makeBundler(requestedUrl, config, requestFromReader(req));
+    var bundler = makeBundler(requestedUrl, config, requestFromReader(req), retrieveDirection(req.url));
     bundler.bundle(function (err, bundle) {
       if (err) {
         if (!disconnected) {

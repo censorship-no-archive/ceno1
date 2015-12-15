@@ -181,12 +181,9 @@ public class ChannelMaker implements Runnable {
 			}
 		}
 		channelStatus = ChannelStatus.puzzleSolved;
-		SimpleFieldSet replySfs = new SimpleFieldSet(true);
-		replySfs.put("id", (int) (Math.random() * (Integer.MAX_VALUE * 0.8)));
-		replySfs.putOverwrite("insertURI", signalSSK.toString());
 		byte[] encReply = null;
 		try {
-			encReply = Crypto.encrypt(replySfs.toOrderedString().getBytes("UTF-8"), pubKey);
+			encReply = Crypto.encrypt(signalSSK.toString().getBytes("UTF-8"), pubKey);
 		} catch (GeneralSecurityException e1) {
 			Logger.error(this, "General security exception while encrypting response to quiz: " + e1.getMessage());
 		} catch (IllegalBase64Exception e1) {

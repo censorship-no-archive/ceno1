@@ -1,5 +1,5 @@
 (function () {
 
-languages.setChannelText('en');
+languages.setChannelText(CURRENT_LOCALE);
 
 })();

@@ -56,7 +56,7 @@ var errorAdvice = map[ErrorCode]string{
 	ERR_NO_CONFIG:              "missing_config_err",
 	ERR_MALFORMED_URL:          "malformed_url_err",
 	ERR_NO_FEEDS_FILE:          "no_feeds_file_err",
-	ERR_NO_ARTICLES_FILE:       "no_articles_file_err",
+	ERR_NO_ARTICLES_FILE:       "no_articles_advice",
 	ERR_CORRUPT_JSON:           "corrupt_json_err",
 	ERR_NO_CONNECT_LCS:         "agent_communication_err",
 	ERR_MALFORMED_LCS_RESPONSE: "contact_devs_err",
@@ -109,6 +109,8 @@ var lcsErrorHandlers = map[ErrorCode]func(ErrorState) bool{
 // depending on the error being served, automatically refresh itself the same way
 // that wait.html does.
 var AutoRefreshingErrorPages = map[ErrorCode]bool{
+	ERR_NO_FEEDS_FILE:          true,
+	ERR_NO_ARTICLES_FILE:       true,
 	ERR_NO_CONNECT_LCS:         true,
 	ERR_MALFORMED_LCS_RESPONSE: true,
 	ERR_FROM_LCS:               true,

@@ -4,8 +4,7 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import freenet.node.FSParseException;
-import freenet.support.SimpleFieldSet;
+import freenet.support.Logger;
 
 public class ChannelManager {
 	private List<Channel> channelList;
@@ -41,19 +40,15 @@ public class ChannelManager {
 		}
 	}
 
-	public void addChannel(SimpleFieldSet sfs) throws MalformedURLException {
-		Channel channel = null;
+	public void addChannel(String signalSSK) {
+		Channel channel;
 		try {
-			channel = new Channel(sfs.getString("insertURI"));
-		} catch (FSParseException e) {
-			// TODO Log this
-			e.printStackTrace();
-			return;
+			channel = new Channel(signalSSK);
+			addChannel(channel);
 		} catch (MalformedURLException e) {
-			// TODO Log this
-			e.printStackTrace();
+			Logger.warning(this, "Could not subscribe to SSK during channel creation for key: " + signalSSK);
+			return;
 		}
-		addChannel(channel);
 	}
 
 	public boolean removeChannel(Channel channel) {

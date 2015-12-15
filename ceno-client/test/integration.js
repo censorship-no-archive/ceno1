@@ -6,6 +6,7 @@ var http = require('http');
 var urllib = require('url');
 var querystring = require('querystring');
 var request = require('request');
+var URLSafeBase64 = require('urlsafe-base64');
 
 // Header set by extension to signal a rewrite from HTTPS to HTTP
 // Node's http.IncomingMessage.headers use lowercase for header names
@@ -18,7 +19,7 @@ const REWRITTEN_HEADER = 'x-ceno-rewritten';
 var lcsServer = http.createServer(function (req, res) {
   console.log('LCS got lookup');
   var url = querystring.parse(urllib.parse(req.url).query).url;
-  url = (new Buffer(url, 'base64')).toString();
+  url = URLSafeBase64(url);
   res.writeHead(200, {'Content-Type': 'application/json'});
   res.write(JSON.stringify({
     complete: true,
@@ -58,7 +59,7 @@ var rsServer = http.createServer(function (req, res) {
   if (req.url.substring(0, '/create'.length) === '/create') {
     console.log('RS got create');
     var url = querystring.parse(urllib.parse(req.url).query).url;
-    url = (new Buffer(url, 'base64')).toString();
+    url = URLSafeBase64(url);
     console.log('RS got URL ' + url);
     res.writeHead(200, {'Content-Type': 'text/plain'});
     res.write('okay');
@@ -66,7 +67,7 @@ var rsServer = http.createServer(function (req, res) {
     console.log('RS wrote okay');
     var headers = {};
     headers[REWRITTEN_HEADER] = req.headers[REWRITTEN_HEADER];
-    url = (new Buffer(url)).toString('base64');
+    url = URLSafeBase64(url);
     request({
       url: 'http://localhost:3094?url=' + url,
       headers: headers
@@ -85,7 +86,7 @@ var rsServer = http.createServer(function (req, res) {
     });
     req.on('end', function () {
       var data = JSON.parse(jsonData);
-      var url = (new Buffer(data.url, 'base64')).toString();
+      var url = URLSafeBase64(data.url);
       console.log('RS got bundle for ' + url);
       res.write('okay');
       res.end();
@@ -95,4 +96,3 @@ var rsServer = http.createServer(function (req, res) {
 
 rsServer.listen(3092);
 console.log('Request Sender listening on port 3092');
-
