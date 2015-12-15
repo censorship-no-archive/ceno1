@@ -47,6 +47,8 @@ public class ChannelMaker {
 			throw new CENOException(CENOErrCode.RR, "Could not insert channel announcer page");
 		}
 
+        //For test reason only cause real test takes 20 min comment for real life
+        //bridgeDatabase.storeChannel("SSK@TcKLMqVPTtqeOXhDbGBXLbdQj4wkfUN040YmAdDdzyk,5QZI7cLj4nstrpR~wYiIlKsptRX5fQG6plv5y7bPCy8,AQECAAE", null);
         //Add the channels currently stored in the database
         ChannelManager.getInstance().addChannels(bridgeDatabase.retrieveChannels());
 

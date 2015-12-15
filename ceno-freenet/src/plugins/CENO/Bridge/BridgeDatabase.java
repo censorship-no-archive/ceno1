@@ -33,13 +33,18 @@ public class BridgeDatabase
     public BridgeDatabase(String databasePath) throws CENOException
     //: databasePath(databasePath)
     {
-        try {
-            Class.forName("org.sqlite.JDBC");
-            String jdbcString = "jdbc:sqlite:"+databasePath;
-            _conn = DriverManager.getConnection(jdbcString);
-            CreateDatabaseStructure();
-        } catch ( Exception e ) {
-            throw new CENOException(CENOErrCode.LCS_DATABASE_CONNECT_FAILED, "Could not connect to the bridge database");
+        //Sanity check
+        if (_conn != null) {
+            Logger.error(this, "Already connected to the database.");
+        } else {
+            try {
+                Class.forName("org.sqlite.JDBC");
+                String jdbcString = "jdbc:sqlite:"+databasePath;
+                _conn = DriverManager.getConnection(jdbcString);
+                CreateDatabaseStructure();
+            } catch ( Exception e ) {
+                throw new CENOException(CENOErrCode.LCS_DATABASE_CONNECT_FAILED, "Could not connect to the bridge database");
+            }
         }
     }
 
@@ -51,18 +56,19 @@ public class BridgeDatabase
     public void CreateDatabaseStructure() throws CENOException {
         Statement sqlCommand = null;
         //Sanity check
-        if (_conn != null) {
-            Logger.error(this, "Already connected to the database.");
+        if (_conn == null) {
+            Logger.error(this, "Not connected to the database yet.");
+            throw new CENOException(CENOErrCode.LCS_DATABASE_OPERATION_FAILED, "Failed to create channel table");
         }
         //Creating the channel table
         try {
             sqlCommand = _conn.createStatement();
-            String sql = "CREATE TABLE IF NOT EXISTS channels " +
-                "(id INT PRIMARY KEY AUTOINCREMENT," +
-                "privateSSK TEXT  NOT NULL," +
+            String sqlString = "CREATE TABLE IF NOT EXISTS channels " +
+                "(id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                "privateSSK TEXT NOT NULL," +
                 "lastKnownVersion INT," +
                 "lastSynced TEXT);";
-            sqlCommand.executeUpdate(sql);
+            sqlCommand.executeUpdate(sqlString);
             sqlCommand.close();
         } catch ( Exception e ) {
             throw new CENOException(CENOErrCode.LCS_DATABASE_OPERATION_FAILED, "Failed to create channel table");
@@ -83,18 +89,23 @@ public class BridgeDatabase
         
         try {
             sqlCommand = _conn.createStatement();
-            String sql = "SELECT * FROM channels; ";
+            String sqlString = "SELECT * FROM channels; ";
 
-            ResultSet result = sqlCommand.executeQuery(sql);
+            ResultSet result = sqlCommand.executeQuery(sqlString);
 
-            while ( result.next() )
-                storedChannels.add(new Channel(result.getString("privateSSK"),
+            while ( result.next() ) {
+                try {
+                    storedChannels.add(new Channel(result.getString("privateSSK"),
                                                result.getLong("lastKnownVersion")));
-            
+                } catch ( Exception e ) {
+                    Logger.error(this, "failed to add a channel for a stored SSK ");
+                }
+            }
             result.close();
             sqlCommand.close();
 
         } catch ( Exception e ) {
+            Logger.error(this, "failed to access the stored channel table");
             throw new CENOException(CENOErrCode.LCS_DATABASE_OPERATION_FAILED, "Failed to read the stored channel");
             
         }
@@ -115,15 +126,16 @@ public class BridgeDatabase
         try {
             sqlCommand = _conn.createStatement();
             
-            String sql = "INSERT INTO  channels (privateSSK,lastKnownVersion) " +
-                "VALUES (" + insertSSK+ ", " + String.valueOf(providedEdition) + ");"; 
+            String sqlString = "INSERT INTO  channels (privateSSK,lastKnownVersion) " +
+                "VALUES ('" + insertSSK+ "', " + String.valueOf(providedEdition) + ");"; 
 
-            sqlCommand.executeUpdate(sql);
+            sqlCommand.executeUpdate(sqlString);
             sqlCommand.close();
-            _conn.commit();
+            //_conn.commit(); auto commit is enabled by default
 
         } catch ( Exception e ) {
-            throw new CENOException(CENOErrCode.LCS_DATABASE_OPERATION_FAILED, "Failed to store channel");
+            Logger.error(this,"Failed to store channel");
+            //throw new CENOException(CENOErrCode.LCS_DATABASE_OPERATION_FAILED, "Failed to store channel");
             
         }
 
