@@ -1,19 +1,15 @@
 package plugins.CENO.Bridge;
 
-import java.sql.*;
-
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-
-import java.util.List;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.List;
 
 import plugins.CENO.CENOErrCode;
 import plugins.CENO.CENOException;
 import plugins.CENO.Bridge.Signaling.Channel;
-
 import freenet.support.Logger;
 
 public class BridgeDatabase
@@ -58,7 +54,7 @@ public class BridgeDatabase
         //Sanity check
         if (_conn == null) {
             Logger.error(this, "Not connected to the database yet.");
-            throw new CENOException(CENOErrCode.LCS_DATABASE_OPERATION_FAILED, "Failed to create channel table");
+            throw new CENOException(CENOErrCode.RR_DATABASE_OPERATION_FAILED, "Failed to create channel table");
         }
         //Creating the channel table
         try {
@@ -71,7 +67,7 @@ public class BridgeDatabase
             sqlCommand.executeUpdate(sqlString);
             sqlCommand.close();
         } catch ( Exception e ) {
-            throw new CENOException(CENOErrCode.LCS_DATABASE_OPERATION_FAILED, "Failed to create channel table");
+            throw new CENOException(CENOErrCode.RR_DATABASE_OPERATION_FAILED, "Failed to create channel table");
             
         }
     
@@ -106,7 +102,7 @@ public class BridgeDatabase
 
         } catch ( Exception e ) {
             Logger.error(this, "failed to access the stored channel table");
-            throw new CENOException(CENOErrCode.LCS_DATABASE_OPERATION_FAILED, "Failed to read the stored channel");
+            throw new CENOException(CENOErrCode.RR_DATABASE_OPERATION_FAILED, "Failed to read the stored channel");
             
         }
 

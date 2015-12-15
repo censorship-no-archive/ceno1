@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
-import java.util.concurrent.TimeUnit;
 
 import plugins.CENO.CENOErrCode;
 import plugins.CENO.CENOException;
@@ -30,10 +29,10 @@ public class ChannelMaker {
 	public void publishNewPuzzle() throws IOException, InsertException, CENOException, GeneralSecurityException {
 		Puzzle puzzle = new Puzzle();
 
-        //For test reason only cause real test takes 20 min comment for real life
-        //bridgeDatabase.storeChannel("SSK@TcKLMqVPTtqeOXhDbGBXLbdQj4wkfUN040YmAdDdzyk,5QZI7cLj4nstrpR~wYiIlKsptRX5fQG6plv5y7bPCy8,AQECAAE", null);
-        //Add the channels currently stored in the database
-        ChannelManager.getInstance().addChannels(bridgeDatabase.retrieveChannels());
+		//For test reason only cause real test takes 20 min comment for real life
+		//bridgeDatabase.storeChannel("SSK@TcKLMqVPTtqeOXhDbGBXLbdQj4wkfUN040YmAdDdzyk,5QZI7cLj4nstrpR~wYiIlKsptRX5fQG6plv5y7bPCy8,AQECAAE", null);
+		//Add the channels currently stored in the database
+		ChannelManager.getInstance().addChannels(bridgeDatabase.retrieveChannels());
 
 		ChannelMakerAnnouncer channelMakerAnnouncer = new ChannelMakerAnnouncer(bridgeInsertURI, Crypto.savePublicKey(asymKeyPair.getPublic()), puzzle);
 		channelMakerAnnouncer.doAnnounce();

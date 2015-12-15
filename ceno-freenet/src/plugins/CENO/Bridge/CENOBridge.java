@@ -125,7 +125,7 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 			}
 
 			try {
-				channelMaker = new ChannelMaker(initConfig.getProperty("insertURI"), asymKeyPair);
+				channelMaker = new ChannelMaker(initConfig.getProperty("insertURI"), asymKeyPair, bridgeDatabase);
 				channelMaker.publishNewPuzzle();
 			} catch (IOException e) {
 				Logger.error(this, "Could not start channel listener for the given insertURI: " + e.getMessage());
