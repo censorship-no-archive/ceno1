@@ -15,6 +15,8 @@ import plugins.CENO.CENOException;
 import plugins.CENO.CENOL10n;
 import plugins.CENO.Configuration;
 import plugins.CENO.Version;
+import plugins.CENO.Bridge.BridgeDatabase;
+
 import plugins.CENO.Bridge.Signaling.ChannelMaker;
 import plugins.CENO.Common.Crypto;
 import plugins.CENO.FreenetInterface.NodeInterface;
@@ -40,6 +42,7 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 
 	// Interface objects with fred
 	public static NodeInterface nodeInterface;
+	BridgeDatabase bridgeDatabase;
 	ChannelMaker channelMaker;
 
 	private static boolean isMasterBridge = false;
@@ -51,6 +54,7 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 	public static Configuration initConfig;
 	private static final Version VERSION = new Version(Version.PluginType.BRIDGE);
 	private static final String CONFIGPATH = ".CENO/bridge.properties";
+	private static final String DBPATH = ".CENO/bridge.db";
 
 	public static final String ANNOUNCER_PATH = "CENO-signaler";
 
@@ -74,16 +78,14 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 		}
 
 		String confIsMasterBridge = initConfig.getProperty("isMasterBridge");
-
 		if (confIsMasterBridge != null && confIsMasterBridge.equals("true")) {
 			isMasterBridge = true;
 		}
 
 		String confIsSingalBridge = initConfig.getProperty("isSignalBridge");
-
 		if (confIsSingalBridge != null && confIsSingalBridge.equals("true")) {
 			isSignalBridge = true;
-			
+
 			Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 			// Read RSA keypair and modulus from configuration file or, if not available, create a new one
 			KeyPair asymKeyPair = null;
@@ -110,9 +112,20 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 					return;
 				}
 			}
-			
+
+			String confBridgeDB = initConfig.getProperty("bridgeDB");
+			if (confBridgeDB == null) {
+				confBridgeDB = DBPATH;
+			}
 			try {
-				channelMaker = new ChannelMaker(initConfig.getProperty("insertURI"), asymKeyPair);
+				bridgeDatabase = new BridgeDatabase(DBPATH);
+			} catch (CENOException e) {
+				Logger.error(this, "Could not open bridge database");
+				terminate();
+			}
+
+			try {
+				channelMaker = new ChannelMaker(initConfig.getProperty("insertURI"), asymKeyPair, bridgeDatabase);
 				channelMaker.publishNewPuzzle();
 			} catch (IOException e) {
 				Logger.error(this, "Could not start channel listener for the given insertURI: " + e.getMessage());
