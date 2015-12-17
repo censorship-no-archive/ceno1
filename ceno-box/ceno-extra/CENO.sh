@@ -72,9 +72,13 @@ startBrowser() {
       return
       ;;
 
-    Linux)
-      # Open a browser window with the CENO profiles, including the plugin
-
+      Linux)
+        # Open a browser window with the CENO profiles, including the plugin
+        if browserExists firefox
+        then
+          firefox -no-remote -private-window -profile "browser-profiles/firefox" $extInstaller &> /dev/null &
+          return
+        fi
 
       for chromecmd in chrome chromium-browser chromium google-chrome
       do
@@ -89,12 +93,6 @@ startBrowser() {
           fi
         fi
       done
-
-      if browserExists firefox
-      then
-        firefox -no-remote -private-window -profile "browser-profiles/firefox" $extInstaller &> /dev/null &
-        return
-      fi
 
       if [ -z "$chromeFound" ]
       then
