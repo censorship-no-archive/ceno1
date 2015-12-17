@@ -79,7 +79,7 @@ div#downloaders {
   padding-bottom: 20px;
   margin-left: auto;
   margin-right: auto;
-  width: 450px;
+  width: 200px;
 }
 div#downloaders button.downloader {
   width: 200px;
@@ -103,7 +103,7 @@ div.explanation {
 </head>
 <body>
   <div class="error">
-    <h1>Choose your preferred browser</h1>
+    <h1>To start using CENO, please install the browser extension</h1>
     <div id="main">
       <div class="explanation">
         <p>
@@ -120,11 +120,6 @@ div.explanation {
         <a href="../../browser-extensions/browser-extensions-builds/cenorouter@equalit.ie-1.0.0.xpi">
           <button id="firefoxExt" class="downloader">
             Install in Firefox
-          </button>
-        </a>
-        <a href="#installchrome">
-          <button id="chromeExt" class="downloader">
-            Install in Chrome/Chromium
           </button>
         </a>
       </div>
@@ -146,100 +141,5 @@ div.explanation {
         </p>
       </div>
     </div>
-    <div class="horizontalrule"></div>
-    <a name="installfirefox"></a>
-    <h1>Instructions for Firefox</h1>
-    <div class="explanation">
-      <a href="cenofirefoxinstruct1.png">
-        <img style="width: 700px;" src="cenofirefoxinstruct1.png" />
-      </a>
-    </div>
-    <h2>Step 1</h2>
-    <div class="explanation">
-      <p>
-        The first step is to open a new tab, enter <span class="colored">about:addons</span>
-        into the address bar and press enter/return.
-      </p>
-    </div>
-    <h2>Step 2</h2>
-    <div class="explanation">
-      <p>
-        Click the gear/settings icon and then click <span class="colored">
-        Install Add-on From File...</span> and select <span class="colored">
-        ceno/builds/cenorouter@equalit.ie-X.Y.Z.xpi</span>.  Note that X, Y, and Z
-        are placeholders for the version numbers of the extension shipped with your
-        copy of CENO.
-      </p>
-    </div>
-    <div class="explanation">
-      <div>
-        <a href="cenofirefoxinstruct2.png">
-          <img style="width: 250px;" src="cenofirefoxinstruct2.png" />
-        </a>
-      </div>
-    </div>
-    <h2>Step 3</h2>
-    <div class="explanation">
-      <p>
-        In the popup dialog that appears, click <span class="colored">install</span>.
-      </p>
-    </div>
-    <div>
-      <a href="#finishingup"><span class="colored">&#8595; Finishing up</span></a>
-    </div>
-    <div class="horizontalrule"></div>
-    <a name="installchrome"></a>
-    <h1>Instructions for Chrome or Chromium</h1>
-    <div class="explanation">
-      <a href="cenochromeinstruct1.png">
-        <img style="width: 700px; height: 144px;" src="cenochromeinstruct1.png" />
-      </a>
-    </div>
-    <h2>Step 1</h2>
-    <div class="explanation">
-      <p>
-        In a new tab, enter <span class="colored">chrome://extensions</span> into
-        the address bar and press enter/return.
-      </p>
-    </div>
-    <h2>Step 2</h2>
-    <div class="explanation">
-      <p>
-        Check the <span class="colored">Developer mode</span> checkbox at the top right of
-        the page.
-      </p>
-    </div>
-    <h2>Step 3</h2>
-    <div class="explanation">
-      <p>
-        Click the <span class="colored">Load unpacked extension...</span>
-        button towards the top left of the page and then open the
-        <span class="colored">ceno/ceno-chrome</span> folderin the file browser that appears
-        and click "okay" or "open".
-      </p>
-    </div>
-    <div>
-      <a href="#finishingup"><span class="colored">&#8595; Finishing up</span></a>
-    </div>
-    <div class="horizontalrule"></div>
-    <a name="finishingup"></a>
-    <h1>You're done!</h1>
-    <div class="explanation">
-      <div>
-        <a href="cenopopup.png">
-          <img style="width: 450px;" src="cenopopup.png" />
-        </a>
-      </div>
-      <p>
-        You should now have an icon in your toolbar for the CENO Router extension.
-        Clicking on it reveals a popup with some information and a <span class="colored">
-        Toggle CENO</span> button that, when clicked, will activate CENO if it is
-        inactive and deactivate it otherwise.  You must have the CENO Client running
-        to be able to activate CENO.  It will have been activated by default if you
-        started CENO by running the CENO box.  If it is not active, you should try
-        restarting the CENO box.
-      </p>
-    </div>
-  </div>
 </body>
 </html>

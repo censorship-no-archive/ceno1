@@ -48,8 +48,10 @@ browserExists() {
 
 startChromeProfile() {
   # Open a Chrome window with the CENO Router extension preloaded
-  $1 --use-temporary-user-data-dir --load-extension=$(pwd)/browser-extensions/ceno-chrome --disable-translate \
+  tempProfile=$(mktemp -d browser-profiles/chrome/google-chrome.XXXXXXX)
+  $1 --profile-directory=$tempProfile --load-extension=$(pwd)/browser-extensions/ceno-chrome --disable-translate \
   --no-first-run --disable-java --disable-metrics --no-default-browser-check $2 &> /dev/null &
+  rm -r $tempProfile
 }
 
 startBrowser() {
