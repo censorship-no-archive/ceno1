@@ -69,6 +69,12 @@ startBrowser() {
 
     Linux)
       # Open a browser window with the CENO profiles, including the plugin
+      if browserExists firefox
+      then
+        firefox -no-remote -private-window -profile "browser-profiles/firefox" $extInstaller &> /dev/null &
+        return
+      fi
+
       for chromecmd in chrome chromium-browser chromium google-chrome
       do
         if browserExists $chromecmd
@@ -83,16 +89,10 @@ startBrowser() {
         fi
       done
 
-      if browserExists firefox
-      then
-        firefox -no-remote -private-window -profile "browser-profiles/firefox" $extInstaller &> /dev/null &
-        return
-      fi
-
       if [ -z "$chromeFound" ]
       then
         echo "None of the supported browsers is installed in your machine"
-        echo "Please install Chrome or Firefox and execute this script again"
+        echo "Please install Firefox or Chromium/Chrome and execute this script again"
         exit 2
       else
         echo "Please close the" $chromeFound "window and run this script again"
