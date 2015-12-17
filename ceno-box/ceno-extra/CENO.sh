@@ -48,10 +48,13 @@ browserExists() {
 
 startChromeProfile() {
   # Open a Chrome window with the CENO Router extension preloaded
-  tempProfile=$(mktemp -d browser-profiles/chrome/google-chrome.XXXXXXX)
-  $1 --profile-directory=$tempProfile --load-extension=$(pwd)/browser-extensions/ceno-chrome --disable-translate \
+  chromeProfileDir=browser-profiles/chrome/CENO
+  if [[ ! -d $chromeProfileDir ]]
+  then
+    mkdir browser-profiles/chrome/CENO
+  fi
+  $1 --profile-directory=$chromeProfileDir --load-extension=$(pwd)/browser-extensions/ceno-chrome --disable-translate \
   --no-first-run --disable-java --disable-metrics --no-default-browser-check $2 &> /dev/null &
-  rm -r $tempProfile
 }
 
 startBrowser() {
@@ -71,11 +74,7 @@ startBrowser() {
 
     Linux)
       # Open a browser window with the CENO profiles, including the plugin
-      if browserExists firefox
-      then
-        firefox -no-remote -private-window -profile "browser-profiles/firefox" $extInstaller &> /dev/null &
-        return
-      fi
+
 
       for chromecmd in chrome chromium-browser chromium google-chrome
       do
@@ -90,6 +89,12 @@ startBrowser() {
           fi
         fi
       done
+
+      if browserExists firefox
+      then
+        firefox -no-remote -private-window -profile "browser-profiles/firefox" $extInstaller &> /dev/null &
+        return
+      fi
 
       if [ -z "$chromeFound" ]
       then
