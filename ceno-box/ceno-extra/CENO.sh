@@ -76,7 +76,7 @@ startBrowser() {
         # Open a browser window with the CENO profiles, including the plugin
         if browserExists firefox
         then
-          firefox -no-remote -private-window -profile "browser-profiles/firefox" $extInstaller &> /dev/null &
+          firefox -no-remote -private-window -profile "browser-profiles/firefox" $portal &> /dev/null &
           return
         fi
 
