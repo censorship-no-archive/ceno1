@@ -353,7 +353,13 @@ func PortalLocaleHandler(w http.ResponseWriter, r *http.Request) {
 	if !localeIsSupported {
 		w.Write([]byte(`{"success": false, "error": "Unsupported locale ` + requestData.Locale + `."}`))
 	} else {
+		log("changing locale from " + os.Getenv("CENOLANG") + " to " + CurrentLocale)
 		CurrentLocale = requestData.Locale
+		if IETFLocale, ok := ISO639toIETF[CurrentLocale]; ok {
+			os.Setenv(LANG_ENVVAR, IETFLocale)
+		} else {
+			os.Setenv(LANG_ENVVAR, CurrentLocale)
+		}
 		w.Write([]byte(`{"success": true}`))
 	}
 }
