@@ -5,28 +5,17 @@
 [CENO](https://censorship.no) is innovative censorship circumvention technology
 based on a p2p distributed caching network.
 
-The goal of CENO is to make access to cenosred content easy and safe.
-CENO exfiltrates document requests out of a censored area using an anonymous transport layer.
-It then uses networks such as Freenet to store encrypted documents in such a way that they can be easily
-retrieved securely by individuals in the censored area.
+Users do not need to know a friendly proxy server in the uncensored zone to bypass local filtering. CeNo maintains strong privacy and anonymity features as well as offering users plausible deniability in an emergency situation. CeNo is built in advance of aggressive Internet filtering and the establishment of [national intranets](http://en.wikipedia.org/wiki/National_intranet) to fence off citizens from the wicked Web. Read more about the project [here](https://github.com/equalitie/ceno/wiki)
 
 ## Disclaimer
+CENO is a work in progress and currently in alpha release. Bugs and imperfections exist. It may be possible for a malicious third party to exploit a weakness to deanonymise your IP address. In most Internet environments, using [Tor](https://www.torproject.org) is recommended for anonymous Internet browsing and publishing. 
 
-Please understand that CENO is a work in progress.  Its developers at [eQualit.ie](https://equalit.ie)
-are working hard to ensure that CENO will be able to provide a secure means of circumventing
-censorship and protect you.  However, it is possible that bugs exist that a malicious entity
-might exploit to learn about you.  At present, it will be apparent to your Internet
-Service Provider that you are using the Freenet network.  Before you use CENO,
-you are encouraged to think carefully about the risks that you face.
+## Installing CENO
 
-## Running CENO
+New users are advised to use the CENOBox, an all-in-one bundle that includes a preconfigured version of all the client-side components. You can download the latest release for your operating system from [here](https://github.com/equalitie/ceno/releases/latest).
 
-New users are advised to use the CENOBox, an all-in-one bundle that includes a
-preconfigured version of all the client-side components. You can download the
-latest release for your operating system from [here](https://github.com/equalitie/ceno/releases/latest).
-We currently distribute CENOBox for Linux and Mac OS X. You need to have either
-Firefox or Chrome/Chromium installed on your machine, as well as a Java
-Runtime Environment (in Debian/Ubuntu we recommend the `default-jre` package).
+We recommend users to run the Firefox browser but it will also work with Chrome/Chromium. You will also need a Java
+Runtime Environment (in Debian/Ubuntu we recommend the `default-jre` package, or you can find an appropriate version for your operating system from [Oracle](http://www.oracle.com/technetwork/java/javase/downloads/jre7-downloads-1880261.html).
 
 ### CENOBox in Linux and Mac OS X
 
@@ -36,13 +25,9 @@ curl -0 -J -L "https://raw.githubusercontent.com/equalitie/ceno/master/ceno-box/
 sh installCENO.sh
 ```
 
-CENOBox will open a new Chrome or Firefox window. Remember that you are protected
-by CENO only when you are using that browser window to visit websites, and only when CENO Router
-plugin status is active, which it is by default.
+CENOBox will open a new Chrome or Firefox window. Remember that you are protected by CENO only when you are using that browser window to visit websites, and only when CENO Router plugin status is active, which it is by default.
 
-Once you have installed CENOBox in your system, you can re-open a protected
-browser window by navigating to the CENOBox directory and using the CENO.sh
-script
+Once you have installed CENOBox in your system, you can re-open a protected browser window by navigating to the CENOBox directory and using the CENO.sh script
 
 ```bash
 cd ~/CENOBox
