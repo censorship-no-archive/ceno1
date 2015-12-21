@@ -1,7 +1,6 @@
 let { ToggleButton } = require('sdk/ui/button/toggle');
 let { Ci } = require('chrome');
 let { newURI } = require('sdk/url/utils');
-let { NewTabURL } = require('resource:///modules/NewTabURL.jsm');
 let events = require('sdk/system/events');
 let preferences = require('sdk/preferences/service');
 let Request = require('sdk/request').Request;
@@ -13,7 +12,7 @@ let _ = require("sdk/l10n").get;
 
 // CENO configuration settings
 const CENO_PORT = 3090;
-const CENO_ADDR = '127.0.0.1';
+const CENO_ADDR = 'localhost';
 
 // A message to alert to the user if their browser is not configured
 // to use CENO Client as a proxy.
@@ -76,7 +75,7 @@ function stripHTTPS(url) {
 function sendToProxy(event) {
   let channel = event.subject.QueryInterface(Ci.nsIHttpChannel);
   // If we get back a request that is already directed straight to the CC, ignore it
-  if (/^http:\/\/127\.0\.0\.1:3090/.test(channel.URI.spec)) {
+  if (/^http:\/\/localhost:3090/.test(channel.URI.spec)) {
     channel.setRequestHeader(REWRITTEN_HEADER, /rewritten=true$/.test(channel.URI.spec).toString(), false);
     return;
   }
@@ -94,7 +93,6 @@ function activateCENO() {
   preferences.set(PROXY_SSL_PORT, CENO_PORT);
   // Set the homepage and new tab page
   preferences.set(SETTING_HOMEPAGE, CENO_PORTAL_PAGE);
-  NewTabURL.override(CENO_PORTAL_PAGE);
   // Turn proxying on
   preferences.set(PROXY_TYPE, PROXY_TYPE_MANUAL);
 }
@@ -107,7 +105,6 @@ function deactivateCENO() {
   preferences.set(PROXY_TYPE, PROXY_TYPE_NONE);
   // Reset the user's homepage and new tab page
   preferences.set(SETTING_HOMEPAGE, 'about:home');
-  NewTabURL.reset();
 }
 
 /* Ensure that the user has the CENO client started so we can use it to proxy HTTP requests.
@@ -153,26 +150,26 @@ let panel = panels.Panel({
 /* Listen for messages from the popup's contentscript informing us that
  * the toggle button was clicked.
  */
-panel.port.on('toggle-clicked', function () {
-  if (ss.storage.active || false) {
-    deactivateCENO();
-    ss.storage.active = false;
-    console.log('Deactivated');
-    panel.port.emit('inform-activity', false);
-  } else {
-    ensureProxyIsRunning(function (proxyIsSet) {
-      if (proxyIsSet) {
-        activateCENO();
-        ss.storage.active = true;
-        console.log('Activated');
-        panel.port.emit('inform-activity', true);
-      } else {
-        console.log('Not activating');
-        panel.port.emit('issue-alert', NO_PROXY_MSG);
-      }
-    });
-  }
-});
+// panel.port.on('toggle-clicked', function () {
+//   if (ss.storage.active || false) {
+//     deactivateCENO();
+//     ss.storage.active = false;
+//     console.log('Deactivated');
+//     panel.port.emit('inform-activity', false);
+//   } else {
+//     ensureProxyIsRunning(function (proxyIsSet) {
+//       if (proxyIsSet) {
+//         activateCENO();
+//         ss.storage.active = true;
+//         console.log('Activated');
+//         panel.port.emit('inform-activity', true);
+//       } else {
+//         console.log('Not activating');
+//         panel.port.emit('issue-alert', NO_PROXY_MSG);
+//       }
+//     });
+//   }
+// });
 
 /* Show the information panel.
  */
@@ -182,9 +179,9 @@ function handleChange(state) {
       position: button,
       width: 450
     });
-    let isActive = ss.storage.active || false;
-    let word = (isActive) ? _('activeWord') : _('inactiveWord');
-    panel.port.emit('inform-activity', isActive, word);
+    //let isActive = ss.storage.active || false;
+    //let word = (isActive) ? _('activeWord') : _('inactiveWord');
+    //panel.port.emit('inform-activity', isActive, word);
   }
 }
 
@@ -197,7 +194,7 @@ ensureProxyIsRunning(function (proxyIsSet) {
     activateCENO();
     ss.storage.active = true;
     console.log('Activated');
-    panel.port.emit('inform-activity', true);
+    //panel.port.emit('inform-activity', true);
   } else {
     console.log('Not activating');
     panel.port.emit('issue-alert', NO_PROXY_MSG);
