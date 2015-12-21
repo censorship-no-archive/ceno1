@@ -1,5 +1,6 @@
 Freenet
 CENOBox*
 CENOBackbone*
+CENOBridge*
 ceno-freenet/plugins/*
 ceno-debug/*.jar

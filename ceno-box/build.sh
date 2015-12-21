@@ -138,7 +138,7 @@ mkdir CENOBox/browser-extensions
 cp -rL {browser-extensions-builds,ceno-firefox,ceno-chrome} CENOBox/browser-extensions
 cp -rL browser-profiles CENOBox
 rm CENOBox/browser-profiles/chrome/.gitkeep
-cp -r ceno-{freenet,extra}/* CENOBox
+cp -r ceno-extra/{CENO.py,CENO.sh,freenet.ini,LICENSE.CENO,memory.autolimit,README} CENOBox
 mkdir CENOBox/ceno-client
 cp -r ceno-client/{views,config,static,json-files,locale} CENOBox/ceno-client
 cp ceno-client/client CENOBox/ceno-client/CENOClient
@@ -146,20 +146,26 @@ mkdir CENOBox/ceno-client/translations
 cp ceno-client/translations/**.all.json CENOBox/ceno-client/translations
 
 cp -rL ceno-backbone/* CENOBackbone
-cp -rL ceno-bridge/* CENOBridge
 
-# Build CENO client and Backbone Freenet plugins
+mkdir CENOBridge/bundle-server
+cp -rL ceno-bridge/bundle-server/{config,locales,bundle-server.js,bshandler.js,node,package.json,README.md,translations.js} CENOBridge/bundle-server
+mkdir CENOBridge/rss-reader
+cp -rL ceno-bridge/rss-reader/{config,docs,translations,follower,reader,README.md} CENOBridge/rss-reader
+cp -r ceno-bridge/{.CENO,CENOBridge.sh,freenet.ini,memory.autolimit} CENOBridge
+mkdir CENOBridge/bundle-server/log
+mkdir CENOBridge/rss-reader/json-files
+
+# Build CENO Freenet plugins
 echo "Building CENO Freenet plugins"
-cd ../ceno-freenet
+cd ceno-freenet
 ant dist > /dev/null
-cp dist/CENO.jar $CENOBOXPATH/ceno-debug/
-cp dist/CENOBackbone.jar $CENOBOXPATH/ceno-backbone/
-cp dist/CENOBridge.jar $CENOBOXPATH/ceno-bridge/
+cp dist/CENOBackbone.jar $CENOBOXPATH/CENOBackbone/
+cp dist/CENOBridge.jar $CENOBOXPATH/CENOBridge/
 cd $CENOBOXPATH
 
 if [[ $PLUGINS == 1 ]]; then
-  cp -r ceno-debug/CENO.jar CENOBox/
-  cp ceno-debug/freenet-client.ini CENOBox/freenet.ini
+  cp ceno-freenet/dist/CENO.jar $CENOBOXPATH/CENOBox/
+  cp ceno-extra/freenet-with-plugin.ini CENOBox/freenet.ini
 fi
 
 echo
