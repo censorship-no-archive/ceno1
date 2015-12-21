@@ -58,3 +58,13 @@ type ArticleInfo struct {
 	Version int    `json:"version"`
 	Items   []Item `json:"items"`
 }
+
+/**
+ * translate portal language to the IETF stardard locale
+ */
+var ISO639toIETF = map[string]string{
+	"en": "en-us",
+	"fr": "fr-fr",
+	"fa": "fa-ir",
+	"ar": "ar-ar",
+}
