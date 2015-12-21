@@ -5,18 +5,19 @@
 [CENO](https://censorship.no) is innovative censorship circumvention technology
 based on a p2p distributed caching network.
 
-Users do not need to know a friendly proxy server in the uncensored zone to bypass local filtering. CeNo maintains strong privacy and anonymity features as well as offering users plausible deniability in an emergency situation. CeNo is built in advance of aggressive Internet filtering and the establishment of [national intranets](http://en.wikipedia.org/wiki/National_intranet) to fence off citizens from the wicked Web. Read more about the project [here](https://github.com/equalitie/ceno/wiki)
+Users do not need to know a friendly proxy server in the uncensored zone to bypass local filtering. CeNo maintains strong privacy and anonymity features as well as offering users plausible deniability in an emergency situation. CeNo is built in advance of aggressive Internet filtering and the establishment of [national intranets](http://en.wikipedia.org/wiki/National_intranet) to fence off citizens from the wicked Web. Read more about the project [here](https://github.com/equalitie/ceno/wiki).
 
-<a href="ceno-infographic"><img src="https://github.com/equalitie/ceno/raw/next/ceno-client/static/images/ceno_about_infographic.png" align="center" height="257" width="450" ></a>
+<br>
+<a href="https://github.com/equalitie/ceno/raw/next/ceno-client/static/images/ceno_about_infographic.png" target="_blank"><img src="https://github.com/equalitie/ceno/raw/next/ceno-client/static/images/ceno_about_infographic.png" align="center" height="257" width="450" ></a>
 
 ## Disclaimer
-CENO is a work in progress and currently in alpha release. Bugs and imperfections exist. It may be possible for a malicious third party to exploit a weakness to deanonymise your IP address. In most Internet environments, using [Tor](https://www.torproject.org) is recommended for anonymous Internet browsing and publishing. 
+CENO is a work in progress and currently in alpha release. Bugs and imperfections exist. It may be possible for a malicious third party to exploit a weakness to deanonymise your IP address. In most Internet environments, using [Tor](https://www.torproject.org) is recommended for anonymous Internet browsing and publishing.
 
 ## Running CENO
-For installation, please refer to [INSTALL.MD](https://github.com/equalitie/ceno/blob/next/INSTALL.md)
+For installation, please refer to [INSTALL.md](https://github.com/equalitie/ceno/blob/next/INSTALL.md).
 
 ###What you need to know
-1. CENO uses the [Freenet](https://freenetproject.org) censorship resistant platform for communications and storage. The Freenet package is bundled with CENOBOX. Launching it from your computer will in fact do three things:
+1. CENO uses the [Freenet](https://freenetproject.org) censorship resistant platform for communications and storage. The Freenet package is bundled with CENOBox. Launching it from your computer will in fact do three things:
  * Launch the CENO client software
  * Launch a [Firefox](https://github.com/equalitie/ceno/tree/next/ceno-firefox) or [Chrome](https://github.com/equalitie/ceno/tree/next/ceno-chrome) browser with the CENO plugin and open the CENO portal page (http://localhost:3090)
  * Launch Freenet
@@ -25,4 +26,3 @@ For installation, please refer to [INSTALL.MD](https://github.com/equalitie/ceno
 4. There are two ways to receive content via CENO:
  * Request websites via the CENO URL bar
  * Browse pre-loaded news feeds via CENO Channels
- 
