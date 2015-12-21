@@ -106,7 +106,6 @@ function copyFreenetFilesTo() {
   cp -r $FREENET_DIR/{\
 bin,\
 lib,\
-Uninstaller,\
 bcprov-jdk15on-152.jar,\
 freenet.ico,\
 freenet.jar,\
@@ -138,7 +137,7 @@ mkdir CENOBox/browser-extensions
 cp -rL {browser-extensions-builds,ceno-firefox,ceno-chrome} CENOBox/browser-extensions
 cp -rL browser-profiles CENOBox
 rm CENOBox/browser-profiles/chrome/.gitkeep
-cp -r ceno-extra/{CENO.py,CENO.sh,freenet.ini,LICENSE.CENO,memory.autolimit,README} CENOBox
+cp -r ceno-extra/{CENO.py,CENO.sh,freenet.ini,LICENSE.CENO,memory.autolimit,README,CENO.desktop,icon.png} CENOBox
 mkdir CENOBox/ceno-client
 cp -r ceno-client/{views,config,static,json-files,locale} CENOBox/ceno-client
 cp ceno-client/client CENOBox/ceno-client/CENOClient
@@ -164,7 +163,7 @@ cp dist/CENOBridge.jar $CENOBOXPATH/CENOBridge/
 cd $CENOBOXPATH
 
 if [[ $PLUGINS == 1 ]]; then
-  cp ceno-freenet/dist/CENO.jar $CENOBOXPATH/CENOBox/
+  cp ceno-freenet/dist/CENO.jar CENOBox/
   cp ceno-extra/freenet-with-plugin.ini CENOBox/freenet.ini
 fi
 

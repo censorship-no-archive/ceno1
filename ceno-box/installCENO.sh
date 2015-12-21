@@ -36,6 +36,13 @@ unzip -q CENOBox_$(echo $CENO_OS).zip
 # Start CENOBox
 echo
 cd CENOBox
+
+head -7 CENO.desktop > CENO.desktop
+echo Exec=sh `pwd`/CENO.sh start >> CENO.desktop
+echo Path=`pwd` >> CENO.desktop
+echo Icon=`pwd`/icon.png
+cp CENO.desktop ~/local/share/applications/CENO.desktop
+
 sh ./CENO.sh stop &> /dev/null
 sh ./CENO.sh
 cd ..

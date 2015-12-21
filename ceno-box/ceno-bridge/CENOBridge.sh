@@ -12,12 +12,13 @@ then
 fi
 
 # Start the Freenet Bridge node
+./update.sh
 ./run.sh start &> CENO.log
 
 # Start bundle server, after determining whether nodejs version >4 is available
 cd bundle-server
 npm install
-verlte $(node -v) 4 && node bundle-server.js &> CENO.log & || ./node bundle-server.js &> CENO.log &
+verlte $(node -v) 4 && node bundle-server.js &> CENO.log || ./node bundle-server.js &> CENO.log &
 disown
 cd ..
 
