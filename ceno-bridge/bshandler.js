@@ -171,11 +171,13 @@ function makeBundler(url, config, reqFromReader, enforcedDirection) {
       callback(ex, null);
     }
   });
-  try {
-    bundler.on('originalReceived', b.replaceImages);
-  } catch (ex) {
-    bs_log('Exception while replacing images');
-  }
+  bundler.on('originalReceived', function (requestFn, originalDoc, url, callback) {
+    try {
+      b.replaceImages(requestFn, originalDoc, url, callback);
+    } catch (ex) {
+      callback(ex, null);
+    }
+  });
   return bundler;
 }
 
