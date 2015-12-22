@@ -18,7 +18,9 @@ go get -u github.com/nicksnyder/go-i18n/goi18n
 
 echo ""
 echo "Merging localization files."
-cd translations
+cd tools
+python json-translation.py from
+cd ../translations
 $GOPATH/bin/goi18n *.all.json *.untranslated.json
 cd ..
 

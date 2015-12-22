@@ -1,0 +1,38 @@
+{
+    "browserActionPage": {
+        "message": "popup.html",
+        "description": ""
+    },
+    "activeStatus": {
+        "message": "غیرفعال",
+        "description": ""
+    },
+    "useCeno": {
+        "message": "تغییر وضعیت سینو",
+        "description": ""
+    },
+    "noProxyMsg": {
+        "message": "کلاینت سینو فعال نیست. لطفا پیش از فعال کردن این افزونه سینو را باز کنید.",
+        "description": ""
+    },
+    "activeWord": {
+        "message": "فعال",
+        "description": ""
+    },
+    "inactiveWord": {
+        "message": "غیرفعال",
+        "description": ""
+    },
+    "whileActive": {
+        "message": "زمانی که افزونه فعال باشد، در درخواست به سایت های HTTPS مداخله کرده تا از رمزنگاری آن توسط مرورگر جلوگیری کند. شما با کمک سینو در امنیت هستید.",
+        "description": ""
+    },
+    "currentStatus": {
+        "message": "وضعیت کنونی:",
+        "description": ""
+    },
+    "aboutEQ": {
+        "message": "توسعه دهنده سیستم های باز و قابل استفاده مجدد با تمرکز بر حفظ حریم خصوصی، امنیت آنلاین و مدیریت اطلاعات.",
+        "description": ""
+    }
+}
