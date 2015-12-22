@@ -45,7 +45,7 @@ browserSupported() {
 }
 
 if ! commandExists java
-else
+then
   echo "Please install Java Runtime Environment and execute this script again"
   echo "In Debian/Ubuntu/Mint... we recommend you install the 'default-jre' package (apt-get install default-jre)"
   echo "In fedora/CentOS/Red Hat... we recommend the 'java-1.8.0-openjdk' package (yum install java-1.8.0-openjdk)"
