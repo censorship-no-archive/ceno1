@@ -12,7 +12,8 @@ case "$(uname -s)" in
      ;;
 
    CYGWIN*|MINGW32*|MSYS*)
-     echo "Windows is not supported yet"
+     echo "Windows is not supported by this script"
+     echo "Please download the CENO Windows installer"
      exit 1
      ;;
 
@@ -37,12 +38,13 @@ unzip -q CENOBox_$(echo $CENO_OS).zip
 echo
 cd CENOBox
 
-head -7 CENO.desktop > CENO.desktop
-echo Exec=sh `pwd`/CENO.sh start >> CENO.desktop
-echo Path=`pwd` >> CENO.desktop
-echo Icon=`pwd`/icon.png
-cp CENO.desktop ~/local/share/applications/CENO.desktop
+if [ "$CENO_OS" == "Linux" ]; then
+  head -7 CENO.desktop > CENO.desktop
+  echo Exec=sh `pwd`/CENO.sh start >> CENO.desktop
+  echo Path=`pwd` >> CENO.desktop
+  echo Icon=`pwd`/icon.png
+  cp CENO.desktop ~/local/share/applications/CENO.desktop
+fi
 
-sh ./CENO.sh stop &> /dev/null
-sh ./CENO.sh
+sh ./CENO.sh start
 cd ..
