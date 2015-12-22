@@ -21,8 +21,12 @@ For installation, please refer to [INSTALL.md](https://github.com/equalitie/ceno
  * Launch the CENO client software
  * Launch a [Firefox](https://github.com/equalitie/ceno/tree/next/ceno-firefox) or [Chrome](https://github.com/equalitie/ceno/tree/next/ceno-chrome) browser with the CENO plugin and open the CENO portal page (http://localhost:3090)
  * Launch Freenet
-2. Freenet needs to discover other peers and learn about the network around you. This will take a few minutes. The CENO 'Status Indicator' will display CONNECTED when Freenet has discovered enough peers. This will happen every time you launch or restart the software.
-3. Both CENO and Freenet use a local proxy client to connect with your browser. CENO is accessible via http://localhost:3090 and Freenet via http://localhost:8888. To alternate between the respective CENO/Freenet portals in your browser, use the CENO browser plugin to enable or disable the service
+2. Freenet needs to discover other peers and learn about the network around you. This will take a few minutes and you need to wait before getting results. As it learns its gets faster. The CENO 'Status Indicator' will display CONNECTED when Freenet has discovered enough peers. This will happen every time you start the software.
+3. Both CENO and Freenet use a local proxy client to connect with your browser. CENO is accessible via http://localhost:3090/portal and Freenet via http://localhost:8888. To alternate between the respective CENO/Freenet portals in your browser, use the CENO browser plugin to enable or disable the service
 4. There are two ways to receive content via CENO:
  * Request websites via the CENO URL bar
  * Browse pre-loaded news feeds via CENO Channels
+
+<img src="https://raw.githubusercontent.com/equalitie/ceno/next/wiki/images/portal_page_guide_comments.png" align="center"</a>
+
+###
