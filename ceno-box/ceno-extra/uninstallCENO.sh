@@ -3,8 +3,8 @@
 sh ./CENO.sh stop
 
 echo
-CENO_DESKTOP="~/local/share/applications/CENO.desktop"
-if [ -a "$CENO_DESKTOP" ]; then
+CENO_DESKTOP="~/.local/share/applications/CENO.desktop"
+if [ -f "$CENO_DESKTOP" ]; then
   echo "Removing CENO desktop shortcut"
   rm $CENO_DESKTOP
 fi
