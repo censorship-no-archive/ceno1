@@ -1,16 +1,25 @@
 package plugins.CENO.Backbone;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
+import java.util.List;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 
 import plugins.CENO.Version;
 import plugins.CENO.FreenetInterface.NodeInterface;
+import plugins.CENO.Configuration;
 
 import freenet.clients.http.ConnectionsToadlet.PeerAdditionReturnCodes;
+import freenet.client.InsertException;
+import freenet.client.async.PersistenceDisabledException;
+import freenet.keys.FreenetURI;
 import freenet.io.comm.PeerParseException;
 import freenet.io.comm.ReferenceSignatureVerificationException;
 import freenet.node.DarknetPeerNode;
@@ -57,12 +66,17 @@ public class CENOBackbone implements FredPlugin, FredPluginVersioned, FredPlugin
 
 	private static final Version VERSION = new Version(Version.PluginType.BACKBONE);
 	
-	public static final String BRIDGE_KEY = "SSK@mlfLfkZmWIYVpKbsGSzOU~-XuPp~ItUhD8GlESxv8l4,tcB-IHa9c4wpFudoSm0k-iTaiE~INdeQXvcYP2M1Nec,AQACAAE/";
+	//public static final String BRIDGE_KEY = "SSK@mlfLfkZmWIYVpKbsGSzOU~-XuPp~ItUhD8GlESxv8l4,tcB-IHa9c4wpFudoSm0k-iTaiE~INdeQXvcYP2M1Nec,AQACAAE/"; what's up?
 
 	public static Node node;
 	public static NodeInterface nodeInterface;
 
 	private NodeRefHelper nodeRefHelper;
+
+	public static Configuration initConfig;
+	private static final String CONFIGPATH = ".CENO/bridge.properties";
+
+	public static final String ANNOUNCER_PATH = "CENO-Backbone";
 
 	ScheduledExecutorService scheduledExecutorService;
 	ScheduledFuture<?> scheduleSend;
@@ -71,8 +85,12 @@ public class CENOBackbone implements FredPlugin, FredPluginVersioned, FredPlugin
 		node = pr.getNode();
 		nodeRefHelper = new NodeRefHelper(node);
 
+        // Read properties of the configuration file
+		initConfig = new Configuration(CONFIGPATH);
+		initConfig.readProperties();
+
 		// Add the bridge node reference in the resources as a friend
-		PeerAdditionReturnCodes addBridgeResult = addFriendBridge();
+		PeerAdditionReturnCodes addBridgeResult = addFriendBridges();
 		if (addBridgeResult == PeerAdditionReturnCodes.ALREADY_IN_REFERENCE || addBridgeResult == PeerAdditionReturnCodes.OK) {
 			Logger.normal(this, "Successfully added the node in bridgeref.txt resource file as friend.");
 		} else {
@@ -83,65 +101,71 @@ public class CENOBackbone implements FredPlugin, FredPluginVersioned, FredPlugin
 
 		nodeInterface = new NodeInterface(pr.getNode(), pr);
 
-		/* Set a random next message number in order to avoid dropping freemails at the bridge,
-		 * because of their message number being processed before. This is obligatory since
-		 * we are using the same Freemail address with multiple backbone nodes, for reaching
-		 * the bridge.
-		 */
-		/*
-		if (!nodeInterface.setRandomNextMsgNumber(BACKBONE_FREEMAIL, BRIDGE_FREEMAIL)) {
-			Logger.error(this, "Could not set a random nextMessageNumber. Freemails will most probably be dropped at the bridge");
-			terminate();
-		}
-		*/
-
-		/* Schedule a thread in order to Send a Freemail to the bridge node with the own node reference.
-		 * First attempt will be in a minute from plugin initialization, and if it fails, there will be
-		 * other attempts every 2 minutes till the Freemail is sent. For every failed attempt, we keep
-		 * an error-level entry in the log.
-		 */
-		scheduledExecutorService = Executors.newScheduledThreadPool(1);
-		scheduleSend = scheduledExecutorService.scheduleWithFixedDelay(new RefSender(), 2, 1, TimeUnit.MINUTES);
-	}
+        if (initConfig.getProperty("backboneAnnounceURI") == null || initConfig.getProperty("backboneAnnounceURI").isEmpty()) { //we are not told where to announce our existance
+            Logger.warning(this, "backboneAnnounceURI is needed in order to inform the master bridge about our existance");
+        } else { //announce the descriptor in the uri
+            
+            //vmon: I don't think we need this we just can simply insert our descriptor in the given URI.
+            /* Schedule a thread in order to Send a Freemail to the bridge node with the own node reference.
+             * First attempt will be in a minute from plugin initialization, and if it fails, there will be
+             * other attempts every 2 minutes till the Freemail is sent. For every failed attempt, we keep
+             * an error-level entry in the log.
+             */
+            //scheduledExecutorService = Executors.newScheduledThreadPool(1);
+            //scheduleSend = scheduledExecutorService.scheduleWithFixedDelay(new RefSender(), 2, 1, TimeUnit.MINUTES);
+            try {
+                announceDescriptor(initConfig.getProperty("backboneAnnounceURI"));
+                Logger.normal(this, "Successfully annouced our node reference to the bridges.");
+            } catch(InsertException e) {
+                Logger.warning(this, "failed to announce our descriptor to the CENO Bridge(s): "+ e.getMessage());
+            }
+            
+        }
+    }
 
 	/**
-	 * Adds the node reference in the resources
-	 * as a friend to the node this plugin is loaded.
+	 * Adds the node references in the resources
+	 * as friends to the node this plugin is loaded.
 	 * 
 	 * @return the corresponding PeerAdditionReturnCode
-	 * indicating whether the bridge was added successfully
-	 * as a friend
+	 * indicating whether the bridges were added successfully
+	 * as friends
 	 */
-	private PeerAdditionReturnCodes addFriendBridge() {
-		SimpleFieldSet bridgeNodeFS;
+	private PeerAdditionReturnCodes addFriendBridges() {
+		List<SimpleFieldSet> bridgeNodeFSList;
 		try {
-			bridgeNodeFS = nodeRefHelper.getBridgeNodeRefFS();
+			 bridgeNodeFSList = nodeRefHelper.readBridgeRefs();
 		} catch (IOException e) {
 			Logger.error(this, "IO Exception while parsing bridge reference resource file");
 			return PeerAdditionReturnCodes.INTERNAL_ERROR;
 		}
+        //For now we are panincing if even we fail to add one of the bridges
 		PeerNode pn;
-		try {
-			pn = node.createNewDarknetNode(bridgeNodeFS, FRIEND_TRUST.HIGH, FRIEND_VISIBILITY.NO);
-			((DarknetPeerNode)pn).setPrivateDarknetCommentNote("Master Bridge");
-		} catch (FSParseException e) {
-			return PeerAdditionReturnCodes.CANT_PARSE;
-		} catch (PeerParseException e) {
-			return PeerAdditionReturnCodes.CANT_PARSE;
-		} catch (ReferenceSignatureVerificationException e){
-			return PeerAdditionReturnCodes.INVALID_SIGNATURE;
-		} catch (Throwable t) {
-			Logger.error(this, "Internal error adding reference :" + t.getMessage(), t);
-			return PeerAdditionReturnCodes.INTERNAL_ERROR;
-		}
-		if(Arrays.equals(pn.getPubKeyHash(), node.getDarknetPubKeyHash())) {
-			Logger.warning(this, "The bridge  node reference file belongs to this node.");
-			return PeerAdditionReturnCodes.TRY_TO_ADD_SELF;
-		}
-		if(!node.addPeerConnection(pn)) {
-			return PeerAdditionReturnCodes.ALREADY_IN_REFERENCE;
-		}
-		return PeerAdditionReturnCodes.OK;
+        for(SimpleFieldSet bridgeNodeFS :  bridgeNodeFSList) {
+            try {
+                pn = node.createNewDarknetNode(bridgeNodeFS, FRIEND_TRUST.HIGH, FRIEND_VISIBILITY.NO);
+                ((DarknetPeerNode)pn).setPrivateDarknetCommentNote("CeNo Bridge");
+            } catch (FSParseException e) {
+                return PeerAdditionReturnCodes.CANT_PARSE;
+            } catch (PeerParseException e) {
+                return PeerAdditionReturnCodes.CANT_PARSE;
+            } catch (ReferenceSignatureVerificationException e){
+                return PeerAdditionReturnCodes.INVALID_SIGNATURE;
+            } catch (Throwable t) {
+                Logger.error(this, "Internal error adding reference :" + t.getMessage(), t);
+                return PeerAdditionReturnCodes.INTERNAL_ERROR;
+            }
+    
+            if(Arrays.equals(pn.getPubKeyHash(), node.getDarknetPubKeyHash())) {
+                Logger.warning(this, "The bridge  node reference file belongs to this node.");
+                //return PeerAdditionReturnCodes.TRY_TO_ADD_SELF;
+            }
+            if(!node.addPeerConnection(pn)) {
+                Logger.warning(this, "The bridge node is already be friended.");
+                //return PeerAdditionReturnCodes.ALREADY_IN_REFERENCE;
+            }
+        }
+        return PeerAdditionReturnCodes.OK;
 	}
 
 	public String getVersion() {
@@ -158,19 +182,32 @@ public class CENOBackbone implements FredPlugin, FredPluginVersioned, FredPlugin
 		}
 	}
 
-
-	private class RefSender implements Runnable {
-
-		public void run() {
-			/*if (nodeInterface.sendFreemail(CENOBackbone.BACKBONE_FREEMAIL, new String[]{BRIDGE_FREEMAIL}, "addFriend", nodeRefHelper.getNodeRef(), "CENO")) {
-				scheduleSend.isDone();
-				scheduledExecutorService.shutdown();
-				Logger.normal(RefSender.class, "Sent Freemail to the bridge with own node reference");
-			} else {
-				Logger.error(RefSender.class, "Failed to send an email with the own node reference to the bridge");
-			}*/
-		}
-
-	}
+    /**
+     * inserts our node descriptor into the given URI
+     *
+     * @param backboneAnnounceURI the URI we are supposed to announce our descriptor in
+     *
+     * @throws InsertException in case insertion fails
+     */
+    public void announceDescriptor(String backboneAnnounceURI) throws InsertException {
+        //we read the ssk we are supposed to insert our node in from the Bridge.properties
+        //Now Inserting our node descriptor into the SSK, shouldn't this be encrypted?
+        //Maybe not as we are not disclosing the insertion URI
+        try {
+            FreenetURI insertURIconfig = new FreenetURI(backboneAnnounceURI);
+            FreenetURI announcementURI = new FreenetURI("USK", ANNOUNCER_PATH, insertURIconfig.getRoutingKey(), insertURIconfig.getCryptoKey(), insertURIconfig.getExtra());
+        
+            Logger.normal(this, "Inserting announcement freesite with USK: " + announcementURI.toString());
+            nodeInterface.insertSingleChunk(announcementURI, nodeRefHelper.getNodeRef(), nodeInterface.getVoidPutCallback(
+                                                                                                                                   "Successfully inserted our node descriptor with URI: " + announcementURI, ""));
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (PersistenceDisabledException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
 
 }
