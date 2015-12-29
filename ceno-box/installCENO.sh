@@ -90,10 +90,17 @@ if [ "$CENO_OS" = "Linux" ]
 then
   cd CENOBox
   echo "Creating Desktop shortcut"
-  head -7 CENO.desktop > CENO.desktop.new
-  echo Exec=sh `pwd`/CENO.sh start >> CENO.desktop.new
+  head -6 CENO.desktop > CENO.desktop.new
   echo Path=`pwd` >> CENO.desktop.new
   echo Icon=`pwd`/icon.png >> CENO.desktop.new
+
+  cp CENO.desktop.new CENOStop.desktop
+  echo Name=Stop CENO >> CENOStop.desktop
+  echo Exec=sh `pwd`/CENO.sh stop >> CENOStop.desktop
+  cp CENOStop.desktop "$HOME"/.local/share/applications/CENOStop.desktop
+
+  echo Name=Start CENO >> CENO.desktop.new
+  echo Exec=sh `pwd`/CENO.sh start >> CENO.desktop.new
   mv CENO.desktop.new CENO.desktop
   cp CENO.desktop "$HOME"/.local/share/applications/CENO.desktop
 fi

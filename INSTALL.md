@@ -7,10 +7,10 @@ Runtime Environment (in Debian/Ubuntu we recommend the `default-jre` package, or
 
 ### CENOBox in Linux and Mac OS X
 
+Change directory to the path you would like to install CENOBox at (we recommend your HOME directory)
+and execute the following command:
 ```bash
-cd ~
-curl -0 -J -L "https://raw.githubusercontent.com/equalitie/ceno/master/ceno-box/installCENO.sh" -o "installCENO.sh"
-sh installCENO.sh
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/equalitie/ceno/master/ceno-box/installCENO.sh)"
 ```
 
 CENOBox will open a new Chrome or Firefox window. Remember that you are protected by CENO only when you are using that browser window to visit websites, and only when CENO Router plugin status is active, which it is by default.
