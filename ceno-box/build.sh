@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/sh
 
 # This script will create a CENO all-in-one box ready for distribution
 #
@@ -29,7 +29,7 @@ do
       PLUGINS=1
       ;;
     m)
-      PLATFORMS=(darwin_amd64 linux_386 linux_amd64 linux_arm)
+      PLATFORMS=(darwin_amd64)
       ;;
   esac
 done
@@ -168,6 +168,13 @@ if [[ $PLUGINS == 1 ]]; then
 fi
 
 echo
+echo "Creating the distribution zips for the host system"
+zip -rq CENOBox.zip CENOBox/
+zip -rq CENOBackbone.zip CENOBackbone/
+zip -rq CENOBridge.zip CENOBridge/
+echo "Successfully built CENOBox.zip, CENOBackbone.zip and CENOBridge.zip distribution bundles."
+
+echo
 for platform in ${PLATFORMS[@]}
 do
   echo "Creating CENOBox for" $platform"..."
@@ -175,10 +182,4 @@ do
   zip -rq CENOBox_$platform.zip CENOBox/
 done
 
-echo "Creating the distribution zips for the host system"
-zip -rq CENOBox.zip CENOBox/
-zip -rq CENOBackbone.zip CENOBackbone/
-zip -rq CENOBridge.zip CENOBridge/
-
-echo "Successfully built CENOBox.zip, CENOBackbone.zip and CENOBridge.zip distribution bundles."
 exit 0

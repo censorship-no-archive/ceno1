@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/sh
 
 # This script should not be run with superuser rights
 if [ "X`id -u`" = "X0" ]

@@ -1,16 +1,17 @@
-#! /bin/sh
+#!/bin/sh
 
 sh ./CENO.sh stop
 
 echo
-CENO_DESKTOP="~/.local/share/applications/CENO.desktop"
-if [ -f "$CENO_DESKTOP" ]; then
-  echo "Removing CENO desktop shortcut"
-  rm $CENO_DESKTOP
+DESKTOP_SHORTCUTS_DIR="$HOME/.local/share/applications"
+if [ -f $DESKTOP_SHORTCUTS_DIR/CENO.desktop ]; then
+  echo "Removing CENO desktop shortcuts"
+  rm $DESKTOP_SHORTCUTS_DIR/CENO.desktop
+  rm $DESKTOP_SHORTCUTS_DIR/CENOStop.desktop
 fi
 
 cd ..
 echo "Removing CENOBox"
 rm -rf ./CENOBox &> /dev/null
-cd ~
+cd $HOME
 exit 0
