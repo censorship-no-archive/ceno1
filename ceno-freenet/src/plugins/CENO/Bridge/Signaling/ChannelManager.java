@@ -59,6 +59,10 @@ public class ChannelManager {
 		return false;
 	}
 
+	public List<Channel> getAllChannels() {
+		return channelList;
+	}
+
 	private void subscribeToChannel(Channel channel) throws MalformedURLException {
 		channel.publishSyn();
 		channel.subscribeToChannelUpdates();

@@ -17,7 +17,9 @@ import plugins.CENO.Configuration;
 import plugins.CENO.Version;
 import plugins.CENO.Bridge.BridgeDatabase;
 
+import plugins.CENO.Bridge.Signaling.Channel;
 import plugins.CENO.Bridge.Signaling.ChannelMaker;
+import plugins.CENO.Bridge.Signaling.ChannelManager;
 import plugins.CENO.Common.Crypto;
 import plugins.CENO.FreenetInterface.NodeInterface;
 import freenet.client.InsertException;
@@ -116,12 +118,15 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 			String confBridgeDB = initConfig.getProperty("bridgeDB");
 			if (confBridgeDB == null) {
 				confBridgeDB = DBPATH;
+				initConfig.setProperty("bridgeDB", DBPATH);
+				initConfig.storeProperties();
 			}
 			try {
 				bridgeDatabase = new BridgeDatabase(DBPATH);
 			} catch (CENOException e) {
 				Logger.error(this, "Could not open bridge database");
 				terminate();
+				return;
 			}
 
 			try {
@@ -233,6 +238,13 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 		// Stop the thread that is polling for new channel requests
 		if (isSignalBridge && channelMaker != null) {
 			channelMaker.stopListeners();
+			for (Channel channel : ChannelManager.getInstance().getAllChannels()) {
+				try {
+					bridgeDatabase.storeChannel(channel);
+				} catch (CENOException e) {
+					Logger.warning(this, "Failed to save signaling channels with SSK: " + channel.getInsertSSK());
+				}
+			}
 		}
 
 		// Stop cenoHttpServer and unbind ports

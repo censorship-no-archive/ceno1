@@ -19,8 +19,7 @@
 	<property name="apache-commonsvalidator.location" location="lib/commons-validator-1.4.1.jar"/>
 	<property name="apache-commonscompress.location" location="lib/commons-compress-1.9.jar"/>
 	<property name="bouncy-castle.location" location="../fred/lib/bcprov-jdk15on-152.jar"/>
-    <property name="sqlite.location" location="/usr/share/java/sqlite.jar"/>
-    <property name="sqlite-jdbc.location" location="/usr/share/java/sqlite-jdbc/sqlite-jdbc.jar"/>
+	<property name="sqlite-jdbc.location" location="lib/sqlite-jdbc-3.8.11.2.jar"/>
 
 	<available file="src/plugins/CENO/Version.java" property="version.present"/>
 	<available file="${junit.location}" property="junit.present"/>
@@ -43,7 +42,7 @@
 		</copy>
 	</target>
 
-    
+
 	<!-- ================================================== -->
 	<target name="setver">
 		<!-- Update the Version file -->
@@ -74,8 +73,7 @@
 				<pathelement location="${apache-commonsvalidator.location}" />
 				<pathelement location="${apache-commonscompress.location}" />
 				<pathelement location="${bouncy-castle.location}" />
-                <pathelement location="${sqlite.location}" />
-                <pathelement location="${sqlite-jdbc.location}" />
+				<pathelement location="${sqlite-jdbc.location}" />
 
 			</classpath>
 			<include name="**/*.java"/>
@@ -169,6 +167,7 @@
 			<zipfileset src="${json-smart.location}" />
 			<zipfileset src="${apache-commonsvalidator.location}" excludes="META-INF/" />
 			<zipfileset src="${apache-commonscompress.location}" excludes="META-INF/" />
+			<zipfileset src="${sqlite-jdbc.location}" />
 		</jar>
 
 		<jar jarfile="${dist}/CENOBackbone.jar" duplicate="fail">
