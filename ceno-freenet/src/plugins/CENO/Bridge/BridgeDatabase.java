@@ -114,15 +114,30 @@ public class BridgeDatabase
 	 *
 	 *   @param new channel ssk
 	 *   @param provided edition
+     *
+     *   @return true if the channel was added successfuly false if it fails
+     *           including if it is repatitive.
 	 */
-	public void storeChannel(String insertSSK, Long providedEdition, Long lastSynced) throws CENOException
+	public bool storeChannel(String insertSSK, Long providedEdition, Long lastSynced) throws CENOException
 	{
-		Statement sqlCommand;
+		Statement sql_check, sqlCommand;
+        
 		try {
+            sqlcheck = _conn.createStatement();
+			String sqlString = "SELECT * FROM channels WHERE privateSSK=" + insertSSK + ";";
+			ResultSet result = sqlCommand.executeQuery(sqlString);
+
+			if ( result.next() ) {
+                return false;
+            }
+
+			result.close();
+			sqlcheck.close();
+            
 			sqlCommand = _conn.createStatement();
 
 			String sqlString = "INSERT OR REPLACE INTO  channels (privateSSK,lastKnownVersion,lastSynced) " +
-					"VALUES ('" + insertSSK+ "', " + providedEdition + ", " + lastSynced + ");"; 
+					"VALUES ('" + insertSSK + "', " + providedEdition + ", " + lastSynced + ");"; 
 
 			sqlCommand.executeUpdate(sqlString);
 			sqlCommand.close();
@@ -134,10 +149,12 @@ public class BridgeDatabase
 
 		}
 
+        return true;
+
 	}
 
-	public void storeChannel(Channel channel) throws CENOException {
-		storeChannel(channel.getInsertSSK(), channel.getLastKnownEdition(), channel.getLastSynced());
+	public bool storeChannel(Channel channel) throws CENOException {
+		return storeChannel(channel.getInsertSSK(), channel.getLastKnownEdition(), channel.getLastSynced());
 	}
 
 
