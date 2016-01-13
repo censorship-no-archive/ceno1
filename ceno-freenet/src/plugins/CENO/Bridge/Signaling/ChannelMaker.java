@@ -13,7 +13,7 @@ import freenet.client.InsertException;
 
 public class ChannelMaker {
 	static final int MAX_POLLING_PUZZLES = 3;
-	static final int MAX_KSK_SLOTS = 20;
+	static final int MAX_KSK_SLOTS = 500;
 
 	private String bridgeInsertURI;
 	private KeyPair asymKeyPair;
@@ -57,7 +57,7 @@ public class ChannelMaker {
 		for (ChannelMakerListener channelLister : channelListeners) {
 			channelLister.stopListener();
 		}
-	} 
+	}
 
 	class Puzzle {
 		private String question;
