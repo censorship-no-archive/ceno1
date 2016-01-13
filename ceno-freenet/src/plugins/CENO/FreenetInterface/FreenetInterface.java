@@ -22,21 +22,21 @@ import freenet.support.api.Bucket;
 
 public interface FreenetInterface {
 
-	FetchResult fetchURI(FreenetURI uri) throws FetchException;
-	ClientGetter localFetchURI(FreenetURI uri, ClientGetCallback callback) throws FetchException;
-	ClientGetter distFetchURI(FreenetURI uri, ClientGetCallback callback) throws FetchException;
-	ClientGetter fetchULPR(FreenetURI uri, ClientGetCallback callback) throws FetchException;
-	boolean subscribeToUSK(USK origUSK, USKCallback cb);
-	FreenetURI[] generateKeyPair();
-	RequestClient getRequestClient();
-	FreenetURI insertBlock(InsertBlock insert, boolean getCHKOnly, String filenameHint) throws InsertException;
-	boolean insertFreesite(FreenetURI insertURI, String docName, String content, ClientPutCallback cb) throws IOException, InsertException;
-	FreenetURI insertBundleManifest(FreenetURI insertURI, String content, String defaultName, ClientPutCallback cb) throws IOException, InsertException;
-	Bucket makeBucket(int length) throws IOException;
-	FreenetURI insertManifest(FreenetURI insertURI, HashMap<String, Object> bucketsByName, String defaultName, short priorityClass) throws InsertException;
-	FreenetURI insertSingleChunk(FreenetURI uri, String content, ClientPutCallback cb) throws InsertException, PersistenceDisabledException, UnsupportedEncodingException;
-	FreenetURI insertSingleChunk(FreenetURI uri, byte[] content, ClientPutCallback cb) throws InsertException, PersistenceDisabledException, UnsupportedEncodingException;
-	NodeConnections getConnections();
-	ClientGetCallback getVoidGetCallback(String successMessage, String failureMessage, NewURICallback onNewURI);
-	ClientPutCallback getVoidPutCallback(String successMessage, String failureMessage);
+    FetchResult fetchURI(FreenetURI uri) throws FetchException;
+    ClientGetter localFetchURI(FreenetURI uri, ClientGetCallback callback) throws FetchException;
+    ClientGetter distFetchURI(FreenetURI uri, ClientGetCallback callback) throws FetchException;
+    ClientGetter fetchULPR(FreenetURI uri, ClientGetCallback callback) throws FetchException;
+    boolean subscribeToUSK(USK origUSK, USKCallback cb);
+    FreenetURI[] generateKeyPair();
+    RequestClient getRequestClient();
+    FreenetURI insertBlock(InsertBlock insert, boolean getCHKOnly, String filenameHint) throws InsertException;
+    boolean insertFreesite(FreenetURI insertURI, String docName, String content, ClientPutCallback cb) throws IOException, InsertException;
+    FreenetURI insertBundleManifest(FreenetURI insertURI, String content, String defaultName, ClientPutCallback cb) throws IOException, InsertException;
+    Bucket makeBucket(int length) throws IOException;
+    FreenetURI insertManifest(FreenetURI insertURI, HashMap<String, Object> bucketsByName, String defaultName, short priorityClass) throws InsertException;
+    FreenetURI insertSingleChunk(FreenetURI uri, String content, ClientPutCallback cb) throws InsertException, PersistenceDisabledException, UnsupportedEncodingException;
+    FreenetURI insertSingleChunk(FreenetURI uri, byte[] content, ClientPutCallback cb) throws InsertException, PersistenceDisabledException, UnsupportedEncodingException;
+    NodeConnections getConnections();
+    ClientGetCallback getVoidGetCallback(String successMessage, String failureMessage, NewURICallback onNewURI);
+    ClientPutCallback getVoidPutCallback(String successMessage, String failureMessage);
 }

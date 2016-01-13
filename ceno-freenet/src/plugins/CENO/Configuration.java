@@ -10,156 +10,156 @@ import java.util.Properties;
 import freenet.support.Logger;
 
 public class Configuration {
-	/** The default location for the configuration file (~/.CENO/ceno.properties) */
-	private static final String defaultConfigLocation = System.getProperty("user.home") + "/.CENO/config.properties";
-	private String customConfigLocation;
+    /** The default location for the configuration file (~/.CENO/ceno.properties) */
+    private static final String defaultConfigLocation = System.getProperty("user.home") + "/.CENO/config.properties";
+    private String customConfigLocation;
 
-	/**
-	 * Properties instance to keep configuration properties during the execution of CENO.
-	 * When calling {{@link #storeProperties()}, the current values of this variable
-	 * get stored in the configuration file in use.
-	 */
-	private Properties properties;
+    /**
+     * Properties instance to keep configuration properties during the execution of CENO.
+     * When calling {{@link #storeProperties()}, the current values of this variable
+     * get stored in the configuration file in use.
+     */
+    private Properties properties;
 
-	/**
-	 * Constructs a configuration file at the default location {@link #defaultConfigLocation}
-	 * 
-	 */
-	public Configuration() {
-		this(defaultConfigLocation);
-	}
+    /**
+     * Constructs a configuration file at the default location {@link #defaultConfigLocation}
+     * 
+     */
+    public Configuration() {
+        this(defaultConfigLocation);
+    }
 
-	/**
-	 * Creates a configuration object corresponding to a file at a custom location
-	 * 
-	 * @param customConfigLocation the custom location
-	 */
-	public Configuration(String customConfigLocation) {
-		this.customConfigLocation = customConfigLocation;
-		properties = new Properties();
-	}
+    /**
+     * Creates a configuration object corresponding to a file at a custom location
+     * 
+     * @param customConfigLocation the custom location
+     */
+    public Configuration(String customConfigLocation) {
+        this.customConfigLocation = customConfigLocation;
+        properties = new Properties();
+    }
 
-	/**
-	 * Tests whether the configuration file actually exists.
-	 * 
-	 * @return <code>true</code> if and only if the configuration file exists;
-	 * <code>false</code> otherwise
-	 */
-	public boolean configExists() {
-		try {
-			return new File(customConfigLocation).exists();
-		} catch(SecurityException e) {
-			return false;
-		}
-	}
+    /**
+     * Tests whether the configuration file actually exists.
+     * 
+     * @return <code>true</code> if and only if the configuration file exists;
+     * <code>false</code> otherwise
+     */
+    public boolean configExists() {
+        try {
+            return new File(customConfigLocation).exists();
+        } catch(SecurityException e) {
+            return false;
+        }
+    }
 
-	private boolean createConfigFile(String configFilePath) {
-		File configFile = new File(configFilePath);
-		try {
-			configFile.getParentFile().mkdirs();
-			if (configFile.createNewFile()) {
-				return true;
-			}
-		} catch (IOException e) {
-			return false;
-		} catch (SecurityException e) {
-			return false;
-		}
-		return true;
-	}
+    private boolean createConfigFile(String configFilePath) {
+        File configFile = new File(configFilePath);
+        try {
+            configFile.getParentFile().mkdirs();
+            if (configFile.createNewFile()) {
+                return true;
+            }
+        } catch (IOException e) {
+            return false;
+        } catch (SecurityException e) {
+            return false;
+        }
+        return true;
+    }
 
-	/**
-	 * Store into {@link #properties} the values of the configuration file.
-	 * If the configuration file does not exist, create it.
-	 * 
-	 * @return <code>true</code> if configuration file was read, or if the configuration file
-	 * didn't exist and got successfully created; <code>false</code> otherwise
-	 */
-	public boolean readProperties() {
-		if (!configExists()) {
-			Logger.warning(this, "CENOBridge configuration was missing.");
-			if (createConfigFile(customConfigLocation)) {
-				return true;
-			} else {
-				Logger.error(this, "CENO plugin could not create configuration file.");
-				return false;
-			}
-		}
-		FileInputStream configFileIn;
-		try {
-			configFileIn = new FileInputStream(customConfigLocation);
-		} catch (FileNotFoundException e) {
-			Logger.error(this, e.getMessage());
-			return false;
-		}
-		try {
-			properties.load(configFileIn);
-			configFileIn.close();
-		} catch (IOException e) {
-			Logger.error(this, e.getMessage());
-			return false;
-		}
-		return true;
-	}
+    /**
+     * Store into {@link #properties} the values of the configuration file.
+     * If the configuration file does not exist, create it.
+     * 
+     * @return <code>true</code> if configuration file was read, or if the configuration file
+     * didn't exist and got successfully created; <code>false</code> otherwise
+     */
+    public boolean readProperties() {
+        if (!configExists()) {
+            Logger.warning(this, "CENOBridge configuration was missing.");
+            if (createConfigFile(customConfigLocation)) {
+                return true;
+            } else {
+                Logger.error(this, "CENO plugin could not create configuration file.");
+                return false;
+            }
+        }
+        FileInputStream configFileIn;
+        try {
+            configFileIn = new FileInputStream(customConfigLocation);
+        } catch (FileNotFoundException e) {
+            Logger.error(this, e.getMessage());
+            return false;
+        }
+        try {
+            properties.load(configFileIn);
+            configFileIn.close();
+        } catch (IOException e) {
+            Logger.error(this, e.getMessage());
+            return false;
+        }
+        return true;
+    }
 
-	/**
-	 * Sets/updates the value of a property
-	 * Properties are not saved in the configuration file until {@link #storeProperties()}
-	 * is called.
-	 * 
-	 * @param key the key of the property
-	 * @param value the new value to be set
-	 */
-	public void setProperty(String key, String value) {
-		properties.setProperty(key, value);
-	}
-	
-	/**
-	 * Getter for the property with a given key
-	 * 
-	 * @param key the key of the property
-	 * @return a String value for that key, or null if that property does not exist
-	 */
-	public String getProperty(String key) {
-		return getProperty(key, null);
-	}
-	
-	/**
-	 * Safe getter for the property with a given key
-	 * 
-	 * @param key the key of the property
-	 * @param defaultValue the value to be returned in case that key does not exist in the properties
-	 * @return the property value for the given key, or the defaultValue if the key does not exist
-	 * in the properties
-	 */
-	public String getProperty(String key, String defaultValue) {
-		return properties.getProperty(key, defaultValue);
-	}
+    /**
+     * Sets/updates the value of a property
+     * Properties are not saved in the configuration file until {@link #storeProperties()}
+     * is called.
+     * 
+     * @param key the key of the property
+     * @param value the new value to be set
+     */
+    public void setProperty(String key, String value) {
+        properties.setProperty(key, value);
+    }
+    
+    /**
+     * Getter for the property with a given key
+     * 
+     * @param key the key of the property
+     * @return a String value for that key, or null if that property does not exist
+     */
+    public String getProperty(String key) {
+        return getProperty(key, null);
+    }
+    
+    /**
+     * Safe getter for the property with a given key
+     * 
+     * @param key the key of the property
+     * @param defaultValue the value to be returned in case that key does not exist in the properties
+     * @return the property value for the given key, or the defaultValue if the key does not exist
+     * in the properties
+     */
+    public String getProperty(String key, String defaultValue) {
+        return properties.getProperty(key, defaultValue);
+    }
 
-	/**
-	 * Stores the values of {@link #properties} in the configuration file. If a property with
-	 * the same key exists, updates its value. Properties in the configuration file that
-	 * do not exist in the {@link #properties} variable do not get updated or removed.
-	 * 
-	 * @return <code>true</code> if storing properties to the configuration file was successful,
-	 * <code>false</code> otherwise
-	 */
-	public boolean storeProperties() {
-		try {
-			FileOutputStream configFileOut = new FileOutputStream(customConfigLocation);
-			properties.store(configFileOut, null);
-			configFileOut.close();
-		} catch (SecurityException e) {
-			Logger.error(this, "Could not write properties to configuration file " + customConfigLocation);
-			return false;
-		} catch (FileNotFoundException e) {
-			Logger.error(this, "Could not open configuration file, is it a directory? " + customConfigLocation);
-			return false;
-		} catch (IOException e) {
-			Logger.error(this, "Could not store properties to configuration file " + customConfigLocation);
-			return false;
-		}
-		return true;
-	}
+    /**
+     * Stores the values of {@link #properties} in the configuration file. If a property with
+     * the same key exists, updates its value. Properties in the configuration file that
+     * do not exist in the {@link #properties} variable do not get updated or removed.
+     * 
+     * @return <code>true</code> if storing properties to the configuration file was successful,
+     * <code>false</code> otherwise
+     */
+    public boolean storeProperties() {
+        try {
+            FileOutputStream configFileOut = new FileOutputStream(customConfigLocation);
+            properties.store(configFileOut, null);
+            configFileOut.close();
+        } catch (SecurityException e) {
+            Logger.error(this, "Could not write properties to configuration file " + customConfigLocation);
+            return false;
+        } catch (FileNotFoundException e) {
+            Logger.error(this, "Could not open configuration file, is it a directory? " + customConfigLocation);
+            return false;
+        } catch (IOException e) {
+            Logger.error(this, "Could not store properties to configuration file " + customConfigLocation);
+            return false;
+        }
+        return true;
+    }
 
 }

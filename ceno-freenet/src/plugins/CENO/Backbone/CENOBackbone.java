@@ -55,122 +55,122 @@ import freenet.support.SimpleFieldSet;
  */
 public class CENOBackbone implements FredPlugin, FredPluginVersioned, FredPluginRealVersioned, FredPluginThreadless {
 
-	private static final Version VERSION = new Version(Version.PluginType.BACKBONE);
-	
-	public static final String BRIDGE_KEY = "SSK@mlfLfkZmWIYVpKbsGSzOU~-XuPp~ItUhD8GlESxv8l4,tcB-IHa9c4wpFudoSm0k-iTaiE~INdeQXvcYP2M1Nec,AQACAAE/";
+    private static final Version VERSION = new Version(Version.PluginType.BACKBONE);
+    
+    public static final String BRIDGE_KEY = "SSK@mlfLfkZmWIYVpKbsGSzOU~-XuPp~ItUhD8GlESxv8l4,tcB-IHa9c4wpFudoSm0k-iTaiE~INdeQXvcYP2M1Nec,AQACAAE/";
 
-	public static Node node;
-	public static NodeInterface nodeInterface;
+    public static Node node;
+    public static NodeInterface nodeInterface;
 
-	private NodeRefHelper nodeRefHelper;
+    private NodeRefHelper nodeRefHelper;
 
-	ScheduledExecutorService scheduledExecutorService;
-	ScheduledFuture<?> scheduleSend;
+    ScheduledExecutorService scheduledExecutorService;
+    ScheduledFuture<?> scheduleSend;
 
-	public void runPlugin(PluginRespirator pr) {
-		node = pr.getNode();
-		nodeRefHelper = new NodeRefHelper(node);
+    public void runPlugin(PluginRespirator pr) {
+        node = pr.getNode();
+        nodeRefHelper = new NodeRefHelper(node);
 
-		// Add the bridge node reference in the resources as a friend
-		PeerAdditionReturnCodes addBridgeResult = addFriendBridge();
-		if (addBridgeResult == PeerAdditionReturnCodes.ALREADY_IN_REFERENCE || addBridgeResult == PeerAdditionReturnCodes.OK) {
-			Logger.normal(this, "Successfully added the node in bridgeref.txt resource file as friend.");
-		} else {
-			// Bridge node could not be added as a friend, the plugin will terminate and unload
-			Logger.error(this, "Error while adding Bridge node as a friend, will terminate Backbone plugin...");
-			terminate();
-		}
+        // Add the bridge node reference in the resources as a friend
+        PeerAdditionReturnCodes addBridgeResult = addFriendBridge();
+        if (addBridgeResult == PeerAdditionReturnCodes.ALREADY_IN_REFERENCE || addBridgeResult == PeerAdditionReturnCodes.OK) {
+            Logger.normal(this, "Successfully added the node in bridgeref.txt resource file as friend.");
+        } else {
+            // Bridge node could not be added as a friend, the plugin will terminate and unload
+            Logger.error(this, "Error while adding Bridge node as a friend, will terminate Backbone plugin...");
+            terminate();
+        }
 
-		nodeInterface = new NodeInterface(pr.getNode(), pr);
+        nodeInterface = new NodeInterface(pr.getNode(), pr);
 
-		/* Set a random next message number in order to avoid dropping freemails at the bridge,
-		 * because of their message number being processed before. This is obligatory since
-		 * we are using the same Freemail address with multiple backbone nodes, for reaching
-		 * the bridge.
-		 */
-		/*
-		if (!nodeInterface.setRandomNextMsgNumber(BACKBONE_FREEMAIL, BRIDGE_FREEMAIL)) {
-			Logger.error(this, "Could not set a random nextMessageNumber. Freemails will most probably be dropped at the bridge");
-			terminate();
-		}
-		*/
+        /* Set a random next message number in order to avoid dropping freemails at the bridge,
+         * because of their message number being processed before. This is obligatory since
+         * we are using the same Freemail address with multiple backbone nodes, for reaching
+         * the bridge.
+         */
+        /*
+        if (!nodeInterface.setRandomNextMsgNumber(BACKBONE_FREEMAIL, BRIDGE_FREEMAIL)) {
+            Logger.error(this, "Could not set a random nextMessageNumber. Freemails will most probably be dropped at the bridge");
+            terminate();
+        }
+        */
 
-		/* Schedule a thread in order to Send a Freemail to the bridge node with the own node reference.
-		 * First attempt will be in a minute from plugin initialization, and if it fails, there will be
-		 * other attempts every 2 minutes till the Freemail is sent. For every failed attempt, we keep
-		 * an error-level entry in the log.
-		 */
-		scheduledExecutorService = Executors.newScheduledThreadPool(1);
-		scheduleSend = scheduledExecutorService.scheduleWithFixedDelay(new RefSender(), 2, 1, TimeUnit.MINUTES);
-	}
+        /* Schedule a thread in order to Send a Freemail to the bridge node with the own node reference.
+         * First attempt will be in a minute from plugin initialization, and if it fails, there will be
+         * other attempts every 2 minutes till the Freemail is sent. For every failed attempt, we keep
+         * an error-level entry in the log.
+         */
+        scheduledExecutorService = Executors.newScheduledThreadPool(1);
+        scheduleSend = scheduledExecutorService.scheduleWithFixedDelay(new RefSender(), 2, 1, TimeUnit.MINUTES);
+    }
 
-	/**
-	 * Adds the node reference in the resources
-	 * as a friend to the node this plugin is loaded.
-	 * 
-	 * @return the corresponding PeerAdditionReturnCode
-	 * indicating whether the bridge was added successfully
-	 * as a friend
-	 */
-	private PeerAdditionReturnCodes addFriendBridge() {
-		SimpleFieldSet bridgeNodeFS;
-		try {
-			bridgeNodeFS = nodeRefHelper.getBridgeNodeRefFS();
-		} catch (IOException e) {
-			Logger.error(this, "IO Exception while parsing bridge reference resource file");
-			return PeerAdditionReturnCodes.INTERNAL_ERROR;
-		}
-		PeerNode pn;
-		try {
-			pn = node.createNewDarknetNode(bridgeNodeFS, FRIEND_TRUST.HIGH, FRIEND_VISIBILITY.NO);
-			((DarknetPeerNode)pn).setPrivateDarknetCommentNote("Master Bridge");
-		} catch (FSParseException e) {
-			return PeerAdditionReturnCodes.CANT_PARSE;
-		} catch (PeerParseException e) {
-			return PeerAdditionReturnCodes.CANT_PARSE;
-		} catch (ReferenceSignatureVerificationException e){
-			return PeerAdditionReturnCodes.INVALID_SIGNATURE;
-		} catch (Throwable t) {
-			Logger.error(this, "Internal error adding reference :" + t.getMessage(), t);
-			return PeerAdditionReturnCodes.INTERNAL_ERROR;
-		}
-		if(Arrays.equals(pn.getPubKeyHash(), node.getDarknetPubKeyHash())) {
-			Logger.warning(this, "The bridge  node reference file belongs to this node.");
-			return PeerAdditionReturnCodes.TRY_TO_ADD_SELF;
-		}
-		if(!node.addPeerConnection(pn)) {
-			return PeerAdditionReturnCodes.ALREADY_IN_REFERENCE;
-		}
-		return PeerAdditionReturnCodes.OK;
-	}
+    /**
+     * Adds the node reference in the resources
+     * as a friend to the node this plugin is loaded.
+     * 
+     * @return the corresponding PeerAdditionReturnCode
+     * indicating whether the bridge was added successfully
+     * as a friend
+     */
+    private PeerAdditionReturnCodes addFriendBridge() {
+        SimpleFieldSet bridgeNodeFS;
+        try {
+            bridgeNodeFS = nodeRefHelper.getBridgeNodeRefFS();
+        } catch (IOException e) {
+            Logger.error(this, "IO Exception while parsing bridge reference resource file");
+            return PeerAdditionReturnCodes.INTERNAL_ERROR;
+        }
+        PeerNode pn;
+        try {
+            pn = node.createNewDarknetNode(bridgeNodeFS, FRIEND_TRUST.HIGH, FRIEND_VISIBILITY.NO);
+            ((DarknetPeerNode)pn).setPrivateDarknetCommentNote("Master Bridge");
+        } catch (FSParseException e) {
+            return PeerAdditionReturnCodes.CANT_PARSE;
+        } catch (PeerParseException e) {
+            return PeerAdditionReturnCodes.CANT_PARSE;
+        } catch (ReferenceSignatureVerificationException e){
+            return PeerAdditionReturnCodes.INVALID_SIGNATURE;
+        } catch (Throwable t) {
+            Logger.error(this, "Internal error adding reference :" + t.getMessage(), t);
+            return PeerAdditionReturnCodes.INTERNAL_ERROR;
+        }
+        if(Arrays.equals(pn.getPubKeyHash(), node.getDarknetPubKeyHash())) {
+            Logger.warning(this, "The bridge  node reference file belongs to this node.");
+            return PeerAdditionReturnCodes.TRY_TO_ADD_SELF;
+        }
+        if(!node.addPeerConnection(pn)) {
+            return PeerAdditionReturnCodes.ALREADY_IN_REFERENCE;
+        }
+        return PeerAdditionReturnCodes.OK;
+    }
 
-	public String getVersion() {
-		return VERSION.getVersion();
-	}
+    public String getVersion() {
+        return VERSION.getVersion();
+    }
 
-	public long getRealVersion() {
-		return VERSION.getRealVersion();
-	}
+    public long getRealVersion() {
+        return VERSION.getRealVersion();
+    }
 
-	public void terminate() {
-		if (scheduledExecutorService != null) {
-			scheduledExecutorService.shutdownNow();
-		}
-	}
+    public void terminate() {
+        if (scheduledExecutorService != null) {
+            scheduledExecutorService.shutdownNow();
+        }
+    }
 
 
-	private class RefSender implements Runnable {
+    private class RefSender implements Runnable {
 
-		public void run() {
-			/*if (nodeInterface.sendFreemail(CENOBackbone.BACKBONE_FREEMAIL, new String[]{BRIDGE_FREEMAIL}, "addFriend", nodeRefHelper.getNodeRef(), "CENO")) {
-				scheduleSend.isDone();
-				scheduledExecutorService.shutdown();
-				Logger.normal(RefSender.class, "Sent Freemail to the bridge with own node reference");
-			} else {
-				Logger.error(RefSender.class, "Failed to send an email with the own node reference to the bridge");
-			}*/
-		}
+        public void run() {
+            /*if (nodeInterface.sendFreemail(CENOBackbone.BACKBONE_FREEMAIL, new String[]{BRIDGE_FREEMAIL}, "addFriend", nodeRefHelper.getNodeRef(), "CENO")) {
+                scheduleSend.isDone();
+                scheduledExecutorService.shutdown();
+                Logger.normal(RefSender.class, "Sent Freemail to the bridge with own node reference");
+            } else {
+                Logger.error(RefSender.class, "Failed to send an email with the own node reference to the bridge");
+            }*/
+        }
 
-	}
+    }
 
 }
