@@ -1,0 +1,14 @@
+{
+    "Could not load config; Error: %s": "امکان بارگذاری یک پیکربندی وجود ندارد. خطا: %s\n",
+    "Using default config.": "در حال استفاده از تنظیمات پیکربندی پیش فرض.",
+    "Running bundler server on port %d.": "در حال اجرای سرور بسته بندی کننده بر روی پورت %d.",
+    "Got request to bundle %s": "درخواست ایجاد یک بسته برای %s دریافت شد.\n",
+    "Request was rewritten: %s": "درخواست از HTTPS به HTTP بازنویسی شد؟ %s.\n",
+    "Request ended prematurely": "درخواست قبل از موعد مقرر به پایان رسید.",
+    "Encountered error creating bundle for %s": "در ایجاد بسته برای %s خطا به وجود آمد.",
+    "Error: %s": "خطا: %s",
+    "Successfully created bundle for %s": "بسته برای  %s به موفقیت ساخته شد.",
+    "Sent bundle to RR": "بسته برای گیرنده ی درخواست که آن را برای ما وارد می کند، ارسال شد.\n",
+    "Reporting bundle completion to RR": "در حال گزارش پایان بسته بندی به گیرنده ی درخواست ",
+    "Sent POST to RR to prompt it to accept bundle": "POST به گیرنده‏‏‏ ی درخواست برای اعلام آمادگی جهت دربافت بسته ی کامل، ارسال شد"
+}

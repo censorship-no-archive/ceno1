@@ -7,24 +7,32 @@ import java.security.KeyPair;
 
 import plugins.CENO.CENOErrCode;
 import plugins.CENO.CENOException;
+import plugins.CENO.Bridge.BridgeDatabase;
 import plugins.CENO.Common.Crypto;
 import freenet.client.InsertException;
 
 public class ChannelMaker {
 	static final int MAX_POLLING_PUZZLES = 3;
-	static final int MAX_KSK_SLOTS = 20;
+	static final int MAX_KSK_SLOTS = 500;
 
 	private String bridgeInsertURI;
 	private KeyPair asymKeyPair;
-	private ChannelMakerListener[] channelListeners = new ChannelMakerListener[20];
+	private ChannelMakerListener[] channelListeners = new ChannelMakerListener[MAX_KSK_SLOTS];
+	BridgeDatabase bridgeDatabase;
 
-	public ChannelMaker(String insertURI, KeyPair asymKeyPair) throws CENOException, IOException, InsertException, GeneralSecurityException {
+	public ChannelMaker(String insertURI, KeyPair asymKeyPair, BridgeDatabase bridgeDatabase) throws CENOException {
 		this.bridgeInsertURI = insertURI;
 		this.asymKeyPair = asymKeyPair;
+		this.bridgeDatabase = bridgeDatabase;
 	}
 
 	public void publishNewPuzzle() throws IOException, InsertException, CENOException, GeneralSecurityException {
 		Puzzle puzzle = new Puzzle();
+
+		//For test reason only cause real test takes 20 min comment for real life
+		//bridgeDatabase.storeChannel("SSK@TcKLMqVPTtqeOXhDbGBXLbdQj4wkfUN040YmAdDdzyk,5QZI7cLj4nstrpR~wYiIlKsptRX5fQG6plv5y7bPCy8,AQECAAE", null);
+		//Add the channels currently stored in the database
+		ChannelManager.getInstance().addChannels(bridgeDatabase.retrieveChannels());
 
 		ChannelMakerAnnouncer channelMakerAnnouncer = new ChannelMakerAnnouncer(bridgeInsertURI, Crypto.savePublicKey(asymKeyPair.getPublic()), puzzle);
 		channelMakerAnnouncer.doAnnounce();
@@ -49,7 +57,7 @@ public class ChannelMaker {
 		for (ChannelMakerListener channelLister : channelListeners) {
 			channelLister.stopListener();
 		}
-	} 
+	}
 
 	class Puzzle {
 		private String question;

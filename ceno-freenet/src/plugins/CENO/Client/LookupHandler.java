@@ -14,7 +14,6 @@ import freenet.client.FetchException;
 import freenet.client.FetchException.FetchExceptionMode;
 import freenet.keys.FreenetURI;
 import freenet.pluginmanager.PluginHTTPException;
-import freenet.support.Base64;
 import freenet.support.IllegalBase64Exception;
 import freenet.support.Logger;
 import freenet.support.api.HTTPRequest;
@@ -43,7 +42,7 @@ public class LookupHandler extends AbstractCENOClientHandler {
 		if (!clientIsHtml) {
 			// Base64 Decode the URL parameter
 			try {
-				urlParam = Base64.decodeUTF8(urlParam);
+				urlParam = URLtoUSKTools.b64DecSafe(urlParam);
 			} catch (IllegalBase64Exception e) {
 				return returnError(new CENOException(CENOErrCode.LCS_HANDLER_URL_DECODE), clientIsHtml);
 			}

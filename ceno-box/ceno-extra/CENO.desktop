@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+GenericName=Censorship Circumvention
+Comment=Circumventing censorship using P2P storage networks
+Categories=Network;WebBrowser;Security;
+Icon=icon.png
+Exec=sh CENO.sh start
+Name=Start CENO

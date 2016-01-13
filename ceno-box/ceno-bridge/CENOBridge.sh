@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/sh
 
 verlte() {
     [  "$1" = "`echo -e "$1\n$2" | sort -V | head -n1`" ]
@@ -12,18 +12,19 @@ then
 fi
 
 # Start the Freenet Bridge node
+./update.sh
 ./run.sh start &> CENO.log
 
-
 # Start bundle server, after determining whether nodejs version >4 is available
-cd bundle-server verlte $(node -v) 4 && node bundle-server.js ||
-./node-release/node bundle-server.js &
+cd bundle-server
+npm install
+verlte $(node -v) 4 && node bundle-server.js &> ../CENO.log || ./node bundle-server.js &> ../CENO.log &
 disown
 cd ..
 
 # Start the rss-reader
 cd rss-reader
-./reader &
+./reader &> ../CENO.log &
 disown
 cd ..
 

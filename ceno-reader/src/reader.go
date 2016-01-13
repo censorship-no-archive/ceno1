@@ -17,6 +17,8 @@ import (
 	"time"
 )
 
+var insertionPause int
+
 /**
  * Log the current time and a message
  * @param {interface} msg - The message to be logged
@@ -88,9 +90,9 @@ func itemFeedHandler(feed *rss.Feed, channel *rss.Channel, newItems []*rss.Item)
 		}
 
 		// Add some rate limiting in there so we don't choke the database
-		<-time.After(time.Duration(Configuration.InsertionPause) * time.Second)
-
+		time.Sleep(time.Duration(insertionPause) * time.Second)
 	}
+
 	items, itemsError := GetItems(DBConnection, feed.Url)
 	if itemsError != nil {
 		log("couldn't get items for " + feed.Url)
@@ -158,7 +160,13 @@ func followFeeds(requests chan SaveFeedRequest) {
 			return
 		} else {
 			log("Saved")
-			writeFeedsErr := writeFeeds([]Feed{feedInfo})
+			feeds, feedErr := AllFeeds(DBConnection)
+			if feedErr != nil {
+				log("Couldn't get feeds")
+				log(feedErr)
+				return
+			}
+			writeFeedsErr := writeFeeds(feeds)
 			if writeFeedsErr != nil {
 				log("Error writing feeds file")
 				log(writeFeedsErr)
@@ -187,7 +195,7 @@ func followFeeds(requests chan SaveFeedRequest) {
  * @return any error that occurs writing to the appropriate file
  */
 func writeItemsFile(feedUrl string, marshalledItems []byte) error {
-	filename := base64.StdEncoding.EncodeToString([]byte(feedUrl)) + ".json"
+	filename := base64.URLEncoding.EncodeToString([]byte(feedUrl)) + ".json"
 	location := path.Join(JSON_FILE_DIR, filename)
 	return ioutil.WriteFile(location, marshalledItems, os.ModePerm)
 }
@@ -405,6 +413,7 @@ func main() {
 	} else {
 		Configuration = conf
 	}
+	insertionPause = Configuration.InsertionPause
 	// Establish a connection to the database
 	var dbErr error
 	DBConnection, dbErr = InitDBConnection(DB_FILENAME)

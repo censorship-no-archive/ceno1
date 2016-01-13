@@ -1,14 +1,14 @@
 {
-  "Could not load config; Error: %s": "Impossible de charger le fichier config; Erreur: %s",
-  "Using default config.": "Utilisation de config par défaut",
-	"Running bundler server on port %d.": "Exécuter un serveur d'empaquetage sur le port %d.",
-  "Got request to bundle %s": "Obtenu la demande de regrouper",
-  "Request was rewritten: %s": "Demande a été réécrit: %s",
-  "Request ended prematurely": "Demande terminée prématurément",
-  "Encountered error creating bundle for %s": "Erreur rencontrée création bundle pour %s",
-  "Error: %s": "Erreur: %s",
-  "Successfully created bundle for %s": "Bundle créé avec succès pour %s",
-  "Sent bundle to RR": "Envoyé paquet RR",
-  "Reporting bundle completion to RR": "Rapports faisceau fin à RR",
-  "Sent POST to RR to prompt it to accept bundle": "Envoi POST à RR pour inciter à accepter bundle"
+    "Could not load config; Error: %s": "Impossible de charger une configuration. Erreur : %s",
+    "Using default config.": "Utilisation des paramètres de configuration par défaut.",
+    "Running bundler server on port %d.": "Lancement du bundler sur le port %d.",
+    "Got request to bundle %s": "Requête reçue pour créer un paquet pour %s.",
+    "Request was rewritten: %s": "La requête a été réécrite de HTTPS à HTTP ? %s.",
+    "Request ended prematurely": "La requête s'est terminée prématurément.",
+    "Encountered error creating bundle for %s": "Une erreur a été rencontrée à la création du paquet pour %s.",
+    "Error: %s": "Erreur : %s",
+    "Successfully created bundle for %s": "Création du paquet pour %s réalisée avec succès.",
+    "Sent bundle to RR": "Paquet envoyé au récepteur de requêtes, qui va l'insérer pour nous.",
+    "Reporting bundle completion to RR": "Annonce de la complétude du paquet au récepteur de requêtes.",
+    "Sent POST to RR to prompt it to accept bundle": "Envoi de POST au récepteur de requêtes pour lui demander d'accepter le paquet complet."
 }

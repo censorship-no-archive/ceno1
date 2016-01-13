@@ -189,7 +189,7 @@ func directHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	// Decode the URL so we can save effort by just passing the modified request to
 	// the proxyHandler function from here.
-	decodedBytes, err := base64.StdEncoding.DecodeString(URLS[0])
+	decodedBytes, err := base64.URLEncoding.DecodeString(URLS[0])
 	if err != nil {
 		HandleCCError(ERR_MALFORMED_URL, T("url_b64_cli"), ErrorState{
 			"responseWriter": w,
@@ -320,7 +320,12 @@ func main() {
 		os.Setenv("CENOLANG", "en-us")
 		setLanguage = "en-us"
 	}
-	i18n.MustLoadTranslationFile("./translations/" + setLanguage + ".all.json")
+	i18n.MustLoadTranslationFile("./translations/" + "en-us" + ".all.json")
+	i18n.LoadTranslationFile("./translations/" + setLanguage + ".all.json")
+	for _, lang := range ISO639toIETF {
+		i18n.LoadTranslationFile("./translations/" + lang + ".all.json")
+	}
+
 	T, _ := i18n.Tfunc(setLanguage, "en-us")
 	// Read an existing configuration file or have the user supply settings
 	if conf, err := ReadConfigFile(CONFIG_FILE); err != nil {

@@ -2,6 +2,7 @@ var fs = require('fs');
 var qs = require('querystring');
 var url = require('url');
 var dateFormat = require('dateformat');
+var URLSafeBase64 = require('urlsafe-base64');
 
 var makeReadable = require('node-readability');
 var request = require('request');
@@ -60,7 +61,7 @@ function reportCompleteBundle(config, data, wasRewritten, cb) {
  */
 function constructRequestUrl(reqUrl, wasRewritten) {
   var newUrl = qs.parse(url.parse(reqUrl).query).url;
-  newUrl = (new Buffer(newUrl, 'base64')).toString();
+  newUrl = URLSafeBase64.decode(newUrl).toString("utf8");
   newUrl = wasRewritten ? newUrl.replace('http://', 'https://') : newUrl;
   return newUrl;
 }
@@ -110,8 +111,8 @@ function requestFromReader(request) {
  */
 function makeBundler(url, config, reqFromReader, enforcedDirection) {
 
-    //backward compatible default value
-    enforcedDirection = ((typeof enforcedDirection !== 'undefined') && ((enforcedDirection === 'ltr') || (enforcedDirection === 'rtl')))  ? enforcedDirection : "";
+  //backward compatible default value
+  enforcedDirection = ((typeof enforcedDirection !== 'undefined') && ((enforcedDirection === 'ltr') || (enforcedDirection === 'rtl')))  ? enforcedDirection : "";
 
   bs_log('Making bundler for ' + url);
   var bundler = new b.Bundler(url);
@@ -134,52 +135,49 @@ function makeBundler(url, config, reqFromReader, enforcedDirection) {
     bundler.on('originalRequest', b.spoofHeaders({'User-Agent': config.userAgent}));
     bundler.on('resourceRequest', b.spoofHeaders({'User-Agent': config.userAgent}));
   }
-  if (reqFromReader) {
-    bs_log('Making a readability-mode page.');
-    bundler.on('originalReceived', function (requestFn, originalDoc, url, callback) {
-      var diff = {};
-      // Wrap the whole call to the readability-mode library in a try block
-      try {
-        makeReadable(originalDoc, {charset: 'utf-8'}, function (err, article, meta) {
-          // Let's assume we're dealing with RTL text, for simplicity
-          // TODO - Find a way to switch this on/off
-          if (err) {
-            var message = _t.__('Error: %s', err.message);
-            bs_log(message);
-            diff[originalDoc] = message;
-          } else {
-              //we only enforce direction in readibility mode
-              //deciding about direction
-              var direction_tag = ""
-              if (enforcedDirection === "ltr") {
-                  direction_tag = ' dir="ltr"';
-              } else if (enforcedDirection === "rtl") {
-                  direction_tag = ' dir="rtl"';
-              }
-              var content = '<html' + direction_tag +'><head><meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/></head>';
-            if (article.content.slice(0, 6) !== '<body>') {
-              content += '<body>' + article.content + '</body></html>';
-            } else {
-              content += article.content + '</html>';
-            }
-            diff[originalDoc] = content;
-            article.close();
+  bs_log('Making a readability-mode page.');
+  bundler.on('originalReceived', function (requestFn, originalDoc, url, callback) {
+    var diff = {};
+    // Wrap the whole call to the readability-mode library in a try block
+    try {
+      makeReadable(originalDoc, {charset: 'utf-8'}, function (err, article, meta) {
+        if (err) {
+          var message = _t.__('Error: %s', err.message);
+          bs_log(message);
+          diff[originalDoc] = message;
+        } else {
+          //we only enforce direction in readibility mode
+          //deciding about direction
+          var direction_tag = ""
+          if (enforcedDirection === "ltr") {
+            direction_tag = ' dir="ltr"';
+          } else if (enforcedDirection === "rtl") {
+            bs_log("Bundle is RTL");
+            direction_tag = ' dir="rtl"';
           }
+          var content = '<html' + direction_tag +'><head><meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/></head>';
+          if (article.content.slice(0, 6) !== '<body>') {
+            content += '<body>' + article.content + '</body></html>';
+          } else {
+            content += article.content + '</html>';
+          }
+          diff[originalDoc] = content;
+          article.close();
           callback(null, diff);
-        });
+        }
+      });
+    } catch (ex) {
       // Now, in case the library encounters some exception, we can just pass the exception on as an error like usual.
-      } catch (ex) {
-        callback(ex, null);
-      }
-    });
-    bundler.on('originalReceived', b.replaceImages);
-  } else {
-    bundler.on('originalReceived', b.replaceImages);
-    bundler.on('originalReceived', b.replaceCSSFiles);
-    bundler.on('originalReceived', b.replaceJSFiles);
-    bundler.on('originalReceived', b.replaceURLCalls);
-    bundler.on('resourceReceived', b.bundleCSSRecursively);
-  }
+      callback(ex, null);
+    }
+  });
+  bundler.on('originalReceived', function (requestFn, originalDoc, url, callback) {
+    try {
+      b.replaceImages(requestFn, originalDoc, url, callback);
+    } catch (ex) {
+      callback(ex, null);
+    }
+  });
   return bundler;
 }
 
@@ -201,35 +199,39 @@ function handler(config) {
     res.writeHead(200, {'Content-Type': 'application/json'});
 
     var bundler = makeBundler(requestedUrl, config, requestFromReader(req), retrieveDirection(req.url));
-    bundler.bundle(function (err, bundle) {
-      if (err) {
-        if (!disconnected) {
-          res.statusCode = 500;
-          res.write('{"error": "' + err.message + '"}');
-          res.end();
-        }
-        bs_log(_t.__('Encountered error creating bundle for %s', requestedUrl));
-        bs_log(_t.__('Error: %s', err.message));
-      } else { // !err
-        var data = {
-          created: new Date(),
-          url: requestedUrl,
-          bundle: bundle
-        };
-        bs_log(_t.__('Successfully created bundle for %s', requestedUrl));
-        if (!disconnected) {
-          res.write(JSON.stringify(data));
-          res.end();
-          bs_log(_t.__('Sent bundle to RR'));
-        } else { // disconnected
-          bs_log(_t.__('Reporting bundle completion to RR'));
-          reportCompleteBundle(config, data, wasRewritten, function () {
+    try {
+      bundler.bundle(function (err, bundle) {
+        if (err) {
+          if (!disconnected) {
+            res.statusCode = 500;
+            res.write('{"error": "' + err.message + '"}');
             res.end();
-            bs_log(_t.__('Sent POST to RR to prompt it to accept bundle'));
-          });
+          }
+          bs_log(_t.__('Encountered error creating bundle for %s', requestedUrl));
+          bs_log(_t.__('Error: %s', err.message));
+        } else { // !err
+          var data = {
+            created: new Date(),
+            url: requestedUrl,
+            bundle: bundle
+          };
+          bs_log(_t.__('Successfully created bundle for %s', requestedUrl));
+          if (!disconnected) {
+            res.write(JSON.stringify(data));
+            res.end();
+            bs_log(_t.__('Sent bundle to RR'));
+          } else { // disconnected
+            bs_log(_t.__('Reporting bundle completion to RR'));
+            reportCompleteBundle(config, data, wasRewritten, function () {
+              res.end();
+              bs_log(_t.__('Sent POST to RR to prompt it to accept bundle'));
+            });
+          }
         }
-      }
-    });
+      });
+    } catch (ex) {
+      bs_log(_t._('Exception while making bundle'));
+    }
   };
 }
 

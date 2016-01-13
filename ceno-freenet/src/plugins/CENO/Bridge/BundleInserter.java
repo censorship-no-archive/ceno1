@@ -24,7 +24,7 @@ public class BundleInserter {
 	private static final BundleInserter INSTANCE = new BundleInserter();
 
 	private static final long SHOULD_REINSERT = TimeUnit.HOURS.toMillis(5);
-	private final int MAX_CONCURRENT_INSERTIONS = 5;
+	private final int MAX_CONCURRENT_INSERTIONS = 10;
 
 	private volatile Integer concurrentInsertions = 0;
 	private Hashtable<String, Date> insertTable = new Hashtable<String, Date>();

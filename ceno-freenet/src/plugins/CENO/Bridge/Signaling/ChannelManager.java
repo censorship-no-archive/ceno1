@@ -39,7 +39,7 @@ public class ChannelManager {
 			}
 		}
 	}
-	
+
 	public void addChannel(String signalSSK) {
 		Channel channel;
 		try {
@@ -57,6 +57,10 @@ public class ChannelManager {
 			return true;
 		}
 		return false;
+	}
+
+	public List<Channel> getAllChannels() {
+		return channelList;
 	}
 
 	private void subscribeToChannel(Channel channel) throws MalformedURLException {

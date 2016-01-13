@@ -21,16 +21,17 @@ import freenet.support.io.ResumeFailedException;
 public class Channel {
 	private FreenetURI insertSSK, requestSSK;
 	private Long lastKnownEdition = 0L;
+	private Long lastSynced = 0L;
 
 	public Channel() throws MalformedURLException {
-		this(null, null);
+		this(null, null, null);
 	}
 
 	public Channel(String insertSSK) throws MalformedURLException {
-		this(insertSSK, null);
+		this(insertSSK, null, null);
 	}
 
-	public Channel(String insertSSK, Long providedEdition) throws MalformedURLException {
+	public Channel(String insertSSK, Long providedEdition, Long lastSynced) throws MalformedURLException {
 		if (insertSSK == null) {
 			FreenetURI[] channelKeyPair = CENOBridge.nodeInterface.generateKeyPair();
 			this.insertSSK = channelKeyPair[0];
@@ -51,6 +52,20 @@ public class Channel {
 		if (insertURI.isUSK()) {
 			this.lastKnownEdition = insertURI.getEdition();
 		}
+
+		this.lastSynced = lastSynced != null ? lastSynced : 0;
+	}
+
+	public String getInsertSSK() {
+		return insertSSK.toASCIIString();
+	}
+
+	public Long getLastKnownEdition() {
+		return lastKnownEdition;
+	}
+
+	public Long getLastSynced() {
+		return lastSynced;
 	}
 
 	public void publishSyn() {
@@ -66,6 +81,7 @@ public class Channel {
 		} catch (PersistenceDisabledException e) {
 			Logger.error(this, "Excpetion while inserting Syn response to an insertion key provided by a client: " + e.getMessage());
 		}
+		this.lastSynced = System.currentTimeMillis();
 	}
 
 	public void subscribeToChannelUpdates() throws MalformedURLException {

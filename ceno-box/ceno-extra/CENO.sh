@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/sh
 
 # This script should not be run with superuser rights
 if [ "X`id -u`" = "X0" ]
@@ -48,7 +48,12 @@ browserExists() {
 
 startChromeProfile() {
   # Open a Chrome window with the CENO Router extension preloaded
-  $1 --use-temporary-user-data-dir --load-extension=$(pwd)/browser-extensions/ceno-chrome --disable-translate \
+  chromeProfileDir=browser-profiles/chrome/CENO
+  if [[ ! -d $chromeProfileDir ]]
+  then
+    mkdir browser-profiles/chrome/CENO
+  fi
+  $1 --profile-directory=$chromeProfileDir --load-extension=$(pwd)/browser-extensions/ceno-chrome --disable-translate \
   --no-first-run --disable-java --disable-metrics --no-default-browser-check $2 &> /dev/null &
 }
 
@@ -67,8 +72,14 @@ startBrowser() {
       return
       ;;
 
-    Linux)
-      # Open a browser window with the CENO profiles, including the plugin
+      Linux)
+        # Open a browser window with the CENO profiles, including the plugin
+        if browserExists firefox
+        then
+          firefox -no-remote -private-window -profile "browser-profiles/firefox" $portal &> /dev/null &
+          return
+        fi
+
       for chromecmd in chrome chromium-browser chromium google-chrome
       do
         if browserExists $chromecmd
@@ -83,16 +94,10 @@ startBrowser() {
         fi
       done
 
-      if browserExists firefox
-      then
-        firefox -no-remote -private-window -profile "browser-profiles/firefox" $extInstaller &> /dev/null &
-        return
-      fi
-
       if [ -z "$chromeFound" ]
       then
         echo "None of the supported browsers is installed in your machine"
-        echo "Please install Chrome or Firefox and execute this script again"
+        echo "Please install Firefox or Chromium/Chrome and execute this script again"
         exit 2
       else
         echo "Please close the" $chromeFound "window and run this script again"

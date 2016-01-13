@@ -88,6 +88,9 @@ function setIndexText(locale) {
   if (!setText('whatNextHeader', 'textContent', locale, 'whatNext')) {
     console.log('Could not set "What Next" header text.');
   }
+  if (!setText('waitForConnect', 'textContent', locale, 'waitForConnect')) {
+    console.log('Could not set "Wait for Connect" header text.');
+  }
   if (!setText('browseChannelsHeader', 'textContent', locale, 'browseChannels')) {
     console.log('Could not set "Browse Channels" header text.');
   }

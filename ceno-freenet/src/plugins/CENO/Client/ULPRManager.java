@@ -78,8 +78,13 @@ public class ULPRManager {
 	}
 
 	public static ULPRStatus lookupULPR(String url) throws CENOException {
+		//TODO Experiment with -1 as suggested edition
+		return lookupULPR(url, 0);
+	}
+	
+	public static ULPRStatus lookupULPR(String url, long suggestedEdition) throws CENOException {
 		if (!urlExistsInTable(url)) {
-			ulprManager.initULPR(url);
+			ulprManager.initULPR(url, suggestedEdition);
 		}
 		return getULPRStatus(url);
 	}
@@ -94,11 +99,6 @@ public class ULPRManager {
 
 	private static void updateULPRStatus(String url, ULPRStatus status) {
 		ulprManager.ulprTable.put(url, status);
-	}
-
-	private void initULPR(String url) throws CENOException {
-		//TODO Experiment with "-1" as Suggested Edition for the USK
-		initULPR(url, 0);
 	}
 
 	private void initULPR(String url, long newEdition) throws CENOException {

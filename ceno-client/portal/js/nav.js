@@ -9,7 +9,7 @@ const STATUS_ICON_OKAY = '/cenoresources/images/status_okay.png';
 const STATUS_ICON_WARNING = '/cenoresources/images/status_warning.png';
 const STATUS_ICON_ERROR = '/cenoresources/images/status_error.png';
 
-let globalStatus = 'okay';
+let globalStatus = 'warning';
 
 /**
  * Set the status message and icon in the nav of the portal page to inform the user of how well
@@ -69,7 +69,7 @@ function getPortalStatus() {
 }
 
 // Update the connection status every ten seconds.
-setConnectivityStatus('error');
+getPeerStatus();
 setInterval(getPeerStatus, 10000);
 
 return {

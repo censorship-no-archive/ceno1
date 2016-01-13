@@ -1,6 +1,11 @@
-#! /bin/bash
+#!/bin/sh
 
 # This script will create a CENO all-in-one box ready for distribution
+#
+# If the -p (plugins) flag is enabled, the bundle will include a build of CENO
+# client, Freemail and WebOfTrust plugins with the latest local modifications.
+# If the -m (multi-platform) flag is enabled, the script will generate a
+# distributable for each of the platforms we want to support.
 #
 # This CENOBOx bundle includes:
 #  * A Freenet node, preloaded with the CENO client plugin. Unless -p flag
@@ -16,13 +21,15 @@
 #
 #  Similar distribution bundles will be generated for Bridge and Backbone nodes
 
-
 # Parse options to check if DEBUG mode is enabled
-while getopts "p" OPTION
+while getopts "pm" OPTION
 do
   case $OPTION in
     p)
       PLUGINS=1
+      ;;
+    m)
+      PLATFORMS=(linux_amd64 darwin_amd64)
       ;;
   esac
 done
@@ -89,17 +96,16 @@ cd ceno-client
 if [ -a client ]; then
   rm client
 fi
-export GOPATH=$HOME/go
-sh ./build.sh
-echo
+
+GOPATH=$HOME sh ./build.sh "${PLATFORMS[@]}"
 cd $CENOBOXPATH
+echo
 
 function copyFreenetFilesTo() {
   # Copy necessary files from the Freenet installation
   cp -r $FREENET_DIR/{\
 bin,\
 lib,\
-Uninstaller,\
 bcprov-jdk15on-152.jar,\
 freenet.ico,\
 freenet.jar,\
@@ -131,34 +137,49 @@ mkdir CENOBox/browser-extensions
 cp -rL {browser-extensions-builds,ceno-firefox,ceno-chrome} CENOBox/browser-extensions
 cp -rL browser-profiles CENOBox
 rm CENOBox/browser-profiles/chrome/.gitkeep
-cp -r ceno-{freenet,extra}/* CENOBox
+cp -r ceno-extra/{CENO.py,CENO.sh,freenet.ini,LICENSE.CENO,memory.autolimit,README,CENO.desktop,icon.png,uninstallCENO.sh} CENOBox
 mkdir CENOBox/ceno-client
-cp -r ceno-client/{views,config,static,json-files} CENOBox/ceno-client
+cp -r ceno-client/{views,config,static,json-files,locale} CENOBox/ceno-client
 cp ceno-client/client CENOBox/ceno-client/CENOClient
 mkdir CENOBox/ceno-client/translations
 cp ceno-client/translations/**.all.json CENOBox/ceno-client/translations
 
 cp -rL ceno-backbone/* CENOBackbone
-cp -rL ceno-bridge/* CENOBridge
 
-# Build CENO client and Backbone Freenet plugins
+mkdir CENOBridge/bundle-server
+cp -rL ceno-bridge/bundle-server/{config,locales,bundle-server.js,bshandler.js,node,package.json,README.md,translations.js} CENOBridge/bundle-server
+mkdir CENOBridge/rss-reader
+cp -rL ceno-bridge/rss-reader/{config,docs,translations,follower,reader,README.md} CENOBridge/rss-reader
+cp -r ceno-bridge/{.CENO,CENOBridge.sh,freenet.ini,memory.autolimit} CENOBridge
+mkdir CENOBridge/bundle-server/log
+mkdir CENOBridge/rss-reader/json-files
+
+# Build CENO Freenet plugins
 echo "Building CENO Freenet plugins"
-cd ../ceno-freenet
+cd ceno-freenet
 ant dist > /dev/null
-cp dist/CENO.jar $CENOBOXPATH/ceno-debug/
-cp dist/CENOBackbone.jar $CENOBOXPATH/ceno-backbone/
-cp dist/CENOBridge.jar $CENOBOXPATH/ceno-bridge/
+cp dist/CENOBackbone.jar $CENOBOXPATH/CENOBackbone/
+cp dist/CENOBridge.jar $CENOBOXPATH/CENOBridge/
 cd $CENOBOXPATH
 
 if [[ $PLUGINS == 1 ]]; then
-  cp -r ceno-debug/CENO.jar CENOBox/
-  cp ceno-debug/freenet-client.ini CENOBox/freenet.ini
+  cp ceno-freenet/dist/CENO.jar CENOBox/
+  cp ceno-extra/freenet-with-plugin.ini CENOBox/freenet.ini
 fi
 
-echo "Creating the distribution zips"
+echo
+echo "Creating the distribution zips for the host system"
 zip -rq CENOBox.zip CENOBox/
 zip -rq CENOBackbone.zip CENOBackbone/
 zip -rq CENOBridge.zip CENOBridge/
-
 echo "Successfully built CENOBox.zip, CENOBackbone.zip and CENOBridge.zip distribution bundles."
+
+echo
+for platform in ${PLATFORMS[@]}
+do
+  echo "Creating CENOBox for" $platform"..."
+  cp ceno-client/CENOClient_$platform CENOBox/ceno-client/CENOClient
+  zip -rq CENOBox_$platform.zip CENOBox/
+done
+
 exit 0

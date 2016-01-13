@@ -15,7 +15,11 @@ import plugins.CENO.CENOException;
 import plugins.CENO.CENOL10n;
 import plugins.CENO.Configuration;
 import plugins.CENO.Version;
+import plugins.CENO.Bridge.BridgeDatabase;
+
+import plugins.CENO.Bridge.Signaling.Channel;
 import plugins.CENO.Bridge.Signaling.ChannelMaker;
+import plugins.CENO.Bridge.Signaling.ChannelManager;
 import plugins.CENO.Common.Crypto;
 import plugins.CENO.FreenetInterface.NodeInterface;
 import freenet.client.InsertException;
@@ -40,6 +44,7 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 
 	// Interface objects with fred
 	public static NodeInterface nodeInterface;
+	BridgeDatabase bridgeDatabase;
 	ChannelMaker channelMaker;
 
 	private static boolean isMasterBridge = false;
@@ -51,6 +56,7 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 	public static Configuration initConfig;
 	private static final Version VERSION = new Version(Version.PluginType.BRIDGE);
 	private static final String CONFIGPATH = ".CENO/bridge.properties";
+	private static final String DBPATH = ".CENO/bridge.db";
 
 	public static final String ANNOUNCER_PATH = "CENO-signaler";
 
@@ -73,45 +79,58 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 			initConfig.storeProperties();
 		}
 
-		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-		// Read RSA keypair and modulus from configuration file or, if not available, create a new one
-		KeyPair asymKeyPair = null;
-		try {
-			if (!Crypto.isValidKeypair(initConfig.getProperty("asymkey.pubKey"), initConfig.getProperty("asymkey.privKey"))) {
-				Logger.warning(this, "CENOBridge will generate a new RSA key pair for the decentralized signaling. This might take a while");
-				asymKeyPair = Crypto.generateAsymKey();
-				initConfig.setProperty("asymkey.pubKey", Crypto.savePublicKey(asymKeyPair.getPublic()));
-				initConfig.setProperty("asymkey.privKey", Crypto.savePrivateKey(asymKeyPair.getPrivate()));
-				initConfig.storeProperties();
-			} else {
-				asymKeyPair = new KeyPair(Crypto.loadPublicKey(initConfig.getProperty("asymkey.pubKey")), Crypto.loadPrivateKey(initConfig.getProperty("asymkey.privKey")));
-				Logger.normal(this, "Found RSA key in configuration file");
-			}
-		} catch (UnsupportedEncodingException e) {
-			Logger.error(this, "Unsupported Encoding Exception during RSA key validation: " + e.getMessage());
-		} catch (GeneralSecurityException e) {
-			Logger.error(this, "General Security Exception: " + e.getMessage());
-		} catch (IllegalBase64Exception e) {
-			Logger.error(this, "Failed to base64 encode/decode: " + e.getMessage());
-		} finally {
-			if (asymKeyPair == null) {
-				terminate();
-				return;
-			}
-		}
-
 		String confIsMasterBridge = initConfig.getProperty("isMasterBridge");
-
 		if (confIsMasterBridge != null && confIsMasterBridge.equals("true")) {
 			isMasterBridge = true;
 		}
 
 		String confIsSingalBridge = initConfig.getProperty("isSignalBridge");
-
 		if (confIsSingalBridge != null && confIsSingalBridge.equals("true")) {
 			isSignalBridge = true;
+
+			Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+			// Read RSA keypair and modulus from configuration file or, if not available, create a new one
+			KeyPair asymKeyPair = null;
 			try {
-				channelMaker = new ChannelMaker(initConfig.getProperty("insertURI"), asymKeyPair);
+				if (!Crypto.isValidKeypair(initConfig.getProperty("asymkey.pubKey"), initConfig.getProperty("asymkey.privKey"))) {
+					Logger.warning(this, "CENOBridge will generate a new RSA key pair for the decentralized signaling. This might take a while");
+					asymKeyPair = Crypto.generateAsymKey();
+					initConfig.setProperty("asymkey.pubKey", Crypto.savePublicKey(asymKeyPair.getPublic()));
+					initConfig.setProperty("asymkey.privKey", Crypto.savePrivateKey(asymKeyPair.getPrivate()));
+					initConfig.storeProperties();
+				} else {
+					asymKeyPair = new KeyPair(Crypto.loadPublicKey(initConfig.getProperty("asymkey.pubKey")), Crypto.loadPrivateKey(initConfig.getProperty("asymkey.privKey")));
+					Logger.normal(this, "Found RSA key in configuration file");
+				}
+			} catch (UnsupportedEncodingException e) {
+				Logger.error(this, "Unsupported Encoding Exception during RSA key validation: " + e.getMessage());
+			} catch (GeneralSecurityException e) {
+				Logger.error(this, "General Security Exception: " + e.getMessage());
+			} catch (IllegalBase64Exception e) {
+				Logger.error(this, "Failed to base64 encode/decode: " + e.getMessage());
+			} finally {
+				if (asymKeyPair == null) {
+					terminate();
+					return;
+				}
+			}
+
+			String confBridgeDB = initConfig.getProperty("bridgeDB");
+			if (confBridgeDB == null) {
+				confBridgeDB = DBPATH;
+				initConfig.setProperty("bridgeDB", DBPATH);
+				initConfig.storeProperties();
+			}
+			try {
+				bridgeDatabase = new BridgeDatabase(DBPATH);
+			} catch (CENOException e) {
+				Logger.error(this, "Could not open bridge database");
+				terminate();
+				return;
+			}
+
+			try {
+				channelMaker = new ChannelMaker(initConfig.getProperty("insertURI"), asymKeyPair, bridgeDatabase);
 				channelMaker.publishNewPuzzle();
 			} catch (IOException e) {
 				Logger.error(this, "Could not start channel listener for the given insertURI: " + e.getMessage());
@@ -219,6 +238,13 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 		// Stop the thread that is polling for new channel requests
 		if (isSignalBridge && channelMaker != null) {
 			channelMaker.stopListeners();
+			for (Channel channel : ChannelManager.getInstance().getAllChannels()) {
+				try {
+					bridgeDatabase.storeChannel(channel);
+				} catch (CENOException e) {
+					Logger.warning(this, "Failed to save signaling channels with SSK: " + channel.getInsertSSK());
+				}
+			}
 		}
 
 		// Stop cenoHttpServer and unbind ports

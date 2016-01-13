@@ -16,7 +16,7 @@ public class Version implements FredPluginVersioned, FredPluginRealVersioned {
 	public static final int BACKBONE_REAL_VERSION = 1;
 
 	/** Revision number of Version.java as read from CVS */
-	public static final String cvsRevision = "@custom@";
+	public static final String cvsRevision = "v0.6";
 
 	public enum PluginType { CLIENT, BRIDGE, BACKBONE };
 

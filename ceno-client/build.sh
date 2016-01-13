@@ -18,7 +18,9 @@ go get -u github.com/nicksnyder/go-i18n/goi18n
 
 echo ""
 echo "Merging localization files."
-cd translations
+cd tools
+python json-translation.py from
+cd ../translations
 $GOPATH/bin/goi18n *.all.json *.untranslated.json
 cd ..
 
@@ -41,6 +43,15 @@ npm install
 echo "*  Building resources."
 gulp build
 echo ""
+
+if [ $# -gt 0 ]; then
+  for platform in $@
+  do
+    echo "Building CENO Client for" $platform"..."
+    GOOS=${platform%_*} GOARCH=${platform#*_} go build $SOURCE_FILES
+    mv client CENOClient_$platform
+  done
+fi
 
 go build $SOURCE_FILES
 COMPILE_STATUS=$?
