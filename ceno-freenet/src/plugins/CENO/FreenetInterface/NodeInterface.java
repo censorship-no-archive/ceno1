@@ -69,6 +69,7 @@ public class NodeInterface implements FreenetInterface {
 		// Set up a FetchContext instance for lookup requests in the distributed cache only
 		this.distFC = HighLevelSimpleClientInterface.getFetchContext();
 		this.distFC.ignoreStore = true;
+		this.distFC.canWriteClientCache = true;
 		this.distFC.followRedirects = true;
 		this.distFC.allowSplitfiles = true;
 		this.distFC.maxRecursionLevel = 10;
