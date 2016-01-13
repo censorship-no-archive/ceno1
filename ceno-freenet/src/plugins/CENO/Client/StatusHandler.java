@@ -23,7 +23,7 @@ public class StatusHandler extends AbstractCENOClientHandler {
 		NodeConnections nodeConnections = CENOClient.nodeInterface.getConnections();
 		if (nodeConnections.getCurrent() == 0) {
 			StatusHandler.noPeersTimer = (StatusHandler.noPeersTimer == null) ? System.currentTimeMillis() : StatusHandler.noPeersTimer;
-			if (System.currentTimeMillis() - StatusHandler.noPeersTimer > TimeUnit.MINUTES.toMillis(5)) {
+			if (System.currentTimeMillis() - StatusHandler.noPeersTimer > TimeUnit.MINUTES.toMillis(8)) {
 				// The node is not connected to any peers for longer than 5 mins.
 				// Could it be a firewall/connectivity issue?
 				return returnStatus("error", new CENOException(CENOErrCode.LCS_NODE_NOT_ENOUGH_PEERS).getMessage());
@@ -32,10 +32,10 @@ public class StatusHandler extends AbstractCENOClientHandler {
 
 		// If the Freenet node is connected to less than 3 peers, the process will be slow
 		// and we inform the users appropriately
-		if (nodeConnections.getCurrent() < 3) {
+		if (nodeConnections.getCurrent() < 5) {
 			return returnStatus("warning", new CENOException(CENOErrCode.LCS_NODE_INITIALIZING).getMessage());
 		}
-		
+
 		StatusHandler.noPeersTimer = null;
 		return returnStatus("okay", "Freenet node connected to " + nodeConnections.getCurrent() + " peers");
 	}
