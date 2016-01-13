@@ -64,7 +64,7 @@
 		<tstamp/>
 
 		<!-- FIXME: remove the debug and replace with optimize -->
-		<javac srcdir="src/plugins/CENO" destdir="${build}" debug="on" optimize="on" source="${source-version}" includeantruntime="false">
+		<javac srcdir="src/plugins/CENO" destdir="${build}" debug="on" optimize="on" source="${source-version}" includeantruntime='false'>
 			<classpath>
 				<pathelement location="${freenet-cvs-snapshot.location}"/>
 				<pathelement location="${jetty-all.location}"/>
@@ -74,7 +74,6 @@
 				<pathelement location="${apache-commonscompress.location}" />
 				<pathelement location="${bouncy-castle.location}" />
 				<pathelement location="${sqlite-jdbc.location}" />
-
 			</classpath>
 			<include name="**/*.java"/>
 			<exclude name="**/*Test.java"/>
@@ -100,7 +99,7 @@
 
 	<!-- ================================================== -->
 	<target name="unit-build" depends="compile" if="junit.present" unless="skip_tests">
-		<javac srcdir="src/" destdir="${build-test}" debug="on" optimize="on" source="1.5" includeantruntime="false">
+		<javac srcdir="src/" destdir="${build-test}" debug="off" optimize="on" source="1.5" includeantruntime='false'>
 			<classpath>
 				<pathelement path="${build}"/>
 				<!-- <pathelement location="${freenet-ext.location}"/> -->

@@ -1,14 +1,22 @@
 package plugins.CENO.Backbone;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.EOFException;
+import java.io.File;
+import java.io.FileInputStream;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import freenet.node.Node;
 import freenet.support.Fields;
 import freenet.support.SimpleFieldSet;
+import freenet.support.io.Closer;
 
 /**
  * Provides the methods for parsing node references and transforming
@@ -17,6 +25,8 @@ import freenet.support.SimpleFieldSet;
  */
 public class NodeRefHelper {
 	private Node node;
+
+    public static final String BRIDGE_NODES_FILENAME = "resources/bridgeref.txt";
 	
 	public NodeRefHelper (Node node) {
 		this.node = node;
@@ -37,12 +47,61 @@ public class NodeRefHelper {
 	 * Gets the darknet public reference of a node so that
 	 * it can be exchanged with other friends in order to
 	 * become friends
-	 * 
+     *
 	 * @return a SimpleFieldSet with the own Darkent node refernece
 	 */
 	public SimpleFieldSet getNodeRefFS() {
 		return node.exportDarknetPublicFieldSet();
 	}
+
+    /**
+     * Read the Bridge node reference from the resources
+     * 
+     * @param bridgeRefFile the name of the file which contains the bridge
+     * references
+	 * 
+     * @return a list of SimpleFieldSet for the bridge node
+     *
+	 * @throws FileNotFoundException if the bridge ref file is not
+	 * found in the resources
+	 * @throws IOException if the bridge ref file could not be
+	 *  successfully parsed
+     */
+    public static List<SimpleFieldSet> readBridgeRefs(String bridgeRefFile) throws FileNotFoundException, IOException {
+        List<SimpleFieldSet> list = new ArrayList<SimpleFieldSet>();
+		FileInputStream fis = null;
+		try {
+			fis = new FileInputStream(bridgeRefFile);
+            if (fis == null) {
+                throw new FileNotFoundException();
+            }
+			BufferedInputStream bis = new BufferedInputStream(fis);
+			InputStreamReader isr = new InputStreamReader(bis, "UTF-8");
+			BufferedReader br = new BufferedReader(isr);
+			while(true) {
+				try {
+					SimpleFieldSet fs = new SimpleFieldSet(br, false, false, true, false);
+					if(!fs.isEmpty())
+						list.add(fs);
+				} catch (EOFException e) {
+					return list;
+				}
+			}
+		} catch (IOException e) {
+            throw e; 
+			//return list; 
+		} finally {
+			Closer.close(fis);
+		}
+
+    }
+
+    /**
+     *  Default value overload
+     */
+    public static List<SimpleFieldSet> readBridgeRefs() throws FileNotFoundException, IOException {
+        return readBridgeRefs(BRIDGE_NODES_FILENAME);
+    }
 
 	/**
 	 * Read the Bridge node reference from the resources
@@ -53,8 +112,8 @@ public class NodeRefHelper {
 	 * @throws IOException if the bridgeref.txt file could not be
 	 * successfully parsed
 	 */
-	public String getBridgeNodeRef() throws FileNotFoundException, IOException {
-		InputStream is = getClass().getResourceAsStream("resources/bridgeref.txt");
+	public String getBridgeNodesRef() throws FileNotFoundException, IOException {
+		InputStream is = getClass().getResourceAsStream(BRIDGE_NODES_FILENAME);
 		if (is == null) {
 			throw new FileNotFoundException();
 		}
@@ -81,7 +140,7 @@ public class NodeRefHelper {
 	 */
 	public SimpleFieldSet getBridgeNodeRefFS() throws FileNotFoundException, IOException {
 		SimpleFieldSet fs;
-		String bridgeRef = Fields.trimLines(getBridgeNodeRef());
+		String bridgeRef = Fields.trimLines(getBridgeNodesRef());
 		fs = new SimpleFieldSet(bridgeRef, false, true, true);
 		if(!fs.getEndMarker().endsWith("End")) {
 			throw new IOException("Trying to add noderef with end marker \""+fs.getEndMarker()+"\"");
