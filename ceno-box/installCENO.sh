@@ -53,15 +53,19 @@ then
   exit 3
 fi
 
-if ! browserSupported
+if [ "$CENO_OS" = "Linux" ]
 then
-  echo "Please install Firefox or Chrome/Chromium and execute this script again"
-  exit 4
+  if ! browserSupported
+  then
+    echo "Please install Firefox or Chrome/Chromium and execute this script again"
+    exit 4
+  fi
 fi
 
 if ! commandExists unzip
 then
   echo "Please install unzip"
+  exit 5
 fi
 
 echo "    _____ ______ _   _  ____   "

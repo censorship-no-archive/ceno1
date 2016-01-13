@@ -29,7 +29,7 @@ do
       PLUGINS=1
       ;;
     m)
-      PLATFORMS=(darwin_amd64)
+      PLATFORMS=(linux_amd64 darwin_amd64)
       ;;
   esac
 done
