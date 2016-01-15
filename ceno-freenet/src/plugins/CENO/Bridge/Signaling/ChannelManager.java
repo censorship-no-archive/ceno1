@@ -32,12 +32,19 @@ public class ChannelManager {
 		}
 	}
 
-	public void addChannels(List<Channel> extraChannelsList) {
+	public int addChannels(List<Channel> extraChannelsList) {
+		int counter = 0;
 		if (extraChannelsList != null) {
 			for (Channel channel : extraChannelsList) {
-				extraChannelsList.add(channel);
+				try {
+					addChannel(channel);
+					counter++;
+				} catch (MalformedURLException e) {
+					Logger.normal(this, "Could not add channel with insert SSK: " + channel.getInsertSSK());
+				}
 			}
 		}
+		return counter;
 	}
 
 	public void addChannel(String signalSSK) {

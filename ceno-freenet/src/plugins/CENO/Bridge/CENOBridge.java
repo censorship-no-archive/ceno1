@@ -5,6 +5,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.Security;
+import java.util.List;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
@@ -130,7 +131,7 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 			}
 
 			try {
-				channelMaker = new ChannelMaker(initConfig.getProperty("insertURI"), asymKeyPair, bridgeDatabase);
+				channelMaker = new ChannelMaker(initConfig.getProperty("insertURI"), asymKeyPair);
 				channelMaker.publishNewPuzzle();
 			} catch (IOException e) {
 				Logger.error(this, "Could not start channel listener for the given insertURI: " + e.getMessage());
@@ -148,6 +149,16 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 				Logger.error(this, "Could not start decentralized signaling channel maker: " + e.getMessage());
 				terminate();
 				return;
+			}
+
+			//Retrieve and poll previously established channels from the bridge.database
+			try {
+				List<Channel> databaseChannels = bridgeDatabase.retrieveChannels();
+				int counter = ChannelManager.getInstance().addChannels(databaseChannels);
+				Logger.normal(this, "Retrieved " + counter + " previously established channels from the database, failed to subscribe updates from " + 
+						Integer.toString(databaseChannels.size() - counter));
+			} catch (CENOException e) {
+				Logger.error(this, "Exception while retrieving previously established channels from the database: " + e.getMessage());
 			}
 		}
 
