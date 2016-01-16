@@ -78,6 +78,7 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 		} catch (NullPointerException e) {
 			bridgeKey = BRIDGE_KEY;
 		}
+		bridgeKey = bridgeKey.endsWith("/") ? bridgeKey : bridgeKey + "/";
 		Logger.normal(this, "CENO will make requests to the bridge with key: " + bridgeKey);
 
 		// Initialize RS - Make a new class ChannelManager that handles ChannelMaker
