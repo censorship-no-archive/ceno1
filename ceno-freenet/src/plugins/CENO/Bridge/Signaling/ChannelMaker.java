@@ -1,72 +1,62 @@
 package plugins.CENO.Bridge.Signaling;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
+import java.util.Iterator;
 
-import plugins.CENO.CENOErrCode;
+import org.apache.commons.collections4.queue.CircularFifoQueue;
+
 import plugins.CENO.CENOException;
-import plugins.CENO.Common.Crypto;
 import freenet.client.InsertException;
+import freenet.support.Logger;
 
 public class ChannelMaker {
+
 	static final int MAX_POLLING_PUZZLES = 3;
-	static final int MAX_KSK_SLOTS = 500;
 
 	private String bridgeInsertURI;
 	private KeyPair asymKeyPair;
-	private ChannelMakerListener[] channelListeners = new ChannelMakerListener[MAX_KSK_SLOTS];
 
-	public ChannelMaker(String insertURI, KeyPair asymKeyPair) throws CENOException {
+	private static volatile ChannelMaker instance;
+
+	public static ChannelMaker getInstance() {
+		if (instance == null) {
+			synchronized(ChannelMaker.class) {
+				instance = new ChannelMaker();
+			}
+		}
+		return instance;
+	}
+
+	private static CircularFifoQueue<PollingPuzzle> puzzleQueue = new CircularFifoQueue<PollingPuzzle>(MAX_POLLING_PUZZLES);
+
+	public void config(String insertURI, KeyPair asymKeyPair) {
 		this.bridgeInsertURI = insertURI;
 		this.asymKeyPair = asymKeyPair;
 	}
 
-	public void publishNewPuzzle() throws IOException, InsertException, CENOException, GeneralSecurityException {
-		Puzzle puzzle = new Puzzle();
-
-		ChannelMakerAnnouncer channelMakerAnnouncer = new ChannelMakerAnnouncer(bridgeInsertURI, Crypto.savePublicKey(asymKeyPair.getPublic()), puzzle);
-		channelMakerAnnouncer.doAnnounce();
-
-		startSlotListeners(puzzle.getAnswer());
-	}
-
-	private void startSlotListeners(String puzzleAnswer) throws CENOException {
+	public void publishNewPuzzle() throws CENOException, IOException, GeneralSecurityException {
+		PollingPuzzle pollingPuzzle = new PollingPuzzle(bridgeInsertURI, asymKeyPair);
 		try {
-			for (int i = 0; i < MAX_KSK_SLOTS; i++) {
-				channelListeners[i] = new ChannelMakerListener(puzzleAnswer, i, asymKeyPair.getPrivate());
-				Thread listenerThread = new Thread(channelListeners[i]);
-				listenerThread.setName("ChannelListener-" + i);
-				listenerThread.start();
-			}
-		} catch (MalformedURLException e) {
-			throw new CENOException(CENOErrCode.RR, "Could not start Channel Maker Listener thread.");
+			pollingPuzzle.startPolling();
+		} catch (InsertException e) {
+			Logger.error(this, "InsertException while inserting signal announcement, will try again with a new puzzle: " + e.getMessage());
+			publishNewPuzzle();
+			return;
 		}
+		puzzleQueue.offer(pollingPuzzle);
 	}
 
-	public void stopListeners() {
-		for (ChannelMakerListener channelLister : channelListeners) {
-			channelLister.stopListener();
+	public void stopPuzzleListeners() {
+		if (puzzleQueue == null) {
+			return;
 		}
-	}
-
-	class Puzzle {
-		private String question;
-		private String answer;
-
-		public Puzzle() {
-			this.question = Long.toHexString(Double.doubleToLongBits(Math.random()));
-			this.answer = this.question;
+		Iterator<PollingPuzzle> puzzleQueueIterator = puzzleQueue.iterator();
+		while (puzzleQueueIterator.hasNext()) {
+			puzzleQueueIterator.next().stopListeners();
 		}
-
-		public String getQuestion() {
-			return question;
-		}
-
-		public String getAnswer() {
-			return answer;
-		}
+		puzzleQueue.clear();
 	}
 
 }

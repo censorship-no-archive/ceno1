@@ -16,14 +16,11 @@ import plugins.CENO.CENOException;
 import plugins.CENO.CENOL10n;
 import plugins.CENO.Configuration;
 import plugins.CENO.Version;
-import plugins.CENO.Bridge.BridgeDatabase;
-
 import plugins.CENO.Bridge.Signaling.Channel;
 import plugins.CENO.Bridge.Signaling.ChannelMaker;
 import plugins.CENO.Bridge.Signaling.ChannelManager;
 import plugins.CENO.Common.Crypto;
 import plugins.CENO.FreenetInterface.NodeInterface;
-import freenet.client.InsertException;
 import freenet.keys.FreenetURI;
 import freenet.pluginmanager.FredPlugin;
 import freenet.pluginmanager.FredPluginRealVersioned;
@@ -131,14 +128,10 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 			}
 
 			try {
-				channelMaker = new ChannelMaker(initConfig.getProperty("insertURI"), asymKeyPair);
-				channelMaker.publishNewPuzzle();
+				ChannelMaker.getInstance().config(initConfig.getProperty("insertURI"), asymKeyPair);
+				ChannelMaker.getInstance().publishNewPuzzle();
 			} catch (IOException e) {
 				Logger.error(this, "Could not start channel listener for the given insertURI: " + e.getMessage());
-				terminate();
-				return;
-			} catch (InsertException e) {
-				Logger.error(this, "Could not start announcement channel insertion for the given insertURI: " + e.getMessage());
 				terminate();
 				return;
 			} catch (GeneralSecurityException e) {
@@ -155,7 +148,7 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 			try {
 				List<Channel> databaseChannels = bridgeDatabase.retrieveChannels();
 				int counter = ChannelManager.getInstance().addChannels(databaseChannels);
-				Logger.normal(this, "Retrieved " + counter + " previously established channels from the database, failed to subscribe updates from " + 
+				Logger.normal(this, "Retrieved " + counter + " previously established channels from the database, failed to subscribe to updates from " + 
 						Integer.toString(databaseChannels.size() - counter));
 			} catch (CENOException e) {
 				Logger.error(this, "Exception while retrieving previously established channels from the database: " + e.getMessage());
@@ -248,7 +241,7 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 	{
 		// Stop the thread that is polling for new channel requests
 		if (isSignalBridge && channelMaker != null) {
-			channelMaker.stopListeners();
+			channelMaker.stopPuzzleListeners();
 			for (Channel channel : ChannelManager.getInstance().getAllChannels()) {
 				try {
 					bridgeDatabase.storeChannel(channel);

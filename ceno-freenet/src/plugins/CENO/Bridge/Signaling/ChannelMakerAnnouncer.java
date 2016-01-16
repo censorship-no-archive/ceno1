@@ -3,7 +3,7 @@ package plugins.CENO.Bridge.Signaling;
 import java.io.IOException;
 
 import plugins.CENO.Bridge.CENOBridge;
-import plugins.CENO.Bridge.Signaling.ChannelMaker.Puzzle;
+import plugins.CENO.Bridge.Signaling.PollingPuzzle.Puzzle;
 import freenet.client.InsertException;
 import freenet.client.async.PersistenceDisabledException;
 import freenet.keys.FreenetURI;
