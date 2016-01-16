@@ -137,7 +137,7 @@ mkdir CENOBox/browser-extensions
 cp -rL {browser-extensions-builds,ceno-firefox,ceno-chrome} CENOBox/browser-extensions
 cp -rL browser-profiles CENOBox
 rm CENOBox/browser-profiles/chrome/.gitkeep
-cp -r ceno-extra/{CENO.py,CENO.sh,freenet.ini,LICENSE.CENO,memory.autolimit,README,CENO.desktop,icon.png,uninstallCENO.sh} CENOBox
+cp -r ceno-extra/{CENO.py,CENO.sh,freenet.ini,LICENSE.CENO,memory.autolimit,README,CENO.desktop,icon.png,uninstallCENO.sh,.CENO} CENOBox
 mkdir CENOBox/ceno-client
 cp -r ceno-client/{views,config,static,json-files,locale} CENOBox/ceno-client
 cp ceno-client/client CENOBox/ceno-client/CENOClient
