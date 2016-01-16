@@ -12,7 +12,6 @@ import net.minidev.json.parser.ParseException;
 
 import org.eclipse.jetty.server.Request;
 
-import plugins.CENO.Bridge.BundlerInterface.Bundle;
 import plugins.CENO.Common.CENOJettyHandler;
 import plugins.CENO.Common.URLtoUSKTools;
 import freenet.client.InsertException;

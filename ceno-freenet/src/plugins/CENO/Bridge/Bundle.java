@@ -1,4 +1,4 @@
-package plugins.CENO.Bridge.BundlerInterface;
+package plugins.CENO.Bridge;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,13 +11,12 @@ import java.util.Set;
 import net.minidev.json.JSONObject;
 import net.minidev.json.JSONValue;
 import net.minidev.json.parser.ParseException;
-import plugins.CENO.Bridge.CENOBridge;
 import plugins.CENO.Common.URLtoUSKTools;
 
 public class Bundle {
 	private String uri;
 	private String content;
-	private static Set<String> breakingUrls = new HashSet<String>();
+	private static volatile Set<String> breakingUrls = new HashSet<String>();
 
 	public Bundle(String URI) {
 		this.uri = URI;
@@ -43,18 +42,7 @@ public class Bundle {
 		}
 	}
 
-	public void requestFromBundlerSafe() {
-		try {
-			doRequest();
-		} catch (IOException e) {
-			content = "Error while requesting bundle:\n" + e.toString();
-			e.printStackTrace();
-		} catch (ParseException e) {
-			content = "Error while parsing response from bundle server: " + e.getMessage();
-		}
-	}
-
-	private void doRequest() throws IOException, ParseException {
+	private synchronized void doRequest() throws IOException, ParseException {
 		if (breakingUrls.contains(uri)) {
 			throw new IOException("Will not request URL " + uri + "from Bundle Server for robustness reasons");
 		}

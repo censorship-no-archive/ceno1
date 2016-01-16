@@ -7,7 +7,6 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
-import plugins.CENO.Bridge.BundlerInterface.Bundle;
 import plugins.CENO.Common.URLtoUSKTools;
 import freenet.client.InsertException;
 import freenet.client.async.BaseClientPutter;
