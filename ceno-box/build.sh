@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # This script will create a CENO all-in-one box ready for distribution
 #
@@ -29,8 +29,7 @@ do
       PLUGINS=1
       ;;
     m)
-      PLATFORMS=(linux_amd64 darwin_amd64)
-      ;;
+      PLATFORMS=(darwin_amd64)
   esac
 done
 
@@ -41,12 +40,12 @@ if [ -d CENOBox ]; then
   echo "Previous CENOBox build exists; will try to stop if running"
   cd CENOBox
   ./CENO.sh stop
-  cd ..
+  cd $CENOBOXPATH
   rm -r CENOBox
   echo
 fi
 
-if [ -a CENOBox.zip ]; then
+if [ -f CENOBox.zip ]; then
   rm CENOBox.zip
 fi
 
@@ -54,7 +53,7 @@ if [ -d CENOBackbone ]; then
   rm -r CENOBackbone
 fi
 
-if [ -a CENOBackbone.zip ]; then
+if [ -f CENOBackbone.zip ]; then
   rm -r CENOBackbone.zip
 fi
 
@@ -62,7 +61,7 @@ if [ -d CENOBridge ]; then
   rm -r CENOBridge
 fi
 
-if [ -a CENOBridge.zip ]; then
+if [ -f CENOBridge.zip ]; then
   rm -r CENOBridge.zip
 fi
 
@@ -93,7 +92,7 @@ mkdir CENOBridge
 # Build CENO Client
 echo "Building CENO client with latest updates:"
 cd ceno-client
-if [ -a client ]; then
+if [ -f client ]; then
   rm client
 fi
 

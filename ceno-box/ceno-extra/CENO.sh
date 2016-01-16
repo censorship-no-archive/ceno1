@@ -80,30 +80,30 @@ startBrowser() {
           return
         fi
 
-      for chromecmd in chrome chromium-browser chromium google-chrome
-      do
-        if browserExists $chromecmd
-        then
-          if noRunningProcess "$chromecmd"
+        for chromecmd in chrome chromium-browser chromium google-chrome
+        do
+          if browserExists $chromecmd
           then
-            startChromeProfile "$chromecmd" $portal
-            return
-          else
-            chromeFound=$chromecmd
+            if noRunningProcess "$chromecmd"
+            then
+              startChromeProfile "$chromecmd" $portal
+              return
+            else
+              chromeFound=$chromecmd
+            fi
           fi
-        fi
-      done
+        done
 
-      if [ -z "$chromeFound" ]
-      then
-        echo "None of the supported browsers is installed in your machine"
-        echo "Please install Firefox or Chromium/Chrome and execute this script again"
-        exit 2
-      else
-        echo "Please close the" $chromeFound "window and run this script again"
-        exit 3
-      fi
-      ;;
+        if [ -z "$chromeFound" ]
+        then
+          echo "None of the supported browsers is installed in your machine"
+          echo "Please install Firefox or Chromium/Chrome and execute this script again"
+          exit 2
+        else
+          echo "Please close the" $chromeFound "window and run this script again"
+          exit 3
+        fi
+        ;;
 
   esac
 }
@@ -142,7 +142,10 @@ case "$1" in
     if [ -f ceno-client/CENOClient.pid ]
     then
       kill $(cat ceno-client/CENOClient.pid)
-      echo "Stopped CENO Client proxy"
+      if [ $? -ne  0 ]
+      then
+        echo "Stopped CENO Client proxy"
+      fi
     fi
     if ps ax | grep -v grep | grep CENOClient > /dev/null
     then
