@@ -20,7 +20,7 @@ import freenet.support.Logger;
 
 public class PollingPuzzle {
 	static final int MAX_KSK_SLOTS = 20;
-	
+
 	private Puzzle puzzle;
 	private String bridgeInsertURI;
 	private KeyPair asymKeyPair;
@@ -60,7 +60,7 @@ public class PollingPuzzle {
 			channelLister.stopListener();
 		}
 	}
-	
+
 	private void shouldOfferNewPuzzle() {
 		if (consumedSlots > MAX_KSK_SLOTS * 0.5) {
 			try {
@@ -77,8 +77,8 @@ public class PollingPuzzle {
 			}
 		}
 	}
-	
-	class ChannelMakerListener implements Runnable {	
+
+	private class ChannelMakerListener implements Runnable {	
 		final long KSK_POLLING_PAUSE = TimeUnit.MINUTES.toMillis(5);
 
 		private String puzzleAnswer;
@@ -128,8 +128,10 @@ public class PollingPuzzle {
 
 						Logger.normal(ChannelMakerListener.class, "A client has posted information for establishing a signaling channel");
 						ChannelManager.getInstance().addChannel(decKskContent);
+
 						consumedSlots++;
 						shouldOfferNewPuzzle();
+
 						continueLoop = false;
 					}
 

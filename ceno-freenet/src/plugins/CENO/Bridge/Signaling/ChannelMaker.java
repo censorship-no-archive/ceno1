@@ -45,6 +45,9 @@ public class ChannelMaker {
 			publishNewPuzzle();
 			return;
 		}
+		if (puzzleQueue.isAtFullCapacity()) {
+			puzzleQueue.peek().stopListeners();
+		}
 		puzzleQueue.offer(pollingPuzzle);
 	}
 
