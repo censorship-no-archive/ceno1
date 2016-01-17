@@ -195,7 +195,7 @@ func followFeeds(requests chan SaveFeedRequest) {
  * @return any error that occurs writing to the appropriate file
  */
 func writeItemsFile(feedUrl string, marshalledItems []byte) error {
-	filename := base64.URLEncoding.EncodeToString([]byte(feedUrl)) + ".json"
+	filename := base64.URLEncoding.EncodeToString([]byte(FeedsListIdentifier+"/"+feedUrl)) + ".json"
 	location := path.Join(JSON_FILE_DIR, filename)
 	return ioutil.WriteFile(location, marshalledItems, os.ModePerm)
 }
@@ -297,6 +297,9 @@ func insertHandler(w http.ResponseWriter, r *http.Request) {
  */
 func writeFeeds(feeds []Feed) error {
 	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
+	for i, _ := range feeds {
+		feeds[i].Url = FeedsListIdentifier + "/" + feeds[i].Url
+	}
 	marshalledFeeds, marshalError := json.Marshal(map[string]interface{}{
 		"version": 1.0,
 		"feeds":   feeds,
@@ -353,7 +356,7 @@ func writeItems(feedUrl string, items []Item) error {
 	// so the JSON decoder used to decode the data below would return an error
 	// if it tried to also treat the bundle as the JSON that it is and decode that too.
 	bundleData, _ := json.Marshal(map[string]string{
-		"url":     feedUrl,
+		"url":     FeedsListIdentifier + "/" + feedUrl,
 		"created": time.Now().Format(time.UnixDate),
 		"bundle":  fmt.Sprintf("%s", string(marshalled)),
 	})

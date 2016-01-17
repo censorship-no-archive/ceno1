@@ -17,6 +17,9 @@ public class RequestReceiver {
 
 	private static void receivedURLList(String[] urlList) {
 		for (String urlRequested : urlList) {
+			if (URLtoUSKTools.isFeedURL(urlRequested)) {
+				continue;
+			}
 			try {
 				urlRequested = URLtoUSKTools.validateURL(urlRequested);
 			} catch (MalformedURLException e) {

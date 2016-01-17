@@ -84,6 +84,18 @@ public class URLtoUSKTools {
 		return result;
 	}
 
+	public static boolean isFeedURL(String urlParam) {
+		if (urlParam == null  || urlParam.isEmpty()) {
+			return false;
+		}
+
+		if (urlParam.startsWith(PORTAL_DOC_NAME)) {
+			return true;
+		}
+
+		return false;
+	}
+
 	/**
 	 * Validates a URL parameter and formats it accordingly
 	 * 
@@ -91,13 +103,13 @@ public class URLtoUSKTools {
 	 * @return the URL in format that can be processed by the CENO plugins
 	 * @throws MalformedURLException if URL parameter is not a valid URL
 	 */
-	public static String validateURL(String urlParam) throws MalformedURLException {
+	public static String validateURL(String urlParam) throws MalformedURLException {		
 		if (urlParam == null  || urlParam.isEmpty()) {
 			throw new MalformedURLException("Given URL was empty");
 		}
 
-		if (urlParam.equalsIgnoreCase(PORTAL_DOC_NAME)) {
-			return PORTAL_DOC_NAME;
+		if (isFeedURL(urlParam)) {
+			return urlParam;
 		}
 
 		// Won't serve favicons
