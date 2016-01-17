@@ -93,7 +93,7 @@ public class BridgeDatabase
 					storedChannels.add(new Channel(result.getString("privateSSK"),
 							result.getLong("lastKnownVersion"), result.getLong("lastSynced")));
 				} catch ( Exception e ) {
-					Logger.error(this, "failed to add a channel for a stored SSK ");
+					Logger.error(this, "failed to add a channel for a stored SSK");
 				}
 			}
 			result.close();

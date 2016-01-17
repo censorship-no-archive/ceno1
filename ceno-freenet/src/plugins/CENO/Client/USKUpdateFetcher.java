@@ -43,7 +43,7 @@ public class USKUpdateFetcher {
 		return true;
 	}
 
-	public static boolean subscribeFetchUSK(String url) {
+	public static boolean subscribeFetchUSK(String url, long suggestedEdition) {
 		if (url != null && !url.isEmpty()) {
 			try {
 				url = URLtoUSKTools.validateURL(url);
@@ -53,7 +53,7 @@ public class USKUpdateFetcher {
 			}
 		}
 		try {
-			subscribeFetchUSK(URLtoUSKTools.getPortalFeedsUSK(CENOClient.getBridgeKey()).setSuggestedEdition(CENOClient.getFeedsLastVersion()));
+			subscribeFetchUSK(URLtoUSKTools.getPortalFeedsUSK(CENOClient.getBridgeKey()).setSuggestedEdition(suggestedEdition));
 		} catch (MalformedURLException e) {
 			return false;
 		}
@@ -115,6 +115,7 @@ public class USKUpdateFetcher {
 			} catch (FetchException e) {
 				switch (e.getMode()) {
 				case PERMANENT_REDIRECT :
+					CENOClient.setFeedsLastVersion(e.newURI.getSuggestedEdition());
 					fetchNewEdition(e.newURI);
 					break;
 
@@ -175,7 +176,7 @@ public class USKUpdateFetcher {
 			for (Object feed : feeds) {
 				String url = ((JSONObject)feed).get("url").toString();
 				if (url != null && !url.isEmpty()) {
-					subscribeFetchUSK(url);
+					subscribeFetchUSK(url, 0);
 				}
 			}
 
