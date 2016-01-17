@@ -43,7 +43,6 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 	// Interface objects with fred
 	public static NodeInterface nodeInterface;
 	BridgeDatabase bridgeDatabase;
-	ChannelMaker channelMaker;
 
 	private static boolean isMasterBridge = false;
 	private static boolean isSignalBridge = false;
@@ -240,8 +239,8 @@ public class CENOBridge implements FredPlugin, FredPluginVersioned, FredPluginRe
 	public void terminate()
 	{
 		// Stop the thread that is polling for new channel requests
-		if (isSignalBridge && channelMaker != null) {
-			channelMaker.stopPuzzleListeners();
+		if (isSignalBridge) {
+			ChannelMaker.getInstance().stopPuzzleListeners();
 			for (Channel channel : ChannelManager.getInstance().getAllChannels()) {
 				try {
 					bridgeDatabase.storeChannel(channel);
