@@ -2,11 +2,11 @@
   "name": "ceno-router",
   "title": "CENO Router",
   "id": "cenorouter@equalit.ie",
-  "main": "./lib/main.js",
+  "main": "index.js",
   "description": "Facilitates interaction with the CENO Client, your gateway to the CENO network.",
   "author": "Zack Mullaly <redwire@riseup.net>",
   "homepage": "https://censorship.no",
   "icon": "data/icon-128.png",
   "license": "GPL-v3.0",
-  "version": "1.2.1"
+  "version": "1.3.1"
 }

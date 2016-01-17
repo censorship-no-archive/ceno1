@@ -1,13 +1,13 @@
 let { ToggleButton } = require('sdk/ui/button/toggle');
 let { Ci } = require('chrome');
 let { newURI } = require('sdk/url/utils');
+let { NewTabURL } = require('resource:///modules/NewTabURL.jsm');
 let events = require('sdk/system/events');
 let preferences = require('sdk/preferences/service');
 let Request = require('sdk/request').Request;
 let panels = require('sdk/panel');
 let self = require('sdk/self');
 let base64 = require('sdk/base64');
-let ss = require('sdk/simple-storage');
 let _ = require("sdk/l10n").get;
 
 // CENO configuration settings
@@ -93,6 +93,7 @@ function activateCENO() {
   preferences.set(PROXY_SSL_PORT, CENO_PORT);
   // Set the homepage and new tab page
   preferences.set(SETTING_HOMEPAGE, CENO_PORTAL_PAGE);
+  NewTabURL.override(CENO_PORTAL_PAGE);
   // Turn proxying on
   preferences.set(PROXY_TYPE, PROXY_TYPE_MANUAL);
 }
@@ -131,9 +132,9 @@ let button = ToggleButton({
   id: 'ceno-toggle',
   label: 'CENO Intercept',
   icon: {
-    '16': self.data.url('icon.png'),
-    '32': self.data.url('./icon.png'),
-    '64': self.data.url('./icon.png'),
+    '16': "./icon-16.png",
+    '32': "./icon-32.png",
+    '64': "./icon-64.png",
   },
   onChange: handleChange
 });
@@ -189,6 +190,7 @@ function handleHide() {
   button.state('window', { checked: false });
 }
 
+/*
 ensureProxyIsRunning(function (proxyIsSet) {
   if (proxyIsSet) {
     activateCENO();
@@ -200,3 +202,7 @@ ensureProxyIsRunning(function (proxyIsSet) {
     panel.port.emit('issue-alert', NO_PROXY_MSG);
   }
 });
+*/
+
+activateCENO();
+console.log('Activated');
