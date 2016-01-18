@@ -280,6 +280,10 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 			"Rewritten": wasRewritten,
 		}))
 	*/
+	if URL == "" || URL == "/" {
+		PortalIndexHandler(w, r)
+		return
+	}
 	if isValidURL := validateURL(URL, w, r); !isValidURL {
 		return
 	}
