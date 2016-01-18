@@ -75,8 +75,11 @@ function stripHTTPS(url) {
 function sendToProxy(event) {
   let channel = event.subject.QueryInterface(Ci.nsIHttpChannel);
   // If we get back a request that is already directed straight to the CC, ignore it
-  if (/^http:\/\/localhost:3090/.test(channel.URI.spec)) {
+  if (/^http:\/\/(localhost|127.0.0.1):3090/.test(channel.URI.spec)) {
     channel.setRequestHeader(REWRITTEN_HEADER, /rewritten=true$/.test(channel.URI.spec).toString(), false);
+    return;
+  }
+  if (/^http:\/\/(localhost|127.0.0.1):8888/.test(channel.URI.spec)) {
     return;
   }
   let directURL = stripHTTPS(channel.URI.spec).url;
@@ -134,7 +137,7 @@ let button = ToggleButton({
   icon: {
     '16': "./icon-16.png",
     '32': "./icon-32.png",
-    '64': "./icon-64.png",
+    '64': "./icon-64.png"
   },
   onChange: handleChange
 });
