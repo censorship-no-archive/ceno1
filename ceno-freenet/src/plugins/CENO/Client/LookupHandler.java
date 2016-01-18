@@ -173,10 +173,12 @@ public class LookupHandler extends AbstractCENOClientHandler {
 			if (e.getMode() == FetchExceptionMode.PERMANENT_REDIRECT) {
 				fetchResult = localCacheLookup(e.newURI);
 			} else if (e.isFatal()) {
-				Logger.warning(this, "Fatal fetch exception while looking in the local cache for USK: " + calculatedUSK + " Exception: " + e.getMessage());
+				Logger.warning(this, "Fatal fetch exception while looking in the local cache for a USK, Exception: " + e.getMessage());
+				Logger.normal(this, "Fatal fetch exception while looking in the local cache for USK: " + calculatedUSK + " Exception: " + e.getMessage());
 				throw new CENOException(CENOErrCode.LCS_LOOKUP_LOCAL);
 			} else {
-				Logger.error(this, "Unhandled exception while looking in the local cache for USK: " + calculatedUSK + " Exception: " + e.getMessage());
+				Logger.error(this, "Unhandled exception while looking in the local cache for a USK, Exception: " + e.getMessage());
+				Logger.normal(this, "Unhandled exception while looking in the local cache for USK: " + calculatedUSK + " Exception: " + e.getMessage());
 			}
 		}
 		return fetchResult;

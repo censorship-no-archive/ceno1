@@ -53,7 +53,8 @@ public class ULPRManager {
 				}
 			} else {
 				updateULPRStatus(url, ULPRStatus.failed);
-				Logger.error(this, "ULPR failed for url: " + url + " Exception: " + e.getMessage());
+				Logger.error(this, "ULPR failed for a url, Exception: " + e.getMessage());
+				Logger.normal(this, "ULPR failed for url: " + url + " Exception: " + e.getMessage());
 			}
 		}
 
@@ -107,7 +108,8 @@ public class ULPRManager {
 		try {
 			calculatedUSK = URLtoUSKTools.computeUSKfromURL(url, CENOClient.getBridgeKey());
 		} catch (Exception e) {
-			Logger.error(this, "Could not calculate USK for URL: " + url);
+			Logger.error(this, "Could not calculate USK for a URL");
+			Logger.normal(this, "Could not calculate USK for URL: " + url);
 			updateULPRStatus(url, ULPRStatus.couldNotStart);
 			throw new CENOException(CENOErrCode.LCS_HANDLER_URL_TO_USK);
 		}
@@ -115,7 +117,8 @@ public class ULPRManager {
 		try {
 			CENOClient.nodeInterface.fetchULPR(calculatedUSK, new ULPRGetCallback(url));
 		} catch (FetchException e) {
-			Logger.error(this, "Could not start ULPR for URL: " + url);
+			Logger.error(this, "Could not start ULPR for a URL");
+			Logger.normal(this, "Could not start ULPR for URL: " + url);
 			updateULPRStatus(url, ULPRStatus.couldNotStart);
 			throw new CENOException(CENOErrCode.LCS_LOOKUP_ULPR_INIT);
 		}

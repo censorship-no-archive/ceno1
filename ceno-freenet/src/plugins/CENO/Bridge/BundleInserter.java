@@ -73,10 +73,12 @@ public class BundleInserter {
 			try {
 				CENOBridge.nodeInterface.insertBundleManifest(insertionStruct.insertURI, insertionStruct.content, insertionStruct.docName, insertionStruct.insertCb);
 			} catch (IOException e) {
-				Logger.error(this, "Failed to initiate insertion for URL: " + insertionStruct.url + " IO Error: " + e.getMessage());
+				Logger.error(this, "Failed to initiate insertion for a bundle, IO Error: " + e.getMessage());
+				Logger.normal(this, "Failed to initiate insertion for URL: " + insertionStruct.url + " IO Error: " + e.getMessage());
 				return;
 			} catch (InsertException e) {
-				Logger.error(this, "Failed to initiate insertion for URL: " + insertionStruct.url + " Insert Error: " + e.getMessage());
+				Logger.error(this, "Failed to initiate insertion for a bundle, Insert Error: " + e.getMessage());
+				Logger.normal(this, "Failed to initiate insertion for URL: " + insertionStruct.url + " Insert Error: " + e.getMessage());
 				addToQueue(insertionStruct);
 				return;
 			}
@@ -155,7 +157,8 @@ public class BundleInserter {
 		}
 
 		public void onFailure(InsertException e, BaseClientPutter state) {
-			Logger.error(this, "Failed to insert bundle for URL " + url + " Error Message: " + e);
+			Logger.error(this, "Failed to insert bundle for a URL, Error Message: " + e);
+			Logger.normal(this, "Failed to insert bundle for URL " + url + " Error Message: " + e);
 			synchronized (concurrentInsertions) {
 				concurrentInsertions--;
 				processQueue();
