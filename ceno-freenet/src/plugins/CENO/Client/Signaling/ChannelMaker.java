@@ -28,7 +28,7 @@ import freenet.support.io.ResumeFailedException;
 
 public class ChannelMaker implements Runnable {
 	private static final int MAX_KSK_POLLS = 20;
-	
+
 	private FreenetURI signalSSK;
 	private FreenetURI signalSSKpub;
 	private boolean channelEstablished = false;
@@ -45,17 +45,23 @@ public class ChannelMaker implements Runnable {
 			if (signalSSKString != null) {
 				this.signalSSK = new FreenetURI(signalSSKString);
 				this.signalSSKpub = this.signalSSK.deriveRequestURIFromInsertURI();
+				this.lastSynced = lastSynced;
 				channelStatus = ChannelStatus.publishedKSK;
+				Logger.warning(this, "Retrieved previously established channel from client.properties");
+				if (System.currentTimeMillis() - lastSynced < TimeUnit.DAYS.toMillis(15)) {
+					channelStatus = ChannelStatus.waitingForSyn;
+					Logger.warning(this, "The established channel was synced less than 15 days ago and will start using without re-establishment");
+				}
 				return;
 			}
 		} catch (MalformedURLException e) {
 			Logger.error(this, "signalSSK read from configuration is not a valid Freenet key");
-		} finally {
-			FreenetURI newKeyPair[] = CENOClient.nodeInterface.generateKeyPair();
-			this.signalSSK = newKeyPair[0];
-			this.signalSSKpub = newKeyPair[1];
-			this.channelStatus = ChannelStatus.starting;
 		}
+		FreenetURI newKeyPair[] = CENOClient.nodeInterface.generateKeyPair();
+		this.signalSSK = newKeyPair[0];
+		this.signalSSKpub = newKeyPair[1];
+		this.channelStatus = ChannelStatus.starting;
+		Logger.warning(this, "Generated keys for establishing a secure channel");
 	}
 
 	@Override
@@ -97,7 +103,7 @@ public class ChannelMaker implements Runnable {
 
 		return channelEstablished;
 	}
-	
+
 	private boolean waitForSyn() {
 		FreenetURI synURI = new FreenetURI("USK", "syn", signalSSKpub.getRoutingKey(), signalSSKpub.getCryptoKey(), signalSSKpub.getExtra());
 		FetchResult fetchResult = null;
@@ -196,11 +202,11 @@ public class ChannelMaker implements Runnable {
 				return;
 			}
 		}
-		
+
 		insertSubKSK(question, encReply,  new int[0]);
 		waitForSyn();
 	}
-	
+
 	private void insertSubKSK(String question, byte[] encReply, int[] prevSubKSK) {
 		FreenetURI insertedKSK = null;
 		int randSubKSK = (int) (Math.random() * MAX_KSK_POLLS);
@@ -227,12 +233,12 @@ public class ChannelMaker implements Runnable {
 		Logger.normal(this, "Started publishing to KSK solution to the bridge slot " + randSubKSK);
 		return;
 	}
-	
+
 	private class KSKSolutionPutCallback implements ClientPutCallback {
 		int[] prevSubKSK;
 		byte[] encReply;
 		String question;
-		
+
 		public KSKSolutionPutCallback(String question, byte[] encReply, int[] prevSubKSK) {
 			this.question = question;
 			this.encReply = encReply;
@@ -284,7 +290,7 @@ public class ChannelMaker implements Runnable {
 				Logger.error(this, "Failed to publish KSK@solution: " + e.getMessage());
 			}
 		}
-		
+
 	}
 
 }
