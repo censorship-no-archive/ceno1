@@ -163,7 +163,8 @@ func InitModuleWithArticles(feedUrl string) (map[string]interface{}, error) {
 		return nil, feedErr
 	}
 	mapping["Title"] = T("feed_not_found", map[string]string{"FeedUrl": feedUrl})
-	fmt.Println("Trying to find title for feed with url", feedUrl)
+	//fmt.Println("Trying to find title for feed with url", feedUrl)
+	fmt.Println("Trying to find title for feed")
 	for _, feed := range feedsModule["Feeds"].([]Feed) {
 		actualFeedUrl, urlErr := getFeedUrl(feed.Url)
 		if urlErr != nil {
@@ -172,7 +173,8 @@ func InitModuleWithArticles(feedUrl string) (map[string]interface{}, error) {
 		if actualFeedUrl == feedUrl {
 			// We will always find a title eventually unless the user messed up and accidentally changed the
 			// feed url in the address bar.
-			fmt.Println("Found feed with title", feed.Title)
+			//fmt.Println("Found feed with title", feed.Title)
+			fmt.Println("Found feed with title")
 			mapping["Title"] = feed.Title
 			break
 		}
@@ -224,7 +226,7 @@ func loadLanguageStrings() ([]LanguageStrings, LanguageStringJSON, error) {
 }
 
 func PortalIndexHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Got request for test portal page")
+	//fmt.Println("Got request for test portal page")
 	t, _ := template.ParseFiles("./views/index.html", "./views/nav.html", "./views/resources.html", "./views/scripts.html")
 	module := map[string]interface{}{}
 	languageStrings, langStringsJson, readErr := loadLanguageStrings()
@@ -242,7 +244,7 @@ func PortalIndexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func PortalChannelsHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Got request for test channels page")
+	//fmt.Println("Got request for test channels page")
 	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
 	t, _ := template.ParseFiles("./views/channels.html", "./views/nav.html", "./views/resources.html", "./views/breadcrumbs.html", "./views/scripts.html")
 	module, err := InitModuleWithFeeds()
@@ -380,7 +382,7 @@ type StatusResponse struct {
  * @param {*Request} r - Information about the request
  */
 func StatusHandler(w http.ResponseWriter, r *http.Request) {
-	log("Got request to check status of LCS")
+	//log("Got request to check status of LCS")
 	T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
 	response, err := http.Get(StatusCheckURL(Configuration))
 	w.Header().Set("Content-Type", "application/json")

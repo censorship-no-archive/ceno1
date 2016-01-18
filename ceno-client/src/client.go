@@ -176,7 +176,7 @@ func stripHttps(URL string) (string, bool) {
  * @param {*Request} r - Information about the request
  */
 func directHandler(w http.ResponseWriter, r *http.Request) {
-	log("Got request to directHandler")
+	//log("Got request to directHandler")
 	qs := r.URL.Query()
 	T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
 	URLS, found := qs["url"]
@@ -198,7 +198,7 @@ func directHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	decodedURL := string(decodedBytes)
-	log("Decoded URL to " + decodedURL)
+	//log("Decoded URL to " + decodedURL)
 	stripped, rewritten := stripHttps(decodedURL)
 	if stripped == CENOPORTAL || stripped == PORTAL {
 		PortalIndexHandler(w, r)
@@ -274,10 +274,12 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 	URL := r.URL.String()
 	T, _ := i18n.Tfunc(os.Getenv("CENOLANG"), "en-us")
 	wasRewritten := r.Header.Get(REWRITTEN_HEADER) == "true"
-	log(T("got_request_msg_cli", map[string]interface{}{
-		"URL":       URL,
-		"Rewritten": wasRewritten,
-	}))
+	/*
+		log(T("got_request_msg_cli", map[string]interface{}{
+			"URL":       URL,
+			"Rewritten": wasRewritten,
+		}))
+	*/
 	if isValidURL := validateURL(URL, w, r); !isValidURL {
 		return
 	}
