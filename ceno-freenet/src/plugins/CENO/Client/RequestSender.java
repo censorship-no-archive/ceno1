@@ -70,6 +70,10 @@ public class RequestSender {
 		} catch (MalformedURLException e) {
 			return false;
 		}
+		
+		if (URLtoUSKTools.isFeedURL(urlValidated)) {
+			return false;
+		}
 
 		if (!requestTable.containsKey(urlValidated)) {
 			requestTable.put(url, System.currentTimeMillis());
