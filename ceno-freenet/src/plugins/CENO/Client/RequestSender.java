@@ -98,7 +98,7 @@ public class RequestSender {
 		@Override
 		public void run() {
 			synchronized (newUrlArrived) {
-				if(!newUrlArrived || !CENOClient.channelMaker.canSend()) {
+				if(!newUrlArrived || !CENOClient.channelMaker.sentPrivUSK()) {
 					return;
 				}
 

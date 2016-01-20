@@ -92,6 +92,10 @@ public class ChannelMaker implements Runnable {
 		return ChannelStatus.canSend(channelStatus);
 	}
 
+	public boolean sentPrivUSK() {
+		return ChannelStatus.sentPrivUSK(channelStatus);
+	}
+
 	private boolean checkChannelEstablished() {
 		if (System.currentTimeMillis() - lastSynced  > TimeUnit.DAYS.toMillis(30)) {
 			return false;
