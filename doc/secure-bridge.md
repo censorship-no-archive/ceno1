@@ -1,7 +1,7 @@
 # How to run a secure CENO bridge node
 
 Running a CENO bridge node implies that your system and, as a consequence, the
-client nodes are exposed to [threats](../doc/threatModel.md#4-threats) if
+client nodes are exposed to [threats](threatModel.md#4-threats) if
 your server is not hardened adequately.  This guide briefly illustrates the
 common risks associated with running a CENO bridge and gives some basic
 recommendations on how to secure the system to minimize the risk.
