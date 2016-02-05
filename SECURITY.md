@@ -12,6 +12,10 @@ is a work in progress and should only be used when all other mature and proven
 circumvention tools fail (see [alternative
 tools](https://learn.equalit.ie/wiki/I_want_to_learn_about_circumventing_Internet_censorship)). 
 
+**Note:** This document contains general information on CENO security and is
+addressed at CENO client users. Bridge nodes operators should read [these
+recommendations](/doc/secure-bridge.md) for running a secure CENO bridge.
+
 # What do you mean by secure?
 
 In this particular project we care about and define herein your:
