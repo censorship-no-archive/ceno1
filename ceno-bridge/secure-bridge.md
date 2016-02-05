@@ -72,10 +72,14 @@ protect both your server and the clients you serve:
 
 ## Further Reading
 
-For more information see the following sites that provide documentation on
+For more information see the following resources, with thorough documentation on
 server hardening.
 
-https://www.debian.org/doc/manuals/debian-handbook/security.en.html
-https://tails.boum.org/contribute/design/
-http://csrc.nist.gov/publications/nistpubs/800-123/SP800-123.pdf
-https://www.whonix.org/wiki/Advanced_Security_Guide
+* [The Debian Administrator's Handbook - security
+  section](https://www.debian.org/doc/manuals/debian-handbook/security.en.html)
+* [Privacy Enhancing Live Distribution: specification and
+  implementation](https://tails.boum.org/contribute/design)
+* [NIST Guide to General Server Security -
+  PDF](http://csrc.nist.gov/publications/nistpubs/800-123/SP800-123.pdf)
+* [Whonix Advanced security
+  guide](https://www.whonix.org/wiki/Advanced_Security_Guide)
