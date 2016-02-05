@@ -108,3 +108,12 @@ willingly download it to your hard drive so as to access it locally, this
 content will reveal that you have circumvented national censorship to anyone who
 can see what's in your machine. Therefore, it is best to encrypt your entire
 hard disk or, in alternative, to save the files in an encrypted partition.
+
+* Can I use other Freenet services while CENO runs in my computer?
+ 
+ If you use other Freenet services independently from CENO, there may be other
+ risks that you need to consider. To learn more about them, read the Security
+ section in [this page](https://freenetproject.org/help.html). If you use CENO
+ in the default mode -- connecting automatically to Freenet nodes in opennet
+ rather than in darknet mode -- you should avoid using the same Freenet node you
+ use with CENO for other activities where anonymity is important.
