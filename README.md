@@ -32,13 +32,59 @@ sites that require login or are heavily dependent on dynamic content.
 
 More information on how to use CENO securely can be found [here](SECURITY.md).
 
+## Installing CENO
+
+New users are advised to use the CENOBox, an all-in-one bundle that includes a
+preconfigured version of all the client-side components. You can download the
+latest release for your operating system from
+[here](https://github.com/equalitie/ceno/releases/latest).
+
+We recommend to run the Firefox browser, but CENOBox will also work with
+Chrome/Chromium. You will also need a Java Runtime Environment (in Debian/Ubuntu
+we recommend the `default-jre` package, or you can find an appropriate version
+for your operating system from
+[Oracle](http://www.oracle.com/technetwork/java/javase/downloads/jre7-downloads-1880261.html).
+
+If you want to build CENOBox manually, read these [instructions](BUILD.md).
+
+### CENOBox in Linux and Mac OS X
+
+Change directory to the path you would like to install CENOBox at (we recommend
+your /home directory)
+and execute the following command:
+
+```bash
+sh -c "$(curl -fsSL
+https://raw.githubusercontent.com/equalitie/ceno/master/ceno-box/installCENO.sh)"
+```
+
+CENOBox will open a new Firefox or Chrome window with a customized profile.
+Remember that you are protected by CENO only when you are using that browser
+window to visit websites, and only when CENO Router plugin status is active,
+which it is by default.
+
+Once you have installed CENOBox in your system, you can re-open a protected
+browser window by navigating to the CENOBox directory and using the CENO.sh
+script
+
+```bash
+cd ~/CENOBox
+./CENO.sh
+```
+
+CENO will identify your system's language and show you messages in it, given
+that a translation exists.  In order to explicitly set a language, you can set
+the `CENOLANG` environment variable.  For example, if you want to use CENO in
+French, this is the way to execute the CENO.sh script:
+
+```bash
+CENOLANG=fr-fr ./CENO.sh
+```
+
 
 ## Running CENO
 
-For installation, please refer to
-[INSTALL.md](https://github.com/equalitie/ceno/blob/next/INSTALL.md).
-
-### What you need to know
+The first time you launch CENO, there are several things you need to know:
 
 1. CENO uses the [Freenet](https://freenetproject.org) censorship resistant
    platform for communications and storage. The Freenet package is bundled with
