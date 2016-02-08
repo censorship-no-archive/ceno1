@@ -45,6 +45,8 @@ we recommend the `default-jre` package, or you can find an appropriate version
 for your operating system from
 [Oracle](http://www.oracle.com/technetwork/java/javase/downloads/jre7-downloads-1880261.html).
 
+If you want to build CENOBox manually, read these [instructions](BUILD.md).
+
 ### CENOBox in Linux and Mac OS X
 
 Change directory to the path you would like to install CENOBox at (we recommend
