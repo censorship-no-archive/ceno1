@@ -65,6 +65,7 @@ public class NodeInterface implements FreenetInterface {
 		this.localFC.maxRecursionLevel = 10;
 		this.localFC.maxTempLength = Long.MAX_VALUE;
 		this.localFC.maxOutputLength = Long.MAX_VALUE;
+		this.localFC.filterData = true;
 
 		// Set up a FetchContext instance for lookup requests in the distributed cache only
 		this.distFC = HighLevelSimpleClientInterface.getFetchContext();
