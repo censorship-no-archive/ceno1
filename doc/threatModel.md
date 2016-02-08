@@ -3,7 +3,6 @@
 ## Contents
 
   1. Application Description
-  <!-- 2. Application Overview -->
   2. Security Objectives
   3. Assumptions
   4. Threats
@@ -129,6 +128,11 @@ the users, is significantly efficient compared to similar ones, and can scale
 horizontally so as to handle increasing demand.
 
 
+#### Resistance against active network interference
+
+
+
+
 ## 3. Assumptions
 
 #### User Behavior
@@ -251,14 +255,14 @@ We consider this threat to be of high risk but of low exploitability.
 CENO Agents are built in a micro-services fashion and are communicating with
 each other over an HTTP RESTful API. It is worth mentioning that agents accept
 requests only from localhost connections, yet there is no provision from
-blocking requests from not-CENO services running on the users or IA machines.
+blocking requests from not-CENO services running on the users' or IA's machines.
 Email clients that parse HTML and Javascript emails, browsers, as well as
 software specifically developed for this reason, could identify and fingerprint
 the existence of a running CENO agent. Then, out-of-band mechanisms, for example
 requests to a remote machine, could easily leak the IP of a CENO user or Bridge
 maintainer. Nevertheless, malicious software could change the configuration
 options of the Freenet node, or actively interfere in other ways with the CENO
-agents so as to
+agents so as to jeopardize the anonymity of users.
 
 This is a high risk and easily exploitable issue the CENO developers aim towards
 mitigating as soon as possible. In the meantime we strongly recommend that IA
@@ -269,21 +273,42 @@ separate user.
 
 
 #### v. CENO Signaling channel establishment puzzle slots flooding
-This is a medium impact risk but an easily exploitable one. Future CENO versions
-will be using CAPTCHAs in order to stop the aumated spambots.
+
+In order to establish a secure signaling channel, Signal Bridges publish their
+public RSA key along with a quiz whose solution leads to a set of keys, hereon
+slots, that everybody can use to insert a page in Freenet. Clients generate a
+new channel, encrypt it so that it is readably only by the Signal Bridge and
+insert it into one of those slots. Eventually the Signal Bridge will poll the
+slots, discover and decrypt the request of a client and start accepting requests
+on that channel.
+However, in distributed storage networks such as Freenet, slots can be used only
+once and once consumed Signal Bridges will have to publish a new puzzle. A
+malicious adversary could keep inserting nonce and consuming the slots as soon
+as published, therefore causing a Denial Of Service on the channel establishment
+process. Previously established channels won't be affected by the slots flooding
+attack.
+
+This is a medium risk vulnerability (it doesn't affect the security of users or
+Insertion Authorities) but an easily exploitable one. Future CENO versions will
+require from users to solve a CAPTCHA the first time they are communicating with
+an Insertion Authority, in order to stop spambots.
 
 
 #### vi. CENO User machine compromisation / physical seizure
+
 
 This is a medium impact low risk issue.
 
 
 #### vii. Freenet traffic throttling
 
-Efforts have been made towards adding support for obfuscating Freenet nodes traffic but this is an ongoing process and needs the support of the pluggable transport implementors groups (for UDP traffic).
+Alarmed by the ever increasing capacity of global adversaries to actively perform network interference, we are considering the  possible scenario. It is known that Freenet users within China have been having problems with connecting with nodes outside of the country.
+
+Efforts have been made towards adding support for obfuscating Freenet nodes' traffic but this is an ongoing process and needs the support of the pluggable transport implementors groups (for UDP traffic). It is important to mention that usually adversaries throttle only outgoing connections, leaving . In such case, CENO will still be partially functional (see Security Objective "Resistance to active network interference")
 
 This is a high risk issue and exploitable only by adversaries who have access
 to the network infrastructure, such as ISPs.
+
 
 ##### viii. Insertion Authority Network Interference
 
@@ -300,13 +325,11 @@ The agents that were audited are:
   * CENO Freenet plugins (CENO.jar and CENOBridge.jar)
   * CENO Browser Extensions
 
-##### NCC-CENO-006: Bundler Server Does Not Validate TLS Certificates
-
+##### NCC-CENO-006: Bundler Server Does Not Validate TLS Certificate
 This issue was **fixed** with CENO v0.6-rc, by explicitly setting the
 `strictSSL` to true, as suggested by the auditors group.
 
 ##### NCC-CENO-015: Client Downgrades HTTPS Connection Attempts to HTTP
-
 In order to mitigate this issue, the CENO team has decided to imply the
 HTTPS-Everywhere ruleset to all outgoing Bundle Server requests. We consider
 this "best-effort" upgrade to HTTPS the best thing to do, given that it should
@@ -315,11 +338,10 @@ version is inserted in the distributed storage, and in order to assure the
 genuinity of the content inserted. This is **work in progress**.
 
 ##### NCC-CENO-017: CENO Request Scheme Obfuscates URLs and Flattens Web Origins
-
-The CENO team believes that by dropping support for Javascript and by providing hardened browser profiles that this issue has been **mitigated**.
+The CENO team believes that by dropping support for Javascript and by providing
+a hardened browser profile for Firefox that this issue has been **mitigated**.
 
 ##### NCC-CENO-018: JavaScript Can Unmask Users Via Multiple Mechanisms
-
 Similarly to the previous issue identified by the NCC Group, by applying
 readability mode on the bundles inserted by bridges and by stripping any
 Javascript at the Lookup Cache Servers we consider this issue **resolved**.
@@ -328,21 +350,40 @@ The proposed solution of inserting assets individually rather than part of the
 bundle is something that could be considered as a future improvement.
 
 ##### NCC-CENO-019: Exposed Freenet Plugin Enable XSS In Freenet Origin and User Identification
-
 This issue, overlapping with threat iv identified above, is still a **critical
 vulnerability**.
 
 ##### NCC-CENO-021: CENO Client Daemon Is Exposed and Does Not Act as an HTTP Proxy
-
 This issue remains a **critical vulnerability** and will be addressed by using
 application secrets, in the same way with NCC-CENO-019.
 
 ##### NCC-CENO-013: Bridge Server Cannot Recover From Compromise
 
+##### NCC-CENO-002: CENOBox Configures Freenet To Run In Opennet Mode
+
+##### NCC-CENO-001: Distribution of Untrusted and Unsigned Mozilla Firefox Add-On
+
+##### NCC-CENO-003: CENO Bridge Uses Static Source Port
+
+##### NCC-CENO-005: Extension Toggle Switch Implementation is Unsafe
+
+##### NCC-CENO-008: Bridge Server Private Files Accessible To Other Users
+
+##### NCC-CENO-009: Firefox Add-Ons Can Modify CENO Add-On
+
+##### NCC-CENO-007: Sensitive Information Stored In Bridge Server logs
+
+##### NCC-CENO-014: CENO Freemail Account Accessible To All Users
+
+##### NCC-CENO-010: Hard-Coded Bridge in Application Source Code
+
+##### NCC-CENO-011: Missing Recommendations For Bridge Server Hardening
+
+##### NCC-CENO-016: USK URL Generation Does Not Escape Base64-Encoded URL Data
 
 
 
 <hr>
 Threat Model version 1.0  
 CENO version 1.0.0-beta  
-Marios Isaakidis
+ceno@equalit.ie
