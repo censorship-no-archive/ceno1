@@ -20,7 +20,7 @@ import freenet.support.Logger;
 
 public class USKUpdateFetcher {
 
-	public static boolean subscribeFetchUSK(FreenetURI uskUri) {
+	public static boolean subscribeToUSK(FreenetURI uskUri, USKCallback uskCb) {
 		long suggestedEdition;
 		if (uskUri.isSSK()) {
 			suggestedEdition = 0L;
@@ -38,7 +38,7 @@ public class USKUpdateFetcher {
 			return false;
 		}
 
-		CENOClient.nodeInterface.subscribeToUSK(usk, new USKUpdateFetcher.USKUpdateCb());
+		CENOClient.nodeInterface.subscribeToUSK(usk, uskCb);
 
 		return true;
 	}
@@ -53,11 +53,28 @@ public class USKUpdateFetcher {
 			}
 		}
 		try {
-			subscribeFetchUSK(URLtoUSKTools.getPortalFeedsUSK(CENOClient.getBridgeKey()).setSuggestedEdition(suggestedEdition));
+			subscribeToUSK(URLtoUSKTools.getPortalFeedsUSK(CENOClient.getBridgeKey()).setSuggestedEdition(suggestedEdition), new USKUpdateFetcher.USKFetchCallback());
 		} catch (MalformedURLException e) {
 			return false;
 		}
 
+		return true;
+	}
+
+	public static boolean subscribeToFeedUSK(String url, long suggestedEdition) {
+		if (url != null && !url.isEmpty()) {
+			try {
+				url = URLtoUSKTools.validateURL(url);
+				if (!URLtoUSKTools.isFeedURL(url)) {
+					Logger.warning(USKUpdateFetcher.class, "Feeds list included not feed url");
+					return false;
+				}
+				subscribeToUSK(URLtoUSKTools.computeUSKfromURL(url, CENOClient.getBridgeKey()), new USKUpdateFetcher.USKVoidCallback());
+			} catch (MalformedURLException e) {
+				Logger.warning(USKUpdateFetcher.class, "Feed URL failed validation: " + url + " msg: " + e.getMessage());
+				return false;
+			}
+		}
 		return true;
 	}
 
@@ -73,18 +90,38 @@ public class USKUpdateFetcher {
 		}
 
 
-		CENOClient.nodeInterface.subscribeToUSK(feedsUSK, new USKUpdateFetcher.USKUpdateCb(true));
+		CENOClient.nodeInterface.subscribeToUSK(feedsUSK, new USKUpdateFetcher.USKFetchCallback(true));
 
 		return true;
 	}
 
-	private static class USKUpdateCb implements USKCallback {
-		private boolean fetchSubList = false;
+	private static class USKVoidCallback implements USKCallback {
 
-		public USKUpdateCb() {
+		@Override
+		public void onFoundEdition(long l, USK key, ClientContext context,
+				boolean metadata, short codec, byte[] data,
+				boolean newKnownGood, boolean newSlotToo) {
 		}
 
-		public USKUpdateCb(boolean fetchSublist) {
+		@Override
+		public short getPollingPriorityNormal() {
+			return 0;
+		}
+
+		@Override
+		public short getPollingPriorityProgress() {
+			return 0;
+		}
+
+	}
+
+	private static class USKFetchCallback implements USKCallback {
+		private boolean fetchSubList = false;
+
+		public USKFetchCallback() {
+		}
+
+		public USKFetchCallback(boolean fetchSublist) {
 			this.fetchSubList = fetchSublist;
 		}
 
@@ -115,7 +152,9 @@ public class USKUpdateFetcher {
 			} catch (FetchException e) {
 				switch (e.getMode()) {
 				case PERMANENT_REDIRECT :
-					CENOClient.setFeedsLastVersion(e.newURI.getSuggestedEdition());
+					if (fetchSubList) {
+						CENOClient.setFeedsLastVersion(e.newURI.getSuggestedEdition());
+					}
 					fetchNewEdition(e.newURI);
 					break;
 
@@ -160,23 +199,23 @@ public class USKUpdateFetcher {
 			try {
 				obj = (JSONObject)parser.parse(result.asByteArray());
 			} catch (ParseException e) {
-				Logger.error(USKUpdateCb.class, "Could not parse feeds.json");
+				Logger.error(USKFetchCallback.class, "Could not parse feeds.json");
 				return;
 			} catch (IOException e) {
-				Logger.error(USKUpdateCb.class, "IOException while parsing feeds.json");
+				Logger.error(USKFetchCallback.class, "IOException while parsing feeds.json");
 				return;
 			}
 
 			JSONArray feeds = (JSONArray) obj.get("feeds");
 			if (feeds == null) {
-				Logger.warning(USKUpdateCb.class, "Retrieved feeds.json without any feeds");
+				Logger.warning(USKFetchCallback.class, "Retrieved feeds.json without any feeds");
 				return;
 			}
 
 			for (Object feed : feeds) {
 				String url = ((JSONObject)feed).get("url").toString();
 				if (url != null && !url.isEmpty()) {
-					subscribeFetchUSK(url, 0);
+					subscribeToFeedUSK(url, 0);
 				}
 			}
 

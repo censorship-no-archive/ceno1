@@ -64,6 +64,10 @@ public class Channel {
 		return lastKnownEdition;
 	}
 
+	private void setLastKnownEdition(Long newEdition) {
+		this.lastKnownEdition = newEdition;
+	}
+
 	public Long getLastSynced() {
 		return lastSynced;
 	}
@@ -87,7 +91,7 @@ public class Channel {
 	public void subscribeToChannelUpdates() throws MalformedURLException {
 		FreenetURI origUSK = new FreenetURI(requestSSK.getRoutingKey(), requestSSK.getCryptoKey(), requestSSK.getExtra(), "req", lastKnownEdition);
 		try {
-			CENOBridge.nodeInterface.fetchULPR(origUSK, new ReqCallback(origUSK));
+			CENOBridge.nodeInterface.fetchULPR(origUSK, new ReqCallback(origUSK, insertSSK.toString()));
 		} catch (FetchException e) {
 			Logger.error(this, "FetchException while starting ULPR for a signalling channel: " + e.getMessage());
 		}
@@ -95,9 +99,11 @@ public class Channel {
 
 	public static class ReqCallback implements ClientGetCallback {
 		private FreenetURI uri;
+		private String channelSignalSSK;
 
-		public ReqCallback(FreenetURI uri) {
+		public ReqCallback(FreenetURI uri, String channelSignalSSK) {
 			this.uri = uri;
+			this.channelSignalSSK = channelSignalSSK;
 		}
 
 		private void fetchNewRequests(FetchResult result) {
@@ -114,7 +120,7 @@ public class Channel {
 
 			FreenetURI nextURI = uri.setSuggestedEdition(uri.getEdition() + 1);
 			try {
-				CENOBridge.nodeInterface.fetchULPR(nextURI, new ReqCallback(nextURI));
+				CENOBridge.nodeInterface.fetchULPR(nextURI, new ReqCallback(nextURI, this.channelSignalSSK));
 			} catch (FetchException e) {
 				Logger.error(this, "FetchException while starting ULPR for next edition of a signalling channel: " + e.getMessage());
 			}
@@ -133,6 +139,7 @@ public class Channel {
 
 		@Override
 		public void onSuccess(FetchResult result, ClientGetter state) {
+			ChannelManager.getInstance().getChannel(channelSignalSSK).setLastKnownEdition(uri.getSuggestedEdition());
 			fetchNewRequests(result);
 		}
 
@@ -141,7 +148,7 @@ public class Channel {
 			switch (e.getMode()) {
 			case PERMANENT_REDIRECT :
 				try {
-					CENOBridge.nodeInterface.fetchULPR(e.newURI, new ReqCallback(e.newURI));
+					CENOBridge.nodeInterface.fetchULPR(e.newURI, new ReqCallback(e.newURI, this.channelSignalSSK));
 				} catch (FetchException e1) {
 					Logger.error(this, "FetchException while starting ULPR for new edition of a signalling channel: " + e1.getMessage());
 				}

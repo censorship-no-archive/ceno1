@@ -23,6 +23,14 @@ public class ChannelManager {
 		return instance;
 	}
 
+	public Channel getChannel(String signalSSK) {
+		for (Channel channel : channelList) {
+			if (channel.getInsertSSK().equals(signalSSK))
+				return channel;
+		}
+		return null;
+	}
+
 	public void addChannel(Channel channel) throws MalformedURLException {
 		if (channel != null) {
 			if (!channelList.contains(channel)) {

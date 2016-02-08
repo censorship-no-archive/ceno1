@@ -190,7 +190,7 @@ public class HighLevelSimpleClientInterface {
 		HLSCInterface.node.clientCore.clientContext.start(clientPutter);
 		return uri;
 	}
-	
+
 	public static FreenetURI insertSingleChunk(FreenetURI uri, byte[] content, ClientPutCallback cb) throws InsertException, PersistenceDisabledException, UnsupportedEncodingException {
 		RandomAccessBucket b = new SimpleReadOnlyArrayBucket(content);
 
@@ -208,10 +208,14 @@ public class HighLevelSimpleClientInterface {
 		// If the content is an HTML/XML file and there are hidden characters before the <html> opening tag, remove them
 		int bucketLength, index = 0;
 		if (content.indexOf("<") != 0) {
-			if (content.substring(0, 50).matches("(?ui)[\\s\\S]*\\<(!DOCTYPE)?\\s*(html|\\?xml)[\\s\\S]*")) {
-				//FIXME: Instead of creating a substring, find the index of the byte corresponding to "<" and assign it
-				// to the index variable. indexOf("<") won't work because of multi-byte UTF-8 characters
-				content = content.substring(content.indexOf("<"));
+			try {
+				if (content.substring(0, 50).matches("(?ui)[\\s\\S]*\\<(!DOCTYPE)?\\s*(html|\\?xml)[\\s\\S]*")) {
+					//FIXME: Instead of creating a substring, find the index of the byte corresponding to "<" and assign it
+					// to the index variable. indexOf("<") won't work because of multi-byte UTF-8 characters
+					content = content.substring(content.indexOf("<"));
+				}
+			} catch (StringIndexOutOfBoundsException e) {
+				Logger.minor(HighLevelSimpleClientInterface.class, "Content of bundle to insert is less than 50 characters long");
 			}
 		}
 
