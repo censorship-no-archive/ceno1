@@ -84,11 +84,7 @@ CENOLANG=fr-fr ./CENO.sh
 
 ## Running CENO
 
-For installation, please refer to
-[INSTALL.md](https://github.com/equalitie/ceno/blob/next/INSTALL.md).
-
-
-### What you need to know the first time you launch CENO
+The first time you launch CENO, there are several things you need to know:
 
 1. CENO uses the [Freenet](https://freenetproject.org) censorship resistant
    platform for communications and storage. The Freenet package is bundled with
