@@ -79,7 +79,6 @@ public class ChannelManager {
 	}
 
 	private void subscribeToChannel(Channel channel) throws MalformedURLException {
-		channel.publishSyn();
 		channel.subscribeToChannelUpdates();
 	}
 
