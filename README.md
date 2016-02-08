@@ -11,7 +11,7 @@ well as offering users plausible deniability in an emergency situation. CENO is
 built in advance of aggressive Internet filtering and the establishment of
 [national intranets](http://en.wikipedia.org/wiki/National_intranet) to fence
 off citizens from the wicked Web. Read more about the project
-[here](https://github.com/equalitie/ceno/wiki).
+[here](/doc/CENO-About.md).
 
 
 ## Disclaimer
