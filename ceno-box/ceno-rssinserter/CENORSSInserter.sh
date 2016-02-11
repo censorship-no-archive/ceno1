@@ -26,6 +26,8 @@ cd ..
 cd rss-reader
 ./reader &> ../CENO.log &
 disown
+
+sleep 1200
 ./follower ../feedlist.txt 180 &
 disown
 cd ..
