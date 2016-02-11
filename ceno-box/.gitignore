@@ -2,5 +2,6 @@ Freenet
 CENOBox*
 CENOBackbone*
 CENOBridge*
+CENORSSInserter*
 ceno-freenet/plugins/*
 ceno-debug/*.jar

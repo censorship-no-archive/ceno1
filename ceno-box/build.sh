@@ -46,7 +46,7 @@ if [ -d CENOBox ]; then
 fi
 
 if [ -f CENOBox.zip ]; then
-  rm CENOBox.zip
+  rm CENOBox*.zip
 fi
 
 if [ -d CENOBackbone ]; then
@@ -63,6 +63,14 @@ fi
 
 if [ -f CENOBridge.zip ]; then
   rm -r CENOBridge.zip
+fi
+
+if [ -d CENORSSInserter ]; then
+  rm -r CENORSSInserter
+fi
+
+if [ -f CENORSSInserter.zip ]; then
+  rm -r CENORSSInserter.zip
 fi
 
 # Locate a Freenet installation directory
@@ -166,12 +174,17 @@ if [[ $PLUGINS == 1 ]]; then
   cp ceno-extra/freenet-with-plugin.ini CENOBox/freenet.ini
 fi
 
+cp -r CENOBridge CENORSSInserter
+rm CENORSSInserter/CENOBridge.sh
+cp -rL ceno-rssinserter/* CENORSSInserter
+zip -rq CENORSSInserter.zip CENORSSInserter/
+
 echo
 echo "Creating the distribution zips for the host system"
 zip -rq CENOBox.zip CENOBox/
 zip -rq CENOBackbone.zip CENOBackbone/
 zip -rq CENOBridge.zip CENOBridge/
-echo "Successfully built CENOBox.zip, CENOBackbone.zip and CENOBridge.zip distribution bundles."
+echo "Successfully built CENOBox.zip, CENOBackbone.zip, CENOBridge.zip and CENORSSInserter.zip distribution bundles."
 
 echo
 for platform in ${PLATFORMS[@]}
