@@ -5,6 +5,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.EOFException;
 import java.io.File;
@@ -27,6 +28,7 @@ public class NodeRefHelper {
 	private Node node;
 
     public static final String BRIDGE_NODES_FILENAME = "resources/bridgeref.txt";
+    public static final String BACKBONE_NODES_FILENAME = "resources/myref.txt";
 	
 	public NodeRefHelper (Node node) {
 		this.node = node;
@@ -55,6 +57,41 @@ public class NodeRefHelper {
 	}
 
     /**
+     * Write own node reference in the resources/myref.txt for later use
+     *
+	 * @throws IOException if the own ref file could not be open for write
+     */
+    public void writeOwnRef() throws IOException {
+
+        File ownRefFile = new File(BACKBONE_NODES_FILENAME);
+        FileOutputStream fos = null;
+
+        try {
+
+			// if file doesn't exists, then create it
+            fos = new FileOutputStream(ownRefFile);
+			if (!ownRefFile.exists()) {
+				ownRefFile.createNewFile();
+			}
+
+			// get the content in bytes
+			byte[] contentInBytes = getNodeRef().getBytes();
+
+			fos.write(contentInBytes);
+			fos.flush();
+
+			System.out.println("Done");
+
+		} catch (IOException e) {
+			e.printStackTrace();
+            throw e;
+		
+		} finally {
+			fos.close();
+        }
+        
+    }
+        /**
      * Read the Bridge node reference from the resources
      * 
      * @param bridgeRefFile the name of the file which contains the bridge
