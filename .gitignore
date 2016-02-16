@@ -60,3 +60,9 @@ CENOBackbone
 
 # Stupid OSX files
 .DS_Store
+
+ceno-freenet/build_*.xml
+
+ceno-bridge/error.log
+
+ceno-client/translations/fr-fr.all.json

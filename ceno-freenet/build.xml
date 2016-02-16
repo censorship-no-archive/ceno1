@@ -65,7 +65,7 @@
 		<tstamp/>
 
 		<!-- FIXME: remove the debug and replace with optimize -->
-		<javac srcdir="src/plugins/CENO" destdir="${build}" debug="on" optimize="on" source="${source-version}" includeantruntime='false'>
+		<javac target="1.7" srcdir="src/plugins/CENO" destdir="${build}" debug="on" optimize="on" source="${source-version}" includeantruntime='false'>
 			<classpath>
 				<pathelement location="${freenet-cvs-snapshot.location}"/>
 				<pathelement location="${jetty-all.location}"/>
