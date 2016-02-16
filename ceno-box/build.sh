@@ -175,15 +175,16 @@ if [[ $PLUGINS == 1 ]]; then
 fi
 
 cp -r CENOBridge CENORSSInserter
+cp CENOBackbone/CENOBackbone.jar CENORSSInserter
 rm CENORSSInserter/CENOBridge.sh
 cp -rL ceno-rssinserter/* CENORSSInserter
-zip -rq CENORSSInserter.zip CENORSSInserter/
 
 echo
 echo "Creating the distribution zips for the host system"
 zip -rq CENOBox.zip CENOBox/
 zip -rq CENOBackbone.zip CENOBackbone/
 zip -rq CENOBridge.zip CENOBridge/
+zip -rq CENORSSInserter.zip CENORSSInserter/
 echo "Successfully built CENOBox.zip, CENOBackbone.zip, CENOBridge.zip and CENORSSInserter.zip distribution bundles."
 
 echo

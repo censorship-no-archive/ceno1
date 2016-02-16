@@ -45,7 +45,7 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 	private Thread channelMakerThread;
 
 	// Default bridge key (for the CENO bridge running on Deflect)
-	private static final String BRIDGE_KEY = "SSK@mlfLfkZmWIYVpKbsGSzOU~-XuPp~ItUhD8GlESxv8l4,tcB-IHa9c4wpFudoSm0k-iTaiE~INdeQXvcYP2M1Nec,AQACAAE/";
+	private static final String BRIDGE_KEY = "SSK@C7VZ~Ar87EKQDg7XhU2BrL8wY1Bo0cWXu3t5ODteUxQ,B6Z~AjwbM5GXusyZdjRsonnFL4KgLu4-e4SdfQwpAls,AQACAAE/";
 
 	private static Long feedsLastVersion;
 

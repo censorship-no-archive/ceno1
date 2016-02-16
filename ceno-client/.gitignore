@@ -1,4 +1,5 @@
 translations/*.untranslated.json
+translations/*.all.json
 go/
 articles.debug
 test/erroringlcs

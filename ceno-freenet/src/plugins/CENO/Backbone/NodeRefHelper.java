@@ -27,9 +27,9 @@ import freenet.support.io.Closer;
 public class NodeRefHelper {
 	private Node node;
 
-    public static final String BRIDGE_NODES_FILENAME = "resources/bridgeref.txt";
-    public static final String BACKBONE_NODES_FILENAME = "resources/myref.txt";
-	
+	public static final String BRIDGE_NODES_FILENAME = "resources/bridgeref.txt";
+	public static final String BACKBONE_NODES_FILENAME = "resources/myref.txt";
+
 	public NodeRefHelper (Node node) {
 		this.node = node;
 	}
@@ -49,27 +49,27 @@ public class NodeRefHelper {
 	 * Gets the darknet public reference of a node so that
 	 * it can be exchanged with other friends in order to
 	 * become friends
-     *
+	 *
 	 * @return a SimpleFieldSet with the own Darkent node refernece
 	 */
 	public SimpleFieldSet getNodeRefFS() {
 		return node.exportDarknetPublicFieldSet();
 	}
 
-    /**
-     * Write own node reference in the resources/myref.txt for later use
-     *
+	/**
+	 * Write own node reference in the resources/myref.txt for later use
+	 *
 	 * @throws IOException if the own ref file could not be open for write
-     */
-    public void writeOwnRef() throws IOException {
+	 */
+	public void writeOwnRef() throws IOException {
 
-        File ownRefFile = new File(BACKBONE_NODES_FILENAME);
-        FileOutputStream fos = null;
+		File ownRefFile = new File(BACKBONE_NODES_FILENAME);
+		FileOutputStream fos = null;
 
-        try {
+		try {
 
 			// if file doesn't exists, then create it
-            fos = new FileOutputStream(ownRefFile);
+			fos = new FileOutputStream(ownRefFile);
 			if (!ownRefFile.exists()) {
 				ownRefFile.createNewFile();
 			}
@@ -84,34 +84,34 @@ public class NodeRefHelper {
 
 		} catch (IOException e) {
 			e.printStackTrace();
-            throw e;
-		
+			throw e;
+
 		} finally {
 			fos.close();
-        }
-        
-    }
-        /**
-     * Read the Bridge node reference from the resources
-     * 
-     * @param bridgeRefFile the name of the file which contains the bridge
-     * references
+		}
+
+	}
+	/**
+	 * Read the Bridge node reference from the resources
 	 * 
-     * @return a list of SimpleFieldSet for the bridge node
-     *
+	 * @param bridgeRefFile the name of the file which contains the bridge
+	 * references
+	 * 
+	 * @return a list of SimpleFieldSet for the bridge node
+	 *
 	 * @throws FileNotFoundException if the bridge ref file is not
 	 * found in the resources
 	 * @throws IOException if the bridge ref file could not be
 	 *  successfully parsed
-     */
-    public static List<SimpleFieldSet> readBridgeRefs(String bridgeRefFile) throws FileNotFoundException, IOException {
-        List<SimpleFieldSet> list = new ArrayList<SimpleFieldSet>();
+	 */
+	public static List<SimpleFieldSet> readBridgeRefs(String bridgeRefFile) throws FileNotFoundException, IOException {
+		List<SimpleFieldSet> list = new ArrayList<SimpleFieldSet>();
 		FileInputStream fis = null;
 		try {
 			fis = new FileInputStream(bridgeRefFile);
-            if (fis == null) {
-                throw new FileNotFoundException();
-            }
+			if (fis == null) {
+				throw new FileNotFoundException();
+			}
 			BufferedInputStream bis = new BufferedInputStream(fis);
 			InputStreamReader isr = new InputStreamReader(bis, "UTF-8");
 			BufferedReader br = new BufferedReader(isr);
@@ -125,20 +125,20 @@ public class NodeRefHelper {
 				}
 			}
 		} catch (IOException e) {
-            throw e; 
+			throw e; 
 			//return list; 
 		} finally {
 			Closer.close(fis);
 		}
 
-    }
+	}
 
-    /**
-     *  Default value overload
-     */
-    public static List<SimpleFieldSet> readBridgeRefs() throws FileNotFoundException, IOException {
-        return readBridgeRefs(BRIDGE_NODES_FILENAME);
-    }
+	/**
+	 *  Default value overload
+	 */
+	public List<SimpleFieldSet> readBridgeRefs() throws FileNotFoundException, IOException {
+		return readBridgeRefs(BRIDGE_NODES_FILENAME);
+	}
 
 	/**
 	 * Read the Bridge node reference from the resources
@@ -161,7 +161,7 @@ public class NodeRefHelper {
 			bridgeRef.append(line);
 			bridgeRef.append("\n");
 		}
-		
+
 		return bridgeRef.toString().trim().concat("End");
 	}
 
