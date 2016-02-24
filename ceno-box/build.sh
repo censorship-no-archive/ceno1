@@ -134,6 +134,8 @@ wrapper_Linux.zip.sha1\
   cp $FREENET_DIR/README $1/README.Freenet
 }
 
+shopt -s dotglob
+
 echo "Copying necessary files from the existing Freenet installation"
 copyFreenetFilesTo CENOBox
 copyFreenetFilesTo CENOBackbone
@@ -194,5 +196,7 @@ do
   cp ceno-client/CENOClient_$platform CENOBox/ceno-client/CENOClient
   zip -rq CENOBox_$platform.zip CENOBox/
 done
+
+shopt -u dotglob
 
 exit 0
