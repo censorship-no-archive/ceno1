@@ -9,33 +9,34 @@ This program is free software: you can redistribute it and/or modify it under th
 # How to
 
 - Make a list of the host in ceno_rss_inserter_hosts, they should all have the same name with enumeration starting from 0. like:
-    backbone0
-    backbone2
-    backbone3
-    .
-    .
-    .
+
+     backbone0
+     backbone2
+     backbone3
+     .
+     .
+     .
 
 - Copy feedlist.txt
+
 - Run the feed rationer with correct prefix for backbone name and number of backbones such as
 
-    ./feed_rationer.py --subfeed-file-prefix=subfeedlist_backbone -n 10
+     ./feed_rationer.py --subfeed-file-prefix=subfeedlist_backbone -n 10
 
 
 - Move the resulting files
 
-    mv subfeedlist_backbone* roles/rss_feeder/files/
+     mv subfeedlist_backbone* roles/rss_feeder/files/
+
+- Copy the master bridge descriptor in
+
+      roles/rss_feeder/files/sig_bridges_ref.txt
+
+- Copy the ceno rss inserter bundle in
+
+      roles/rss_feeder/files/CENORSSInserter.zip
 
 - Provisions the rss inserters
 
-    playbook -i ceno_rss_inserter_hosts rss_feeder
-
-
-- Collect the node references in
-
-     refs/backbone1
-     refs/backbone2
-     .
-     .
-     .
+       playbook -i ceno_rss_inserter_hosts rss_feeder
 
