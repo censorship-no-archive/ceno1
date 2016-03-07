@@ -1,0 +1,4 @@
+---
+- hosts: ceno_rss_inserter_hosts
+  roles:
+    - access

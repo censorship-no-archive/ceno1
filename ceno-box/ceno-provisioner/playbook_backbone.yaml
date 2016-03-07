@@ -1,10 +1,10 @@
 ---
-- hosts: ceno_rss_inserter_hosts
+- hosts: ceno_backbone_hosts
   vars:
     - proxyuser: amnesia
   pre_tasks:
     - name: Update apt cache
       apt: update_cache=yes
   roles:
-    - rss_feeder
+    - backbone
     

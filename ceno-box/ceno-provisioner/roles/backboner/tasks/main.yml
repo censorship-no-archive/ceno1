@@ -2,13 +2,9 @@
 # - name: test
 #   ping:
 
-# sometimes it is not for some reason
-# - name: run npm
-#   become_user: "{{ proxyuser }}"
-#   become: yes
-#   shell: "npm install"
-#   args:
-#     chdir: "/home/{{ proxyuser }}/CENORSSInserter/bundle-server/"
+# - name: add link to nodejs
+#   command: "ln /usr/bin/nodejs /usr/bin/node"
+#   ignore_errors: True
 
 - name: Install dependencies
   apt: name={{ item }} state=latest
@@ -17,13 +13,9 @@
     - haveged
     - unzip
     - openjdk-7-jre
-    - node
-    - npm
-    - lsof
-
-- name: link node to nodejs
-  command: "ln /usr/bin/nodejs /usr/bin/node"
-  ignore_errors: True
+#    - node
+#    - npm
+#    - lsof
 
 - name: remove java 6
   apt: name={{ item }} state=absent
@@ -101,33 +93,10 @@
     src: "sig_bridges_ref.txt"
     dest: "/home/{{ proxyuser }}/CENORSSInserter/resources/bridgeref.txt"
 
-- name: copy subfeed list
-  become_user: "{{ proxyuser }}"
-  become: yes
-  copy:
-  args:
-    src: "subfeedlist_{{ inventory_hostname }}.txt"
-    dest: "/home/{{ proxyuser }}/CENORSSInserter/feedlist.txt"
-
-- name: check if the reader is running
-  become_user: "{{ proxyuser }}"
-  command: "pgrep reader >/dev/null"
-  ignore_errors: True
-  register: reader_is_running
-
-# - name: check result
-#   debug: var=reader_is_running
-- name: kill the rss reader if running
-  become_user: "{{ proxyuser }}"
-  become: yes
-  command: "pkill reader"
-  ignore_errors: True
-  when: reader_is_running
-
 - name: Run CENO bridge
   become_user: "{{ proxyuser }}"
   become: yes
-  command: "/home/{{ proxyuser }}/CENORSSInserter/CENORSSInserter.sh"
+  command: "/home/{{ proxyuser }}/CENORSSInserter/run.sh start"
   args:
     chdir: "/home/{{ proxyuser }}/CENORSSInserter/"
 
@@ -149,15 +118,6 @@
     src: "/home/{{ proxyuser }}/CENORSSInserter/resources/myref.txt"
     flat: yes
 
-- name: add bundle server cron job
-  become_user: "{{ proxyuser }}"
-  become: yes
-  cron:
-  args:
-    name: "keep bundler server alive"
-    job: "lsof -i :3094 | grep LISTEN || /home/amnesia/CENORSSInserter/run-bundle-server.sh"
-  #job: "if ! /usr/bin/pgrep node >/dev/null; then /home/amnesia/CENORSSInserter/run-bundle-server.sh; fi"
-
 - name: add ceno log cron job
   become_user: "{{ proxyuser }}"
   become: yes
@@ -166,42 +126,5 @@
     name: "ceno log"
     minute: 0
     job: "cat /home/amnesia/CENORSSInserter/logs/freenet-previous.log | grep CENO | grep -v RGA | grep -v re-running >> /home/amnesia/CENORSSInserter/logs/CENO.log"
-  
-- name: run rss reader
-  become_user: "{{ proxyuser }}"
-  become: yes
-  shell: "( ( nohup ./reader 1>../CENO.log 2>&1 ) & )"
-  args:
-    chdir: "/home/{{ proxyuser }}/CENORSSInserter/rss-reader/"
-
-- name: wait for reader
-  become_user: "{{ proxyuser }}"
-  become: yes
-  wait_for:
-  args:
-    port: 3096
-
-- name: run the follower
-  become_user: "{{ proxyuser }}"
-  become: yes
-  shell: "( ( nohup ./follower ../feedlist.txt 180 1>../CENO.log 2>&1 ) & )"
-  args:
-    chdir: "/home/{{ proxyuser }}/CENORSSInserter/rss-reader/"
-  
-#  # - name: Read backbone descriptor
-#  #   sudo: true
-#  #   sudo_user: "{{ proxyuser }}"
-#  #   slurp:
-#  #   args:
-#  #     src: "/home/{{ proxyuser }}/CENOBox/resources/myref.txt"
-#  #   register: ceno_backbone_refence
-
-#  #  - name: Add descriptor to db
-#  #    host: local
-#  #    lineinfile:
-#  #    args:
-#  #      dest=bridgeref.txt
-#  #      line=
-        
   
    
