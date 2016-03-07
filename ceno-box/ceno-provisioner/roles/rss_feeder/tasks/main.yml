@@ -1,0 +1,168 @@
+---
+# - name: test
+#   ping:
+
+- name: Install dependencies
+  apt: name={{ item }} state=latest
+  with_items:
+    - haveged
+    - unzip
+    - openjdk-7-jre
+
+- name: Add a new user
+  user:
+  args:
+    name: "{{ proxyuser }}"
+    shell: "/bin/bash"
+
+- name: Check if CeNo exists
+  become: yes
+  become_user: "{{ proxyuser }}"
+  stat:
+  args:
+    path: "/home/{{ proxyuser }}/CENORSSInserter/"
+  register: ceno_stat
+
+# - name: Check if CeNo is running
+#   become_user: "{{ proxyuser }}"
+#   wait_for: 
+#   args:
+#     port: 8888
+#     timeout: 1 
+#   register: ceno_running
+#   ignore_errors: True
+#   when: ceno_exists
+  
+- name: Stop CeNo if it is running
+  become: yes
+  become_user: "{{ proxyuser }}"
+  command: "/home/{{ proxyuser }}/CENORSSInserter/run.sh stop"
+  args:
+    chdir: "/home/{{ proxyuser }}/CENORSSInserter/"
+  ignore_errors: True
+  when: ceno_stat.stat.exists
+
+- name: Remove any existing copies of Ceno
+  file:
+  args:
+    path: "/home/{{ proxyuser }}/CENORSSInserter/"
+    state: absent
+  
+- name: Copy across CENO bundle
+  become: yes
+  become_user: "{{ proxyuser }}"
+  copy:
+  args:
+    src: "CENORSSInserter.zip"
+    dest: "/home/{{ proxyuser }}/CENORSSInserter.zip"
+
+- name: Extract CENO
+  become: yes
+  become_user: "{{ proxyuser }}"
+  command: "unzip CENORSSInserter.zip"
+  args:
+    chdir: "/home/{{ proxyuser }}/"
+
+- name: Creates resource directory
+  become: yes
+  become_user: "{{ proxyuser }}"
+  file:
+  args:
+    path: "/home/{{ proxyuser }}/CENORSSInserter/resources"
+    state: directory
+
+- name: Copy master bridge ref
+  become_user: "{{ proxyuser }}"
+  become: yes
+  copy:
+  args:
+    src: "sig_bridges_ref.txt"
+    dest: "/home/{{ proxyuser }}/CENORSSInserter/resources/bridgeref.txt"
+
+- name: Run CENO bridge
+  become_user: "{{ proxyuser }}"
+  become: yes
+  command: "/home/{{ proxyuser }}/CENORSSInserter/run.sh start"
+  args:
+    chdir: "/home/{{ proxyuser }}/CENORSSInserter/"
+
+- name: Wait for bridge to publish its descriptor
+  become_user: "{{ proxyuser }}"
+  become: yes
+  wait_for: timeout=60
+  args:
+    path: "/home/{{ proxyuser }}/CENORSSInserter/resources/myref.txt"
+# notify:
+#   fetch descriptor
+
+- name: fetch descriptor
+  become_user: "{{ proxyuser }}"
+  become: yes
+  fetch:
+  args:
+    dest: "refs/{{ inventory_hostname }}"
+    src: "/home/{{ proxyuser }}/CENORSSInserter/resources/myref.txt"
+    flat: yes
+
+- name: copy subfeed list
+  become_user: "{{ proxyuser }}"
+  become: yes
+  copy:
+  args:
+    src: "subfeedlist_{{ inventory_hostname }}.txt"
+    dest: "/home/{{ proxyuser }}/CENORSSInserter/feedlist.txt"
+
+# - name: check if the reader is running
+#   become_user: "{{ proxyuser }}"
+#   command: "pgrep reader"
+#   register: reader_is_running
+
+# - name: check result
+#   debug: var=reader_is_running
+  
+- name: kill the rss reader if running
+  become_user: "{{ proxyuser }}"
+  become: yes
+  command: "pkill reader"
+  ignore_errors: True
+#  when: reader_is_running
+
+  
+- name: run rss reader
+  become_user: "{{ proxyuser }}"
+  become: yes
+  shell: "( ( nohup ./reader 1>/dev/null 2>&1 ) & )"
+  args:
+    chdir: "/home/{{ proxyuser }}/CENORSSInserter/rss-reader/"
+
+- name: wait for reader
+  become_user: "{{ proxyuser }}"
+  become: yes
+  wait_for:
+  args:
+    port: 3096
+
+- name: run the follower
+  become_user: "{{ proxyuser }}"
+  become: yes
+  command: "./follower ../feedlist.txt 0"
+  args:
+    chdir: "/home/{{ proxyuser }}/CENORSSInserter/rss-reader/"
+  
+#  # - name: Read backbone descriptor
+#  #   sudo: true
+#  #   sudo_user: "{{ proxyuser }}"
+#  #   slurp:
+#  #   args:
+#  #     src: "/home/{{ proxyuser }}/CENOBox/resources/myref.txt"
+#  #   register: ceno_backbone_refence
+
+#  #  - name: Add descriptor to db
+#  #    host: local
+#  #    lineinfile:
+#  #    args:
+#  #      dest=bridgeref.txt
+#  #      line=
+        
+  
+   

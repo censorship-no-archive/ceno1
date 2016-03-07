@@ -1,0 +1,40 @@
+---
+- name: Install dependencies
+  apt: name={{ item }} state=latest
+  with_items:
+    - unzip
+    - default-jre
+
+- name: Add a new user
+  user:
+  args:
+    name: "{{ proxyuser }}"
+    shell: "/bin/bash"
+
+- name: Remove any existing copies of Ceno
+  file:
+  args:
+    path: "/home/{{ proxyuser }}/CENOBox/"
+    state: absent
+
+- name: Copy across CENO bundle
+  sudo: true
+  sudo_user: "{{ proxyuser }}"
+  copy:
+  args:
+    src: "CENOBox_Linux.zip"
+    dest: "/home/{{ proxyuser }}/CENOBox_Linux.zip"
+
+- name: Extract CENO
+  sudo: true
+  sudo_user: "{{ proxyuser }}"
+  command: "unzip CENOBox_Linux.zip"
+  args:
+    chdir: "/home/{{ proxyuser }}/"
+
+- name: Run CENO
+  sudo: true
+  sudo_user: "{{ proxyuser }}"
+  command: "/home/{{ proxyuser }}/CENOBox/CENO.sh terminal"
+  args:
+    chdir: "/home/{{ proxyuser }}/CENOBox/"

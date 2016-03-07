@@ -1,0 +1,10 @@
+---
+- hosts: cenoproxies
+  vars:
+    - proxyuser: amnesia
+  pre_tasks:
+    - name: Update apt cache
+      apt: update_cache=yes
+  roles:
+    - cenoproxy
+    
