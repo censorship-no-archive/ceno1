@@ -22,7 +22,7 @@
   with_items:
     - openjdk-6-jre
     - openjdk-6-jre-lib
-    
+
 - name: Add a new user
   user:
   args:
@@ -39,14 +39,14 @@
 
 # - name: Check if CeNo is running
 #   become_user: "{{ proxyuser }}"
-#   wait_for: 
+#   wait_for:
 #   args:
 #     port: 8888
-#     timeout: 1 
+#     timeout: 1
 #   register: ceno_running
 #   ignore_errors: True
 #   when: ceno_exists
-  
+
 - name: Stop CeNo if it is running
   become: yes
   become_user: "{{ proxyuser }}"
@@ -61,7 +61,7 @@
   args:
     path: "/home/{{ proxyuser }}/CENORSSInserter/"
     state: absent
-  
+
 - name: Copy across CENO bundle
   become: yes
   become_user: "{{ proxyuser }}"
@@ -122,6 +122,8 @@
   command: "/home/{{ proxyuser }}/CENORSSInserter/CENORSSInserter.sh"
   args:
     chdir: "/home/{{ proxyuser }}/CENORSSInserter/"
+  environment:
+    is_provisioner: 1
 
 - name: Wait for bridge to publish its descriptor
   become_user: "{{ proxyuser }}"
@@ -183,10 +185,12 @@
 - name: run the follower
   become_user: "{{ proxyuser }}"
   become: yes
-  shell: "( ( nohup ./follower ../feedlist.txt 180 1>../CENO.log 2>&1 ) & )"
+  shell: "( ( sleep 1200; nohup ./follower ../feedlist.txt 180 1>../CENO.log 2>&1 ) & )"
+  async: 5
+  poll: 0
   args:
     chdir: "/home/{{ proxyuser }}/CENORSSInserter/rss-reader/"
-  
+
 #  # - name: Read backbone descriptor
 #  #   sudo: true
 #  #   sudo_user: "{{ proxyuser }}"
@@ -201,6 +205,3 @@
 #  #    args:
 #  #      dest=bridgeref.txt
 #  #      line=
-        
-  
-   

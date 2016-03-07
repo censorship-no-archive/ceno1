@@ -22,6 +22,11 @@ verlte $(node -v) 4 && node bundle-server.js &> ../CENO.log || ./node bundle-ser
 disown
 cd ..
 
+# If the script is executed by the provisioner, then do not execute the rest of the script
+if [[ $is_provisioner == 1 ]]; then
+  exit 0
+fi
+
 # Start the rss-reader and follower
 cd rss-reader
 ./reader &> ../CENO.log &
