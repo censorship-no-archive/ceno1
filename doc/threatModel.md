@@ -67,17 +67,14 @@ send emails.
 #### Anonymity
 
 CENO promises strong user anonymity guarantees, inherited by using Freenet as
-the underlying storage and communications medium. Nodes that are using CENO are
+the underlying storage and communication medium. Nodes that are using CENO are
 indistinguishable from the rest of the Freenet nodes and form part of the same
 global network of peers. Our user-bridge signaling mechanism leaks no metadata
 (apart from the intention of a node to establish a secure channel with the
 bridge) and the bridges cannot know who is requesting a URL.
 
-<!--
-It is known that
-sophisticated attacks to networks such as Freenet could expose the anonymity of
-users, as we are describing in the `Threats` section.
--->
+It is known that sophisticated attacks to networks such as Freenet could expose
+the identity of users, as we are describing in the `Threats` section.
 
 
 #### A secure communication mechanism
@@ -88,7 +85,7 @@ mechanism in operation provides the following features:
   * Confidentiality
   * Integrity
   * Causality Preservation
-  * Sender and (once channel established) Recipient Anonymity
+  * Sender and, once the channel has been established,  Recipient Anonymity
   * No shared secrets needed
   * No service provider required
   * Asynchronicity
@@ -113,7 +110,7 @@ with each other. Global adversaries will be able to tell with whom your node is
 exchanging encrypted messages, but won't be able to find out the actual content.
 In a few words, even though adversaries (such as your Internet Service Provider)
 will be able to see that you are using a censorship circumvention tool, it will
-be very difficult for them to know what you are using it for.
+be extremely difficult for them to know what you are using it for.
 
 
 #### Plausible deniability
@@ -131,10 +128,27 @@ available in the network is not related to CENO.
 
 #### Resistance against active network interference
 
-It is worth mentioning that adversaries with access to the network transport
-link might be able to throttle Freenet connections or block connections to
-Freenet seed nodes. This could mean that your node won't be able to find other
-peers in order to request content and you won't be able to use CENO.
+CENO will not establish any connections, but will use the Freenet's ones with
+other peers in order to retrieve content and forward requests for URLs to a CENO
+Insertion Authority. Freenet traffic (encrypted end-to-end and over UDP) looks
+like random noise to Deep Packet Inspection, therefore it is difficult for
+adversaries to create specific rules for dropping Freenet connections, without
+affecting other services. It is worth mentioning that adversaries that control
+the network transport link might be able to block connections to the Freenet
+seed nodes. This could mean that your node won't be able to find other peers in
+order to request content, unless you know other people who are already using
+CENO/Freenet to help you become part of the global network.
+
+In scenarios where connections with peers in other countries are throttled (e.g.
+because of a national firewall), but those within the country are left intact,
+CENO users will still be able to communicate with each other and, given that one
+of them has cached a specific resource, she could serve it upon requests to the
+rest of the in-country network and pass it along as her node is replicating its
+cached content. This concept can be extended to mesh networks that are using
+independent network infrastructure, nevertheless. The CENO team imagines that in
+such situations, when a small set of nodes can connect with the global network,
+CENO users will still be able to access the portal content and request new
+bundles.
 
 
 ## 3. Assumptions
@@ -409,9 +423,9 @@ issue.
 CENO team is now distributing a signed version of their Mozilla Firefox Add-on
 included in the CENOBox, along with a profile that automatically loads it,
 therefore the issue is considered **resolved**. However the team has decided not
-to upload the addons.mozilla.org site (AMO), since downloading it could expose
-the intention of individuals to use CENO or could interfere with their browsing
-experience, for example by downgrading HTTPS to HTTP requests.
+to upload the add-on to the addons.mozilla.org site (AMO), since it could
+interfere with their normal browsing experience, for example by downgrading
+HTTPS to HTTP requests.
 
 ##### NCC-CENO-003: CENO Bridge Uses Static Source Port
 Bridge maintainers are encouraged to proxy Bundler Server traffic via a
