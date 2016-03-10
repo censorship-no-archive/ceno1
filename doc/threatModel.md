@@ -24,7 +24,7 @@ static content that otherwise would not be available because of Internet
 censorship. It is therefore a great tool for reading the news - a selection of
 news feeds has already been inserted and getting updated on a daily basis,
 accessible via the "CENO Portal". Nevertheless, users can anonymously request
-from specific nodes that have access to the uncensored Web (from now on
+specific nodes that have access to the uncensored Web (from now on
 "Bridges") to fetch a URL, prepare a bundle for it and insert it in the
 distributed storage, so as to be retrieved by the user that requested it. Future
 requests for the same URL will be handled directly via the cache without the
@@ -32,9 +32,9 @@ need for user-bridge communication, even if the website is no more live. No
 knowledge of the global network topology is required in order to retrieve
 bundles or send a message to a Bridge. In cases of nationwide Internet
 throttling, content will remain available to the peers given that a copy of that
-bundle is cached in the in-country network of peers. When using CENO you won't
-be able to visit dynamic websites, log in in websites, stream media or read and
-send emails.
+bundle is cached in the in-country network of peers. When using CENO, you will
+not be able to visit dynamic websites, log into websites, stream media or read
+and send emails.
 
 
 <!-- ## 2. Architecture Overview
@@ -105,44 +105,44 @@ horizontally so as to handle increasing demand.
 
 CENO traffic among peers is end-to-end encrypted and appears on traffic analysis
 as random UDP noise. The ephemeral encryption keys are kept safely by the peers
-and no non-global entities can discover which set of nodes are communicating
-with each other. Global adversaries will be able to tell with whom your node is
-exchanging encrypted messages, but won't be able to find out the actual content.
-In a few words, even though adversaries (such as your Internet Service Provider)
-will be able to see that you are using a censorship circumvention tool, it will
+and no non-global entities can discover which sets of nodes are communicating
+with each other. Global adversaries will be able to tell with whom a certain
+node is exchanging encrypted messages, but won't be able to find out the actual
+content. In few words, even though adversaries (such as your Internet Service
+Provider) might see that you are using a censorship circumvention tool, it will
 be extremely difficult for them to know what you are using it for.
 
 
 #### Plausible deniability
 
-When using CENO, you are contributing to the network by sharing part of your
-hard drive and by storing encrypted chunks of files. This is how content remains
-available, once inserted in the network. Bear in mind that decryption keys are
-not included in those chunks. Unlike torrents, you don't have control of what is
-stored in your machine and you don't need to directly connect with nodes that
-host a specific Freenet file. Therefore it would be impossible for users to know
-what kind of parts of files they are sharing, given the immense number of files
-that have been inserted in the distributed cache. The majority of the content
-available in the network is not related to CENO.
+When using CENO, you are contributing to the whole of Freenet by sharing part of
+your hard drive and by storing encrypted chunks of files in it. This is how
+content remains available, once inserted in the network. The majority of this
+content is not related to CENO, and decryption keys are not included in these
+chunks. Unlike torrents, you cannot know or control what is stored in your
+machine, and you don't need to directly connect with nodes that host a specific
+Freenet file. Therefore, it would be impossible for users to know what kind of
+parts of files they are sharing, given the immense number of files that have
+been inserted in the distributed cache.
 
 
 #### Resistance against active network interference
 
-CENO will not establish any connections, but will use the Freenet's ones with
+CENO will not establish any connections, but will use Freenet's ones with
 other peers in order to retrieve content and forward requests for URLs to a CENO
 Insertion Authority. Freenet traffic (encrypted end-to-end and over UDP) looks
-like random noise to Deep Packet Inspection, therefore it is difficult for
-adversaries to create specific rules for dropping Freenet connections, without
-affecting other services. It is worth mentioning that adversaries that control
-the network transport link might be able to block connections to the Freenet
-seed nodes. This could mean that your node won't be able to find other peers in
-order to request content, unless you know other people who are already using
-CENO/Freenet to help you become part of the global network.
+like random noise to Deep Packet Inspection, so it is difficult for adversaries
+to create specific rules for dropping Freenet connections without affecting
+other services. It is worth mentioning that adversaries that control the network
+transport link might be able to block connections to the Freenet seed nodes.
+This could mean that your node will not be able to find other peers in order to
+request content, unless you know other people who are already using CENO/Freenet
+to help you become part of the global network.
 
 In scenarios where connections with peers in other countries are throttled (e.g.
 because of a national firewall), but those within the country are left intact,
 CENO users will still be able to communicate with each other and, given that one
-of them has cached a specific resource, she could serve it upon requests to the
+of them has cached a specific resource, she could serve it upon request to the
 rest of the in-country network and pass it along as her node is replicating its
 cached content. This concept can be extended to mesh networks that are using
 independent network infrastructure, nevertheless. The CENO team imagines that in
@@ -155,51 +155,67 @@ bundles.
 
 #### User Behavior
 
-  * Users do not manually save content on their hard drives from CENO Portal bundles or other files retrieved from Freenet.
-  * Users always browse CENO via the browser (Firefox or Chrome) window opened when they started CENO and that is using the customized profile and add-ons.
-  * Users do not alter the settings of the preconfigured browser profile, disable the CENO add-on or enable other add-ons that could interfere with CENO
-  * Users do not make requests for privacy sensitive URLs, for example URLs that include a username in the GET parameters.
-  * Users do not manually select to use a malicious Insertion Authority.
-  * Users do not add as friends nodes operated by entities they do not know or do not trust.
+  * Users do not manually save content on their hard drives from CENO Portal
+    bundles or other files retrieved from Freenet.
+  * Users always browse CENO via the browser (Firefox or Chrome) window that
+    opens when they start CENO and that is using the customized profile and
+    add-ons.
+  * Users do not: alter the settings of the preconfigured browser profile;
+    disable the CENO add-on; or enable other add-ons that could interfere with
+    CENO.
+  * Users do not make requests for privacy sensitive URLs, for example URLs that
+    include a username in the GET parameters.
+  * Users do not manually change the Insertion Authority they want to use
+    and select a malicious one.
+  * Users do not add as friends nodes operated by entities they do not know or
+    do not trust.
   * Users do not manually degrade the default Freenet/CENOBox security options.
-  * Users do not manually set Freenet node logging level to a level that retains private information, such as the URLs they have been requesting.
-  * Users do not run software that could interact with Freenet (via the Freenet Client Protocol or the Web interface).
+  * Users do not manually set Freenet node logging level to a level that retains
+    private information, such as the URLs they have been requesting.
+  * Users do not run software that could interact with Freenet (via the Freenet
+    Client Protocol or the Web interface).
 
 
 #### Freenet Nodes
 
   * Freenet nodes do not drop requests for lookups or insertions.
-  * Freenet peers respond honestly when they are asked whether they store a specific chunk.
+  * Freenet peers respond honestly when they are asked whether they store a
+    specific chunk.
   * Freenet nodes do not log requests of other peers.
   * Freenet peers do not probe their neighbors for specific chunks.
   * Freenet seed nodes are operating and reachable.
   * No adversary controls a large part of the Freenet nodes network.
-  * No malevolent nodes flood their neighbors' datastores.
+  * No malevolent nodes flood their neighbors' data stores.
 
-We would recommend you to refer to the Freenet Threat model in the project wiki
+We recommend you to refer to the Freenet Threat model in the project wiki
 https://wiki.freenetproject.org/Threat_model (also
 https://wiki.freenetproject.org/Major_attacks and
 https://wiki.freenetproject.org/Potential_attackers ).
 We shall not consider Freenet vulnerabilities (such as sybil attacks) as part of
 our threat model from now on.
 
-Nevertheless, CENO protocol has been designed in such a way that future CENO
+At any rate, CENO protocol has been designed in such a way that future CENO
 versions can be easily ported to use other storage or transport networks, by
 replacing the related agents.
 
 
 #### Insertion Authority/Bridge Maintainers
 
-  * Bundle Server is configured to route all requests via an anonymization network.
+  * The Bundle Server is configured to route all requests via an anonymization
+    network.
   * Bridges do not trust compromised SSL Certificates.
-  * IA Maintainers do not run software that could interfere with CENO agents, or Freenet, or expose that they are hosting a bridge.
+  * IA Maintainers do not run software that could interfere with CENO agents, or
+    Freenet, or expose that they are hosting a bridge.
 
 
 #### General Assumptions
 
-  * Users' and Insertion Authority Maintainers' systems are not compromised or affected by malware that could interfere with CENO.
-  * Users and Bridges are given enough bandwidth and storage resources to effectively participate in the network.
-  * No security vulnerabilities exist in the programming languages, frameworks or libraries in use.
+  * Users' and Insertion Authority Maintainers' systems are not compromised or
+    affected by malware that could interfere with CENO.
+  * Users and Bridges are given enough bandwidth and storage resources to
+    effectively participate in the network.
+  * No security vulnerabilities exist in the programming languages, frameworks
+    or libraries in use.
   * Cryptography works and there are no operating quantum computers.
 
 
@@ -208,8 +224,8 @@ replacing the related agents.
 #### i. Malicious Insertion Authorities
 
 CENO users have access via the CENO Portal and CENO Browser window only to
-bundles and feeds that had been inserted by the Insertion Authority they trust.
-CENOBox comes preconfigured with an Insertion Authority the CENO team is
+bundles and feeds that have been inserted by the Insertion Authority (IA) they
+trust.  CENOBox comes preconfigured with an Insertion Authority the CENO team is
 maintaining, but users can manually decide to use another bridge, both for
 reading the portal news as well as for requesting new URLs, by setting an
 alternative valid Insertion Authority bridgeKey in the .CENO/client.properties
@@ -217,40 +233,40 @@ file.
 
 When selecting to retrieve bundles from independent Insertion Authorities, users
 could be exposed to tampered or potentially "harmful" content. Malicious IAs
-could censor content, alter it, deny to serve a resource (insert a bundle for a
-URL), not serve specific established signaling channels. Uncloaking users by
-injecting code in the bundles can be considered impossible, since CENO Local
-Cache Server strips any scripts from bundles before serving them to the users.
-In worst case scenario, a malicious AI controlling a significant amount of nodes
-in the Freenet network could try to combine the URLs requested by a channel with
-a de-anonymization attack, therefore correlating URLs requested with the IP that
-is making insertions in an established channel.
+could censor content, alter it, deny to serve a resource (i.e. to insert a
+bundle for a URL), or not serve specific established signaling channels.
+Uncloaking users by injecting code in the bundles can be considered impossible,
+since CENO Local Cache Server strips any scripts from bundles before serving
+them to the users. In the worst case scenario, a malicious AI controlling a
+significant amount of nodes in the Freenet network could try to combine the URLs
+requested by a channel with a de-anonymization attack, therefore correlating the
+requested URLs with the IP that is making insertions in an established channel.
 
-This is a medium risk issue with a low exploitability, that affects only users
+This is a medium-risk issue with a low exploitability, that affects only users
 who have manually selected to use a non-default IA.
 
 
 #### ii. CENO Insertion Authority private key compromisation
 
-In order content to be discoverable and authenticatable, Insertion Authorities
-use a private SSK - Signed Subspace Key ( https://wiki.freenetproject.org/SSK )
-for inserting bundles, portal feeds, information for establishing secure
-signaling channels etc. This key is included in the .CENO/bridge.properties file
-in Signal and Master/RSS-Insertion bridges.
+For content to be discoverable and authenticatable, Insertion Authorities
+use a private SSK – Signed Subspace Key ( https://wiki.freenetproject.org/SSK )
+– for inserting bundles, portal feeds, information for establishing secure
+signaling channels, etc. This key is included in the .CENO/bridge.properties
+file in Signal and Master/RSS-Insertion bridges.
 
-If an adversary gets access to that private key she will be able to insert
+If an adversary gets access to that private key, she will be able to insert
 content that would be discoverable with the Insertion Authority's public
 bridgeKey, without CENO users being able to tell the difference. Nevertheless,
 if the adversary inserts newer editions of pre-inserted bundles, lookups from
 users in the distributed cache will return the latest, tampered content.
 Adversaries could then behave as described in the "Malicious Insertion
-Authorities" threat, but also invest on the technique and cause Denial Of
+Authorities" threat, but also invest on the technique and cause Denial of
 Service of the Insertion Authority.
 
-We categorize this issue among the high risk ones, with low exploitability. At
+We categorize this issue among the high-risk ones, with low exploitability. At
 the moment there is no implemented mechanism for recovering from such an
-incident. The CENO team is planning to work on a status page that users's
-clients will automatically poll to check whether an Insertion Authority has been
+incident. The CENO team is planning to work on a status page that users' clients
+will automatically poll to check whether an Insertion Authority has been
 compromised. That page will be inserted by the Insertion Authority owner under
 the same SSK Freenet key.
 
@@ -262,15 +278,16 @@ the same SSK Freenet key.
 
 #### iii. Established signaling channels compromisation
 
-Established channel are stored on Signal Bridges at a database in the same
+Established channels are stored on Signal Bridges at a database in the same
 directory as the Freenet files and CENO agents. Obviously there is no mapping
-between a channel and an IP, but if an adversary gains access to the channels
+between a channel and an IP, but if an adversary gains access to a channel's
 database file, they will be able to get a history of the URLs requested by each
 user. Given that the list of URLs include user-specific attributes, or can be
-matched with a behavior of a targeted user, the adversary could extract
+matched with a targeted user's behavior, the adversary could extract
 information regarding the way a specific individual has been using CENO.
 
-We consider this threat to be of high risk but of low exploitability.
+We consider this threat to be characterized by high risk, but by low
+exploitability.
 
 
 #### iv. CENO agents and Freenet node exposure via requests to their RESTful API
@@ -278,21 +295,21 @@ We consider this threat to be of high risk but of low exploitability.
 CENO Agents are built in a micro-services fashion and are communicating with
 each other over an HTTP RESTful API. It is worth mentioning that agents accept
 requests only from localhost connections, yet there is no provision from
-blocking requests from not-CENO services running on the users' or IA's machines.
-Email clients that parse HTML and Javascript emails, browsers, as well as
+blocking requests from non-CENO services running on the users' or IA's machines.
+Email clients that parse HTML and Javascript emails, as well as browsers or
 software specifically developed for this reason, could identify and fingerprint
-the existence of a running CENO agent. Then, out-of-band mechanisms, for example
-requests to a remote machine, could easily leak the IP of a CENO user or Bridge
-maintainer. Nevertheless, malicious software could change the configuration
-options of the Freenet node, or actively interfere in other ways with the CENO
-agents so as to jeopardize the anonymity of users.
+the existence of a running CENO agent. In such a case, out-of-band mechanisms,
+for example requests to a remote machine, could easily leak the IP of a CENO
+user or Bridge maintainer. Nevertheless, malicious software could change the
+configuration options of the Freenet node, or actively interfere in other ways
+with the CENO agents so as to jeopardize the anonymity of users.
 
-This is a high risk and easily exploitable issue the CENO developers aim towards
-mitigating as soon as possible. In the meantime we strongly recommend that IA
+This is a high-risk and easily exploitable issue the CENO developers aim towards
+mitigating as soon as possible. In the meantime, we strongly recommend that IA
 maintainers use their Bridge machines only for that purpose and avoid installing
-non related to CENO software, and CENO users to avoid running any other programs
-while using CENO. If supported by the Operating System, CENO should be run by a
-separate user.
+software that is not related to CENO, and that CENO users avoid running any
+other programs while using CENO. If supported by the Operating System, CENO
+should be run by a separate user.
 
 
 #### v. CENO Signaling channel establishment puzzle slots flooding
@@ -300,69 +317,69 @@ separate user.
 In order to establish a secure signaling channel, Signal Bridges publish their
 public RSA key along with a quiz whose solution leads to a set of keys, hereon
 slots, that everybody can use to insert a page in Freenet. Clients generate a
-new channel, encrypt it so that it is readably only by the Signal Bridge and
+new channel, encrypt it so that it is readable only by the Signal Bridge and
 insert it into one of those slots. Eventually the Signal Bridge will poll the
 slots, discover and decrypt the request of a client and start accepting requests
 on that channel.
-However, in distributed storage networks such as Freenet, slots can be used only
-once and once consumed Signal Bridges will have to publish a new puzzle. A
-malicious adversary could keep inserting nonce and consuming the slots as soon
-as published, therefore causing a Denial Of Service on the channel establishment
-process. Previously established channels won't be affected by the slots flooding
-attack.
 
-This is a medium risk vulnerability (it doesn't affect the security of users or
-Insertion Authorities) but an easily exploitable one. Future CENO versions will
-require from users to solve a CAPTCHA the first time they are communicating with
+However, in distributed storage networks such as Freenet, slots can be used only
+once and, once consumed, Signal Bridges will have to publish a new puzzle. A
+malicious adversary could keep inserting nonce and consuming the slots as soon
+as published, therefore causing a Denial of Service on the channel establishment
+process. Previously established channels will not be affected by the slots
+flooding attack.
+
+This is a medium-risk vulnerability (it does not affect the security of users or
+Insertion Authorities), but an easily exploitable one. Future CENO versions will
+require users to solve a CAPTCHA the first time they are communicating with
 an Insertion Authority, in order to stop spambots.
 
 
 #### vi. CENO User machine compromisation / physical seizure
 
-Given that a user had not manually downloaded content from Freenet or saved CENO
-bundles, all chunks stored in the users' hard disk are encrypted. Even though it
+Given that a user has not manually downloaded content from Freenet or saved CENO
+bundles, all chunks stored in the user's hard disk are encrypted. Even though it
 will be obvious that the owner of the machine had been using CENO, the adversary
 will need to know the decryption keys in order to prove that the machine owner
-was hosting particular content (see `Plausible deniability` in Security
-Objectives).
+was hosting particular content (see Security Objective "Plausible deniability").
 
 Compromisation of the .CENO/client.properties configuration file will leak the
 private signaling channel the machine owner had established with an Insertion
-Authority. The adversary could then use the signaling channel key to lookup
-previous requests by the owner and therefore learn about what URLs she had been
+Authority. The adversary could then use the signaling channel key to look up
+previous requests by the owner and thus find out what URLs she had been
 visiting. In addition, the exposure of the Insertion Authority bridgeKey would
-indicate what kind of news sources the machine owner could be reading.
+indicate what kind of news sources the machine owner could have been reading.
 
-If the adversary gains access to a CENO node in operation, they will also be
+If the adversary gains access to a CENO node in operation, she will also be
 able to discover the Freenet files (including CENO bundles/URLs) the machine
 owner had been accessing in that session.
 
-We consider physical seizure of CENO client nodes a high impact, low risk issue.
+We consider physical seizure of CENO client nodes a high-impact, low-risk issue.
 
 
 #### vii. Freenet traffic throttling
 
-Alarmed by the ever increasing capacity of global adversaries to actively
+Alarmed by the ever-increasing capacity of global adversaries to actively
 perform network interference, we are considering Freenet traffic throttling a
 possible scenario. It is known that Freenet users within China have been having
-problems with connecting with nodes outside of the country.
+problems connecting with nodes outside of the country.
 
-Efforts have been made towards adding support for obfuscating Freenet nodes'
-traffic but this is an ongoing process and needs the support of the pluggable
-transport implementors groups. At the moment there does not exist a project that
-has implemneted UDP traffic obfuscation.
+Efforts have been made towards adding support for obfuscating Freenet nodes
+traffic, but this is an ongoing process and needs the support of the pluggable
+transport implementors groups. At the moment, there does not exist a project
+that has implemented UDP traffic obfuscation.
 
-This is a high risk issue and exploitable only by adversaries who have access to
-the network infrastructure, such as ISPs. It is important to mention that
-usually adversaries throttle only outgoing connections and do not mess with
+This is a high-risk issue which is exploitable only by adversaries who have
+access to the network infrastructure, such as ISPs. It is important to mention
+that usually adversaries throttle only outgoing connections and do not mess with
 in-country node-to-node traffic. In such cases, CENO will still be partially
-functional and can serve as the tool for sharing information among peers (see
+functional and can serve as a tool for sharing information among peers (see
 Security Objective "Resistance to active network interference").
 
 
 ##### viii. Insertion Authority Network Interference
 
-This is a medium risk of low exploitability.
+This is a medium-risk issue with low exploitability.
 
 
 ## 5. Security Audit results (as of CENO v0.5.1)
