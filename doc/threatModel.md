@@ -23,7 +23,7 @@ Main objective of the CENO project is to deliver in a peer-to-peer fashion
 static content that otherwise would not be available because of Internet
 censorship. It is therefore a great tool for reading the news – a selection of
 news feeds has already been inserted and getting updated on a daily basis,
-accessible via the "CENO Portal". Nevertheless, users can anonymously request
+accessible via the "CENO Portal". Furthermore, users can anonymously request
 specific nodes that have access to the uncensored Web (from now on "Bridges") to
 fetch a URL, prepare a bundle for it and insert it in the distributed storage,
 so as to be retrieved by the user that requested it. Future requests for the
@@ -143,11 +143,10 @@ because of a national firewall), but those within the country are left intact,
 CENO users will still be able to communicate with each other and, given that one
 of them has cached a specific resource, she could serve it upon request to the
 rest of the in-country network and pass it along as her node is replicating its
-cached content. This concept can be extended to mesh networks that are using
-independent network infrastructure, nevertheless. The CENO team imagines that in
-such situations, when a small set of nodes can connect with the global network,
-CENO users will still be able to access the portal content and request new
-bundles.
+cached content. This concept can also be extended to mesh networks that are
+using independent network infrastructure. The CENO team imagines that in such
+situations, when a small set of nodes can connect with the global network, CENO
+users will still be able to access the portal content and request new bundles.
 
 
 ## 3. Assumptions
@@ -256,7 +255,7 @@ file in Signal and Master/RSS-Insertion Bridges.
 
 If an adversary gets access to that private key, she will be able to insert
 content that would be discoverable with the Insertion Authority's public
-bridgeKey, without CENO users being able to tell the difference. Nevertheless,
+bridgeKey, without CENO users being able to tell the difference. Furthermore,
 if the adversary inserts newer editions of pre-inserted bundles, lookups from
 users in the distributed cache will return the latest, tampered content.
 Adversaries could then behave as described in the "Malicious Insertion
@@ -300,7 +299,7 @@ Email clients that parse HTML and Javascript emails, as well as browsers or
 software specifically developed for this reason, could identify and fingerprint
 the existence of a running CENO agent. In such a case, out-of-band mechanisms,
 for example requests to a remote machine, could easily leak the IP of a CENO
-user or Bridge maintainer. Nevertheless, malicious software could change the
+user or Bridge maintainer. In addition, malicious software could change the
 configuration options of the Freenet node, or actively interfere in other ways
 with the CENO agents so as to jeopardize the anonymity of users.
 
