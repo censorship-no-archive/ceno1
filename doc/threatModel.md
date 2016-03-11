@@ -70,7 +70,7 @@ the underlying storage and communication medium. Nodes that are using CENO are
 indistinguishable from the rest of the Freenet nodes and form part of the same
 global network of peers. Our user-Bridge signaling mechanism leaks no metadata
 (apart from the intention of a node to establish a secure channel with the
-Bridge), and the Bridges cannot know who is requesting a URL.
+Bridge), and the bridge nodes cannot know who is requesting a URL.
 
 It is known that sophisticated attacks to networks such as Freenet could expose
 the identity of users, as we are describing in the "Threats" section.
@@ -299,13 +299,13 @@ Email clients that parse HTML and Javascript emails, as well as browsers or
 software specifically developed for this reason, could identify and fingerprint
 the existence of a running CENO agent. In such a case, out-of-band mechanisms,
 for example requests to a remote machine, could easily leak the IP of a CENO
-user or Bridge maintainer. In addition, malicious software could change the
+user or bridge node maintainer. In addition, malicious software could change the
 configuration options of the Freenet node, or actively interfere in other ways
 with the CENO agents so as to jeopardize the anonymity of users.
 
 This is a high-risk and easily exploitable issue the CENO developers aim towards
 mitigating as soon as possible. In the meantime, we strongly recommend that IA
-maintainers use their Bridge machines only for that purpose and avoid installing
+maintainers use their bridge machines only for that purpose and avoid installing
 software that is not related to CENO, and that CENO users avoid running any
 other programs while using CENO. If supported by the operating system, CENO
 should be run by a separate user.
@@ -455,7 +455,7 @@ CENO team has removed the Toggle Switch, therefore this issue is considered
 ##### NCC-CENO-008: Bridge Server Private Files Accessible To Other Users
 CENOBridge distributable explicitly sets bridge.properties file permissions and
 makes it unreadable by other users. In addition, Bridge maintainers are
-encouraged to avoid running non-related services on a Bridge machine and are
+encouraged to avoid running non-related services on a bridge machine and are
 instructed to check the access permissions of such sensitive files. We consider
 this issue **resolved**.
 
@@ -474,11 +474,11 @@ signaling mechanism.
 
 ##### NCC-CENO-010: Hard-Coded Bridge in Application Source Code
 Users can now configure their nodes to use alternative Insertion Authorities.
-However, there is no mechanism for announcing compromised Bridges yet. Therefore
-this issue is **partially mitigated**.
+However, there is no mechanism for announcing compromised bridge nodes yet.
+Therefore this issue is **partially mitigated**.
 
 ##### NCC-CENO-011: Missing Recommendations For Bridge Server Hardening
-The CENO team has composed an instruction hardening guide for Bridge
+The CENO team has composed an instruction hardening guide for bridge nodes
 maintainers which can be found in [doc/secureBridge.md](secureBridge.md) and
 [ceno-freenet/INSTALL.Bridge.md](../ceno-freenet/INSTALL.Bridge.md), therefore
 the issue is **resolved**.
