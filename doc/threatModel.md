@@ -21,20 +21,19 @@ wicked Web.
 
 Main objective of the CENO project is to deliver in a peer-to-peer fashion
 static content that otherwise would not be available because of Internet
-censorship. It is therefore a great tool for reading the news - a selection of
+censorship. It is therefore a great tool for reading the news – a selection of
 news feeds has already been inserted and getting updated on a daily basis,
 accessible via the "CENO Portal". Nevertheless, users can anonymously request
-specific nodes that have access to the uncensored Web (from now on
-"Bridges") to fetch a URL, prepare a bundle for it and insert it in the
-distributed storage, so as to be retrieved by the user that requested it. Future
-requests for the same URL will be handled directly via the cache without the
-need for user-bridge communication, even if the website is no more live. No
-knowledge of the global network topology is required in order to retrieve
-bundles or send a message to a Bridge. In cases of nationwide Internet
-throttling, content will remain available to the peers given that a copy of that
-bundle is cached in the in-country network of peers. When using CENO, you will
-not be able to visit dynamic websites, log into websites, stream media or read
-and send emails.
+specific nodes that have access to the uncensored Web (from now on "Bridges") to
+fetch a URL, prepare a bundle for it and insert it in the distributed storage,
+so as to be retrieved by the user that requested it. Future requests for the
+same URL will be handled directly via the cache without the need for user-bridge
+communication, even if the website is no more live. No knowledge of the global
+network topology is required in order to retrieve bundles or send a message to a
+bridge. In cases of nationwide Internet throttling, content will remain
+available to the peers given that a copy of that bundle is cached in the
+in-country network of peers. When using CENO, you will not be able to visit
+dynamic websites, log into websites, stream media or read and send emails.
 
 
 <!-- ## 2. Architecture Overview
@@ -71,21 +70,21 @@ the underlying storage and communication medium. Nodes that are using CENO are
 indistinguishable from the rest of the Freenet nodes and form part of the same
 global network of peers. Our user-bridge signaling mechanism leaks no metadata
 (apart from the intention of a node to establish a secure channel with the
-bridge) and the bridges cannot know who is requesting a URL.
+bridge), and the bridges cannot know who is requesting a URL.
 
 It is known that sophisticated attacks to networks such as Freenet could expose
-the identity of users, as we are describing in the `Threats` section.
+the identity of users, as we are describing in the "Threats" section.
 
 
 #### A secure communication mechanism
 
-CENO users establish a signaling channel with their Bridge of preference. The
+CENO users establish a signaling channel with their bridge of preference. The
 mechanism in operation provides the following features:
 
   * Confidentiality
   * Integrity
   * Causality Preservation
-  * Sender and, once the channel has been established,  Recipient Anonymity
+  * Sender and, once the channel has been established, Recipient Anonymity
   * No shared secrets needed
   * No service provider required
   * Asynchronicity
@@ -94,7 +93,7 @@ mechanism in operation provides the following features:
 Users can always drop a channel and establish a new one. Spammers cannot
 interfere with already established channels, but can only spam their own
 channel. Spamming the channel establishment mechanism might temporarily prevent
-new users from establishing a new channel with a Bridge, but will not result in
+new users from establishing a new channel with a bridge, but will not result in
 Denial of Service of the rest of CENO functionality. Notably, the design of our
 signaling mechanism requires no prior authentication or manual interaction by
 the users, is significantly efficient compared to similar ones, and can scale
@@ -107,10 +106,10 @@ CENO traffic among peers is end-to-end encrypted and appears on traffic analysis
 as random UDP noise. The ephemeral encryption keys are kept safely by the peers
 and no non-global entities can discover which sets of nodes are communicating
 with each other. Global adversaries will be able to tell with whom a certain
-node is exchanging encrypted messages, but won't be able to find out the actual
-content. In few words, even though adversaries (such as your Internet Service
-Provider) might see that you are using a censorship circumvention tool, it will
-be extremely difficult for them to know what you are using it for.
+node is exchanging encrypted messages, but will not be able to find out the
+actual content. In few words, even though adversaries (such as your Internet
+Service Provider) might see that you are using a censorship circumvention tool,
+it will be extremely difficult for them to know what you are using it for.
 
 
 #### Plausible deniability
@@ -135,9 +134,9 @@ like random noise to Deep Packet Inspection, so it is difficult for adversaries
 to create specific rules for dropping Freenet connections without affecting
 other services. It is worth mentioning that adversaries that control the network
 transport link might be able to block connections to the Freenet seed nodes.
-This could mean that your node will not be able to find other peers in order to
-request content, unless you know other people who are already using CENO/Freenet
-to help you become part of the global network.
+This could imply that certain nodes will not be able to find other peers in
+order to request content, unless the users know other people who are already
+using CENO/Freenet and can help them become part of the global network.
 
 In scenarios where connections with peers in other countries are throttled (e.g.
 because of a national firewall), but those within the country are left intact,
@@ -155,7 +154,7 @@ bundles.
 
 #### User Behavior
 
-  * Users do not manually save content on their hard drives from CENO Portal
+  * Users do not manually save on their hard drives content from CENO Portal
     bundles or other files retrieved from Freenet.
   * Users always browse CENO via the browser (Firefox or Chrome) window that
     opens when they start CENO and that is using the customized profile and
@@ -187,10 +186,11 @@ bundles.
   * No adversary controls a large part of the Freenet nodes network.
   * No malevolent nodes flood their neighbors' data stores.
 
-We recommend you to refer to the Freenet Threat model in the project wiki
-https://wiki.freenetproject.org/Threat_model (also
-https://wiki.freenetproject.org/Major_attacks and
-https://wiki.freenetproject.org/Potential_attackers ).
+We recommend you to refer to the [Freenet Threat
+model](https://wiki.freenetproject.org/Threat_model) in the project wiki (also
+[https://wiki.freenetproject.org/Major_attacks](https://wiki.freenetproject.org/Major_attacks)
+and
+[https://wiki.freenetproject.org/Potential_attackers](https://wiki.freenetproject.org/Potential_attackers)).
 We shall not consider Freenet vulnerabilities (such as sybil attacks) as part of
 our threat model from now on.
 
@@ -212,7 +212,7 @@ replacing the related agents.
 
   * Users' and Insertion Authority Maintainers' systems are not compromised or
     affected by malware that could interfere with CENO.
-  * Users and Bridges are given enough bandwidth and storage resources to
+  * Users and bridges are given enough bandwidth and storage resources to
     effectively participate in the network.
   * No security vulnerabilities exist in the programming languages, frameworks
     or libraries in use.
@@ -242,7 +242,7 @@ significant amount of nodes in the Freenet network could try to combine the URLs
 requested by a channel with a de-anonymization attack, therefore correlating the
 requested URLs with the IP that is making insertions in an established channel.
 
-This is a medium-risk issue with a low exploitability, that affects only users
+This is a medium-risk issue with low exploitability, that affects only users
 who have manually selected to use a non-default IA.
 
 
@@ -281,7 +281,7 @@ the same SSK Freenet key.
 Established channels are stored on Signal Bridges at a database in the same
 directory as the Freenet files and CENO agents. Obviously there is no mapping
 between a channel and an IP, but if an adversary gains access to a channel's
-database file, they will be able to get a history of the URLs requested by each
+database file, she will be able to get a history of the URLs requested by each
 user. Given that the list of URLs include user-specific attributes, or can be
 matched with a targeted user's behavior, the adversary could extract
 information regarding the way a specific individual has been using CENO.
@@ -300,15 +300,15 @@ Email clients that parse HTML and Javascript emails, as well as browsers or
 software specifically developed for this reason, could identify and fingerprint
 the existence of a running CENO agent. In such a case, out-of-band mechanisms,
 for example requests to a remote machine, could easily leak the IP of a CENO
-user or Bridge maintainer. Nevertheless, malicious software could change the
+user or bridge maintainer. Nevertheless, malicious software could change the
 configuration options of the Freenet node, or actively interfere in other ways
 with the CENO agents so as to jeopardize the anonymity of users.
 
 This is a high-risk and easily exploitable issue the CENO developers aim towards
 mitigating as soon as possible. In the meantime, we strongly recommend that IA
-maintainers use their Bridge machines only for that purpose and avoid installing
+maintainers use their bridge machines only for that purpose and avoid installing
 software that is not related to CENO, and that CENO users avoid running any
-other programs while using CENO. If supported by the Operating System, CENO
+other programs while using CENO. If supported by the operating system, CENO
 should be run by a separate user.
 
 
@@ -362,7 +362,7 @@ We consider physical seizure of CENO client nodes a high-impact, low-risk issue.
 Alarmed by the ever-increasing capacity of global adversaries to actively
 perform network interference, we are considering Freenet traffic throttling a
 possible scenario. It is known that Freenet users within China have been having
-problems connecting with nodes outside of the country.
+problems with connecting with nodes outside of the country.
 
 Efforts have been made towards adding support for obfuscating Freenet nodes
 traffic, but this is an ongoing process and needs the support of the pluggable
@@ -400,33 +400,33 @@ true, as suggested by the auditors group.
 In order to mitigate this issue, the CENO team has decided to imply the
 HTTPS-Everywhere ruleset to all outgoing Bundle Server requests. We consider
 this "best-effort" upgrade to HTTPS the best thing to do, given that it should
-not be the first user the one who decides whether the HTTP over the HTTPS
-version is inserted in the distributed storage, and in order to assure the
-genuinity of the content inserted. This is **work in progress**.
+not be the first user who decides whether the HTTP over the HTTPS version is
+inserted in the distributed storage, and in order to ensure the genuinity of the
+content inserted. This is **work in progress**.
 
 ##### NCC-CENO-017: CENO Request Scheme Obfuscates URLs and Flattens Web Origins
 The CENO team believes that by dropping support for Javascript and by providing
-a hardened browser profile for Firefox that this issue has been **mitigated**.
+a hardened browser profile for Firefox, this issue has been **mitigated**.
 
 ##### NCC-CENO-018: JavaScript Can Unmask Users Via Multiple Mechanisms
 Similarly to the previous issue identified by the NCC Group, by applying
 readability mode on the bundles inserted by bridges and by stripping any
-Javascript at the Lookup Cache Servers we consider this issue **resolved**.
+Javascript at the Lookup Cache Servers, we consider this issue **resolved**.
 
-The proposed solution of inserting assets individually rather than part of the
-bundle is something that could be considered as a future improvement.
+The proposed solution of inserting assets individually rather than as part of
+the bundle is something that could be considered as a future improvement.
 
 ##### NCC-CENO-019: Exposed Freenet Plugin Enable XSS In Freenet Origin and User Identification
-This issue, overlapping with threat iv identified above, is still a **critical
+This issue, overlapping with threat iv. identified above, is still a **critical
 vulnerability**.
 
 ##### NCC-CENO-021: CENO Client Daemon Is Exposed and Does Not Act as an HTTP Proxy
 This issue remains a **critical vulnerability** and will be addressed by using
-application secrets, in the same way with NCC-CENO-019.
+application secrets, in the same way as with NCC-CENO-019.
 
 ##### NCC-CENO-013: Bridge Server Cannot Recover From Compromise
-This issue remains a **vulnerability**. The CENO teams describes their plans to
-mitigate it in threat ii above.
+This issue remains a **vulnerability**. The CENO team describes their plans to
+mitigate it in threat ii. above.
 
 ##### NCC-CENO-002: CENOBox Configures Freenet To Run In Opennet Mode
 Unfortunately there is no alternative way for shipping CENOBox to new Freenet
@@ -437,20 +437,20 @@ themselves from de-anonymization attacks. CENO team **will not address** this
 issue.
 
 ##### NCC-CENO-001: Distribution of Untrusted and Unsigned Mozilla Firefox Add-On
-CENO team is now distributing a signed version of their Mozilla Firefox Add-on
-included in the CENOBox, along with a profile that automatically loads it,
-therefore the issue is considered **resolved**. However the team has decided not
-to upload the add-on to the addons.mozilla.org site (AMO), since it could
+CENO team is now distributing a signed version of their Mozilla Firefox add-on
+included in the CENOBox, along with a profile that automatically loads it.
+Therefore, the issue is considered **resolved**. However, the team has decided
+not to upload the add-on to the addons.mozilla.org site (AMO), since it could
 interfere with their normal browsing experience, for example by downgrading
 HTTPS to HTTP requests.
 
 ##### NCC-CENO-003: CENO Bridge Uses Static Source Port
-Bridge maintainers are encouraged to proxy Bundler Server traffic via a
-anonymization network (specifically tor), in which case the static source port
+Bridge maintainers are encouraged to proxy Bundler Server traffic via an
+anonymization network (specifically Tor), in which case the static source port
 will not be exposed. We consider this issue **mitigated**.
 
 ##### NCC-CENO-005: Extension Toggle Switch Implementation is Unsafe
-CENO team has removed the Toggle Switch therefore this issue is considered
+CENO team has removed the Toggle Switch, therefore this issue is considered
 **resolved**.
 
 ##### NCC-CENO-008: Bridge Server Private Files Accessible To Other Users
@@ -462,8 +462,8 @@ this issue **resolved**.
 
 ##### NCC-CENO-009: Firefox Add-Ons Can Modify CENO Add-On
 The CENO team has followed the auditor's suggestion and now ships a
-pre-configured profile that loads the Firefox CENO add-on, while blocks access
-to Mozilla Add-On site. Therefore the issue is **resolved**.
+pre-configured profile that loads the Firefox CENO add-on, while blocking access
+to the Mozilla Add-On site. Therefore the issue is **resolved**.
 
 ##### NCC-CENO-007: Sensitive Information Stored In Bridge Server logs
 The CENO team has followed the auditor's suggestions and we consider this issue
@@ -475,16 +475,17 @@ signaling mechanism.
 
 ##### NCC-CENO-010: Hard-Coded Bridge in Application Source Code
 Users can now configure their nodes to use alternative Insertion Authorities.
-However there is no mechanism yet for announcing compromised bridges. Therefore
-the issues is **partially mitigated**.
+However, there is no mechanism for announcing compromised bridges yet. Therefore
+this issue is **partially mitigated**.
 
 ##### NCC-CENO-011: Missing Recommendations For Bridge Server Hardening
-The CENO team has composed an instruction hardening guides for Bridge
-maintainers which can be found in doc/secureBridge.md and
-ceno-freenet/INSTALL.Bridge.md therefore the issue is **resolved**.
+The CENO team has composed an instruction hardening guide for Bridge
+maintainers which can be found in [doc/secureBridge.md](secureBridge.md) and
+[ceno-freenet/INSTALL.Bridge.md](../ceno-freenet/INSTALL.Bridge.md), therefore
+the issue is **resolved**.
 
 ##### NCC-CENO-016: USK URL Generation Does Not Escape Base64-Encoded URL Data
-All CENO agents are now using URL-safe base64 encoding (rfc4648-sec5) therefore
+All CENO agents are now using URL-safe base64 encoding (rfc4648-sec5), therefore
 the issue is **resolved**.
 
 
