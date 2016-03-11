@@ -27,10 +27,10 @@ accessible via the "CENO Portal". Nevertheless, users can anonymously request
 specific nodes that have access to the uncensored Web (from now on "Bridges") to
 fetch a URL, prepare a bundle for it and insert it in the distributed storage,
 so as to be retrieved by the user that requested it. Future requests for the
-same URL will be handled directly via the cache without the need for user-bridge
+same URL will be handled directly via the cache without the need for user-Bridge
 communication, even if the website is no more live. No knowledge of the global
 network topology is required in order to retrieve bundles or send a message to a
-bridge. In cases of nationwide Internet throttling, content will remain
+Bridge. In cases of nationwide Internet throttling, content will remain
 available to the peers given that a copy of that bundle is cached in the
 in-country network of peers. When using CENO, you will not be able to visit
 dynamic websites, log into websites, stream media or read and send emails.
@@ -68,9 +68,9 @@ dynamic websites, log into websites, stream media or read and send emails.
 CENO promises strong user anonymity guarantees, inherited by using Freenet as
 the underlying storage and communication medium. Nodes that are using CENO are
 indistinguishable from the rest of the Freenet nodes and form part of the same
-global network of peers. Our user-bridge signaling mechanism leaks no metadata
+global network of peers. Our user-Bridge signaling mechanism leaks no metadata
 (apart from the intention of a node to establish a secure channel with the
-bridge), and the bridges cannot know who is requesting a URL.
+Bridge), and the Bridges cannot know who is requesting a URL.
 
 It is known that sophisticated attacks to networks such as Freenet could expose
 the identity of users, as we are describing in the "Threats" section.
@@ -78,7 +78,7 @@ the identity of users, as we are describing in the "Threats" section.
 
 #### A secure communication mechanism
 
-CENO users establish a signaling channel with their bridge of preference. The
+CENO users establish a signaling channel with their Bridge of preference. The
 mechanism in operation provides the following features:
 
   * Confidentiality
@@ -93,7 +93,7 @@ mechanism in operation provides the following features:
 Users can always drop a channel and establish a new one. Spammers cannot
 interfere with already established channels, but can only spam their own
 channel. Spamming the channel establishment mechanism might temporarily prevent
-new users from establishing a new channel with a bridge, but will not result in
+new users from establishing a new channel with a Bridge, but will not result in
 Denial of Service of the rest of CENO functionality. Notably, the design of our
 signaling mechanism requires no prior authentication or manual interaction by
 the users, is significantly efficient compared to similar ones, and can scale
@@ -205,14 +205,14 @@ replacing the related agents.
     network.
   * Bridges do not trust compromised SSL Certificates.
   * IA Maintainers do not run software that could interfere with CENO agents, or
-    Freenet, or expose that they are hosting a bridge.
+    Freenet, or expose that they are hosting a Bridge.
 
 
 #### General Assumptions
 
   * Users' and Insertion Authority Maintainers' systems are not compromised or
     affected by malware that could interfere with CENO.
-  * Users and bridges are given enough bandwidth and storage resources to
+  * Users and Bridges are given enough bandwidth and storage resources to
     effectively participate in the network.
   * No security vulnerabilities exist in the programming languages, frameworks
     or libraries in use.
@@ -226,7 +226,7 @@ replacing the related agents.
 CENO users have access via the CENO Portal and CENO Browser window only to
 bundles and feeds that have been inserted by the Insertion Authority (IA) they
 trust.  CENOBox comes preconfigured with an Insertion Authority the CENO team is
-maintaining, but users can manually decide to use another bridge, both for
+maintaining, but users can manually decide to use another Bridge, both for
 reading the portal news as well as for requesting new URLs, by setting an
 alternative valid Insertion Authority bridgeKey in the .CENO/client.properties
 file.
@@ -252,7 +252,7 @@ For content to be discoverable and authenticatable, Insertion Authorities
 use a private SSK – Signed Subspace Key ( https://wiki.freenetproject.org/SSK )
 – for inserting bundles, portal feeds, information for establishing secure
 signaling channels, etc. This key is included in the .CENO/bridge.properties
-file in Signal and Master/RSS-Insertion bridges.
+file in Signal and Master/RSS-Insertion Bridges.
 
 If an adversary gets access to that private key, she will be able to insert
 content that would be discoverable with the Insertion Authority's public
@@ -300,13 +300,13 @@ Email clients that parse HTML and Javascript emails, as well as browsers or
 software specifically developed for this reason, could identify and fingerprint
 the existence of a running CENO agent. In such a case, out-of-band mechanisms,
 for example requests to a remote machine, could easily leak the IP of a CENO
-user or bridge maintainer. Nevertheless, malicious software could change the
+user or Bridge maintainer. Nevertheless, malicious software could change the
 configuration options of the Freenet node, or actively interfere in other ways
 with the CENO agents so as to jeopardize the anonymity of users.
 
 This is a high-risk and easily exploitable issue the CENO developers aim towards
 mitigating as soon as possible. In the meantime, we strongly recommend that IA
-maintainers use their bridge machines only for that purpose and avoid installing
+maintainers use their Bridge machines only for that purpose and avoid installing
 software that is not related to CENO, and that CENO users avoid running any
 other programs while using CENO. If supported by the operating system, CENO
 should be run by a separate user.
@@ -410,7 +410,7 @@ a hardened browser profile for Firefox, this issue has been **mitigated**.
 
 ##### NCC-CENO-018: JavaScript Can Unmask Users Via Multiple Mechanisms
 Similarly to the previous issue identified by the NCC Group, by applying
-readability mode on the bundles inserted by bridges and by stripping any
+readability mode on the bundles inserted by Bridges and by stripping any
 Javascript at the Lookup Cache Servers, we consider this issue **resolved**.
 
 The proposed solution of inserting assets individually rather than as part of
@@ -455,8 +455,8 @@ CENO team has removed the Toggle Switch, therefore this issue is considered
 
 ##### NCC-CENO-008: Bridge Server Private Files Accessible To Other Users
 CENOBridge distributable explicitly sets bridge.properties file permissions and
-makes it unreadable by other users. In addition, bridge maintainers are
-encouraged to avoid running non-related services on a bridge machine and are
+makes it unreadable by other users. In addition, Bridge maintainers are
+encouraged to avoid running non-related services on a Bridge machine and are
 instructed to check the access permissions of such sensitive files. We consider
 this issue **resolved**.
 
@@ -475,7 +475,7 @@ signaling mechanism.
 
 ##### NCC-CENO-010: Hard-Coded Bridge in Application Source Code
 Users can now configure their nodes to use alternative Insertion Authorities.
-However, there is no mechanism for announcing compromised bridges yet. Therefore
+However, there is no mechanism for announcing compromised Bridges yet. Therefore
 this issue is **partially mitigated**.
 
 ##### NCC-CENO-011: Missing Recommendations For Bridge Server Hardening
