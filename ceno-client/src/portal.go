@@ -280,25 +280,27 @@ func PortalArticlesHandler(w http.ResponseWriter, r *http.Request) {
 	feedUrlBytes, _ := base64.URLEncoding.DecodeString(b64FeedUrl)
 	feedUrl := string(feedUrlBytes)
 	module, err, lookupResult := InitModuleWithArticles(feedUrl)
-	if lookupResult.ErrCode > 0 {
-		if IsCacheServerError(lookupResult.ErrCode) {
-			HandleLCSError(lookupResult.ErrCode, lookupResult.ErrMsg, ErrorState{
-				"responseWriter": w,
-				"request":        r,
-			})
+	if module == nil {
+		if lookupResult.ErrCode > 0 {
+			if IsCacheServerError(lookupResult.ErrCode) {
+				HandleLCSError(lookupResult.ErrCode, lookupResult.ErrMsg, ErrorState{
+					"responseWriter": w,
+					"request":        r,
+				})
+			} else {
+				HandleCCError(lookupResult.ErrCode, lookupResult.ErrMsg, ErrorState{
+					"responseWriter": w,
+					"request":        r,
+				})
+			}
+		} else if err != nil {
+				HandleCCError(ERR_NO_ARTICLES_FILE, T("no_articles_file_err"), ErrorState{
+					"responseWriter": w,
+					"request":        r,
+				})
 		} else {
-			HandleCCError(lookupResult.ErrCode, lookupResult.ErrMsg, ErrorState{
-				"responseWriter": w,
-				"request":        r,
-			})
+			pleaseWait(r.URL.Path, w)
 		}
-	} else if err != nil {
-			HandleCCError(ERR_NO_ARTICLES_FILE, T("no_articles_file_err"), ErrorState{
-				"responseWriter": w,
-				"request":        r,
-			})
-	} else if err == nil {
-		pleaseWait(r.URL.Path, w)
 	} else {
 		module["PublishedWord"] = T("published_word")
 		module["AuthorWord"] = T("authors_word")
