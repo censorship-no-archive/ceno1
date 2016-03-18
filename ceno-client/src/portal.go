@@ -127,11 +127,14 @@ func InitModuleWithFeeds() (map[string]interface{}, error) {
  * @param {string} feedUrl - The URL of the feed to fetch articles from
  * @return a map with a "feeds" key and corresponding array of Feed structs and an optional error
  */
-func InitModuleWithArticles(feedUrl string) (map[string]interface{}, error) {
+func InitModuleWithArticles(feedUrl string) (map[string]interface{}, error, Result) {
 	T, _ := i18n.Tfunc(os.Getenv(LANG_ENVVAR), DEFAULT_LANG)
 	articleInfo := ArticleInfo{}
 	var decodeErr error
 	result := Lookup(feedUrl)
+	if result.ErrCode > 0 {
+		return nil, nil, result
+	}
 	if result.Complete && result.Found {
 		fmt.Println("Lookup is complete")
 		// Serve whatever the LCS gave us as the most recent articles list for
@@ -145,7 +148,7 @@ func InitModuleWithArticles(feedUrl string) (map[string]interface{}, error) {
 		articleInfoFile, openErr := os.Open(articlesFilename(feedUrl))
 		if openErr != nil {
 			fmt.Println("Got file open error", openErr.Error())
-			return nil, openErr
+			return nil, nil, result
 		}
 		defer articleInfoFile.Close()
 		decoder := json.NewDecoder(articleInfoFile)
@@ -153,14 +156,14 @@ func InitModuleWithArticles(feedUrl string) (map[string]interface{}, error) {
 	}
 	if decodeErr != nil {
 		fmt.Println("Got decode error", decodeErr.Error())
-		return nil, decodeErr
+		return nil, decodeErr, result
 	}
 	mapping := make(map[string]interface{})
 	// We want to get the feed's title to display on the articles page, however we cannot simply
 	// scan through the feeds.json file on disk, because we might be serving from what the LCS is giving us.
 	feedsModule, feedErr := InitModuleWithFeeds()
 	if feedErr != nil {
-		return nil, feedErr
+		return nil, feedErr, result
 	}
 	mapping["Title"] = T("feed_not_found", map[string]string{"FeedUrl": feedUrl})
 	//fmt.Println("Trying to find title for feed with url", feedUrl)
@@ -181,7 +184,7 @@ func InitModuleWithArticles(feedUrl string) (map[string]interface{}, error) {
 	}
 	mapping["Articles"] = articleInfo.Items
 	mapping["Version"] = articleInfo.Version
-	return mapping, nil
+	return mapping, nil, result
 }
 
 func stringifyLanguages(langStrings LanguageStringJSON) string {
@@ -276,12 +279,26 @@ func PortalArticlesHandler(w http.ResponseWriter, r *http.Request) {
 	b64FeedUrl := pathComponents[len(pathComponents)-1]
 	feedUrlBytes, _ := base64.URLEncoding.DecodeString(b64FeedUrl)
 	feedUrl := string(feedUrlBytes)
-	module, err := InitModuleWithArticles(feedUrl)
-	if err != nil {
-		HandleCCError(ERR_NO_ARTICLES_FILE, T("no_articles_file_err"), ErrorState{
-			"responseWriter": w,
-			"request":        r,
-		})
+	module, err, lookupResult := InitModuleWithArticles(feedUrl)
+	if lookupResult.ErrCode > 0 {
+		if IsCacheServerError(lookupResult.ErrCode) {
+			HandleLCSError(lookupResult.ErrCode, lookupResult.ErrMsg, ErrorState{
+				"responseWriter": w,
+				"request":        r,
+			})
+		} else {
+			HandleCCError(lookupResult.ErrCode, lookupResult.ErrMsg, ErrorState{
+				"responseWriter": w,
+				"request":        r,
+			})
+		}
+	} else if err != nil {
+			HandleCCError(ERR_NO_ARTICLES_FILE, T("no_articles_file_err"), ErrorState{
+				"responseWriter": w,
+				"request":        r,
+			})
+	} else if err == nil {
+		pleaseWait(r.URL.Path, w)
 	} else {
 		module["PublishedWord"] = T("published_word")
 		module["AuthorWord"] = T("authors_word")
