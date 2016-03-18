@@ -96,6 +96,18 @@ public class URLtoUSKTools {
 		return false;
 	}
 
+	public static boolean isPortalURL(String urlParam) {
+		if (urlParam == null  || urlParam.isEmpty()) {
+			return false;
+		}
+
+		if (urlParam.equals(PORTAL_DOC_NAME)) {
+			return true;
+		}
+
+		return false;
+	}
+
 	/**
 	 * Validates a URL parameter and formats it accordingly
 	 * 
