@@ -21,7 +21,7 @@ import freenet.support.Logger;
 /** CENOBridge Plugin handler for requests to cache bundles
  * 	
  * BundleInserterHandler listens to {@link CENOBridge#bundleInserterPort} port
- * and under the "/store" route for POST requests.
+ * and under the "/insert" route for POST requests.
  * Those POST requests include the bundled page as well as the original url.
  * The handler caches the given bundle under its signed subspace.
  * Upon successful insertion, the handler replies with "stored".
@@ -30,9 +30,9 @@ public class BundleInserterHandler extends CENOJettyHandler {
 
 	public void handle(String target,Request baseRequest,HttpServletRequest request,HttpServletResponse response)
 			throws IOException, ServletException {
-		// Only POST requests at /store route will be handled
+		// Only POST requests at /insert route will be handled
 		if (!request.getMethod().equals("POST")) {
-			writeError(baseRequest, response, "Not a POST request at /store route");
+			writeError(baseRequest, response, "Not a POST request at /insert route");
 			return;
 		}
 
@@ -96,7 +96,7 @@ public class BundleInserterHandler extends CENOJettyHandler {
 
 		response.setContentType("text/html;charset=utf-8");
 		response.setStatus(HttpServletResponse.SC_OK);
-		response.getWriter().println("stored");
+		response.getWriter().println("okay");
 		baseRequest.setHandled(true);
 	}
 }
