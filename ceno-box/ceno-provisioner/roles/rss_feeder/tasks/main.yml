@@ -31,6 +31,23 @@
     - openjdk-6-jre
     - openjdk-6-jre-lib
     
+- name: Add UTF8 locale
+  command: "locale-gen --purge en_US.UTF-8"
+
+- name: Set default lang
+  lineinfile:
+  args:
+    dest: /etc/default/locale
+    regexp: "^LANG="
+    line: 'LANG="en_US.UTF-8"'
+
+- name: Set default language
+  lineinfile:
+  args:
+    dest: /etc/default/locale
+    regexp: "^LANGUAGE="
+    line: 'LANGUAGE="en_US:en"'
+    
 - name: Add a new user
   user:
   args:
