@@ -15,7 +15,7 @@
 	<property name="junit.location" value="/usr/share/java/junit.jar"/>
 	<property name="jetty-serverlet.location" value="lib/javax.servlet-api-3.1.0.jar"/>
 	<property name="jetty-all.location" value="lib/jetty-all-9.2.6.v20141205.jar"/>
-	<property name="json-smart.location" location="lib/json-smart-1.2.jar"/>
+	<property name="json-smart.location" location="lib/json-smart-2.2.1.jar"/>
 	<property name="apache-commonsvalidator.location" location="lib/commons-validator-1.4.1.jar"/>
 	<property name="apache-commonscompress.location" location="lib/commons-compress-1.9.jar"/>
 	<property name="apache-commonscollections.location" location="lib/commons-collections4-4.1.jar"/>
