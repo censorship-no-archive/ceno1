@@ -20,6 +20,7 @@
     - node
     - npm
     - lsof
+    - locales
 
 - name: link node to nodejs
   command: "ln /usr/bin/nodejs /usr/bin/node"

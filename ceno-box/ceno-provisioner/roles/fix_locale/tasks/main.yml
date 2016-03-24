@@ -21,6 +21,13 @@
 - name: Add UTF8 locale
   command: "locale-gen --purge en_US.UTF-8"
 
+- name: make utf8 available
+  lineinfile:
+  args:
+    dest: /etc/locale.gen
+    regexp: "^#.*en_US.UTF-8 UTF-8"
+    line: 'en_US.UTF-8 UTF-8'
+
 - name: Set default lang
   lineinfile:
   args:
@@ -34,6 +41,12 @@
     dest: /etc/default/locale
     regexp: "^LANGUAGE="
     line: 'LANGUAGE="en_US:en"'
+
+- name: reconfigure locales
+  command: "dpkg-reconfigure --frontend=noninteractive locales"
+
+- name: update locales
+  command: "update-locale LANG=en_US.UTF-8"
 
 - name: Run CENO bridge
   become_user: "{{ proxyuser }}"

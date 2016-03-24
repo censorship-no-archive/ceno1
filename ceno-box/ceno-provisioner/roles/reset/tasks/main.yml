@@ -1,0 +1,44 @@
+- name: restart machine
+  shell: sleep 2 && shutdown -r now "Ansible updates triggered"
+  async: 1
+  poll: 0
+  sudo: true
+  ignore_errors: true
+
+- name: waiting for server to come back
+  local_action: wait_for host={{ inventory_hostname }} state=started delay=30 timeout=300
+
+- name: Run CENO bridge
+  become_user: "{{ proxyuser }}"
+  become: yes
+  command: "/home/{{ proxyuser }}/CENORSSInserter/CENORSSInserter.sh"
+  args:
+    chdir: "/home/{{ proxyuser }}/CENORSSInserter/"
+
+- name: Wait for bridge to publish its descriptor
+  become_user: "{{ proxyuser }}"
+  become: yes
+  wait_for: timeout=60
+  args:
+    path: "/home/{{ proxyuser }}/CENORSSInserter/resources/myref.txt"
+
+- name: run rss reader
+  become_user: "{{ proxyuser }}"
+  become: yes
+  shell: "( ( nohup ./reader 1>../CENO.log 2>&1 ) & )"
+  args:
+    chdir: "/home/{{ proxyuser }}/CENORSSInserter/rss-reader/"
+
+- name: wait for reader
+  become_user: "{{ proxyuser }}"
+  become: yes
+  wait_for:
+  args:
+    port: 3096
+
+- name: run the follower
+  become_user: "{{ proxyuser }}"
+  become: yes
+  shell: "( ( nohup ./follower ../feedlist.txt 180 1>../CENO.log 2>&1 ) & )"
+  args:
+    chdir: "/home/{{ proxyuser }}/CENORSSInserter/rss-reader/"
