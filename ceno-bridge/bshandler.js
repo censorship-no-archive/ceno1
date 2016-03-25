@@ -43,7 +43,7 @@ function bs_log(msg) {
  * @param {function} cb - A callback to invoke to handle the results of the request
  */
 function reportCompleteBundle(config, data, wasRewritten, cb) {
-  var headers = {};
+  var headers = {'charset':'utf-8'};
   headers[REWRITTEN_HEADER] = wasRewritten;
   request({
     url: config.requestReceiver + RR_COMPLETE,
