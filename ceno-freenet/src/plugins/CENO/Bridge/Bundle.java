@@ -49,7 +49,7 @@ public class Bundle {
 		uri = URLtoUSKTools.b64EncSafe("http://" + URLtoUSKTools.validateURL(uri));
 		URL url = new URL("http", "127.0.0.1", CENOBridge.bundleServerPort, "/?url=" + uri);
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-		BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+		BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
 		StringBuffer response = new StringBuffer();
 		try {
 			String line;
