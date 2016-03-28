@@ -67,12 +67,13 @@ public class NodeRefHelper {
 		FileOutputStream fos = null;
 
 		try {
-
-			// if file doesn't exists, then create it
-			fos = new FileOutputStream(ownRefFile);
+			// if file doesn't exist, then create it
 			if (!ownRefFile.exists()) {
+				ownRefFile.getParentFile().mkdirs();
 				ownRefFile.createNewFile();
 			}
+			
+			fos = new FileOutputStream(ownRefFile);
 
 			// get the content in bytes
 			byte[] contentInBytes = getNodeRef().getBytes();
@@ -81,13 +82,13 @@ public class NodeRefHelper {
 			fos.flush();
 
 			System.out.println("Done");
-
 		} catch (IOException e) {
 			e.printStackTrace();
 			throw e;
-
 		} finally {
-			fos.close();
+			if (fos != null) {
+				fos.close();
+			}
 		}
 
 	}
