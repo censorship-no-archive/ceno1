@@ -54,8 +54,7 @@ your /home directory)
 and execute the following command:
 
 ```bash
-sh -c "$(curl -fsSL
-https://raw.githubusercontent.com/equalitie/ceno/master/ceno-box/installCENO.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/equalitie/ceno/master/ceno-box/installCENO.sh)"
 ```
 
 CENOBox will open a new Firefox or Chrome window with a customized profile.

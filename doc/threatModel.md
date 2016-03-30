@@ -507,5 +507,5 @@ the issue is **resolved**.
 
 <hr>
 Threat Model version 1.0  
-CENO version 1.0.0
+CENO version 1.0.0  
 ceno@equalit.ie
