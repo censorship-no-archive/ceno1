@@ -268,7 +268,7 @@ func insertHandler(w http.ResponseWriter, r *http.Request) {
 	writeFeedsErr := writeFeeds(feeds)
 	if writeFeedsErr != nil {
 		log(writeFeedsErr)
-		return
+		//return none the less write the feedlist in freenet
 	}
 	for _, feed := range feeds {
 		items, itemsError := GetItems(DBConnection, feed.Url)
