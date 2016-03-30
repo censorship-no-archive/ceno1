@@ -159,7 +159,7 @@ public class CENOBackbone implements FredPlugin, FredPluginVersioned, FredPlugin
 			}
 
 			//if(Arrays.equals(pn.getPubKeyHash(), node.getDarknetPubKeyHash())) {
-			if(Arrays.equals(pn.getPubKeyHash(), node.getDarknetPubKeyHash())) { //fred-next version
+			if(Arrays.equals(pn.peerECDSAPubKeyHash, node.getDarknetPubKeyHash())) { //fred-next version
 				Logger.warning(this, "The bridge  node reference file belongs to this node.");
 				//return PeerAdditionReturnCodes.TRY_TO_ADD_SELF;
 			}
