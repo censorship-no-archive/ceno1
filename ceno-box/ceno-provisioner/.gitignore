@@ -1,0 +1,4 @@
+*.retry
+roles/update_feeds/files
+roles/update_feeds/files/*.txt
+

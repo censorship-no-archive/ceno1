@@ -1,0 +1,28 @@
+---
+# - name: test
+#   ping:
+
+# sometimes it is not for some reason
+# - name: run npm
+#   become_user: "{{ proxyuser }}"
+#   become: yes
+#   shell: "npm install"
+#   args:
+#     chdir: "/home/{{ proxyuser }}/CENORSSInserter/bundle-server/"
+
+- name: copy subfeed list
+  become_user: "{{ proxyuser }}"
+  become: yes
+  copy:
+  args:
+    src: "subfeedlist_{{ inventory_hostname }}.txt"
+    dest: "/home/{{ proxyuser }}/CENORSSInserter/feedlist.txt"
+
+- name: run the follower
+  become_user: "{{ proxyuser }}"
+  become: yes
+  shell: "( ( sleep 1; nohup ./follower ../feedlist.txt 1 1>>../CENO.log 2>&1 ) & )"
+  #async: 1250
+  #poll: 0
+  args:
+    chdir: "/home/{{ proxyuser }}/CENORSSInserter/rss-reader/"

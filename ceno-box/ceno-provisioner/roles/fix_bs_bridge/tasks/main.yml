@@ -1,0 +1,84 @@
+---
+# - name: test
+#   ping:
+
+# sometimes it is not for some reason
+# - name: run npm
+#   become_user: "{{ proxyuser }}"
+#   become: yes
+#   shell: "npm install"
+#   args:
+#     chdir: "/home/{{ proxyuser }}/CENORSSInserter/bundle-server/"
+
+- name: Stop CeNo if it is running
+  become: yes
+  become_user: "{{ proxyuser }}"
+  command: "/home/{{ proxyuser }}/CENORSSInserter/run.sh stop"
+  args:
+    chdir: "/home/{{ proxyuser }}/CENORSSInserter/"
+  ignore_errors: True
+
+- name: Stop CeNo if it is running
+  become: yes
+  become_user: "{{ proxyuser }}"
+  command: "/home/{{ proxyuser }}/CENORSSInserter/run.sh stop"
+  args:
+    chdir: "/home/{{ proxyuser }}/CENORSSInserter/"
+  ignore_errors: True
+
+- name: kill the bundler server
+  become_user: "{{ proxyuser }}"
+  become: yes
+  command: "pkill node"
+  ignore_errors: True
+
+- name: Copy fixed bridge plugin
+  become_user: "{{ proxyuser }}"
+  become: yes
+  copy:
+  args:
+    src: "CENOBridge.jar"
+    dest: "/home/{{ proxyuser }}/CENORSSInserter/CENOBridge.jar"
+
+- name: Copy fixed bshandler
+  become_user: "{{ proxyuser }}"
+  become: yes
+  copy:
+  args:
+    src: "bshandler.js"
+    dest: "/home/{{ proxyuser }}/CENORSSInserter//bundle-server/CENOBridge.jar"
+
+- name: Run CENO bridge
+  become_user: "{{ proxyuser }}"
+  become: yes
+  command: "/home/{{ proxyuser }}/CENORSSInserter/CENORSSInserter.sh"
+  args:
+    chdir: "/home/{{ proxyuser }}/CENORSSInserter/"
+
+# - name: Wait for bridge to publish its descriptor
+#   become_user: "{{ proxyuser }}"
+#   become: yes
+#   wait_for: timeout=60
+#   args:
+#     path: "/home/{{ proxyuser }}/CENORSSInserter/resources/myref.txt"
+# notify:
+#   fetch descriptor
+
+  
+#  # - name: Read backbone descriptor
+#  #   sudo: true
+#  #   sudo_user: "{{ proxyuser }}"
+#  #   slurp:
+#  #   args:
+#  #     src: "/home/{{ proxyuser }}/CENOBox/resources/myref.txt"
+#  #   register: ceno_backbone_refence
+
+#  #  - name: Add descriptor to db
+#  #    host: local
+#  #    lineinfile:
+#  #    args:
+#  #      dest=bridgeref.txt
+#  #      line=
+        
+  
+   
