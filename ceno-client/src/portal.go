@@ -294,10 +294,10 @@ func PortalArticlesHandler(w http.ResponseWriter, r *http.Request) {
 				})
 			}
 		} else if err != nil {
-				HandleCCError(ERR_NO_ARTICLES_FILE, T("no_articles_file_err"), ErrorState{
-					"responseWriter": w,
-					"request":        r,
-				})
+			HandleCCError(ERR_NO_ARTICLES_FILE, T("no_articles_file_err"), ErrorState{
+				"responseWriter": w,
+				"request":        r,
+			})
 		} else {
 			pleaseWait(r.URL.Path, w)
 		}
