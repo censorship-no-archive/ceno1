@@ -80,6 +80,23 @@ French, this is the way to execute the CENO.sh script:
 CENOLANG=fr-fr ./CENO.sh
 ```
 
+### CENOBox in Windows
+
+**Please note**: For CENO to run correctly, [Java](https://www.java.com/en/download/)
+and [Firefox](https://www.mozilla.org/en-US/firefox/new/) need to be installed
+in your computer. 
+
+Download the CENOBox installer [here](/releases) and launch it to install
+CENOBox.
+
+When the installation is complete, CENOBox will open a new Firefox or Chrome
+window with a customized profile. Remember that you are protected by CENO only
+when you are using that browser window to visit websites, and only when CENO
+Router plugin status is active, which it is by default.
+
+To reopen the protected browser, click
+
+
 
 ## Running CENO
 
