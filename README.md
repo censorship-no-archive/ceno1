@@ -86,8 +86,8 @@ CENOLANG=fr-fr ./CENO.sh
 and [Firefox](https://www.mozilla.org/en-US/firefox/new/) need to be installed
 in your computer. 
 
-Download the CENOBox installer [here](/releases) and launch it to install
-CENOBox.
+Download the CENOBox installer [here](https://github.com/equalitie/ceno/releases)
+and launch it to install CENOBox.
 
 When the installation is complete, CENOBox will open a new Firefox or Chrome
 window with a customized profile. Remember that you are protected by CENO only
