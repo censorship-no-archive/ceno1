@@ -82,7 +82,7 @@ CENOLANG=fr-fr ./CENO.sh
 
 ### CENOBox in Windows
 
-**Please note**: For CENO to run correctly, [Java](https://www.java.com/en/download/)
+**Please note**: For CENO to run correctly, [Java Runtime Environment](http://www.oracle.com/technetwork/java/javase/downloads/jre7-downloads-1880261.html)
 and [Firefox](https://www.mozilla.org/en-US/firefox/new/) need to be installed
 in your computer. 
 
