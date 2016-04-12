@@ -18,6 +18,7 @@ import (
 )
 
 var insertionPause int
+var insertFeedListOnly bool
 
 /**
  * Log the current time and a message
@@ -175,6 +176,9 @@ func followFeeds(requests chan SaveFeedRequest) {
 			}
 			request.W.Write([]byte(T("req_handle_success_rdr")))
 		}
+		if insertFeedListOnly {
+			continue
+		}
 		if feedInfo.Charset == "" {
 			go pollFeed(feedInfo.Url, nil)
 		} else {
@@ -270,6 +274,11 @@ func insertHandler(w http.ResponseWriter, r *http.Request) {
 		log(writeFeedsErr)
 		return
 	}
+
+	if insertFeedListOnly != true {
+		return
+	}
+
 	for _, feed := range feeds {
 		items, itemsError := GetItems(DBConnection, feed.Url)
 		if itemsError != nil {
@@ -417,6 +426,7 @@ func main() {
 		Configuration = conf
 	}
 	insertionPause = Configuration.InsertionPause
+	insertFeedListOnly = Configuration.InsertionPause
 	// Establish a connection to the database
 	var dbErr error
 	DBConnection, dbErr = InitDBConnection(DB_FILENAME)
