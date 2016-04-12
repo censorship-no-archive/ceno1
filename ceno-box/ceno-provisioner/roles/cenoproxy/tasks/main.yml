@@ -3,7 +3,14 @@
   apt: name={{ item }} state=latest
   with_items:
     - unzip
-    - default-jre
+    - openjdk-7-jre
+    - locales
+
+- name: remove java 6
+  apt: name={{ item }} state=absent
+  with_items:
+    - openjdk-6-jre
+    - openjdk-6-jre-lib
 
 - name: Add a new user
   user:

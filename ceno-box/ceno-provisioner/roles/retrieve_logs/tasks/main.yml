@@ -1,0 +1,19 @@
+- name: fetch bundler log
+  become_user: "{{ proxyuser }}"
+  become: yes
+  fetch:
+  args:
+    dest: "logs/{{ inventory_hostname }}/CENO_plugin.log"
+    src: "/home/{{ proxyuser }}/CENORSSInserter/logs/CENO.log"
+    flat: yes
+
+
+- name: fetch ceno plugin log
+  become_user: "{{ proxyuser }}"
+  become: yes
+  fetch:
+  args:
+    dest: "logs/{{ inventory_hostname }}/CENO_bundler.log"
+    src: "/home/{{ proxyuser }}/CENORSSInserter/CENO.log"
+    flat: yes
+

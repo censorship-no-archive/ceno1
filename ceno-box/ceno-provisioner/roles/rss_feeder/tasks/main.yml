@@ -32,25 +32,45 @@
   lineinfile:
   args:
     dest: /etc/locale.gen
+    regexp: '^en_US.UTF-8 UTF-8"'
+    state: absent
+    
+- name: Make utf8 available
+  lineinfile:
+  args:
+    dest: /etc/locale.gen
     regexp: "^#.*en_US.UTF-8 UTF-8"
     line: "en_US.UTF-8 UTF-8"
+
+- name: Remove default locale
+  file:
+  args:
+    path: "/etc/default/locale"
+    state: absent
 
 - name: reconfigure locales
   command: "dpkg-reconfigure --frontend=noninteractive locales"
 
-- name: Set default lang
-  lineinfile:
-  args:
-    dest: /etc/default/locale
-    regexp: "^LANG="
-    line: "LANG=en_US.UTF-8"
+# - name: Set default lang
+#   lineinfile:
+#   args:
+#     dest: /etc/default/locale
+#     regexp: "^LANG="
+#     line: "LANG=en_US.UTF-8"
 
-- name: Set default language
-  lineinfile:
-  args:
-    dest: /etc/default/locale
-    regexp: "^LANGUAGE="
-    line: "LANGUAGE=en_US:en"
+# - name: Set default language
+#   lineinfile:
+#   args:
+#     dest: /etc/default/locale
+#     regexp: "^LANGUAGE="
+#     line: "LANGUAGE=en_US:en"
+
+# - name: Set default LC
+#   lineinfile:
+#   args:
+#     dest: /etc/default/locale
+#     regexp: "^LC_ALL="
+#     line: "LC_ALL=en_US.UTF-8"
 
 - name: update locales
   command: "update-locale LANG=en_US.UTF-8"
@@ -148,6 +168,22 @@
   ignore_errors: True
   when: reader_is_running
 
+- name: Copy fixed reader
+  become_user: "{{ proxyuser }}"
+  become: yes
+  copy:
+  args:
+    src: "reader"
+    dest: "/home/{{ proxyuser }}/CENORSSInserter/rss-reader/reader"
+
+- name: Copy old insertion key
+  become_user: "{{ proxyuser }}"
+  become: yes
+  copy:
+  args:
+    src: "bridge.properties"
+    dest: "/home/{{ proxyuser }}/CENORSSInserter/.CENO/bridge.properties"
+
 - name: Run CENO bridge
   become_user: "{{ proxyuser }}"
   become: yes
@@ -155,23 +191,23 @@
   args:
     chdir: "/home/{{ proxyuser }}/CENORSSInserter/"
 
-# - name: Wait for bridge to publish its descriptor
-#   become_user: "{{ proxyuser }}"
-#   become: yes
-#   wait_for: timeout=60
-#   args:
-#     path: "/home/{{ proxyuser }}/CENORSSInserter/resources/myref.txt"
+- name: Wait for bridge to publish its descriptor
+  become_user: "{{ proxyuser }}"
+  become: yes
+  wait_for: timeout=60
+  args:
+    path: "/home/{{ proxyuser }}/CENORSSInserter/resources/myref.txt"
 # # notify:
 # #   fetch descriptor
 
-# - name: fetch descriptor
-#   become_user: "{{ proxyuser }}"
-#   become: yes
-#   fetch:
-#   args:
-#     dest: "refs/{{ inventory_hostname }}"
-#     src: "/home/{{ proxyuser }}/CENORSSInserter/resources/myref.txt"
-#     flat: yes
+- name: fetch descriptor
+  become_user: "{{ proxyuser }}"
+  become: yes
+  fetch:
+  args:
+    dest: "refs/{{ inventory_hostname }}"
+    src: "/home/{{ proxyuser }}/CENORSSInserter/resources/myref.txt"
+    flat: yes
 
 - name: add bundle server cron job
   become_user: "{{ proxyuser }}"
@@ -216,8 +252,8 @@
   become_user: "{{ proxyuser }}"
   become: yes
   shell: "( ( sleep 1; nohup ./follower ../feedlist.txt 1 1>../CENO.log 2>&1 ) & )"
-  async: 5
-  poll: 0
+  # async: 5
+  # poll: 0
   args:
     chdir: "/home/{{ proxyuser }}/CENORSSInserter/rss-reader/"
 

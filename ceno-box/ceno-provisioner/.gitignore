@@ -1,4 +1,7 @@
 *.retry
 roles/update_feeds/files
 roles/update_feeds/files/*.txt
-
+refs
+logs
+roles/fix_bs_bridge/files/
+roles/*/files/*
