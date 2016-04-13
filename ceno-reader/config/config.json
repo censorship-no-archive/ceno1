@@ -2,5 +2,6 @@
   "PortNumber": ":3096",
   "BundleServer": "http://127.0.0.1:3094",
   "BundleInserter": "http://127.0.0.1:3095",
-  "InsertionPause": 240
+  "InsertionPause": 240,
+  "InsertFeedListOnly": false
 }
