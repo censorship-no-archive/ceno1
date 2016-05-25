@@ -3,7 +3,7 @@
   become: yes
   fetch:
   args:
-    dest: "logs/{{ inventory_hostname }}/CENO_plugin.log"
+    dest: "logs/{{ inventory_hostname }}_CENO_plugin.log"
     src: "/home/{{ proxyuser }}/CENORSSInserter/logs/CENO.log"
     flat: yes
 
@@ -13,7 +13,7 @@
   become: yes
   fetch:
   args:
-    dest: "logs/{{ inventory_hostname }}/CENO_bundler.log"
+    dest: "logs/{{ inventory_hostname }}_CENO_bundler.log"
     src: "/home/{{ proxyuser }}/CENORSSInserter/CENO.log"
     flat: yes
 

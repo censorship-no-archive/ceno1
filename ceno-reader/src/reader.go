@@ -109,6 +109,23 @@ func itemFeedHandler(feed *rss.Feed, channel *rss.Channel, newItems []*rss.Item)
 }
 
 /**
+ * get the feed info and Calls pollFeed with right charset function
+ * @param {Feed} feedInfo - a struct containing feedInfo
+ */
+func pollFeedInfo(feedInfo Feed) {
+	if feedInfo.Charset == "" {
+		go pollFeed(feedInfo.Url, nil)
+	} else {
+		charsetFn, found := CharsetReaders[feedInfo.Charset]
+		if found {
+			go pollFeed(feedInfo.Url, charsetFn)
+		} else {
+			go pollFeed(feedInfo.Url, nil)
+		}
+	}
+}
+
+/**
  * Periodically polls an RSS or Atom feed for new items.
  * @param {string} URL - The address of the feed
  * @param {xmlx.CharsetFunc} charsetReader - A function for handling the charset of items
@@ -175,16 +192,25 @@ func followFeeds(requests chan SaveFeedRequest) {
 			}
 			request.W.Write([]byte(T("req_handle_success_rdr")))
 		}
-		if feedInfo.Charset == "" {
-			go pollFeed(feedInfo.Url, nil)
-		} else {
-			charsetFn, found := CharsetReaders[feedInfo.Charset]
-			if found {
-				go pollFeed(feedInfo.Url, charsetFn)
-			} else {
-				go pollFeed(feedInfo.Url, nil)
-			}
-		}
+		pollFeedInfo(feedInfo)
+	}
+}
+
+/**
+ * follows all the feed already stored in the DB, called at the start up
+ */
+func followDBFeeds() {
+	feeds, feedErr := AllFeeds(DBConnection)
+	if feedErr != nil {
+		log("Couldn't get feeds")
+		log(feedErr)
+		return
+	}
+	//the assumption is that the feed list is already
+	//stored in freenet so we are not going to store
+	//reconstruct and store the feeds file again
+	for _, feed := range feeds {
+		pollFeedInfo(feed)
 	}
 }
 
@@ -423,6 +449,8 @@ func main() {
 	if dbErr != nil {
 		logPanic(T("database_init_error_rdr", map[string]interface{}{"Error": dbErr.Error()}))
 	}
+	//We need to start follow feeds that are already in the database
+	followDBFeeds()
 	// Set up the HTTP server to listen for requests for new feeds to read
 	requestNewFollow := make(chan SaveFeedRequest)
 	go followFeeds(requestNewFollow)

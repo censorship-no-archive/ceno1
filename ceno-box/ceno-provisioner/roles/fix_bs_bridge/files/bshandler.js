@@ -196,7 +196,7 @@ function handler(config) {
       disconnected = true;
       bs_log(_t.__('Request ended prematurely'));
     });
-    res.writeHead(200, {'Content-Type': 'application/json'});
+    res.writeHead(200, {'Content-Type': 'application/json; charset=utf-8'});
 
     var bundler = makeBundler(requestedUrl, config, requestFromReader(req), retrieveDirection(req.url));
     try {

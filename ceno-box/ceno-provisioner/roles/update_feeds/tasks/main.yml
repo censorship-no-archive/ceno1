@@ -19,7 +19,7 @@
 - name: Remove current feed db
   file:
   args:
-    path: "/home/{{ proxyuser }}/CENORSSInserter/"
+    path: "/home/{{ proxyuser }}/CENORSSInserter/rss-reader/feeds.db"
     state: absent
 
 # - name: copy subfeed list

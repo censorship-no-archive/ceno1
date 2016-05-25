@@ -24,6 +24,16 @@
     - openjdk-6-jre
     - openjdk-6-jre-lib
 
+
+# sometimes node executable is call nodejs
+- name: make node simlink
+  file:
+  args:
+    src: /usr/bin/nodejs
+    dest: /usr/bin/node
+    state: link
+  ignore_errors: True
+
 #UTF-8 stuff
 - name: Add UTF8 locale
   command: "locale-gen --purge en_US.UTF-8"
@@ -42,11 +52,11 @@
     regexp: "^#.*en_US.UTF-8 UTF-8"
     line: "en_US.UTF-8 UTF-8"
 
-- name: Remove default locale
-  file:
-  args:
-    path: "/etc/default/locale"
-    state: absent
+# - name: Remove default locale
+#   file:
+#   args:
+#     path: "/etc/default/locale"
+#     state: absent
 
 - name: reconfigure locales
   command: "dpkg-reconfigure --frontend=noninteractive locales"
@@ -168,21 +178,21 @@
   ignore_errors: True
   when: reader_is_running
 
-- name: Copy fixed reader
-  become_user: "{{ proxyuser }}"
-  become: yes
-  copy:
-  args:
-    src: "reader"
-    dest: "/home/{{ proxyuser }}/CENORSSInserter/rss-reader/reader"
+# - name: Copy fixed reader
+#   become_user: "{{ proxyuser }}"
+#   become: yes
+#   copy:
+#   args:
+#     src: "reader"
+#     dest: "/home/{{ proxyuser }}/CENORSSInserter/rss-reader/reader"
 
-- name: Copy old insertion key
-  become_user: "{{ proxyuser }}"
-  become: yes
-  copy:
-  args:
-    src: "bridge.properties"
-    dest: "/home/{{ proxyuser }}/CENORSSInserter/.CENO/bridge.properties"
+# - name: Copy old insertion key
+#   become_user: "{{ proxyuser }}"
+#   become: yes
+#   copy:
+#   args:
+#     src: "bridge.properties"
+#     dest: "/home/{{ proxyuser }}/CENORSSInserter/.CENO/bridge.properties"
 
 - name: Run CENO bridge
   become_user: "{{ proxyuser }}"
@@ -237,7 +247,7 @@
 - name: run rss reader
   become_user: "{{ proxyuser }}"
   become: yes
-  shell: "( ( nohup ./reader 1>../CENO.log 2>&1 ) & )"
+  shell: "( (sleep 1; nohup ./reader 1>../CENO.log 2>&1 ) & )"
   args:
     chdir: "/home/{{ proxyuser }}/CENORSSInserter/rss-reader/"
 
