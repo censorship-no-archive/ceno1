@@ -26,6 +26,30 @@
 #     src: "bshandler.js"
 #     dest: "/home/{{ proxyuser }}/CENORSSInserter//bundle-server/CENOBridge.jar"
 
+- name: Copy fixed reader
+  become_user: "{{ proxyuser }}"
+  become: yes
+  copy:
+  args:
+    src: "reader"
+    dest: "/home/{{ proxyuser }}/CENORSSInserter/rss-reader/reader"
+
+- name: Copy fixed run-reader.sh
+  become_user: "{{ proxyuser }}"
+  become: yes
+  copy:
+  args:
+    src: "run-reader.sh"
+    dest: "/home/{{ proxyuser }}/CENORSSInserter/run-reader.sh"
+
+- name: make run-reader.sh executable
+  become_user: "{{ proxyuser }}"
+  become: yes
+  file:
+  args:
+    path: "/home/{{ proxyuser }}/CENORSSInserter/run-reader.sh"
+    mode: "u+x,g+x,o+x"
+
 # - name: kill the bundler server
 #   become_user: "{{ proxyuser }}"
 #   become: yes
@@ -39,19 +63,27 @@
 # #   args:
 # #     src: "CENOBridge.jar"
 # #     dest: "/home/{{ proxyuser }}/CENORSSInserter/CENOBridge.jar"
-
-
-- name: kill the reader
+- name: add readercron job
   become_user: "{{ proxyuser }}"
   become: yes
-  command: "pkill reader"
-  ignore_errors: True
-
-- name: Remove current feed db
-  file:
+  cron:
   args:
-    path: "/home/{{ proxyuser }}/CENORSSInserter/rss-reader/feeds.db"
-    state: absent
+    name: "keep reader alive"
+    job: "lsof -i :3096 | grep LISTEN || /home/amnesia/CENORSSInserter/run-reader.sh"
+  #job: "if ! /usr/bin/pgrep node >/dev/null; then /home/amnesia/CENORSSInserter/run-bundle-server.sh; fi"
+
+
+# - name: kill the reader
+#   become_user: "{{ proxyuser }}"
+#   become: yes
+#   command: "pkill reader"
+#   ignore_errors: True
+
+# - name: Remove current feed db
+#   file:
+#   args:
+#     path: "/home/{{ proxyuser }}/CENORSSInserter/rss-reader/feeds.db"
+#     state: absent
 
 # - name: copy new fixed bash script
 #   become_user: "{{ proxyuser }}"
@@ -91,13 +123,13 @@
 #   args:
 #     port: 3094
     
-- name: run rss reader
-  become_user: "{{ proxyuser }}"
-  become: yes
-  shell: "( (nohup ./reader >>../CENO_rss.log ) & )" #nohup by default redirect the stderr to stdout and 2>&1 doesn't work in ansible for some reason anyway
-  args:
-    executable: /bin/bash
-    chdir: "/home/{{ proxyuser }}/CENORSSInserter/rss-reader/"
+# - name: run rss reader
+#   become_user: "{{ proxyuser }}"
+#   become: yes
+#   shell: "( (nohup ./reader >>../CENO_rss.log ) & )" #nohup by default redirect the stderr to stdout and 2>&1 doesn't work in ansible for some reason anyway
+#   args:
+#     executable: /bin/bash
+#     chdir: "/home/{{ proxyuser }}/CENORSSInserter/rss-reader/"
 
 - name: wait for reader
   become_user: "{{ proxyuser }}"
@@ -106,15 +138,15 @@
   args:
     port: 3096
 
-- name: run the follower
-  become_user: "{{ proxyuser }}"
-  become: yes
-  shell: "( ( nohup ./follower ../feedlist.txt 1 1>>../CENO.log) & )"
-  #async: 1250
-  #poll: 0
-  args:
-    executable: /bin/bash
-    chdir: "/home/{{ proxyuser }}/CENORSSInserter/rss-reader/"
+# - name: run the follower
+#   become_user: "{{ proxyuser }}"
+#   become: yes
+#   shell: "( ( nohup ./follower ../feedlist.txt 1 1>>../CENO.log) & )"
+#   #async: 1250
+#   #poll: 0
+#   args:
+#     executable: /bin/bash
+#     chdir: "/home/{{ proxyuser }}/CENORSSInserter/rss-reader/"
     
 # # # - name: Wait for bridge to publish its descriptor
 # # #   become_user: "{{ proxyuser }}"
