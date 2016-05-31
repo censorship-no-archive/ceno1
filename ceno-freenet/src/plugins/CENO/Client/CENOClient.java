@@ -22,7 +22,7 @@ import freenet.support.api.HTTPRequest;
 
 /**
  * CENO Client plugin
- * 
+ *
  * Implements the Local Cache Server (LCS) and Request Sender (RS)
  * CENO agents.
  */
@@ -45,7 +45,7 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 	private Thread channelMakerThread;
 
 	// Default bridge key (for the CENO bridge running on Deflect)
-	private static final String BRIDGE_KEY = "SSK@C7VZ~Ar87EKQDg7XhU2BrL8wY1Bo0cWXu3t5ODteUxQ,B6Z~AjwbM5GXusyZdjRsonnFL4KgLu4-e4SdfQwpAls,AQACAAE/";
+	private static final String BRIDGE_KEY = "SSK@skyVcFU3qUK7lM-Ye2SGUwG1kQi1GPnI7tuiHttIOJA,d0aDf-qB~x7q7amxT935Kgju0Nw6TVfiIjZnPptmAF8,AQACAAE/";
 
 	private static Long feedsLastVersion;
 
@@ -123,11 +123,11 @@ public class CENOClient implements FredPlugin, FredPluginVersioned, FredPluginRe
 	public static String getBridgeKey() {
 		return bridgeKey;
 	}
-	
+
 	public static Long getFeedsLastVersion() {
 		return feedsLastVersion;
 	}
-	
+
 	static void setFeedsLastVersion(Long feedsLastVersionPar) {
 		feedsLastVersion = feedsLastVersionPar;
 	}

@@ -54,8 +54,7 @@ your /home directory)
 and execute the following command:
 
 ```bash
-sh -c "$(curl -fsSL
-https://raw.githubusercontent.com/equalitie/ceno/master/ceno-box/installCENO.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/equalitie/ceno/master/ceno-box/installCENO.sh)"
 ```
 
 CENOBox will open a new Firefox or Chrome window with a customized profile.
@@ -80,6 +79,23 @@ French, this is the way to execute the CENO.sh script:
 ```bash
 CENOLANG=fr-fr ./CENO.sh
 ```
+
+### CENOBox in Windows
+
+**Please note**: For CENO to run correctly, [Java Runtime Environment](http://www.oracle.com/technetwork/java/javase/downloads/jre7-downloads-1880261.html)
+and [Firefox](https://www.mozilla.org/en-US/firefox/new/) need to be installed
+in your computer. 
+
+Download the CENOBox installer [here](https://github.com/equalitie/ceno/releases)
+and launch it to install CENOBox.
+
+When the installation is complete, CENOBox will open a new Firefox or Chrome
+window with a customized profile. Remember that you are protected by CENO only
+when you are using that browser window to visit websites, and only when CENO
+Router plugin status is active, which it is by default.
+
+To reopen the protected browser, click
+
 
 
 ## Running CENO
