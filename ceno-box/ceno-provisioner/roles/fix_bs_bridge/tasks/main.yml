@@ -26,29 +26,30 @@
 #     src: "bshandler.js"
 #     dest: "/home/{{ proxyuser }}/CENORSSInserter//bundle-server/CENOBridge.jar"
 
-- name: Copy fixed reader
-  become_user: "{{ proxyuser }}"
-  become: yes
-  copy:
-  args:
-    src: "reader"
-    dest: "/home/{{ proxyuser }}/CENORSSInserter/rss-reader/reader"
+# - name: Copy fixed reader
+#   become_user: "{{ proxyuser }}"
+#   become: yes
+#   copy:
+#   args:
+#     src: "reader"
+#     dest: "/home/{{ proxyuser }}/CENORSSInserter/rss-reader/reader"
 
-- name: Copy fixed run-reader.sh
-  become_user: "{{ proxyuser }}"
-  become: yes
-  copy:
-  args:
-    src: "run-reader.sh"
-    dest: "/home/{{ proxyuser }}/CENORSSInserter/run-reader.sh"
+# - name: Copy fixed run-reader.sh
+#   become_user: "{{ proxyuser }}"
+#   become: yes
+#   copy:
+#   args:
+#     src: "run-reader.sh"
+#     dest: "/home/{{ proxyuser }}/CENORSSInserter/run-reader.sh"
 
-- name: make run-reader.sh executable
-  become_user: "{{ proxyuser }}"
-  become: yes
-  file:
-  args:
-    path: "/home/{{ proxyuser }}/CENORSSInserter/run-reader.sh"
-    mode: "u+x,g+x,o+x"
+# - name: make run-reader.sh executable
+#   become_user: "{{ proxyuser }}"
+#   become: yes
+#   file:
+#   args:
+#     src: "run-reader.sh"
+#     path: "/home/{{ proxyuser }}/CENORSSInserter/run-reader.sh"
+#     mode: "u+x,g+x,o+x"
 
 # - name: kill the bundler server
 #   become_user: "{{ proxyuser }}"
@@ -63,13 +64,13 @@
 # #   args:
 # #     src: "CENOBridge.jar"
 # #     dest: "/home/{{ proxyuser }}/CENORSSInserter/CENOBridge.jar"
-- name: add readercron job
-  become_user: "{{ proxyuser }}"
-  become: yes
-  cron:
-  args:
-    name: "keep reader alive"
-    job: "lsof -i :3096 | grep LISTEN || /home/amnesia/CENORSSInserter/run-reader.sh"
+# - name: add readercron job
+#   become_user: "{{ proxyuser }}"
+#   become: yes
+#   cron:
+#   args:
+#     name: "keep reader alive"
+#     job: "lsof -i :3096 | grep LISTEN || /home/amnesia/CENORSSInserter/run-reader.sh"
   #job: "if ! /usr/bin/pgrep node >/dev/null; then /home/amnesia/CENORSSInserter/run-bundle-server.sh; fi"
 
 
@@ -109,19 +110,26 @@
 #     src: "run-bundle-server.sh"
 #     dest: "/home/{{ proxyuser }}/CENORSSInserter/run-bundle-server.sh"
 
-# - name: Run CENO bridge
-#   become_user: "{{ proxyuser }}"
-#   become: yes
-#   command: "/home/{{ proxyuser }}/CENORSSInserter/CENORSSInserter.sh"
-#   args:
-#     chdir: "/home/{{ proxyuser }}/CENORSSInserter/"
+- name: Run CENO bridge
+  become_user: "{{ proxyuser }}"
+  become: yes
+  command: "/home/{{ proxyuser }}/CENORSSInserter/CENORSSInserter.sh"
+  args:
+    chdir: "/home/{{ proxyuser }}/CENORSSInserter/"
 
-# - name: wait for bundler
-#   become_user: "{{ proxyuser }}"
-#   become: yes
-#   wait_for:
-#   args:
-#     port: 3094
+- name: wait for bridge
+  become_user: "{{ proxyuser }}"
+  become: yes
+  wait_for:
+  args:
+    port: 3095
+
+- name: wait for bundler
+  become_user: "{{ proxyuser }}"
+  become: yes
+  wait_for:
+  args:
+    port: 3094
     
 # - name: run rss reader
 #   become_user: "{{ proxyuser }}"
