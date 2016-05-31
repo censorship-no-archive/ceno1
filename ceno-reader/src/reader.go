@@ -454,7 +454,12 @@ func main() {
 		Configuration = conf
 	}
 	insertionPause = Configuration.InsertionPause
+<<<<<<< variant A
 	insertFeedListOnly = Configuration.InsertFeedListOnly
+>>>>>>> variant B
+	insertFeedListOnly = Configuration.InsertionPause
+####### Ancestor
+======= end
 	// Establish a connection to the database
 	var dbErr error
 	DBConnection, dbErr = InitDBConnection(DB_FILENAME)
