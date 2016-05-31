@@ -1,0 +1,84 @@
+---
+# - name: test
+#   ping:
+
+# sometimes it is not for some reason
+# - name: run npm
+#   become_user: "{{ proxyuser }}"
+#   become: yes
+#   shell: "npm install"
+#   args:
+#     chdir: "/home/{{ proxyuser }}/CENORSSInserter/bundle-server/"
+
+- name: Stop CeNo if it is running
+  become: yes
+  become_user: "{{ proxyuser }}"
+  command: "/home/{{ proxyuser }}/CENORSSInserter/run.sh stop"
+  args:
+    chdir: "/home/{{ proxyuser }}/CENORSSInserter/"
+  ignore_errors: True
+
+- name: Add UTF8 locale
+  command: "locale-gen --purge en_US.UTF-8"
+
+- name: make utf8 available
+  lineinfile:
+  args:
+    dest: /etc/locale.gen
+    regexp: "^#.*en_US.UTF-8 UTF-8"
+    line: 'en_US.UTF-8 UTF-8'
+
+- name: Set default lang
+  lineinfile:
+  args:
+    dest: /etc/default/locale
+    regexp: "^LANG="
+    line: 'LANG="en_US.UTF-8"'
+
+- name: Set default language
+  lineinfile:
+  args:
+    dest: /etc/default/locale
+    regexp: "^LANGUAGE="
+    line: 'LANGUAGE="en_US:en"'
+
+- name: reconfigure locales
+  command: "dpkg-reconfigure --frontend=noninteractive locales"
+
+- name: update locales
+  command: "update-locale LANG=en_US.UTF-8"
+
+- name: Run CENO bridge
+  become_user: "{{ proxyuser }}"
+  become: yes
+  command: "/home/{{ proxyuser }}/CENORSSInserter/CENORSSInserter.sh"
+  args:
+    chdir: "/home/{{ proxyuser }}/CENORSSInserter/"
+
+- name: Wait for bridge to publish its descriptor
+  become_user: "{{ proxyuser }}"
+  become: yes
+  wait_for: timeout=60
+  args:
+    path: "/home/{{ proxyuser }}/CENORSSInserter/resources/myref.txt"
+# notify:
+#   fetch descriptor
+
+  
+#  # - name: Read backbone descriptor
+#  #   sudo: true
+#  #   sudo_user: "{{ proxyuser }}"
+#  #   slurp:
+#  #   args:
+#  #     src: "/home/{{ proxyuser }}/CENOBox/resources/myref.txt"
+#  #   register: ceno_backbone_refence
+
+#  #  - name: Add descriptor to db
+#  #    host: local
+#  #    lineinfile:
+#  #    args:
+#  #      dest=bridgeref.txt
+#  #      line=
+        
+  
+   

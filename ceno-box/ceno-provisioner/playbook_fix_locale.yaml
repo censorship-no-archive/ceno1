@@ -1,0 +1,6 @@
+---
+- hosts: ceno_rss_inserter_hosts
+  vars:
+    - proxyuser: amnesia
+  roles:
+    - fix_locale

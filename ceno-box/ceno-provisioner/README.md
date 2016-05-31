@@ -11,8 +11,8 @@ This program is free software: you can redistribute it and/or modify it under th
 - Make a list of the host in ceno_rss_inserter_hosts, they should all have the same name with enumeration starting from 0. like:
 
      backbone0
+     backbone1
      backbone2
-     backbone3
      .
      .
      .

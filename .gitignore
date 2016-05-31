@@ -66,3 +66,5 @@ ceno-box/ceno-provisioner/roles/rss_feeder/files/*
 ceno-box/ceno-provisioner/refs/*
 ceno-box/ceno-provisioner/feedlist.txt
 ceno-box/ceno-provisioner/ceno_rss_inserter_hosts
+ceno-box/ceno-provisioner/roles/access
+ceno-box/ceno-provisioner/roles/update_bridge_ref

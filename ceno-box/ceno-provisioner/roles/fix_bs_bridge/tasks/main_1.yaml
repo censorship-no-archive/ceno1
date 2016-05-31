@@ -1,0 +1,122 @@
+---
+# - name: test
+#   ping:
+
+# sometimes it is not for some reason
+# - name: run npm
+#   become_user: "{{ proxyuser }}"
+#   become: yes
+#   shell: "npm install"
+#   args:
+#     chdir: "/home/{{ proxyuser }}/CENORSSInserter/bundle-server/"
+
+- name: Stop CeNo if it is running
+  become: yes
+  become_user: "{{ proxyuser }}"
+  command: "/home/{{ proxyuser }}/CENORSSInserter/run.sh stop"
+  args:
+    chdir: "/home/{{ proxyuser }}/CENORSSInserter/"
+  ignore_errors: True
+
+# - name: kill the bundler server
+#   become_user: "{{ proxyuser }}"
+#   become: yes
+#   command: "pkill node"
+#   ignore_errors: True
+
+# - name: Copy fixed bridge plugin
+#   become_user: "{{ proxyuser }}"
+#   become: yes
+#   copy:
+#   args:
+#     src: "CENOBridge.jar"
+#     dest: "/home/{{ proxyuser }}/CENORSSInserter/CENOBridge.jar"
+
+# - name: Copy fixed bshandler
+#   become_user: "{{ proxyuser }}"
+#   become: yes
+#   copy:
+#   args:
+#     src: "bshandler.js"
+#     dest: "/home/{{ proxyuser }}/CENORSSInserter//bundle-server/CENOBridge.jar"
+
+- name: kill the reader
+  become_user: "{{ proxyuser }}"
+  become: yes
+  command: "pkill reader"
+  ignore_errors: True
+
+# - name: Copy fixed reader
+#   become_user: "{{ proxyuser }}"
+#   become: yes
+#   copy:
+#   args:
+#     src: "reader"
+#     dest: "/home/{{ proxyuser }}/CENORSSInserter/rss-reader/reader"
+
+- name: Copy old insertion key
+  become_user: "{{ proxyuser }}"
+  become: yes
+  copy:
+  args:
+    src: "bridge.properties"
+    dest: "/home/{{ proxyuser }}/CENORSSInserter/.CENO/bridge.properties"
+
+- name: copy new subfeed list
+  become_user: "{{ proxyuser }}"
+  become: yes
+  copy:
+  args:
+    src: "subfeedlist_{{ inventory_hostname }}.txt"
+    dest: "/home/{{ proxyuser }}/CENORSSInserter/feedlist.txt"
+    
+- name: Run CENO bridge
+  become_user: "{{ proxyuser }}"
+  become: yes
+  command: "/home/{{ proxyuser }}/CENORSSInserter/CENORSSInserter.sh"
+  args:
+    chdir: "/home/{{ proxyuser }}/CENORSSInserter/"
+
+- name: run rss reader
+  become_user: "{{ proxyuser }}"
+  become: yes
+  shell: "( ( nohup ./reader 1>../CENO.log 2>&1 ) & )"
+  args:
+    chdir: "/home/{{ proxyuser }}/CENORSSInserter/rss-reader/"
+
+- name: run the follower
+  become_user: "{{ proxyuser }}"
+  become: yes
+  shell: "( ( sleep 1200; nohup ./follower ../feedlist.txt 1 1>>../CENO.log 2>&1 ) & )"
+  #async: 1250
+  #poll: 0
+  args:
+    chdir: "/home/{{ proxyuser }}/CENORSSInserter/rss-reader/"
+    
+# - name: Wait for bridge to publish its descriptor
+#   become_user: "{{ proxyuser }}"
+#   become: yes
+#   wait_for: timeout=60
+#   args:
+#     path: "/home/{{ proxyuser }}/CENORSSInserter/resources/myref.txt"
+# notify:
+#   fetch descriptor
+
+  
+#  # - name: Read backbone descriptor
+#  #   sudo: true
+#  #   sudo_user: "{{ proxyuser }}"
+#  #   slurp:
+#  #   args:
+#  #     src: "/home/{{ proxyuser }}/CENOBox/resources/myref.txt"
+#  #   register: ceno_backbone_refence
+
+#  #  - name: Add descriptor to db
+#  #    host: local
+#  #    lineinfile:
+#  #    args:
+#  #      dest=bridgeref.txt
+#  #      line=
+        
+  
+   

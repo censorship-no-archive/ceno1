@@ -1,0 +1,130 @@
+---
+# - name: test
+#   ping:
+
+# - name: add link to nodejs
+#   command: "ln /usr/bin/nodejs /usr/bin/node"
+#   ignore_errors: True
+
+- name: Install dependencies
+  apt: name={{ item }} state=latest
+  with_items:
+    - sudo
+    - haveged
+    - unzip
+    - openjdk-7-jre
+#    - node
+#    - npm
+#    - lsof
+
+- name: remove java 6
+  apt: name={{ item }} state=absent
+  with_items:
+    - openjdk-6-jre
+    - openjdk-6-jre-lib
+    
+- name: Add a new user
+  user:
+  args:
+    name: "{{ proxyuser }}"
+    shell: "/bin/bash"
+
+- name: Check if CeNo exists
+  become: yes
+  become_user: "{{ proxyuser }}"
+  stat:
+  args:
+    path: "/home/{{ proxyuser }}/CENORSSInserter/"
+  register: ceno_stat
+
+# - name: Check if CeNo is running
+#   become_user: "{{ proxyuser }}"
+#   wait_for: 
+#   args:
+#     port: 8888
+#     timeout: 1 
+#   register: ceno_running
+#   ignore_errors: True
+#   when: ceno_exists
+  
+- name: Stop CeNo if it is running
+  become: yes
+  become_user: "{{ proxyuser }}"
+  command: "/home/{{ proxyuser }}/CENORSSInserter/run.sh stop"
+  args:
+    chdir: "/home/{{ proxyuser }}/CENORSSInserter/"
+  ignore_errors: True
+  when: ceno_stat.stat.exists
+
+- name: Remove any existing copies of Ceno
+  file:
+  args:
+    path: "/home/{{ proxyuser }}/CENORSSInserter/"
+    state: absent
+  
+- name: Copy across CENO bundle
+  become: yes
+  become_user: "{{ proxyuser }}"
+  copy:
+  args:
+    src: "CENORSSInserter.zip"
+    dest: "/home/{{ proxyuser }}/CENORSSInserter.zip"
+
+- name: Extract CENO
+  become: yes
+  become_user: "{{ proxyuser }}"
+  command: "unzip CENORSSInserter.zip"
+  args:
+    chdir: "/home/{{ proxyuser }}/"
+
+- name: Creates resource directory
+  become: yes
+  become_user: "{{ proxyuser }}"
+  file:
+  args:
+    path: "/home/{{ proxyuser }}/CENORSSInserter/resources"
+    state: directory
+
+- name: Copy master bridge ref
+  become_user: "{{ proxyuser }}"
+  become: yes
+  copy:
+  args:
+    src: "sig_bridges_ref.txt"
+    dest: "/home/{{ proxyuser }}/CENORSSInserter/resources/bridgeref.txt"
+
+- name: Run CENO bridge
+  become_user: "{{ proxyuser }}"
+  become: yes
+  command: "/home/{{ proxyuser }}/CENORSSInserter/run.sh start"
+  args:
+    chdir: "/home/{{ proxyuser }}/CENORSSInserter/"
+
+- name: Wait for bridge to publish its descriptor
+  become_user: "{{ proxyuser }}"
+  become: yes
+  wait_for: timeout=60
+  args:
+    path: "/home/{{ proxyuser }}/CENORSSInserter/resources/myref.txt"
+# notify:
+#   fetch descriptor
+
+- name: fetch descriptor
+  become_user: "{{ proxyuser }}"
+  become: yes
+  fetch:
+  args:
+    dest: "refs/{{ inventory_hostname }}"
+    src: "/home/{{ proxyuser }}/CENORSSInserter/resources/myref.txt"
+    flat: yes
+
+- name: add ceno log cron job
+  become_user: "{{ proxyuser }}"
+  become: yes
+  cron:
+  args:
+    name: "ceno log"
+    minute: 0
+    job: "cat /home/amnesia/CENORSSInserter/logs/freenet-previous.log | grep CENO | grep -v RGA | grep -v re-running >> /home/amnesia/CENORSSInserter/logs/CENO.log"
+  
+   

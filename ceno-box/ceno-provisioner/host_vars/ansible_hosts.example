@@ -1,0 +1,2 @@
+[caislean_full]
+caislean.domain.com ansible_ssh_user=john ansible_ssh_port=22

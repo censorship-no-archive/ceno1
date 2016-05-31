@@ -1,0 +1,10 @@
+---
+- hosts: ceno_backbone_hosts
+  vars:
+    - proxyuser: amnesia
+  pre_tasks:
+    - name: Update apt cache
+      apt: update_cache=yes
+  roles:
+    - backbone
+    

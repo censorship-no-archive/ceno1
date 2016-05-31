@@ -1,0 +1,54 @@
+---
+# - name: test
+#   ping:
+
+# sometimes it is not for some reason
+# - name: run npm
+#   become_user: "{{ proxyuser }}"
+#   become: yes
+#   shell: "npm install"
+#   args:
+#     chdir: "/home/{{ proxyuser }}/CENORSSInserter/bundle-server/"
+- name: kill the reader
+  become_user: "{{ proxyuser }}"
+  become: yes
+  command: "pkill reader"
+  ignore_errors: True
+
+#delete the feed db
+- name: Remove current feed db
+  file:
+  args:
+    path: "/home/{{ proxyuser }}/CENORSSInserter/rss-reader/feeds.db"
+    state: absent
+
+# - name: copy subfeed list
+#   become_user: "{{ proxyuser }}"
+#   become: yes
+#   copy:
+#   args:
+#     src: "subfeedlist_{{ inventory_hostname }}.txt"
+#     dest: "/home/{{ proxyuser }}/CENORSSInserter/feedlist.txt"
+
+- name: run rss reader
+  become_user: "{{ proxyuser }}"
+  become: yes
+  shell: "( ( nohup ./reader 1>../CENO.log 2>&1 ) & )"
+  args:
+    chdir: "/home/{{ proxyuser }}/CENORSSInserter/rss-reader/"
+
+- name: wait for reader
+  become_user: "{{ proxyuser }}"
+  become: yes
+  wait_for:
+  args:
+    port: 3096
+
+- name: run the follower
+  become_user: "{{ proxyuser }}"
+  become: yes
+  shell: "( ( sleep 1; nohup ./follower ../feedlist.txt 1 1>>../CENO.log 2>&1 ) & )"
+  #async: 1250
+  #poll: 0
+  args:
+    chdir: "/home/{{ proxyuser }}/CENORSSInserter/rss-reader/"

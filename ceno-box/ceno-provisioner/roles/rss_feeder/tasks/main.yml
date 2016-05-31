@@ -16,6 +16,7 @@
     - node
     - npm
     - lsof
+    - locales
 
 - name: remove java 6
   apt: name={{ item }} state=absent
@@ -23,6 +24,67 @@
     - openjdk-6-jre
     - openjdk-6-jre-lib
 
+
+# sometimes node executable is call nodejs
+- name: make node simlink
+  file:
+  args:
+    src: /usr/bin/nodejs
+    dest: /usr/bin/node
+    state: link
+  ignore_errors: True
+
+#UTF-8 stuff
+- name: Add UTF8 locale
+  command: "locale-gen --purge en_US.UTF-8"
+
+- name: Make utf8 available
+  lineinfile:
+  args:
+    dest: /etc/locale.gen
+    regexp: '^en_US.UTF-8 UTF-8"'
+    state: absent
+    
+- name: Make utf8 available
+  lineinfile:
+  args:
+    dest: /etc/locale.gen
+    regexp: "^#.*en_US.UTF-8 UTF-8"
+    line: "en_US.UTF-8 UTF-8"
+
+# - name: Remove default locale
+#   file:
+#   args:
+#     path: "/etc/default/locale"
+#     state: absent
+
+- name: reconfigure locales
+  command: "dpkg-reconfigure --frontend=noninteractive locales"
+
+# - name: Set default lang
+#   lineinfile:
+#   args:
+#     dest: /etc/default/locale
+#     regexp: "^LANG="
+#     line: "LANG=en_US.UTF-8"
+
+# - name: Set default language
+#   lineinfile:
+#   args:
+#     dest: /etc/default/locale
+#     regexp: "^LANGUAGE="
+#     line: "LANGUAGE=en_US:en"
+
+# - name: Set default LC
+#   lineinfile:
+#   args:
+#     dest: /etc/default/locale
+#     regexp: "^LC_ALL="
+#     line: "LC_ALL=en_US.UTF-8"
+
+- name: update locales
+  command: "update-locale LANG=en_US.UTF-8"
+    
 - name: Add a new user
   user:
   args:
@@ -116,6 +178,22 @@
   ignore_errors: True
   when: reader_is_running
 
+# - name: Copy fixed reader
+#   become_user: "{{ proxyuser }}"
+#   become: yes
+#   copy:
+#   args:
+#     src: "reader"
+#     dest: "/home/{{ proxyuser }}/CENORSSInserter/rss-reader/reader"
+
+# - name: Copy old insertion key
+#   become_user: "{{ proxyuser }}"
+#   become: yes
+#   copy:
+#   args:
+#     src: "bridge.properties"
+#     dest: "/home/{{ proxyuser }}/CENORSSInserter/.CENO/bridge.properties"
+
 - name: Run CENO bridge
   become_user: "{{ proxyuser }}"
   become: yes
@@ -131,8 +209,8 @@
   wait_for: timeout=60
   args:
     path: "/home/{{ proxyuser }}/CENORSSInserter/resources/myref.txt"
-# notify:
-#   fetch descriptor
+# # notify:
+# #   fetch descriptor
 
 - name: fetch descriptor
   become_user: "{{ proxyuser }}"
@@ -171,7 +249,7 @@
 - name: run rss reader
   become_user: "{{ proxyuser }}"
   become: yes
-  shell: "( ( nohup ./reader 1>../CENO.log 2>&1 ) & )"
+  shell: "( (sleep 1; nohup ./reader 1>../CENO.log 2>&1 ) & )"
   args:
     chdir: "/home/{{ proxyuser }}/CENORSSInserter/rss-reader/"
 
@@ -185,9 +263,9 @@
 - name: run the follower
   become_user: "{{ proxyuser }}"
   become: yes
-  shell: "( ( sleep 1200; nohup ./follower ../feedlist.txt 180 1>../CENO.log 2>&1 ) & )"
-  async: 5
-  poll: 0
+  shell: "( ( sleep 1; nohup ./follower ../feedlist.txt 1 1>../CENO.log 2>&1 ) & )"
+  # async: 5
+  # poll: 0
   args:
     chdir: "/home/{{ proxyuser }}/CENORSSInserter/rss-reader/"
 
