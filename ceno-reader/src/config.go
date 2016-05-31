@@ -16,6 +16,7 @@ type Config struct {
 	BundleInserter string // The location of the Bundle Inserter
 	InsertionPause int    // Number of seconds the reader needs to pause before inserting next item on the list
 	// this is to avoid making the inserter out of memory
+	InsertFeedListOnly bool
 }
 
 // Default confifuration values that can be provided as options to the user.
