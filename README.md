@@ -105,7 +105,7 @@ The first time you launch CENO, there are several things you need to know:
 1. CENO uses the [Freenet](https://freenetproject.org) censorship resistant
    platform for communications and storage. The Freenet package is bundled with
    CENOBox. When you launch CENOBox from your computer, three things happen:
- * the CENO client software starts;
+ * The CENO client software starts;
  * A window with a customized profile complete with CENO plugin of your
    [Firefox](https://github.com/equalitie/ceno/tree/next/ceno-firefox) or
    [Chrome](https://github.com/equalitie/ceno/tree/next/ceno-chrome) browser
