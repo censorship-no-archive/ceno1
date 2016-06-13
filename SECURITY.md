@@ -21,7 +21,7 @@ recommendations](/doc/secure-bridge.md) for running a secure CENO bridge.
 In this particular project we care about and define herein your:
 
 * Anonymity - the ability to browse online content anonymously, whereby no one
-  party knows who you are AND what you reading.
+  party knows who you are AND what you are reading.
 * Unobservability - the ability to hide the fact that you are using CENO from
   network monitoring and surveillance.
 * Plausible deniability - the ability to deny knowledge of or responsibility for
