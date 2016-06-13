@@ -50,7 +50,7 @@ If you want to build CENOBox manually, read these [instructions](BUILD.md).
 ### CENOBox in Linux and Mac OS X
 
 Change directory to the path you would like to install CENOBox at (we recommend
-your /home directory)
+your `/home` directory)
 and execute the following command:
 
 ```bash
@@ -63,8 +63,8 @@ window to visit websites, and only when CENO Router plugin status is active,
 which it is by default.
 
 Once you have installed CENOBox in your system, you can re-open a protected
-browser window by navigating to the CENOBox directory and using the CENO.sh
-script
+browser window by navigating to the CENOBox directory and using the `CENO.sh`
+script:
 
 ```bash
 cd ~/CENOBox
@@ -74,7 +74,7 @@ cd ~/CENOBox
 CENO will identify your system's language and show you messages in it, given
 that a translation exists.  In order to explicitly set a language, you can set
 the `CENOLANG` environment variable.  For example, if you want to use CENO in
-French, this is the way to execute the CENO.sh script:
+French, this is the way to execute the `CENO.sh` script:
 
 ```bash
 CENOLANG=fr-fr ./CENO.sh
