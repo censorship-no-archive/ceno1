@@ -109,7 +109,7 @@ The first time you launch CENO, there are several things you need to know:
  * A window with a customized profile complete with CENO plugin of your
    [Firefox](https://github.com/equalitie/ceno/tree/next/ceno-firefox) or
    [Chrome](https://github.com/equalitie/ceno/tree/next/ceno-chrome) browser
-   opens on the CENO portal page (http://localhost:3090/portal);
+   opens on the CENO portal page (<http://localhost:3090/portal>);
  * Freenet starts in your computer.
 2. When you launch it, Freenet needs to discover other peers and learn about the
    network before it connects properly. This will take a few minutes, which
@@ -118,8 +118,8 @@ The first time you launch CENO, there are several things you need to know:
    Freenet has discovered enough peers. This will happen every time you start
    the software.
 3. Both CENO and Freenet use a local proxy client to connect with your browser.
-   CENO is accessible via (http://localhost:3090/portal) and Freenet via
-   (http://localhost:8888).
+   CENO is accessible via (<http://localhost:3090/portal>) and Freenet via
+   (<http://localhost:8888>).
 4. There are two ways to receive content via CENO:
  * Request websites via the CENO URL bar;
  * Browse pre-loaded news feeds via CENO Channels.
