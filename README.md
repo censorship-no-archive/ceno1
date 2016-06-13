@@ -57,12 +57,7 @@ and execute the following command:
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/equalitie/ceno/master/ceno-box/installCENO.sh)"
 ```
 
-CENOBox will open a new Firefox or Chrome window with a customized profile.
-Remember that you are protected by CENO only when you are using that browser
-window to visit websites, and only when CENO Router plugin status is active,
-which it is by default.
-
-Once you have installed CENOBox in your system, you can re-open a protected
+Once you have installed CENOBox in your system, you can open a protected
 browser window by navigating to the CENOBox directory and using the `CENO.sh`
 script:
 
@@ -70,6 +65,11 @@ script:
 cd ~/CENOBox
 ./CENO.sh
 ```
+
+CENOBox will open a new Firefox or Chrome window with a customized profile.
+Remember that you are protected by CENO only when you are using that browser
+window to visit websites, and only when CENO Router plugin status is active,
+which it is by default.
 
 CENO will identify your system's language and show you messages in it, given
 that a translation exists.  In order to explicitly set a language, you can set
