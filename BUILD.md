@@ -14,7 +14,7 @@ git clone https://github.com/equalitie/ceno
 ## Building the client-side components
 
 The client-side components include everything a user needs to use CENO to circumvent censorship.
-The components here provide user interface elements and utilities as well as a disitribution of Freenet
+The components here provide user interface elements and utilities as well as a distribution of Freenet
 that will allow access to securely stored content.
 
 The components include
@@ -55,6 +55,7 @@ export PATH=$PATH:$GOROOT/bin
 #### Node.js and NPM
 
 You can download Node.js and NPM together directly from the [official site](https://nodejs.org/dist/v4.2.2/).
+In Debian-based systems you should install the `nodejs-legacy` package along with `nodejs`.
 
 ### Building the client
 
