@@ -1,8 +1,8 @@
 # Components
 
-##Overview
+## Overview
 
-CENO is an innovative internet censorship resistance tool. It uses peer-to-peer (p2p) networking for content distribution and storage, relying on strong encryption for privacy and plausible deniability. The focus is on ensuring unfettered access to information from some of the most restrictive countries. The project is based around two key principles:
+CENO is an innovative Internet censorship resistance tool. It uses peer-to-peer (p2p) networking for content distribution and storage, relying on strong encryption for privacy and plausible deniability. The focus is on ensuring unfettered access to information from some of the most restrictive countries. The project is based around two key principles:
 
 1. Storing information inside the censored region so that citizens can retrieve it locally. Cached content needs to be encrypted and distributed between various nodes. Content is delivered using p2p communication.
 2. Maintaining anonymity for bridge nodes importing information inside the censored region. This is to ensure a maximum life span of such nodes as they are bound to be scarce. Additionally, this is to improve the safety of individuals who are helping to bring censored information inside the censored region.
@@ -11,17 +11,17 @@ CENO is an innovative internet censorship resistance tool. It uses peer-to-peer 
 
 * The client should be able to request content without knowing the identity or location of the bridge.
 * Anonymity of the bridge node should not be compromised by serving/inserting requested content into the network.
-* The content should be cached inside the censored area to reduce the number of repeated request to the bridges.
-* During the initial development timeframe CENO will load cacheable http content into Freenet.
+* The content should be cached inside the censored area to reduce the number of repeated requests to the bridges.
+* During the initial development timeframe CENO will load cacheable HTTP content into Freenet.
 
 ## Nodes
 
-CENO allows users running a Freenet node to request http content from a standard Internet URL. The infrastructure performs the following functions:
+CENO allows users running a Freenet node to request HTTP content from a standard Internet URL. The infrastructure performs the following functions:
 
-1. receive requests from the Client node and determine if they already in cache;
-2. serve the request from cache;
+1. receive requests from the Client node and determine if they are already in cache;
+2. serve the requests from cache;
 3. forward requests not found in cache to a Bridge node;
-4. Cache responses received from a Bridge node.
+4. cache responses received from a Bridge node.
 
 ### Client Node
 
