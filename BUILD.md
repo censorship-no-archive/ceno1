@@ -55,7 +55,7 @@ export PATH=$PATH:$GOROOT/bin
 #### Node.js and NPM
 
 You can download Node.js and NPM together directly from the [official site](https://nodejs.org/dist/v4.2.2/).
-In Debian-based systems you should install the `nodejs-legacy` package along with `nodejs`.
+In Debian-based systems you should also install the `nodejs-legacy` package.
 
 ### Building the client
 

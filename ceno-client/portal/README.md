@@ -44,7 +44,7 @@ seamlessly).
 
 In order to use the automatic build tools described below to handle Portal resources, [Node.js and
 NPM](https://nodejs.org/en/) will need to be installed, along with the [gulp](http://gulpjs.com/) build tool.
-In Debian-based systems you should install the `nodejs-legacy` package along with `nodejs`.
+In Debian-based systems you should also install the `nodejs-legacy` package.
 
 Once Node and NPM are installed, gulp can be installed by running
 
