@@ -33,15 +33,10 @@ cd ..
 
 echo ""
 echo "Preparing CENO Portal."
-which gulp > /dev/null
-if [ $? -ne 0 ]; then
-    echo "*  Installing the gulp build tool."
-    npm install -g gulp
-fi
 echo "*  Installing any missing dependencies."
 npm install
 echo "*  Building resources."
-gulp build
+node_modules/gulp/bin/gulp.js build
 echo ""
 
 if [ $# -gt 0 ]; then

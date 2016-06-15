@@ -51,6 +51,8 @@ Once Node and NPM are installed, gulp can be installed by running
 npm install -g gulp
 ```
 
+This is only needed if you intend to run gulp tasks manually.
+
 ## Building
 
 All of the content in the portal page is encapsulated in this directory, however in order
