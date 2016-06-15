@@ -63,7 +63,7 @@ CENO looks for the documents you have requested.
 
 The CENO Client is using the [go-i18n](https://github.com/nicksnyder/go-i18n) library to handle
 internationalization.  All of the ready-for-translation texts can be found in the
-`ceno-client/translations/` directory contains json files containing an array of objects pairing strings
+`ceno-client/translations/` directory, which contains JSON files containing an array of objects pairing strings
 to be translated with an id that can be referenced from the source code.
 
 e.g.
