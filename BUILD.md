@@ -81,7 +81,7 @@ Once packaged, either browser extension can be installed by opening it in its re
 
 Mozilla Firefox extensions using the addon SDK as CENO does can be easily built using Mozilla's new
 [jpm](https://developer.mozilla.org/en-US/Add-ons/SDK/Tools/jpm) tool. You can install it easily with NPM
-and then package the Firefox extension into an xpi file
+and then package the Firefox extension into an XPI file
 
 ```bash
 npm install -g jpm
@@ -96,11 +96,11 @@ Complete instructions for all packaging tasks are available in the
 
 The five steps relevant to us are as follows:
 
-1. Bring up the Extensions management page by going to this URL: `chrome://extensions`
+1. Bring up the Extensions management page by going to this URL: `chrome://extensions`.
 2. Ensure that the "Developer mode" checkbox in the top right-hand corner is checked.
 3. Click the `Pack extension` button. A dialog appears.
 4. In the `Extension root directory` field, specify `<path-to-ceno>/ceno/ceno-chrome`. Ignore the second field.
-5. Click `Package`. The packager creates two files: a .crx file, which is the actual extension that can be installed, and a .pem file, which contains the private key.
+5. Click `Package`. The packager creates two files: a `.crx` file, which is the actual extension that can be installed, and a `.pem` file, which contains the private key.
 
 ### CENO Freenet plugin
 
@@ -113,15 +113,17 @@ Download the following dependencies:
 or build them from [the source code](https://github.com/freenet/contrib)
   * [JUnit4](https://github.com/junit-team/junit/wiki/Download-and-Install)
 
-Then you can use ant to generate the CENO.jar plugin.
+Then you can use ant to generate the `CENO.jar` plugin.
+
 ```bash
 cd ceno-freenet
 ant dist
 ```
-You may have to modify the ceno-freenet/build.xml file in order to match the location
+
+You may have to modify the `ceno-freenet/build.xml` file in order to match the location
 of the dependencies at your local setup.
 The distributable jar files are located under `ceno-freenet/dist`.
-Installing the CENO.jar client plugin in your Freenet node requires that you
+Installing the `CENO.jar` client plugin in your Freenet node requires that you
 configure the WebOfTrust and Freemail official plugins. In order to
 do that follow the steps in this [README](https://github.com/equalitie/ceno/blob/master/ceno-freenet/INSTALL.md#in-short).
 
@@ -167,7 +169,7 @@ The available languages can be found in `ceno-bridge/locales/`.
 ### CENOBridge Freenet plugin
 
 CENOBridge plugin is built the same way as the CENO client plugin (instructions
-  [here](#ceno-freenet-plugin)).
+[here](#ceno-freenet-plugin)).
 
 CENOBridge plugin can be loaded to your Freenet node like any other plugin,
 by navigating to your node's plugins page (http://127.0.0.1:8888/plugins) and
