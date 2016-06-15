@@ -2,7 +2,7 @@
 
 The [Censorship.no!](https://censorship.no) project (CENO) works by exfiltrating
 website requests out of a censored area using an anonymous transport layer,
-[bundling] (https://github.com/equalitie/bundler) websites into files and
+[bundling](https://github.com/equalitie/bundler) websites into files and
 inserting them into encrypted distributed storage networks. For the user the
 experience is more or less transparent, accessing CENO content through a portal
 in the browser.  
