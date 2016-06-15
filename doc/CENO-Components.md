@@ -2,7 +2,7 @@
 
 ##Overview
 
-CeNo! is an innovative internet censorship resistance tool. It uses peer-to-peer (p2p) networking for content distribution and storage, relying on strong encryption for privacy and plausible deniability. The focus is on ensuring unfettered access to information from some of the most restrictive countries. The project is based around two key principles:
+CENO is an innovative internet censorship resistance tool. It uses peer-to-peer (p2p) networking for content distribution and storage, relying on strong encryption for privacy and plausible deniability. The focus is on ensuring unfettered access to information from some of the most restrictive countries. The project is based around two key principles:
 
 1. Storing information inside the censored region so that citizens can retrieve it locally. Cached content needs to be encrypted and distributed between various nodes. Content is delivered using p2p communication.
 2. Maintaining anonymity for bridge nodes importing information inside the censored region. This is to ensure a maximum life span of such nodes as they are bound to be scarce. Additionally, this is to improve the safety of individuals who are helping to bring censored information inside the censored region.
@@ -28,8 +28,8 @@ CENO allows users running a Freenet node to request http content from a standard
 The Client node is responsible for translating between Freenet content and Internet URLs.
 
 1. Translate a node's GET request to the uncensored zone.
-2. Translate a node's request to the CeNo! infrastructure. 
-3. Proxy responses from the uncensored zone to the CeNo! infrastructure.
+2. Translate a node's request to the CENO infrastructure. 
+3. Proxy responses from the uncensored zone to the CENO infrastructure.
 
 ### Bridge Node
 
