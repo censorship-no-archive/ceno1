@@ -19,7 +19,7 @@ client (the proxy server) and the second affects the bridge (bundler) server.
 CENO client exists as a standard HTTP proxy.  It sits between the user's browser
 and the local cache server, which itself is a portal to Freenet and, via Freemail,
 the bridge server.  When a user requests a site that uses SSL/TLS, such as
-https://duckduckgo.com, their browser begins a TLS handshake that CENO client
+`https://duckduckgo.com`, their browser begins a TLS handshake that CENO client
 cannot respond to, lacking duckduckgo's cryptographic identifying elements (their
 private key and certificate information).  As such, only standard HTTP requests
 can be received and handled by CENO client.
@@ -58,8 +58,8 @@ To test that the plugin works, follow these instructions:
 
 1. Start the Freenet plugin (instructions provided with CENO Client)
 2. Start CENO Client
-3. Start chromium with `chromium --proxy-server=http://127.0.0.1:3090`
-4. Navigate to `chrome://extensions` in chromium
+3. Start Chromium with `chromium --proxy-server=http://127.0.0.1:3090`
+4. Navigate to `chrome://extensions` in Chromium
 5. Check the `Developer Mode` checkbox in the top right corner of the page
 6. Click the `Load unpacked extension...` button
 7. Open this directory in the dialog that appears
@@ -74,8 +74,8 @@ informing you that a request for `http://<URL>` was received.
 
 A tutorial is available explaining how internationalization is handled in Chrome extensions on
 [the official Google extension API site](https://developer.chrome.com/extensions/i18n).  In a
-nutshell, the `ceno-chrome/_locals/` directory contains directories corresponding to each
-language that CENO Chrome has been translated into.  For example, the `ceno-chrome/_locals/en`
+nutshell, the `ceno-chrome/_locales/` directory contains directories corresponding to each
+language that CENO Chrome has been translated into.  For example, the `ceno-chrome/_locales/en`
 directory contains the English strings.  Each of these directories must contain only a
 `messages.json` file, which contains a single object of the following form:
 
@@ -90,13 +90,13 @@ directory contains the English strings.  Each of these directories must contain 
 That is, each key is an ID to identify the string, and that ID maps to another object containing
 a `message` key that maps to the translated string.
 
-To create a new translation, for example to Spanish, one would create `ceno-chrome/_locals/es/messages.json`
+To create a new translation, for example to Spanish, one would create `ceno-chrome/_locales/es/messages.json`
 with the following content (related to the example above):
 
 ```js
 {
   "greeting": {
-    "message": "Hola mundo!"
+    "message": "¡Hola mundo!"
   }
 }
 ```
