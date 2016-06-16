@@ -197,11 +197,9 @@ postponing requests.
 
 ### 6102 - Malformed URL
 
-BI logs that and does not continue the process of insertion
+BI logs that and does not continue the process of insertion.
 
 ### 6200 - Bundle received is malformed
-
-**Error code: 6200**
 
 If the bundle received is detected to have an incorrect format or is malformed for some reason,
 the RR may be informed so as to be able to issue a new request to the bundle server.
