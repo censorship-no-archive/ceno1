@@ -187,11 +187,11 @@ users will still be able to access the portal content and request new bundles.
   * No malevolent nodes flood their neighbors' data stores.
 
 We recommend you to refer to the [Freenet Threat
-model](https://wiki.freenetproject.org/Threat_model) in the project wiki (also
-[https://wiki.freenetproject.org/Major_attacks](https://wiki.freenetproject.org/Major_attacks)
+model](https://wiki.freenetproject.org/Threat_model) in its project wiki (also
+[Major attacks](https://wiki.freenetproject.org/Major_attacks)
 and
-[https://wiki.freenetproject.org/Potential_attackers](https://wiki.freenetproject.org/Potential_attackers)).
-We shall not consider Freenet vulnerabilities (such as sybil attacks) as part of
+[Potential attackers](https://wiki.freenetproject.org/Potential_attackers)).
+We shall not consider Freenet vulnerabilities (such as Sybil attacks) as part of
 our threat model from now on.
 
 At any rate, CENO protocol has been designed in such a way that future CENO
@@ -228,7 +228,7 @@ bundles and feeds that have been inserted by the Insertion Authority (IA) they
 trust.  CENOBox comes preconfigured with an Insertion Authority the CENO team is
 maintaining, but users can manually decide to use another Bridge, both for
 reading the portal news as well as for requesting new URLs, by setting an
-alternative valid Insertion Authority bridgeKey in the .CENO/client.properties
+alternative valid Insertion Authority bridgeKey in the `.CENO/client.properties`
 file.
 
 When selecting to retrieve bundles from independent Insertion Authorities, users
@@ -249,9 +249,9 @@ who have manually selected to use a non-default IA.
 #### ii. CENO Insertion Authority private key compromisation
 
 For content to be discoverable and authenticatable, Insertion Authorities
-use a private SSK – Signed Subspace Key ( https://wiki.freenetproject.org/SSK )
+use a private SSK – [Signed Subspace Key](https://wiki.freenetproject.org/SSK)
 – for inserting bundles, portal feeds, information for establishing secure
-signaling channels, etc. This key is included in the .CENO/bridge.properties
+signaling channels, etc. This key is included in the `.CENO/bridge.properties`
 file in Signal and Master/RSS-Insertion Bridges.
 
 If an adversary gets access to that private key, she will be able to insert
@@ -342,7 +342,7 @@ will be obvious that the owner of the machine had been using CENO, the adversary
 will need to have the decryption keys in order to prove that the machine owner
 was hosting particular content (see Security Objective "Plausible deniability").
 
-Compromisation of the .CENO/client.properties configuration file will leak the
+Compromisation of the `.CENO/client.properties` configuration file will leak the
 private signaling channel the machine owner had established with an Insertion
 Authority. The adversary could then use the signaling channel key to look up
 previous requests by the owner and thus find out what URLs she had been
@@ -389,7 +389,7 @@ access to that node. Even worse, a global adversary could tamper with the
 network traffic of de-anonymized IA nodes and insert altered content in CENO.
 
 Insertion Authority maintainers are strongly advised to route all Bundle Server
-traffic via an anonymization network, such as tor or i2p. In addition, we
+traffic via an anonymization network, such as Tor or I2P. In addition, we
 recommend the use of [HTTPS-Proxy](https://github.com/equalitie/HTTPS-Proxy)
 that integrates the
 [HTTPS-Everywhere](https://github.com/EFForg/https-everywhere) ruleset, in order
@@ -405,7 +405,7 @@ The agents that were audited are:
 
   * CENO Client Proxy
   * CENO Bundle Server
-  * CENO Freenet plugins (CENO.jar and CENOBridge.jar)
+  * CENO Freenet plugins (`CENO.jar` and `CENOBridge.jar`)
   * CENO Browser Extensions
 
 ##### NCC-CENO-006: Bundler Server Does Not Validate TLS Certificate
@@ -470,7 +470,7 @@ CENO team has removed the Toggle Switch, therefore this issue is considered
 **resolved**.
 
 ##### NCC-CENO-008: Bridge Server Private Files Accessible To Other Users
-CENOBridge distributable explicitly sets bridge.properties file permissions and
+CENOBridge distributable explicitly sets `bridge.properties` file permissions and
 makes it unreadable by other users. In addition, Bridge maintainers are
 encouraged to avoid running non-related services on a bridge machine and are
 instructed to check the access permissions of such sensitive files. We consider
