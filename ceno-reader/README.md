@@ -16,14 +16,14 @@ You can read all about how the CENO Reader handles RSS in the
 
 ## Dependencies
 
-1. Go(lang) - https://golang.org/
+1. Go(lang) - <https://golang.org/>
 
 ### Go(lang)
 
 Golang can be downloaded from the [official site](https://golang.org).
 Once installed, you should set the `GOROOT`, `GOPATH`, and `PATH` environment variables.
 `GOROOT` should be set to the location which you installed Go to, e.g. `/usr/lib/go`
-if you don't already have it set..
+if you don't already have it set.
 `GOPATH` should be set to `$HOME/go` if you don't already have it set.
 `PATH` should have `$GOROOT/bin` appended to it.
 
