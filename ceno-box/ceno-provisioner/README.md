@@ -2,7 +2,7 @@
 
 Recepies to provision multiple rss inserter bridges in ceno network to speed up rss feed insertion.
 
-Copyright (C) 2016 eQuali.ie
+Copyright (C) 2016 eQualit.ie
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
