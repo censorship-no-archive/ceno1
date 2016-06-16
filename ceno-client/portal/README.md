@@ -32,7 +32,7 @@ inserted into the distributed storage system in use as soon as they get started.
 |   |---languages.js = Handles applying translated strings to content in pages
 |   |---nav.js       = Handles the connectivity indicator
 +---locale
-|   \---en.json = The original, English key-value string pairs Transifex can handle.
+|   \---en.json = The original, English key-value string pairs Transifex can handle
 ```
 
 All of the code relevant to serving the Portal from the CENO Client is located in `ceno-client/src/portal.go`.
