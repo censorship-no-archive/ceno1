@@ -23,7 +23,7 @@ client (the proxy server) and the second affects the bridge (bundler) server.
 CENO client exists as a standard HTTP proxy.  It sits between the user's browser
 and the local cache server, which itself is a portal to Freenet and, via Freemail,
 the bridge server.  When a user requests a site that uses SSL/TLS, such as
-https://duckduckgo.com, their browser begins a TLS handshake that CENO client
+`https://duckduckgo.com`, their browser begins a TLS handshake that CENO client
 cannot respond to, lacking duckduckgo's cryptographic identifying elements (their
 private key and certificate information).  As such, only standard HTTP requests
 can be received and handled by CENO client.
@@ -62,8 +62,8 @@ To test that the plugin works, follow these instructions:
 
 1. Start the Freenet plugin (instructions provided with CENO Client)
 2. Start CENO Client
-3. Start chromium with `chromium --proxy-server=http://127.0.0.1:3090`
-4. Navigate to `chrome://extensions` in chromium
+3. Start Chromium with `chromium --proxy-server=http://127.0.0.1:3090`
+4. Navigate to `chrome://extensions` in Chromium
 5. Check the `Developer Mode` checkbox in the top right corner of the page
 6. Click the `Load unpacked extension...` button
 7. Open this directory in the dialog that appears
