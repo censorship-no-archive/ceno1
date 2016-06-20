@@ -12,7 +12,7 @@
   8. Copy `USK@kWKE67nhHNp6C-lgD5QtpL5qnIgmsnM6B5i7xxJGXIQ,UhZYJ2R6egIAjdMGAQbsjPcos1~CIJ~CbUKjpuUlwXA,AQACAAE/CENO-plugin/-1/CENO.jar` at the text box right below the `Add an Unofficial Plugin` header and click `Load`.
   9. Make sure CENO has been successfully loaded, by finding the corresponding row in the `Plugins currently loaded` list.
   10. Visit `Freemail`. You should be able to see CENO in the list of accounts. If not, create a new account for the CENO identity with the password `CENO`.
-  11. Start the CENO Client, configure appropriately your browser to use it as a proxy, and surf anonymously the Web evading censorship.
+  11. Start the CENOClient, configure appropriately your browser to use it as a proxy, and surf anonymously the Web evading censorship.
 
 
 ### What is CENO?
@@ -38,4 +38,4 @@ Being a free project and licensed under GPLv3, you can get the source code from 
 ### Loading CENO to a running freenet node
 Once you have your freenet node up and connected to peers, you are ready to load the WebOfTrust, Freemail and CENO plugins.  
 Start by visiting freenet's fproxy local address with a browser in private/incognito mode and navigate to `Configuration > Plugins` (default address is <http://127.0.0.1:8888/plugins/>). Under the `Add an Official Plugin` find the option for the `WebOfTrust`, select it and click `Load`. Do the same for the `Freemail` official plugin. Copy `USK@kWKE67nhHNp6C-lgD5QtpL5qnIgmsnM6B5i7xxJGXIQ,UhZYJ2R6egIAjdMGAQbsjPcos1~CIJ~CbUKjpuUlwXA,AQACAAE/CENO-plugin/-1/CENO.jar` at the text box right below the "Add an Unofficial Plugin" header and click `Load`. By fetching the plugins from within freenet it is virtually impossible for anyone to track who is downloading and using CENO. Nevertheless, your freenet node will automatically update CENO to the latest version during startup.  
-Give some time to your node to connect to a few peers. You are now ready to use the CENO Client as a proxy, by default on `127.0.0.1:3090`.
+Give some time to your node to connect to a few peers. You are now ready to use the CENOClient as a proxy, by default on `127.0.0.1:3090`.
