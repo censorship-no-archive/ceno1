@@ -15,7 +15,7 @@ The Bridge is responsible for the following tasks:
 
 In order to satisfy the need to insert bundles in the distributed cache in a way that it can
 be discovered and verified by clients, as well as updating them when needed, CENO is using the
-Signed Space Freenet keys (SSKs) that are based on the paradigm of public key cryptography.  
+Signed Space Freenet keys (SSKs) that are based on the paradigm of public key cryptography.
 In the current implementation (v0.3.0), the secure channel over which clients forward their
 requests is the Freemail service, running on top of Freenet. A Freemail address has a 1-1
 relationship with a WebOfTrust identity. Ownership of a WebOfTrust identity is granted with a

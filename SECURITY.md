@@ -47,7 +47,7 @@ page](https://freenetproject.org/documentation.html#connect).
 Yes, because by design Freenet itself is just a network and a protocol. However,
 Freenet is part of what is commonly known as the "Darkweb", and that carries its
 own connotations in terms of what is tolerated by the authorities and considered
-socially acceptable by the mainstream media and public opinion.  
+socially acceptable by the mainstream media and public opinion.
 
 * What does a Freenet node store? Can i get in trouble for storing Freenet data
   in my computer?
