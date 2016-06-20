@@ -12,20 +12,19 @@ on one's own machine.  It is responsible for three main functions:
 Instructions for building and running the client can be found on the
 [project README](https://github.com/equalitie/ceno#building-the-client).
 
-You may create cross-platform builds of the client using the build.sh script and
-the right parameters:  
-`darwin`, `linux` and `windows`, followed by the architecture `386`, `amd64` or
-`arm`
+You may create cross-platform builds of the client using the `build.sh` script and
+the right parameters
+(`darwin`, `linux` or `windows`), followed by the architecture (`386`, `amd64` or
+`arm`).
 
 If for example you would like to build CENO Client for darwin amd64 and linux
-arm you have to give to build.sh the following arguments:
+arm you have to give to `build.sh` the following arguments:
 ```
 ./build.sh darwin_amd64 linux_arm
 ```
 
-
 You will have to prepare a cross-platform building environment for golang in
-your system. In Debian, install the golang-src package and execute:
+your system. In Debian, install the `golang-src` package and execute:
 ```
 cd /usr/local/go/src; for os in darwin freebsd windows; do for arch in amd64 386; do sudo GOROOT_BOOTSTRAP=/usr/local/go GOOS=$os GOARCH=$arch ./make.bash --no-clean; done; done
 ```
@@ -63,10 +62,8 @@ CENO looks for the documents you have requested.
 
 The CENO Client is using the [go-i18n](https://github.com/nicksnyder/go-i18n) library to handle
 internationalization.  All of the ready-for-translation texts can be found in the
-`ceno-client/translations/` directory contains json files containing an array of objects pairing strings
-to be translated with an id that can be referenced from the source code.
-
-e.g.
+`ceno-client/translations/` directory, which contains JSON files containing an array of objects pairing strings
+to be translated with an id that can be referenced from the source code, e.g.
 
 ```js
 [
@@ -85,7 +82,7 @@ Note that the `"id"` fields should not be changed.
 Also, the text inside (and including) `{{}}` should be left alone as it is used by the software.
 
 To create a translation, simply create a new file such as `ceno-client/translations/fr-fr.all.json` with
-the same structure- objects mapping the same IDs to the French (in this case) translations of the
+the same structure - objects mapping the same IDs to the French (in this case) translations of the
 text. Such a new file should, at the bare minimum, contain an empty array
 
 `fr-fr.all.json`
@@ -137,7 +134,7 @@ from `ceno-client/` or by running the `build.sh` script again.
 ## Translating with Transifex
 
 eQualit.ie relies on [Transifex](https://www.transifex.com/) to translate CENO.  Transifex is very
-adaptable in supporting a the file formats for every other component of CENO (w.r.t. i18n documents)
+adaptable in supporting the file formats for every other component of CENO (w.r.t. i18n documents)
 however the client is an exception.  Transifex expects JSON files to be of the form
 
 ```js

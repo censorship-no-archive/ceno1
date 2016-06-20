@@ -97,7 +97,7 @@ Step | Description                                        | Message
 
 ### Lookup Success (Distributed Cache)
 
- The following describes the scenario wherein the user's local cache does **not** contain a bundle for the requested URL, but the distributed cache does.
+The following describes the scenario wherein the user's local cache does **not** contain a bundle for the requested URL, but the distributed cache does.
 
 Step | Description                                        | Message
 -----|----------------------------------------------------|-------------------
@@ -117,7 +117,8 @@ certain facts, for example that a given server is running, and to communicate
 new requirements or requests outside of the standard set of interactions
 required for regular use cases.
 
-Error conditions that CENO components can encounter are described in `doc/errorConditions.md`
+Error conditions that CENO components can encounter are described in
+[doc/errorConditions.md](errorConditions.md)
 and specify error codes that classify them.
 Agents expect the error messages to be JSON responses to their requests
 complying to the following schema:  

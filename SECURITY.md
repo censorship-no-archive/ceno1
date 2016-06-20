@@ -21,7 +21,7 @@ recommendations](/doc/secure-bridge.md) for running a secure CENO bridge.
 In this particular project we care about and define herein your:
 
 * Anonymity - the ability to browse online content anonymously, whereby no one
-  party knows who you are AND what you reading.
+  party knows who you are AND what you are reading.
 * Unobservability - the ability to hide the fact that you are using CENO from
   network monitoring and surveillance.
 * Plausible deniability - the ability to deny knowledge of or responsibility for
@@ -47,7 +47,7 @@ page](https://freenetproject.org/documentation.html#connect).
 Yes, because by design Freenet itself is just a network and a protocol. However,
 Freenet is part of what is commonly known as the "Darkweb", and that carries its
 own connotations in terms of what is tolerated by the authorities and considered
-socially acceptable by the mainstream media and public opinion.  
+socially acceptable by the mainstream media and public opinion.
 
 * What does a Freenet node store? Can i get in trouble for storing Freenet data
   in my computer?

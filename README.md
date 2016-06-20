@@ -50,11 +50,20 @@ If you want to build CENOBox manually, read these [instructions](BUILD.md).
 ### CENOBox in Linux and Mac OS X
 
 Change directory to the path you would like to install CENOBox at (we recommend
-your /home directory)
+your `/home` directory)
 and execute the following command:
 
 ```bash
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/equalitie/ceno/master/ceno-box/installCENO.sh)"
+```
+
+Once you have installed CENOBox in your system, you can open a protected
+browser window by navigating to the CENOBox directory and using the `CENO.sh`
+script:
+
+```bash
+cd ~/CENOBox
+./CENO.sh
 ```
 
 CENOBox will open a new Firefox or Chrome window with a customized profile.
@@ -62,19 +71,10 @@ Remember that you are protected by CENO only when you are using that browser
 window to visit websites, and only when CENO Router plugin status is active,
 which it is by default.
 
-Once you have installed CENOBox in your system, you can re-open a protected
-browser window by navigating to the CENOBox directory and using the CENO.sh
-script
-
-```bash
-cd ~/CENOBox
-./CENO.sh
-```
-
 CENO will identify your system's language and show you messages in it, given
 that a translation exists.  In order to explicitly set a language, you can set
 the `CENOLANG` environment variable.  For example, if you want to use CENO in
-French, this is the way to execute the CENO.sh script:
+French, this is the way to execute the `CENO.sh` script:
 
 ```bash
 CENOLANG=fr-fr ./CENO.sh
@@ -105,11 +105,11 @@ The first time you launch CENO, there are several things you need to know:
 1. CENO uses the [Freenet](https://freenetproject.org) censorship resistant
    platform for communications and storage. The Freenet package is bundled with
    CENOBox. When you launch CENOBox from your computer, three things happen:
- * the CENO client software starts;
+ * The CENO client software starts;
  * A window with a customized profile complete with CENO plugin of your
    [Firefox](https://github.com/equalitie/ceno/tree/next/ceno-firefox) or
    [Chrome](https://github.com/equalitie/ceno/tree/next/ceno-chrome) browser
-   opens on the CENO portal page (http://localhost:3090/portal);
+   opens on the CENO portal page (<http://localhost:3090/portal>);
  * Freenet starts in your computer.
 2. When you launch it, Freenet needs to discover other peers and learn about the
    network before it connects properly. This will take a few minutes, which
@@ -118,8 +118,8 @@ The first time you launch CENO, there are several things you need to know:
    Freenet has discovered enough peers. This will happen every time you start
    the software.
 3. Both CENO and Freenet use a local proxy client to connect with your browser.
-   CENO is accessible via (http://localhost:3090/portal) and Freenet via
-   (http://localhost:8888).
+   CENO is accessible via (<http://localhost:3090/portal>) and Freenet via
+   (<http://localhost:8888>).
 4. There are two ways to receive content via CENO:
  * Request websites via the CENO URL bar;
  * Browse pre-loaded news feeds via CENO Channels.

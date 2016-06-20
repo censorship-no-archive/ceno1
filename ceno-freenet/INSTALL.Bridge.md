@@ -1,4 +1,4 @@
-# CENO Bridge installations steps
+# CENO Bridge installation steps
 
 ## What is a CENO Bridge?
 CENO users rely on special nodes, the so-called Bridges, to fetch for them and insert in the
@@ -15,7 +15,7 @@ The Bridge is responsible for the following tasks:
 
 In order to satisfy the need to insert bundles in the distributed cache in a way that it can
 be discovered and verified by clients, as well as updating them when needed, CENO is using the
-Signed Space Freenet keys (SSKs) that are based on the paradigm of public key cryptography.  
+Signed Space Freenet keys (SSKs) that are based on the paradigm of public key cryptography.
 In the current implementation (v0.3.0), the secure channel over which clients forward their
 requests is the Freemail service, running on top of Freenet. A Freemail address has a 1-1
 relationship with a WebOfTrust identity. Ownership of a WebOfTrust identity is granted with a
@@ -71,26 +71,26 @@ bridge owners.
     required information such as the public SSK key in a special page, similar to the Freemail's
     mailsite SSK. At the moment, if you would like people to use your Insertion Authority, you will have
     to modify the CENOClient and CENOBridge Freemail and WebOfTrust identities constants, the Bridge public
-    SSK key, as well as the accprops file in the CENOClient plugin, and distribute your own CENO builds.
+    SSK key, as well as the `accprops` file in the CENOClient plugin, and distribute your own CENO builds.
 
 
 ### Logs
 CENOBridge is using the Freenet logging tools for generating logs. Bridge owners can set the minimum
-priority level their node will keep messages for at the Freenet WebUI (`http://127.0.0.1:8888/config/logger`).
-Setting the corresponding value to "WARNING" is recommended, for logging important messages without generating
+priority level their node will keep messages for at the Freenet WebUI (<http://127.0.0.1:8888/config/logger>).
+Setting the corresponding value to "WARNING" is recommended for logging important messages without generating
 a lot of HDD I/O operations and large log files. The logs are kept under the `$FreenetInstallation/logs/`
 directory and administrators can isolate interesting messages using the "CENO" as a keyword with grep or
 another tool.
 
 
 ## Getting started with the Bundle Server
-  1. Install [tor](https://www.torproject.org/) and make sure it can successfully open a circuit ([official installation guide](https://www.torproject.org/docs/installguide.html.en)).
-  2. Install [privoxy](http://www.privoxy.org/) and configure it to use tor as a socks5 proxy ([privoxy documentation](http://www.privoxy.org/faq/misc.html#TOR)). Then restart the privoxy service.
-  3. You may want to test that privoxy and tor are chained correctly. In order to do so, visit a tor hidden service with a browser configured to use "http://localhost:8118" as HTTP and HTTPS proxy (8118 being the default privoxy port).
-  4. Install node.js and npm.
+  1. Install [Tor](https://www.torproject.org/) and make sure it can successfully open a circuit ([official installation guide](https://www.torproject.org/docs/installguide.html.en)).
+  2. Install [privoxy](http://www.privoxy.org/) and configure it to use Tor as a SOCKS5 proxy ([privoxy documentation](http://www.privoxy.org/faq/misc.html#TOR)). Then restart the privoxy service.
+  3. You may want to test that privoxy and Tor are chained correctly. In order to do so, visit a Tor hidden service with a browser configured to use `http://localhost:8118` as HTTP and HTTPS proxy (8118 being the default privoxy port).
+  4. Install Node.js and npm.
   5. Change directory to `$ceno-repository/ceno-bridge`.
   6. Download bundle-server dependencies by executing `npm install`.
-  7. Configure bundle-server appropriately by modifying the ceno-bridge/config/node.json file.
+  7. Configure bundle-server appropriately by modifying the `ceno-bridge/config/node.json` file.
   8. Start the bundle-server `CENOLANG=en-us node bundle-server.js`, where CENOLANG can be set to your preferred language that a translation exists for.
 
 
@@ -100,12 +100,12 @@ another tool.
    If you know of other people who you trust and who are also using Freenet, add them as friends and connect
    in [darknet mode](https://freenetproject.org/connect.html).
   2. Visit freenet's fproxy local address with a browser in private/incognito mode and navigate to
-   `Configuration > Plugins` (default address is http://127.0.0.1:8888/plugins/).
+   `Configuration > Plugins` (default address is <http://127.0.0.1:8888/plugins/>).
   3. Under `Add an Official Plugin` find the option for the `WebOfTrust`, select it and click `Load`.
   4. In the same way, load the official `Freemail` plugin.
   5. Once the WebOfTrust plugin has been loaded, you will see a `Community` option in the navigation bar
    (you might have to reload the page in order to see that). Visit the `Own anonymous identities` sub-item,
-   or use the direct link http://127.0.0.1:8888/WebOfTrust/OwnIdentities.
+   or use the direct link <http://127.0.0.1:8888/WebOfTrust/OwnIdentities>.
   6. Create a new Identity and wait until it gets inserted in the network.
   7. Visit the [Known anonymous identities](http://127.0.0.1:8888/WebOfTrust/KnownIdentities) page and, using
    the CENOClient Identity request URI
@@ -129,7 +129,7 @@ another tool.
   11. Make sure CENOBridge has been successfully loaded, by finding the corresponding row in the
    `Plugins currently loaded` list.
   12. You might want to make sure that all of the agents are up and running, and their processes are not children of
-  your current shell. Now you are ready to serve requests for bundles from clients. Start by publishing a CENO.jar build that is using your public
+  your current shell. Now you are ready to serve requests for bundles from clients. Start by publishing a `CENO.jar` build that is using your public
   SSK key, your WebOfTrust identity request URI and your Freemail. Building a CENOBox that will use your Insertion
   Authority by default is also an option.
   13. Finally, in order to increase the speed of insertions and of discovery of requests from clients, you can spin

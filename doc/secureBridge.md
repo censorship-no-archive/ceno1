@@ -66,7 +66,7 @@ protect both your server and the clients you serve:
   malicious users or attacks that could disclose the bridge properties:
 	* Specifically make sure that sensitive files such as
 	  `bridge.properties` are set to only be accessible to the CENO
-	  application. These permissions should be 0600 or -rw-------- .
+	  application. These permissions should be 0600 or `-rw--------`.
 	* Run the CENO bridge server in its own user context and not as the root
 	  user.
 

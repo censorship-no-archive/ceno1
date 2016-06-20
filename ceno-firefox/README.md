@@ -19,7 +19,7 @@ client (the proxy server) and the second affects the bridge (bundler) server.
 CENO client exists as a standard HTTP proxy.  It sits between the user's browser
 and the local cache server, which itself is a portal to Freenet and, via Freemail,
 the bridge server.  When a user requests a site that uses SSL/TLS, such as
-https://duckduckgo.com, their browser begins a TLS handshake that CENO client
+`https://duckduckgo.com`, their browser begins a TLS handshake that CENO client
 cannot respond to, lacking duckduckgo's cryptographic identifying elements (their
 private key and certificate information).  As such, only standard HTTP requests
 can be received and handled by CENO client.
@@ -54,7 +54,7 @@ stored into Freenet, and for users' requests to remain anonymous.
 
 ## Translating
 
-Translation files fore the Firefox extension can be found in the `ceno-firefox/locale` directory.
+Translation files for the Firefox extension can be found in the `ceno-firefox/locale` directory.
 Each target locale is named like `en-US.properties` or `fr-FR.properties`.  The format for these files
 is more like YAML than the JSON used throughout the rest of the client-side codebase, because Firefox has
 to be a special snowflake.
