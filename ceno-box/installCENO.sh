@@ -87,12 +87,15 @@ curl -0 -J -L "https://github.com/equalitie/ceno/releases/download/$(echo $LATES
 unzip -q CENOBox_$(echo $CENO_OS).zip
 rm CENOBox_$(echo $CENO_OS).zip
 
+cd CENOBox
+echo "Updating Freenet installation..."
+sh ./update.sh &> /dev/null
+
 # Start CENOBox
 echo
 
 if [ "$CENO_OS" = "Linux" ]
 then
-  cd CENOBox
   echo "Creating Desktop shortcut"
   head -6 CENO.desktop > CENO.desktop.new
   echo Path=`pwd` >> CENO.desktop.new
@@ -108,5 +111,7 @@ then
   mv CENO.desktop.new CENO.desktop
   cp CENO.desktop "$HOME"/.local/share/applications/CENO.desktop
 fi
+
+cd ..
 
 echo "Successfully installed CENO"
