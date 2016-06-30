@@ -50,10 +50,11 @@ If you want to build CENOBox manually, read these [instructions](BUILD.md).
 ### CENOBox in Linux and Mac OS X
 
 Change directory to the path you would like to install CENOBox at (we recommend
-your `/home` directory)
-and execute the following command:
+your home directory, as shown in the examples below),
+then download and execute the latest version of the installation script:
 
 ```bash
+cd ~
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/equalitie/ceno/master/ceno-box/installCENO.sh)"
 ```
 
