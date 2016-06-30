@@ -116,7 +116,11 @@ The first time you launch CENO, there are several things you need to know:
    means you need to wait a bit before you get results from CENO. As it learns,
    its gets faster. The CENO 'Status Indicator' will display CONNECTED when
    Freenet has discovered enough peers. This will happen every time you start
-   the software.
+   the software. If the status indicator stays for very long in UNSTABLE or NOT
+   CONNECTED, please click on it to get to CENO's Freenet portal page; if you
+   see a note about your Freenet software being out of date, please click the
+   update button and wait for some minutes; when the update is complete the
+   status indicator will display CONNECTED.
 3. Both CENO and Freenet use a local proxy client to connect with your browser.
    CENO is accessible via (<http://localhost:3090/portal>) and Freenet via
    (<http://localhost:8888>).
