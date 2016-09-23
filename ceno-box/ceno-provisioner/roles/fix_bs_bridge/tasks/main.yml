@@ -26,30 +26,38 @@
 #     src: "bshandler.js"
 #     dest: "/home/{{ proxyuser }}/CENORSSInserter//bundle-server/CENOBridge.jar"
 
-# - name: Copy fixed reader
-#   become_user: "{{ proxyuser }}"
-#   become: yes
-#   copy:
-#   args:
-#     src: "reader"
-#     dest: "/home/{{ proxyuser }}/CENORSSInserter/rss-reader/reader"
+- name: Copy fixed reader
+  become_user: "{{ proxyuser }}"
+  become: yes
+  copy:
+  args:
+    src: "reader"
+    dest: "/home/{{ proxyuser }}/CENORSSInserter/rss-reader/reader"
 
-# - name: Copy fixed run-reader.sh
-#   become_user: "{{ proxyuser }}"
-#   become: yes
-#   copy:
-#   args:
-#     src: "run-reader.sh"
-#     dest: "/home/{{ proxyuser }}/CENORSSInserter/run-reader.sh"
+- name: Copy fixed reader config
+  become_user: "{{ proxyuser }}"
+  become: yes
+  copy:
+  args:
+    src: "config.json"
+    dest: "/home/{{ proxyuser }}/CENORSSInserter/rss-reader/config/config.json"
 
-# - name: make run-reader.sh executable
-#   become_user: "{{ proxyuser }}"
-#   become: yes
-#   file:
-#   args:
-#     src: "run-reader.sh"
-#     path: "/home/{{ proxyuser }}/CENORSSInserter/run-reader.sh"
-#     mode: "u+x,g+x,o+x"
+- name: Copy fixed run-reader.sh
+  become_user: "{{ proxyuser }}"
+  become: yes
+  copy:
+  args:
+    src: "run-reader.sh"
+    dest: "/home/{{ proxyuser }}/CENORSSInserter/run-reader.sh"
+
+- name: make run-reader.sh executable
+  become_user: "{{ proxyuser }}"
+  become: yes
+  file:
+  args:
+    src: "run-reader.sh"
+    path: "/home/{{ proxyuser }}/CENORSSInserter/run-reader.sh"
+    mode: "u+x,g+x,o+x"
 
 # - name: kill the bundler server
 #   become_user: "{{ proxyuser }}"
@@ -73,12 +81,11 @@
 #     job: "lsof -i :3096 | grep LISTEN || /home/amnesia/CENORSSInserter/run-reader.sh"
   #job: "if ! /usr/bin/pgrep node >/dev/null; then /home/amnesia/CENORSSInserter/run-bundle-server.sh; fi"
 
-
-# - name: kill the reader
-#   become_user: "{{ proxyuser }}"
-#   become: yes
-#   command: "pkill reader"
-#   ignore_errors: True
+- name: kill the reader
+  become_user: "{{ proxyuser }}"
+  become: yes
+  command: "pkill reader"
+  ignore_errors: True
 
 # - name: Remove current feed db
 #   file:
@@ -102,20 +109,20 @@
 #     src: "run.sh"
 #     dest: "/home/{{ proxyuser }}/CENORSSInserter/run.sh"
 
-# - name: copy new fixed bundler script
-#   become_user: "{{ proxyuser }}"
-#   become: yes
-#   copy:
-#   args:
-#     src: "run-bundle-server.sh"
-#     dest: "/home/{{ proxyuser }}/CENORSSInserter/run-bundle-server.sh"
-
-- name: Run CENO bridge
+- name: copy new fixed bundler script
   become_user: "{{ proxyuser }}"
   become: yes
-  command: "/home/{{ proxyuser }}/CENORSSInserter/CENORSSInserter.sh"
+  copy:
   args:
-    chdir: "/home/{{ proxyuser }}/CENORSSInserter/"
+    src: "run-bundle-server.sh"
+    dest: "/home/{{ proxyuser }}/CENORSSInserter/run-bundle-server.sh"
+
+# - name: Run CENO bridge
+#   become_user: "{{ proxyuser }}"
+#   become: yes
+#   command: "/home/{{ proxyuser }}/CENORSSInserter/CENORSSInserter.sh"
+#   args:
+#     chdir: "/home/{{ proxyuser }}/CENORSSInserter/"
 
 - name: wait for bridge
   become_user: "{{ proxyuser }}"

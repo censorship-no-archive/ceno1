@@ -1,4 +1,4 @@
-- name: fetch bundler log
+- name: fetch ceno plugin log
   become_user: "{{ proxyuser }}"
   become: yes
   fetch:
@@ -8,7 +8,7 @@
     flat: yes
 
 
-- name: fetch ceno plugin log
+- name: fetch bundler log
   become_user: "{{ proxyuser }}"
   become: yes
   fetch:
